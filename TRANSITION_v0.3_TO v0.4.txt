@@ -1,0 +1,17 @@
+Main changes:
+
+- Update package location
+sys.path.append(r'G:\__CommonData\Software\_python_packages\')
+
+
+- Class Measure changed name to Graph:
+from grapa.graph import Graph
+graph = Graph('') instead of meas = Measure('', silent=True)
+
+- Class xyCurve changed name to Curve. Use not modified:
+from grapa.curve import Curve
+
+
+- Class CurveEQE import was modified
+from grapa.datatype.curveEQE import CurveEQE
+

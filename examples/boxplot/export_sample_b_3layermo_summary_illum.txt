@@ -1,0 +1,21 @@
+Sample	sample_b_3layermo
+label	sample\nb\n3layermo
+Cell	Voc [V]	Jsc [mA/cm2]	FF [%]	Eff. [%]	Area [cm-2]	Vmpp [V]	Jmpp [mA/cm2]	Pmpp [mW/cm2]	Rp [Ohmcm2]	Rs [Ohmcm2]	n	J0 [A/cm2]	Temperature [K]	Acquis. T [°C]	Filename	Remarks
+a1	0.72148	33.561	74.004	17.919	0.545	0.57815	30.994	17.919	5288.7	0.769	1.8	5.75e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_a1_01.txt	
+a2	0.71685	33.591	75.35	18.144	0.544	0.58185	31.184	18.144	5226.3	0.637	1.695	2.44e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_a2_01.txt	
+a3	0.71671	34.133	75.26	18.411	0.536	0.58215	31.626	18.411	3841.8	0.745	1.643	1.45e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_a3_01.txt	
+b1	0.71473	34.089	74.672	18.193	0.542	0.57555	31.61	18.193	6247.7	0.336	1.959	2.37e-08	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_b1_01.txt	WARNING: n and I0 probably off (sq. res. 0.0013, threshold 0.0002)
+b2	0.71421	33.736	75.638	18.224	0.559	0.58165	31.332	18.224	6206.3	0.611	1.681	2.23e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_b2_01.txt	
+b3	0.714	33.572	75.283	18.046	0.574	0.57995	31.116	18.046	4835.4	0.659	1.695	2.54e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_b3_01.txt	
+c1	0.7142	33.899	75.095	18.181	0.543	0.57735	31.491	18.181	5253.3	0.613	1.756	4.55e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_c1_01.txt	WARNING: n and I0 probably off (sq. res. 0.0004, threshold 0.0002)
+c2	0.71248	32.946	75.811	17.796	0.551	0.58265	30.543	17.796	5794.9	0.524	1.723	3.33e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_c2_01.txt	
+c3	0.71344	33.535	75.966	18.175	0.543	0.58385	31.13	18.175	4649.3	0.426	1.749	4.26e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_c3_01.txt	
+d1	0.71477	33.682	75.157	18.094	0.548	0.57905	31.248	18.094	5820.9	0.74	1.66	1.80e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_d1_01.txt	
+d2	0.7127	32.866	76.173	17.842	0.551	0.58385	30.56	17.842	8305.5	0.54	1.684	2.28e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_d2_01.txt	
+d3	0.71298	33.04	76.153	17.94	0.546	0.58435	30.7	17.94	5090.8	0.457	1.768	4.85e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_d3_01.txt	WARNING: n and I0 probably off (sq. res. 0.0003, threshold 0.0002)
+e1	0.71486	33.202	75.271	17.865	0.551	0.57895	30.858	17.865	5716.0	0.689	1.695	2.48e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_e1_01.txt	
+e2	0.71332	33.484	75.939	18.138	0.551	0.58385	31.066	18.138	5550.5	0.288	1.867	1.14e-08	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_e2_01.txt	WARNING: n and I0 probably off (sq. res. 0.0009, threshold 0.0002)
+e3	0.71383	32.98	76.172	17.933	0.563	0.58585	30.61	17.933	4659.1	0.486	1.701	2.62e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_e3_01.txt	WARNING: n and I0 probably off (sq. res. 0.0002, threshold 0.0002)
+f1	0.71562	33.76	75.04	18.129	0.555	0.57925	31.297	18.129	4818.9	0.502	1.797	6.56e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_f1_01.txt	WARNING: n and I0 probably off (sq. res. 0.0003, threshold 0.0002)
+f2	0.71457	33.265	75.978	18.06	0.552	0.58425	30.912	18.06	5683.1	0.37	1.802	6.76e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_f2_01.txt	WARNING: n and I0 probably off (sq. res. 0.0007, threshold 0.0002)
+f3	0.71391	33.216	76.089	18.043	0.542	0.58425	30.883	18.043	5131.5	0.631	1.628	1.28e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_f3_new_cont_01.txt	

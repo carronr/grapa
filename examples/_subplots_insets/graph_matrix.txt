@@ -1,0 +1,21 @@
+subplotskwargs	{'sharex': 'col', 'sharey': False}
+subplotstranspose	False
+figsize	[10, 5]
+subplotsheight_ratios	[3, 2]
+subplots_adjust	{'left': 0.08, 'top': 0.95, 'hspace': 0.25, 'wspace': 0.35, 'right': 0.95, 'bottom': 0.1}
+fontsize	12.0
+subplotswidth_ratios	[3, 0.3, 1]
+subplotsncols	3.0
+subplotsid	[-0.04, 0.01]
+meastype	Graph
+curve	subplot	subplot	inset	subplot	subplot
+filename	examples/_subplots_insets/graph_matrix.txt	examples/_subplots_insets/graph_matrix.txt	examples/_subplots_insets/graph_matrix.txt	examples/_subplots_insets/graph_matrix.txt	examples/_subplots_insets/graph_matrix.txt
+insetcoords			[0.2, 0.2, 0.25, 0.35]
+insetfile			C-f_SAMPLE_f1_123K.txt
+insetupdate			{'fontsize': 8}
+label	Graph EQE	Graph JV	inset Cf	Graph TRPL 2	Graph TRPL
+subplotcolspan	1	2		1	1
+subplotfile	SAMPLE_A_d1_1.sr	I-V_SAMPLE_A_a2_01.txt		003.dat	003.dat
+subplotrowspan	2	1		1	1
+subplotupdate	{}	{'fontsize': 8, 'typeplot': 'semilogy', 'alter': 'abs'}		{'xlabel': '', 'xtickslabels': [[], []], 'ylabel': '', 'arbitraryfunctions': [['legend.set_visible', [False], {}]]}	{'legendtitle': 'Time-resolved PL', 'xticksstep': 300, 'ylabel_coords': [-0.25, 0.4]}
+0.0	0.0	0.0	0.0	0.0	0.0

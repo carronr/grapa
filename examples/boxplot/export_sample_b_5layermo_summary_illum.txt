@@ -1,0 +1,21 @@
+Sample	sample_b_5layermo
+label	sample\nb\n5layermo
+Cell	Voc [V]	Jsc [mA/cm2]	FF [%]	Eff. [%]	Area [cm-2]	Vmpp [V]	Jmpp [mA/cm2]	Pmpp [mW/cm2]	Rp [Ohmcm2]	Rs [Ohmcm2]	n	J0 [A/cm2]	Temperature [K]	Acquis. T [°C]	Filename	Remarks
+a1	0.7122	33.188	76.214	18.014	0.5416	0.58205	30.95	18.014	7150.8	0.411	1.706	2.98e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_a1_01.txt	
+a2	0.71246	33.158	76.282	18.021	0.55666	0.58365	30.876	18.021	5523.2	0.54	1.625	1.28e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_a2_01.txt	
+a3	0.71358	33.584	75.374	18.063	0.5673	0.58075	31.103	18.063	5120.7	0.576	1.706	2.87e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_a3_01.txt	
+b1	0.71232	33.476	76.596	18.265	0.55556	0.58585	31.176	18.265	5575.0	0.024	2.413	2.37e-07	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_b1_01.txt	WARNING: n and I0 probably off (sq. res. 0.0103, threshold 0.0002)
+b2	0.71156	32.793	76.864	17.935	0.55213	0.58725	30.541	17.935	4393.3	0.439	1.617	1.18e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_b2_01.txt	
+b3	0.71225	33.444	76.194	18.15	0.54042	0.58455	31.049	18.15	5593.3	0.489	1.668	2.02e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_b3_01.txt	
+c1	0.71155	32.995	76.115	17.87	0.57287	0.58275	30.665	17.87	6022.8	0.491	1.685	2.41e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_c1_01.txt	
+c2	0.71136	33.399	76.493	18.174	0.5661	0.58585	31.021	18.174	7099.3	0.361	1.737	3.96e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_c2_01.txt	
+c3	0.71242	33.451	76.077	18.13	0.56954	0.58385	31.053	18.13	7252.8	0.412	1.741	4.04e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_c3_01.txt	
+d1	0.71119	32.536	75.652	17.505	0.56003	0.58015	30.174	17.505	5488.2	0.567	1.696	2.69e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_d1_01.txt	
+d2	0.71137	33.209	76.288	18.022	0.54555	0.58455	30.831	18.022	3993.1	0.552	1.619	1.23e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_d2_01.txt	
+d3	0.71192	33.244	75.893	17.962	0.56227	0.58245	30.838	17.962	6409.6	0.481	1.71	3.01e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_d3_01.txt	
+e1	0.71324	32.9	75.391	17.691	0.56061	0.58025	30.488	17.691	4717.4	0.726	1.65	1.60e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_e1_01.txt	
+e2	0.71272	33.259	72.325	17.144	0.54889	0.563	30.452	17.144	3884.9	0.903	1.894	1.43e-08	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_e2_01.txt	
+e3	0.71215	32.997	75.353	17.707	0.55893	0.58075	30.49	17.707	4286.2	0.45	1.791	6.22e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_e3_01.txt	
+f1	0.71621	33.054	75.438	17.859	0.56847	0.58125	30.725	17.859	5066.3	0.763	1.632	1.27e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_f1_01.txt	
+f2	0.7149	33.788	75.125	18.147	0.54502	0.57975	31.301	18.147	4801.2	0.708	1.683	2.22e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_f2_01.txt	
+f3	0.71408	33.33	74.942	17.836	0.55276	0.57895	30.808	17.836	4535.7	0.71	1.701	2.64e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_5LayerMo\I-V_SAMPLE_B_5LayerMo_f3_01.txt	

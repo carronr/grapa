@@ -1,0 +1,5 @@
+Sample	sample_a
+label	sample\na
+Cell	Voc [V]	Jsc [mA/cm2]	FF [%]	Eff. [%]	Area [cm-2]	Vmpp [V]	Jmpp [mA/cm2]	Pmpp [mW/cm2]	Rp [Ohmcm2]	Rs [Ohmcm2]	n	J0 [A/cm2]	Temperature [K]	Acquis. T [°C]	Filename	Remarks
+a2	0.62203	32.802	69.333	14.146	0.32349	0.4839	29.234	14.146	1706.0	0.359	2.214	5.76e-07	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_A\I-V_SAMPLE_A_a2_01.txt	
+a3	0.62362	29.731	70.465	13.065	0.37413	0.4889	26.723	13.065	2044.5	0.438	2.046	2.08e-07	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_A\I-V_SAMPLE_A_a3_01.txt	
