@@ -3,6 +3,7 @@
 Created on Sun Oct 29 14:19:52 2017
 
 @author: Romain
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 from grapa.graph import Graph

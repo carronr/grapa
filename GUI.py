@@ -1,4 +1,8 @@
-﻿print ('Loading matplotlib...')
+﻿"""
+Copyright (c) 2018, Empa, Romain Carron
+"""
+
+print ('Loading matplotlib...')
 import matplotlib
 print ('matplotlib 1')
 matplotlib.use("TkAgg")

@@ -3,6 +3,7 @@
 Created on Wed Jan 25 23:30:21 2017
 
 @author: Romain
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 from abc import ABCMeta, abstractmethod
