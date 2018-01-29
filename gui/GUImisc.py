@@ -3,6 +3,7 @@
 Created on Sat Nov 18 15:00:36 2017
 
 @author: Romain
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 import tkinter as tk

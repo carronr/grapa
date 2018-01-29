@@ -3,6 +3,7 @@
 Created on Fri Jan 26 13:30:22 2018
 
 @author: car
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 

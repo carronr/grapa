@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Copyright (c) 2018, Empa, Romain Carron
+"""
 
 import numpy as np
 import copy

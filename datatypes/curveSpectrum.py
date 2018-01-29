@@ -3,6 +3,7 @@
 Created on Tue Sep 13 15:44:58 2016
 
 @author: car
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 import numpy as np

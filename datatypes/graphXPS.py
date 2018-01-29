@@ -3,6 +3,7 @@
 Created on Tue Jan 23 14:25:49 2018
 
 @author: car
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 # -*- coding: utf-8 -*-

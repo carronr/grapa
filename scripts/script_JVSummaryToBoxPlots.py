@@ -3,6 +3,7 @@
 Created on Fri Dec 23 16:46:38 2016
 
 @author: car
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 import glob

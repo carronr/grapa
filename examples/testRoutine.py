@@ -3,6 +3,7 @@
 Created on Mon Dec 12 20:08:04 2016
 
 @author: car
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 #print ('matplotlib 4')

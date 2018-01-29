@@ -3,6 +3,7 @@
 Created on Sat Mar  4 10:44:14 2017
 
 @author: Romain
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 import os

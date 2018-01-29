@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+@author: car
+Copyright (c) 2018, Empa, Romain Carron
+"""
+
 import numpy as np
 import os
 import sys

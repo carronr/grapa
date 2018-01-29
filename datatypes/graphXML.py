@@ -3,6 +3,7 @@
 Created on Mon Sep 25 22:22:45 2017
 
 @author: Romain
+Copyright (c) 2018, Empa, Romain Carron
 """
 
 from lxml import etree
