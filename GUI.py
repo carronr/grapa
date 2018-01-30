@@ -1,5 +1,7 @@
-﻿"""
-Copyright (c) 2018, Empa, Romain Carron
+﻿# -*- coding: utf-8 -*-
+"""
+@author: Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 print ('Loading matplotlib...')

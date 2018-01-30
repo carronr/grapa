@@ -2,8 +2,8 @@
 """
 Created on Sat Oct 28 12:52:52 2017
 
-@author: Romain
-Copyright (c) 2018, Empa, Romain Carron
+@author: Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np

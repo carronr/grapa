@@ -2,9 +2,10 @@
 """
 Created on Sat Nov 11 14:18:07 2017
 
-@author: Romain
-Copyright (c) 2018, Empa, Romain Carron
+@author: Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
+
 import tkinter as tk
 from tkinter import ttk
 from copy import deepcopy

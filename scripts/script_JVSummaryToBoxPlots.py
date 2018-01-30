@@ -2,8 +2,8 @@
 """
 Created on Fri Dec 23 16:46:38 2016
 
-@author: car
-Copyright (c) 2018, Empa, Romain Carron
+@author: Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import glob

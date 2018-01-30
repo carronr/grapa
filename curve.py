@@ -3,8 +3,8 @@
 """
 Created on Fri Jul 15 15:46:13 2016
 
-@author: car
-Copyright (c) 2018, Empa, Romain Carron
+@author: Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
