@@ -13,6 +13,14 @@ KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
 
+
+
+# 0.4.3.3
+#Additions:
+#- CurveEQE: the calculation of cell Jsc now offers the choice of interpolation polynomial order, and the choice between AM1.5G and AM0 reference spectra.
+
+
+
 Version 0.4.3.2
 Release 27.01.2018
 Additions
