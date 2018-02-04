@@ -10,7 +10,7 @@ A wide range of data formats can loaded by default. The produced graphs are save
 
 The data analysis functions currently focus on photovoltaics and semiconductor material science. Advanced analysis or fitting functions are notably provided for the following characterization techniques: EQE, JV, C-V, C-f, TRPL, SIMS (list not exhaustive).
 
-The software has extended capabilities for advanced plotting, and can be used for creating high-quality figures for scientific publications.
+The software has extended capabilities for advanced plotting including subplots and insets, and can be used for creating high-quality figures for scientific publications.
 
 Last, the user can add to the software and to the graphical interface his own specific data loading functions as well new data types and analysis functions, with no modification of the existing code.
 
@@ -37,6 +37,9 @@ Cheers!
 
 Download grapa and place its content in a folder named “grapa” somewhere on your hard drive.
 The user interface can be started by executing the file GUI.py using your favorite python distribution.
+
+Grapa was developed using python 3.4 and matplotlib 1.5, and should be compatible with more recent versions.
+
 
 **More questions?**
 
