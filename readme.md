@@ -33,6 +33,7 @@ Download grapa and place its content in a folder named “grapa” somewhere on 
 The user interface can be started by executing the file GUI.py using your favorite python distribution.
 
 **More questions?**
+
 See manual.pdf in folder /manual
 
 
