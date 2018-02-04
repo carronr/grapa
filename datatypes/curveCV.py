@@ -8,6 +8,7 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 import numpy as np
 import warnings
+from copy import deepcopy
 
 
 from grapa.graph import Graph
@@ -60,7 +61,7 @@ class GraphCV(Graph):
         for c in range(self.length()-1-nb_add, len0, -1):
             self.deleteCurve(c)
         # cosmetics
-        axisLabels = GraphCV.AXISLABELS
+        axisLabels = deepcopy(GraphCV.AXISLABELS)
         # normalize with area C
         area = self.curve(len0).getAttribute('cell area (cm2)', None)
         if area is None:

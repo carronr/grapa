@@ -100,6 +100,7 @@ class CurveEQE(Curve):
     CURVE = 'Curve EQE'
 
     EQE_AM15_REFERENCE = 'AM1-5_Ed2-2008.txt'
+    EQE_AM0_REFERENCE = 'AM0_2000_ASTM_E-490-00.txt'
     EQE_BEST_CELL_REF = 'EQE_20.4_cell.txt'
     EQE_BEST_CELL_LABEL = 'Empa 20.4%'
 
@@ -165,7 +166,11 @@ class CurveEQE(Curve):
                         ['Savitsky Golay width', 'degree'], [5,2]])
         # EQE current
         if self.attributeEqual('_popt'):
-            out.append([self.currentCalc, 'EQE current', ['ROI'], [[min(self.x()), max(self.x())]]])
+            out.append([self.currentCalc, 'EQE current', ['ROI', 'interpolate', 'spectrum'],
+                        [[min(self.x()), max(self.x())], 'cubic', self.EQE_AM15_REFERENCE.replace('.txt','')], {},
+                        [{'width': 15},
+                         {'width': 8, 'field':'Combobox', 'values':['linear', 'quadratic', 'cubic']},
+                         {'width': 8, 'field':'Combobox', 'values':[self.EQE_AM15_REFERENCE.replace('.txt',''), self.EQE_AM0_REFERENCE.replace('.txt','')]}]])
         # EQE 20.4%
         out.append([self.CurveEQE_Empa20p4, self.EQE_BEST_CELL_LABEL, [], []])
         # tauc (E*ln(1-EQE))**2
@@ -433,24 +438,67 @@ class CurveEQE(Curve):
         print('ERROR CurveEQE_returnAM15reference: cannot find reference file',
               self.EQE_AM15_REFERENCE)
         return 0
+    def CurveEQE_returnAM0referenceCurve(self):
+        """
+        Returns AM0 reference spectrum.
+        Data are in W/m2/um, returns spectral photon irradiance
+        """
+        from grapa.graph import Graph
+        path = os.path.dirname(os.path.abspath(__file__))
+        ref = Graph(os.path.join(path, self.EQE_AM0_REFERENCE))
+        if ref.length() > 0:
+            # h * c / wavelength -> energy WL conversion in vacuum for AM0
+            energy = 6.62607004E-34 * 299792458 / (1e-9 * ref.curve(0).x())
+            irrad = ref.curve(0).y() / energy / 1000
+            return Curve([ref.curve(0).x(), irrad], {})
+        return False
+    
+    # other functions
+    def _curveReference(self, file):
+        """ returns some reference spectrum """
+        if file.endswith('.txt'):
+            file = file[:-4]
+        if file == 'AM1-5_Ed2-2008':
+            return self.CurveEQE_returnAM15referenceCurve()
+        if file == 'AM0_2000_ASTM_E-490-00':
+            return self.CurveEQE_returnAM0referenceCurve()
+        import os.path
+        from grapa.graph import Graph
+        path = os.path.dirname(os.path.abspath(__file__))
+        ref = Graph(os.path.join(path, file), silent=True)
+        if ref.length() > 0:
+            return ref.curve(0)
+        print('ERROR CurveEQE._curveReference: cannot find reference file', file)
+        return False
     
     
-    
-    def currentCalc(self, ROI=None, silent=False):
-        """ Computes the current EQE current using AM1.5 spectrum """
+    def currentCalc(self, ROI=None, interpolatekind='cubic',
+                    spectralPhotonIrrad=None, silent=False):
+        """
+        Computes the current EQE current using AM1.5 spectrum
+        ROI: [nm_min, nm_max]
+        interpolatekind: order for interpolation of EQE data. default 'cubic'.
+        refSpectrum: by default AM1.5G; otherwise filename in folder datatypes
+        """
+        if spectralPhotonIrrad is None:
+            spectralPhotonIrrad = CurveEQE.EQE_AM15_REFERENCE
+        refIrrad = self._curveReference(spectralPhotonIrrad)
+        if not refIrrad:
+            print('Error CurveEQE currentCalc, cannot find reference spectrum',
+                  spectralPhotonIrrad)
+            return
         ROIdef = [min(self.x()), max(self.x())]
         if ROI is None:
             ROI = ROIdef
         else:
             ROI = [max(ROIdef[0], ROI[0]), min(ROIdef[1], ROI[1])]
-        refIrrad = self.CurveEQE_returnAM15referenceCurve()
         # localize range of interest
         refROI = (refIrrad.x() >= ROI[0]) * (refIrrad.x() <= ROI[1])
         refDataX = refIrrad.x()[refROI]
         refDataY = refIrrad.y()[refROI]
         # interpolate data on ref x sampling
         # spline interpolation degree 1
-        f = interpolate.interp1d(self.x(), self.y(), kind='cubic')
+        f = interpolate.interp1d(self.x(), self.y(), kind=interpolatekind)
         interpData = f(refDataX)
         # compute final spectrum
         finalSpectrum = refDataY * interpData
