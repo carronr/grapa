@@ -15,6 +15,7 @@ The software has extended capabilities for advanced plotting including subplots 
 Last, the user can add to the software and to the graphical interface his own specific data loading functions as well new data types and analysis functions, with no modification of the existing code.
 
 Grapa stands for “GRAphing and Photovoltaics Analysis”.
+
 Cheers!
 
 
@@ -36,6 +37,9 @@ Cheers!
 
 Download grapa and place its content in a folder named “grapa” somewhere on your hard drive.
 The user interface can be started by executing the file GUI.py using your favorite python distribution.
+
+Grapa was developed using python 3.4 and matplotlib 1.5, and should be compatible with later versions of each.
+
 
 **More questions?**
 
