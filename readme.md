@@ -38,7 +38,7 @@ Cheers!
 Download grapa and place its content in a folder named “grapa” somewhere on your hard drive.
 The user interface can be started by executing the file GUI.py using your favorite python distribution.
 
-Grapa was developed using python 3.4 and matplotlib 1.5, and should be compatible with later versions of each.
+Grapa was developed using python 3.4 and matplotlib 1.5, and should be compatible with more recent versions.
 
 
 **More questions?**
