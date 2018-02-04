@@ -5,10 +5,15 @@ DOI: 10.5281/zenodo.1164571
 **Description**
 
 Grapa is a python package providing a graphical interface and the underlying code dedicated to the visualization, analysis and presentation of scientific data, with a focus on photovoltaic research.
+
 A wide range of data formats can loaded by default. The produced graphs are saved both as graphical objects and as text files for later modifications.
+
 The data analysis functions currently focus on photovoltaics and semiconductor material science. Advanced analysis or fitting functions are notably provided for the following characterization techniques: EQE, JV, C-V, C-f, TRPL, SIMS (list not exhaustive).
-The software has extended capabilities for advanced plotting, and can be used for creating high-quality figures for scientific publications.
+
+The software has extended capabilities for advanced plotting including subplots and insets, and can be used for creating high-quality figures for scientific publications.
+
 Last, the user can add to the software and to the graphical interface his own specific data loading functions as well new data types and analysis functions, with no modification of the existing code.
+
 Grapa stands for “GRAphing and Photovoltaics Analysis”.
 Cheers!
 
