@@ -65,6 +65,8 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # 0.4.3.3
 #Additions:
 #- CurveEQE: the calculation of cell Jsc now offers the choice of interpolation polynomial order, and the choice between AM1.5G and AM0 reference spectra.
+#Modifications
+#- CurveCV: solved a bug in the vertical axis label.
 
 
 # 0.4.3.2
