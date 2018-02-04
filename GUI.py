@@ -61,7 +61,6 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO:(?)  Keep same zoom upon refresh
 
 
-
 # 0.4.3.3
 #Additions:
 #- CurveEQE: the calculation of cell Jsc now offers the choice of interpolation polynomial order, and the choice between AM1.5G and AM0 reference spectra.
@@ -1938,7 +1937,7 @@ def buildUI():
             pass
     
     app = Application(master=root)
-    app.master.title('TFPV software v0.4.3.3')
+    app.master.title('Grapa software v0.4.3.3')
     # starts runnning programm
     with stdout_redirect(app.Console):
 #        print ('stdout redirected in this Text field')
