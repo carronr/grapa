@@ -61,6 +61,9 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO:(?)  Keep same zoom upon refresh
 
 
+# 0.5.0.1
+# change in setup, now working
+
 # 0.5.0.0
 #New major version number, indicating that grapa can installed using pip!
 #Otherwise no big changes in the software.
@@ -154,7 +157,7 @@ class Application(tk.Frame):
         self.createWidgets(FrameMain)
         # optional
         self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'subplots_examples.txt'))
-        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'Spectra', 'CdS32nm_on_SLG_T.txt'))
+#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'Spectra', 'CdS32nm_on_SLG_T.txt'))
         
         self.varScreenDpi.set(75)
         self.setScreenDpi()
@@ -1879,20 +1882,15 @@ def printLastRelease():
 
 def buildUI():
     root = tk.Tk()
-    
     try:
         root.iconbitmap('datareading.ico')
     except Exception:
-        try:
-            root.iconbitmap('_modules/datareading.ico')
-        except Exception:
-            pass
-    
+        pass
     app = Application(master=root)
-    app.master.title('Grapa software v0.5.0.0')
+    from grapa import __version__
+    app.master.title('Grapa software v'+__version__)
     # starts runnning programm
     with stdout_redirect(app.Console):
-#        print ('stdout redirected in this Text field')
         # retrieve content of last release
         try:
             printLastRelease()

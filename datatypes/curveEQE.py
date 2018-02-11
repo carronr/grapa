@@ -513,7 +513,7 @@ class CurveEQE(Curve):
     
     def CurveUrbachEnergy(self, ROIeV):
         """ Return fit in a Curve object, giving Urbach energy decay """
-        from datatypes.curveArrhenius import CurveArrhenius, CurveArrheniusExpDecay
+        from grapa.datatypes.curveArrhenius import CurveArrhenius, CurveArrheniusExpDecay
         ROIeV.sort()
         curve = CurveArrhenius(self.data, CurveArrheniusExpDecay.attr)
         out = curve.CurveArrhenius_fit(Tlim=ROIeV)
