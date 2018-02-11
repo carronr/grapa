@@ -85,6 +85,10 @@ class CurveMCA(Curve):
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
+        at = ['_MCA_CtokeV_offset', '_MCA_CtokeV_mult']
+        out.append([self.updateValuesDictkeys, 'Save',
+                    ['keV = (channel +', ') * '],
+                    [self.getAttribute(a) for a in at], {'keys': at}])
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
 #out.append([self.dataModifySwapChannelkeV, 'change data Channel<->keV', [], []]) # one line per function
         return out

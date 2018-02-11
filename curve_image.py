@@ -118,7 +118,14 @@ class Curve_Image(Curve):
             if graph is not None:
                 datafile = graph.filenamewithpath(datafile)
             try:
-                from PIL import Image as PILimage
+                try:
+                    from PIL import Image as PILimage
+                except ImportError:
+                    try:
+                        from pillow import Image as PILimage
+                    except ImportError:
+                        print('Curve Image: cannot import either PIL or pillow. Cannot open image.')
+                        return data, ignoreNext, X, Y
                 data = PILimage.open(datafile)
                 if rotate:
                     data = data.rotate(rotate)

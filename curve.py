@@ -546,7 +546,24 @@ class Curve:
         attr = {}
         return self.x_offsets(index=idx, alter=alter[0]), self.y_offsets(index=idx, alter=alter[1]), attr
  
-
+    
+    def printHelpFunc(self, func, leadingstrings=None):
+        """ prints the docstring of a function """
+        if leadingstrings is None:
+            leadingstrings = ['- ', '  ']
+        a, idx = 0, None
+        for line in func.__doc__.split('\n'):
+            if len(line) == 0:
+                continue
+            if idx is None:
+                idx = len(line) - len(line.lstrip(' '))
+            if len(line) == idx:
+                continue
+            print(leadingstrings[a] + line[idx:])
+            a = 1
+        
+        
+        
     # some arithmetics
     def __add__(self, other, sub=False, interpolate=-1, offsets=False, operator='add'):
         """
@@ -675,9 +692,7 @@ class Curve:
         out = out.castCurve(self.classNameGUI())
         return out
         
-#    def dataFormula(self, xory, formula):
-#        # TOIMPLEMENT
-#        return False
+        
 
 
     def plot(self, ax, graph=None, graph_i=None, type_plot='', ignoreNext=0, boxplot=None, violinplot=None, violinplotkwargs={}):

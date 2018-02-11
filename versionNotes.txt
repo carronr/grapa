@@ -15,6 +15,25 @@ KNOWN BUGS
 
 
 
+Version 0.5.0.0
+Release 11.02.2018
+New major version number, indicating that grapa can installed using pip!
+Otherwise no big changes in the software.
+Additions:
+- Can now reads some reflectance files (Perkin Elmer spectrophotometer).
+- CurveSpectrum has beed significantly extended, to offer some support to reflectance and transmittance curves. The following functions were added:
+  - Correct for instrumental response, stored in datatypes/spectrumInstrumentalResponses.txt.
+  - Compute the absorptance, defined as A = 1 - R - T
+  - Estimate the absorption coefficient alpha, with input the thickness of the layer. A simple is also provided to account for the absorption in the substrate (see file datatypes/spectrumSubstrates.txt)
+  The last 2 functions request selecting a transmittance/reflectance curve.
+  More details are given in the manual.
+Modifications:
+- Added options to easily change the calibration of XRF files
+Under the hood:
+- Revised the code for opening spectrum files.
+
+
+
 Version 0.4.3.3
 Release 04.02.2018
 Additions:

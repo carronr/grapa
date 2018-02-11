@@ -61,70 +61,21 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO:(?)  Keep same zoom upon refresh
 
 
-# 0.4.3.3
+# 0.5.0.0
+#New major version number, indicating that grapa can installed using pip!
+#Otherwise no big changes in the software.
 #Additions:
-#- CurveEQE: the calculation of cell Jsc now offers the choice of interpolation polynomial order, and the choice between AM1.5G and AM0 reference spectra.
-#Modifications
-#- CurveCV: solved a bug in the vertical axis label.
-#- Updated Manual
-#- Updated readme
-
-
-# 0.4.3.2
-#Additions
-#- Read support of some XPS csv files format
-#- A few options to spice the fill and fill_between plot methods
-#- Extended support for the ticks locator, in keyword 'arbitrayfunctions'. 2 examples are provided.
-#Modifications
-#- Clearer description of the keyword zorder
-#- Clearer description and examples for keyword arbitraryfunctions
-
-
-
-# 0.4.3.1
-# Additions
-#- Implemented a data parsing from file for Curve_Image. The X, Y coordinates can be read from first row, column (leave an empty tab in top-left corner)
-#- Added a new Button in the GUI to create an empty Curve, useful for subplots, insets, images
-#- Selecting a keyword in the property tree now changes the active keyword in "New property". If positive review the panel "Edit property" will be deleted.
-#- A few more examples to the linespec keyword
-#- CurveJV: throws a message when a duplicate is found in the V data series.
-#- New quick fields for capsize and ecolor (color of errorbars) for errorbar types of curves.
-#- Added Combobox entries in the annotation popup, to suggest possibilitirs to the user. Also revised some details in the user interface.
-# Modification
-#- Improved handling of invalid syntax in text, textxy and textargs keywords when loading files 
-#- Restore good performance when zooming when the crosshair is not active
-#- Improved handling of unusual keywords
-#- Improved handling of ylim for CurveCV types with Mott-Schottky plotting.
-
-
-# 0.4.3.0
-# Major changes
-#- Modified prototype of Graph.plot() function. Now, by default the plot is saved only if a file name is provided, and the ifSubPlot preventing deletion of existing axes sets as True if an axis is provided in the figAx parameter.
-#Addition:
-#- Added 2 new types of plot: contour and contourf. These act similarly as imshow in the sens that they aggregate the next Curves with same x values.
-#- Better example for PL spectrum
-#- Added a button to set the graph axes limits to the values set by the zoom tool.
-#- The crosshair of the data picker now follows the mouse motion while the mouse button is pressed.
-#- Added actions to curve type image: aspect, interpolation, transpose, rotation
-#- Added Curve actions to help setting suitable parameters for curves types "errorbar" and "scatter"
-#- Modified Curves actions to include drop-down Combobox menus: Curve_SIMS, Curve_Spectrum, Curve_TRPL, Curve_Math, Curve_Image, Curve_Subplot
-#- xlabel and ylabel can now be entered as lists, under the form ['label', {'color':'b', 'size':6}]
-#- A new Curve keyword was added to the menu: zorder, which determines the drawing order. The legend order and the drawing order can then be tuned independently. The keyword was already functional previously.
-#- Improved file reading of TRPL files
-#- Offsets and multiplicative offsets cannow be entered as string fractions, ie. [0.8, '1/3e2']
-#- Added a checkbox to copy to clipboard the attributes of the Curves/Graph together with the data.
-#Modifications
-#- Modified prototype of Graph.plot() function, see above.
-#- Various minor improvements in the clarity of the GUI and of the text annotation popup
-#- Replaced text Entries by Drop-down menus whenever relevant in the GUI popup
-#- Revised fitting procedure for JV curves, by increasing the assumed noise level due to lamp fluctuations
-#- Replaced the default Entry fields with more user-friendly Combobox in some Curve actions.
-#- New property: replaced the Entry field by a Combobox, summarizing the provided examples or possible values
-#- Improved handling of font sizes in axis labels, titles and ticks labels
-#- Revised internal mechanism for insets (and to some extend subplots). The behavior should be more consistent and predictable, especially when no file are provided.
-#Bugs:
-#- Improved handling of \t in text and labels. Relevant notably for the $\tau$ greek letter etc.
-#- keyword labelhide works again
+#- Can now reads some reflectance files (Perkin Elmer spectrophotometer).
+#- CurveSpectrum has beed significantly extended, to offer some support to reflectance and transmittance curves. The following functions were added:
+#  - Correct for instrumental response, stored in datatypes/spectrumInstrumentalResponses.txt.
+#  - Compute the absorptance, defined as A = 1 - R - T
+#  - Estimate the absorption coefficient alpha, with input the thickness of the layer. A simple is also provided to account for the absorption in the substrate (see file datatypes/spectrumSubstrates.txt)
+#  The last 2 functions request selecting a transmittance/reflectance curve.
+#  More details are given in the manual.
+#Modifications:
+#- Added options to easily change the calibration of XRF files
+#Under the hood:
+#- Revised the code for opening spectrum files.
 
 
 
@@ -203,7 +154,7 @@ class Application(tk.Frame):
         self.createWidgets(FrameMain)
         # optional
         self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'subplots_examples.txt'))
-#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'fancyAnnotations.txt'))
+        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'Spectra', 'CdS32nm_on_SLG_T.txt'))
         
         self.varScreenDpi.set(75)
         self.setScreenDpi()
@@ -1242,6 +1193,7 @@ class Application(tk.Frame):
         self.previousSelectedCurve = sel
         # current filename
         val = self.back_graph.filename if hasattr(self.back_graph, 'filename') else ''
+        self.back_file = val
         self.varLabelFile.set(val)
 
     
@@ -1937,7 +1889,7 @@ def buildUI():
             pass
     
     app = Application(master=root)
-    app.master.title('Grapa software v0.4.3.3')
+    app.master.title('Grapa software v0.5.0.0')
     # starts runnning programm
     with stdout_redirect(app.Console):
 #        print ('stdout redirected in this Text field')

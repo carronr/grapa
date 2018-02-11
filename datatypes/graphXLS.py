@@ -6,7 +6,6 @@ Created on Sat Mar  4 10:57:14 2017
 Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-from xlrd import open_workbook
 
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
@@ -24,6 +23,12 @@ class GraphXLS(Graph):
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
+        try:
+            from xlrd import open_workbook
+        except ImportError as e:
+            print('ImportError: cannot import xlrd. GraphXLS aborted.', e)
+            return False
+    
         wb = open_workbook(self.filename)
         sheet_id = attributes['complement'] if 'complement' in attributes else 0
         if not isinstance(sheet_id, str) and not is_number(sheet_id):

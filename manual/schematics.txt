@@ -1,0 +1,21 @@
+ylim	[-2.5, 3.5]
+figsize	[8, 3]
+subplots_adjust	[0.02, 0, 0.98, 1]
+fontsize	12.0
+subplotsid	(0.05, -0.05)
+xlim	[-0.5, 4.5]
+subplotsncols	3.0
+legendproperties	{'loc': 'best'}
+arbitraryfunctions	[['set_axis_off', [], {}]]
+textargs	[]
+textxy	[]
+text	[]
+meastype	Graph
+curve	subplot	subplot	subplot
+filename	C:/Users/Romain/Desktop/schematics.txt	C:/Users/Romain/Desktop/schematics.txt	C:/Users/Romain/Desktop/schematics.txt
+label
+subplotcolspan	1	1	1
+subplotfile	schematics_sub.txt	schematics_full.txt	schematics_layer.txt
+subplotrowspan	1	1	1
+subplotupdate	{}	{}	{}
+inf	inf	inf	inf

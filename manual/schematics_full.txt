@@ -1,0 +1,25 @@
+xlabel	Wavelength [nm]
+ylim	[-2.5, 3.5]
+figsize	[3, 3.5]
+subplots_adjust	[0, 0, 1, 1]
+fontsize	12.0
+ylabel	Transmittance [%]
+xlim	[-0.5, 4.5]
+legendproperties	{'loc': 'best'}
+arbitraryfunctions	[['set_axis_off', [], {}]]
+textargs	[{'visible': 1.0, 'xytext': [1.5, 3.5], 'xy': (1.9, 2), 'arrowprops': {'facecolor': 'b', 'linewidth': 0, 'shrink': 0.05}, 'textcoords': 'data', 'xycoords': 'data'}, {'visible': 1.0, 'xytext': [1.9, 1.9], 'xy': (2, 1), 'arrowprops': {'facecolor': 'b', 'linewidth': 0, 'shrink': 0.05}, 'textcoords': 'data', 'xycoords': 'data'}, {'visible': 1.0, 'xytext': [2.0, 1], 'xy': (2.1, 0), 'arrowprops': {'facecolor': 'b', 'linewidth': 0, 'shrink': 0.05}, 'textcoords': 'data', 'xycoords': 'data'}, {'visible': 1.0, 'xytext': [2.1, 0], 'xy': (2.5, -1.5), 'arrowprops': {'facecolor': 'b', 'linewidth': 0, 'shrink': 0.05}, 'textcoords': 'data', 'xycoords': 'data'}, {'visible': 1.0, 'xytext': [2, 2], 'xy': (2.4, 3.5), 'arrowprops': {'facecolor': 'b', 'linewidth': 0, 'shrink': 0.05}, 'textcoords': 'data', 'xycoords': 'data'}, {'visible': 1.0, 'textcoords': 'data', 'xytext': [2.3, 2.5]}, {'visible': 1.0, 'textcoords': 'data', 'xytext': [2.2, 1.4]}, {'visible': 1.0, 'textcoords': 'data', 'xytext': [2.3, 0.4]}, {'visible': 1.0, 'textcoords': 'data', 'xytext': [2.5, -0.8]}, {'horizontalalignment': 'center', 'visible': 1.0, 'textcoords': 'data', 'xytext': [2, -2.2]}, {'horizontalalignment': 'center', 'visible': 1.0, 'textcoords': 'data', 'xytext': [2, -1.8]}]
+textxy	['', '', '', '', '', '', '', '', '', '', '']
+text	[' ', ' ', ' ', ' ', ' ', '$R_{tot}$', '$A_{tot, layer}$', '$A_{tot, substrate}$', '$T_{tot}$', '$1 = R_{tot} + A_{tot, layer} + A_{tot, substrate} + T_{tot}$', 'Actual measurement']
+meastype	Graph
+color	[1, 0, 0, 0.5]	[0, 0, 0, 0.25]
+filename	From clipboard	From clipboard
+label	Layer	Substrate
+labelhide	1.0	1.0
+linewidth	0.0	0.0
+muloffset	[4, 1]	[4, 1]
+offset	[0, 1]	[0, 0]
+type	fill	fill
+0.0	0.0	0.0
+1.0	0.0	0.0
+1.0	1.0	1.0
+0.0	1.0	1.0

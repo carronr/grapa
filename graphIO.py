@@ -203,16 +203,25 @@ class GraphIO(Graph):
         # with corresponding Curve types: CV, Cf, JV, TIV, MBE, MCA, SIMS
         # without: MCA fit (html output of XRF), MBElog
         loaded = False
-        childClasses = GraphIO._listGraphChildClasses()
-#        print(childClasses)
-        for child in childClasses:
-            if child.isFileReadable(fileNameBase, fileExt, line1=line1, line2=line2, line3=line3):
-                msg = 'opened as ' + child.FILEIO_GRAPHTYPE + '.'
-                self.headers.update({'meastype': child.FILEIO_GRAPHTYPE})
-                res = child.readDataFromFile(self, attributes, fileName=fileNameBase, line1=line1, line2=line2, line3=line3)
-                if res is None or res != False:
-                    loaded = True
-                    break
+        # first check if instructed to open the file in a certain way
+        if ('readas' in attributes and
+            attributes['readas'].lower() in ['database', 'generic']):
+                msg = 'opened using standard methods.'
+                GraphIO.readDataFromFileTxt(self, attributes)
+                loaded = True
+        # if not, then try every possibility
+        if not loaded:
+            childClasses = GraphIO._listGraphChildClasses()
+    #        print(childClasses)
+            for child in childClasses:
+                if child.isFileReadable(fileNameBase, fileExt, line1=line1, line2=line2, line3=line3):
+                    msg = 'opened as ' + child.FILEIO_GRAPHTYPE + '.'
+                    self.headers.update({'meastype': child.FILEIO_GRAPHTYPE})
+                    res = child.readDataFromFile(self, attributes, fileName=fileNameBase, line1=line1, line2=line2, line3=line3)
+                    if res is None or res != False:
+                        loaded = True
+                        break
+        # if not, then try default methods
         if not loaded:
             # other not readable formats
             if fileExt in ['.pdf']:

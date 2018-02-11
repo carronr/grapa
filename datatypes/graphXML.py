@@ -6,8 +6,6 @@ Created on Mon Sep 25 22:22:45 2017
 Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-from lxml import etree
-
 from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.mathModule import stringToVariable
@@ -30,6 +28,12 @@ class GraphXML(Graph):
         xml file.
         Quite basic at the moment. Did that more for fun than for need.
         """
+        try:
+            from lxml import etree
+        except ImportError as e:
+            print('ImportError: cannot import etree from xlrd. GraphXML aborted.', e)            
+            return False
+        
         tree = etree.parse(self.filename)
         root = tree.getroot()
         
