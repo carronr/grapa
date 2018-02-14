@@ -61,7 +61,17 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO:(?)  Keep same zoom upon refresh
 
 
-# 0.5.0.1
+# 0.5.0.4r1
+#Additions
+#- CurveJV can now read an updated version of the TIV files
+#Bugs
+#- Solved a graphical glitch in the annotation popup, regarding inappropriate "new" labels upon creation and deletion of annotations.
+#Under the hood
+#- Moved the class GraphJV from the file curveJV to graphJV
+
+
+
+# 0.5.0.3
 # change in setup, now working
 
 # 0.5.0.0

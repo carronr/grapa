@@ -24,17 +24,25 @@ class GraphSIMS(Graph):
     not a GraphSIMS. Cannot call a method of GraphSIMS as method of self.
     """
 
-    KEYWORDS = {'ggi': [['^71Ga+'],['^71Ga+', '^113In+']],
-                'cgi': [['Cu+'],['^71Ga+', '^113In+']],
-                'gi': [['^71Ga+', '^113In+'],[]],
-                'cusn': [['Cu+'],['Sn+']],
-                'cuzn': [['Cu+'],['Zn+']],
-                'znsn': [['Zn+'],['Sn+']],
-                'cuznsn': [['Cu+'],['Zn+', 'Sn+']],
-                'cuge': [['Cu+'], ['^70Ge+']],
-                'snge': [['Sn+'], ['^70Ge+']],
+    KEYWORDS = {'ggi':    [['^71Ga+'],['^71Ga+', '^113In+']],
+                'cgi':    [['Cu+'],   ['^71Ga+', '^113In+']],
+                'gi':     [['^71Ga+', '^113In+'],[]],
+                'cusn':   [['Cu+'],   ['Sn+']],
+                'cuzn':   [['Cu+'],   ['Zn+']],
+                'znsn':   [['Zn+'],   ['Sn+']],
+                'cuznsn': [['Cu+'],   ['Zn+', 'Sn+']],
+                'cgt':    [['Cu+'],   ['^70Ge+', 'Sn+']],
+                'ggt':    [['^70Ge+'],['^70Ge+', 'Sn+']]
                 }
+    
+    TOHIDE = ['F+', 'Mg+', 'Al+', '^41K+', 'Fe+', '^65Cu+', '^66Zn+', 'Ga+',
+              'Se+', '^94Mo+', 'In+', '^118Sn+', '^119Sn+',
+              '^110Cd+', '^Cd112+', '^113Cd+', '^92Mo+', '^96Mo+', 'Cs+']
 
+    YIELDS = {'^71Ga+': 1, '^113In+': 5.5, 'Cu+': 300,
+              '^70Ge+': 4500, 'Sn+': 480, 'Zn+': 6000}
+
+              
     FILEIO_GRAPHTYPE = 'SIMS data'
     
     AXISLABELS = [['Sputter time', 't', 's'], ['Intensity', '', 'counts']]
@@ -77,7 +85,7 @@ class GraphSIMS(Graph):
             GraphSIMS.setLayerBoundaries(self, msmtId, ROI)
         # by default, hide some curves - add others, for kestertes?
         hidden = []
-        toHide = ['F+', 'Mg+', 'Al+', '^41K+', 'Fe+', '^65Cu+', '^66Zn+', 'Ga+', 'Se+', '^94Mo+', 'In+']
+        toHide = GraphSIMS.TOHIDE
         for h in toHide:
             c = GraphSIMS.getCurve(self, msmtId, h, silent=True)
             if c is not None:
@@ -137,9 +145,11 @@ class GraphSIMS(Graph):
 
 
     # function setting custom or defaults SIMS yields
-    def setYieldCoefs(self, msmtId, elementYield={}, ifAuto=False):
+    def setYieldCoefs(self, msmtId, elementYield=None, ifAuto=False):
+        if elementYield is None:
+            elementYield = {}
         if ifAuto:
-            default = {'^71Ga+': 1, '^113In+': 5.5, 'Cu+': 300}
+            default = copy.deepcopy(GraphSIMS.YIELDS)
             default.update(elementYield)
             elementYield = default
         for key in elementYield:

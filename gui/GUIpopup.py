@@ -42,7 +42,7 @@ class GuiManagerAnnotations(tk.Frame):
         self.oldattr['textargs'] = deepcopy(graph.getAttribute('textargs', [{}]))
         self.oldattr['legendtitle'] = deepcopy(graph.getAttribute('legendtitle'))
         # prepare
-        self.annotations = []
+        self.annotations, self.annotationsnew = [], None
         self.configText()
         self.configLegTit()
         self.configLegend()
@@ -177,6 +177,9 @@ class GuiManagerAnnotations(tk.Frame):
     def fillUITextGrid(self, frame):
         self.parseGraph()
         # remove previsously created widgets, start afresh
+        if self.annotationsnew is not None:
+            self.annotationsnew.destroy()
+            self.annotationsnew = None
         for row in self.annotations:
             for field in row:
                 if hasattr(field, 'destroy'):
@@ -223,7 +226,11 @@ class GuiManagerAnnotations(tk.Frame):
                     self.annotations[i][j] = e
                     e.grid(column=(j+1), row=(i+1), pady=0, ipady=0, padx=1)
         tk.Label(frame, text='Text', font=self.fontBold).grid(row=0, column=0)
-        tk.Label(frame, text='New',  font=self.fontBold).grid(row=(len(self.attr['text'])+1), column=0)
+        self.annotationsnew = tk.Label(frame, text='New',  font=self.fontBold)
+        self.annotationsnew.grid(row=(len(self.attr['text'])+1), column=0)
+        for j in range(len(self.textfields)):
+            if self.textfields[j]['label'] == 'xytext':
+                self.annotations[-1][j].set('(0.05,0.95)')
 
     def fillUILegendGrid(self, frame):
         Labels = []
