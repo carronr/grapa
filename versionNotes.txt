@@ -14,8 +14,30 @@ KNOWN BUGS
 
 
 
+
+
+Version 0.5.1.0
+Release 18.03.2018
+Additions
+- CurveJV can now read an updated version of the TIV files
+- In the Actions specific to the Curves, the quick access to the offset and muloffset attributes was changed to be Combobox instead of Entries.
+- Added special keywords for offset and muloffset keywords: 'minmax' and '0max', which stretch the data from min to max, and 0 to max respectively.
+- Added options to export Curves or Graph to clipboard with raw or screen data, and with or without properties.
+- JscVoc curves: added a button to separate the data series as Voc vs T. The data is supposed to converge to the bandgap at T=0.
+- CurveArrhenius: the fit range ROI is indicated in the attributes of the fitted Curve.
+- CurveArrhenius: a new possibility is offered to define the x values after the curve creation.
+Bugs
+- Solved a graphical glitch in the annotation popup, regarding inappropriate "new" labels upon creation and deletion of annotations.
+- Solved a glitch, the filename is not changed when copying the graph to the clipboard
+Under the hood
+- Moved the class GraphJV from the file curveJV to graphJV
+
+
+
+
 Version 0.5.0.3
 Small adjustments to make grapa installable via pip
+
 
 
 
@@ -24,7 +46,7 @@ Release 11.02.2018
 New major version number, indicating that grapa can installed using pip!
 Otherwise no big changes in the software.
 Additions:
-- Can now reads some reflectance files (Perkin Elmer spectrophotometer).
+- Can now read some reflectance files (Perkin Elmer spectrophotometer).
 - CurveSpectrum has beed significantly extended, to offer some support to reflectance and transmittance curves. The following functions were added:
   - Correct for instrumental response, stored in datatypes/spectrumInstrumentalResponses.txt.
   - Compute the absorptance, defined as A = 1 - R - T

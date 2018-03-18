@@ -149,8 +149,8 @@ class Graph:
     dataInfoKeysGraphData.append(['markeredgewidth','Marker border width, in points. Example: "1.5"'])
     dataInfoKeysGraphData.append(['zorder',         'Determines the drawing order (float), highest is drawn on top.\nExample: "2", "3"'])
     dataInfoKeysGraphData.append(['== Offsets ==',  ''])
-    dataInfoKeysGraphData.append(['offset',         'Offset to data. Examples: "-10" (on y values), or "[2,\'1/20\']" for (x,y) offset'])
-    dataInfoKeysGraphData.append(['muloffset',      'Multiplitcative offset to data. Examples: "0.01" for y values, or\n"[10, 1e2]" for (x,y) multiplicative offsets'])
+    dataInfoKeysGraphData.append(['offset',         'Offset to data. Examples: "-10" (on y values), "[2,\'1/20\']" for (x,y) offset.\nSpecial keywords: "[\'minmax\', \'0max\']" and combinations.'])
+    dataInfoKeysGraphData.append(['muloffset',      'Multiplicative offset to data. Examples: "0.01" for y values, or\n"[10, 1e2]" for (x,y) multiplicative offsets'])
     dataInfoKeysGraphData.append(['== For specific curve types ==', ''])
     dataInfoKeysGraphData.append(['facecolor',      'Color of "fill" Curve types. Examples: "r", "[0.5,0,0]"'])
     dataInfoKeysGraphData.append(['cmap',           'Colormap, for Curve types which accept this keyword such as scatter). Examples:\n"afmhot", "inferno", or "[[0.91,0.25,1], [1.09,0.75,1], \'hls\']" (see Colorize options)'])
@@ -400,10 +400,14 @@ class Graph:
 
         
     # methods handling content of curves
-    def getCurveData(self, idx):
-        alter = self._getAlter()
-        x = self.curve(idx).x(alter=alter[0])
-        y = self.curve(idx).y(alter=alter[1])
+    def getCurveData(self, idx, ifAltered=True):
+        if ifAltered:
+            alter = self._getAlter()
+            x = self.curve(idx).x_offsets(alter=alter[0])
+            y = self.curve(idx).y_offsets(alter=alter[1])
+        else:
+            x = self.curve(idx).x(alter='')
+            y = self.curve(idx).y(alter='')
         return np.array([x,y])
 
     def update(self, attributes, ifAll=False, forceGraphInfo=False):

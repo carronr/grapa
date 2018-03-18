@@ -175,6 +175,58 @@ class GraphJscVoc(Graph):
             #out.append(Curve([np.array(temps)*np.array(ns), np.array(temps)], {'linestyle': 'none', 'type': 'scatter_c'}))
         return out
 
+    
+    def splitIllumination(self, threshold=3, curve=None):
+        """
+        Splits Jsc Voc data according to illumination intensity.
+        Assumes data are stored as intensity series, grouped by temperatures
+        """
+        from grapa.datatypes.curveArrhenius import CurveArrhenius
+        # retrieves data
+        if curve is None:
+            print('Error splitIllumination, you must provide argument key "curve" with a Jsc-Voc Curve.')
+            return False
+        # check if is single or multiple temperature
+        curveT = GraphJscVoc.findCurveWithX(self, curve)
+        if not isinstance(curveT, Curve):
+            print('Error splitIllumination, cannot find Curve with T information (must have same x data as the selected Jsc vs Voc Curve).')
+            return False
+        Ts = curveT.y()
+        x = curve.x()
+        T = np.inf
+        j = 0
+        data = []
+        for i in range(len(x)):
+            if np.abs(T - Ts[i]) > threshold:
+                j = 0
+            if i == j:
+                data.append([[], []])
+            data[j][0].append(Ts[i])
+            data[j][1].append(x[i])
+            T = Ts[i]
+            j += 1
+        attr = {'area': curve.getArea(),
+                'filename': 'extracted from '+curve.getAttribute('filename').split('/')[-1].split('\\')[-1]}
+        try:
+            from grapa.colorscale import Colorscale
+            colorscale = Colorscale(np.array([[0.91,0.25,1], [1.09,0.75,1]]), space='hls')
+            colors = colorscale.valuesToColor(np.array(range(len(data))) / len(data))
+        except:
+            colors = [''] * len(data)
+        xylbls = [self.formatAxisLabel(['Temperature', 'T', 'K']),
+                  self.formatAxisLabel(['Voc', '', 'V'])]
+        out = []
+        for j in range(len(data)-1,-1,-1):
+            out.append(CurveArrhenius(data[j], attr))
+            out[-1].update({'label': 'Voc vs T, intensity ' + str(j),
+                            'linespec': 'o', 'color': colors[j],
+                            '_Arrhenius_variant': 'ExtrapolationTo0',
+                            '_Arrhenius_dataLabel': xylbls,
+                            '_Arrhenius_dataLabelArrhenius': xylbls})
+        return out
+        
+            
+        
             
         
 class CurveJscVoc(Curve):
@@ -206,6 +258,8 @@ class CurveJscVoc(Curve):
             out.append([self.updateFitParam, 'Modify fit', ['n', 'J0'], roundSignificant(self.getAttribute('_popt'), 5)])
         # split according to temperatures
         out.append([GraphJscVoc.CurvesJscVocSplitTemperature, 'Separate according to T', ['T max fluctuations'], [3], {'curve': self}])
+        # split according to illumination intensities (Voc vs T)
+        out.append([GraphJscVoc.splitIllumination, 'Separate according to intensity', ['T max fluctuations'], [3], {'curve': self}])
         out.append([self.printHelp, 'Help!', [], []])
         return out
     
@@ -228,6 +282,7 @@ class CurveJscVoc(Curve):
         self.setY(self.y() * old / new)
         self.update({'area [cm2]': new})
         return True
+        
         
     def fit_nJ0(self, Voclim=None, Jsclim=None, data=None, T=None):
         """ perform fitting, returns best fit parameters """
@@ -258,6 +313,60 @@ class CurveJscVoc(Curve):
             return CurveJscVoc.Tdefault
         return default
 
+    def splitIllumination(self, curve, threshold=3):
+        """
+        Splits the compiled data into different data (one for each intensity)
+        curve: stores the Jsc-Voc pairs - will need to find the T
+        threshold in °C
+        """
+        T = GraphJscVoc.findCurveWithX(self, curve)
+        if T == False:
+            print('Error JscVoc: cannot find temperature Curve, must have same Voc list as Jsc-Voc Curve. Aborted.')
+            return [], []
+        Voc = curve.x()
+        Jsc = curve.y()
+        Tem = T.y()
+        datas = []
+        temps = []
+        j = 0
+        data, temp = [], []
+        for i in range(len(Voc)):
+            # check if is new temperature
+            if j != 0:
+                if np.abs(Tem[i] - np.average(temp)) > threshold:
+                    datas.append(data)
+                    temps.append(np.average(temp))
+                    data = []
+                    temp = []
+                    j = 0
+            if j == 0: # is new temperature
+                data = [[Voc[i]], [Jsc[i]]]
+                temp = [Tem[i]]
+            else: # is not new
+                data[0].append(Voc[i])
+                data[1].append(Jsc[i])
+                temp.append(Tem[i])
+            j += 1
+        datas.append(data)
+        temps.append(np.average(temp))
+        return datas, temps
+    def CurvesJscVocSplitIllumination(self, curve=None):
+        """
+        Splits the compiled data into different curves (one for each intensity)
+        curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
+            to allow calls from GUI
+        """
+        if curve is None:
+            print('Error CurvesJscVocSplitIllumination, you must provide argument key "curve" with a Jsc-Voc Curve.')
+        datas, temps = GraphJscVoc.splitTemperatures(self, curve, threshold=3)
+        attr = curve.getAttributes()
+        out = []
+        for i in range(len(datas)):
+            out.append(CurveJscVoc(datas[i], attr))
+            out[-1].update({'temperature': temps[i], 'type': '', 'cmap': ''})
+            out[-1].update({'label': out[-1].getAttribute('label')+' '+'{:.0f}'.format(temps[i])+'K'})
+        return out
+         
     def printHelp(self):
         print('*** *** ***')
         print('CurveJV offer basic treatment of Jsc-Voc pairs of solar cells.')

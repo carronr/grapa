@@ -84,7 +84,19 @@ class Curve:
         except Exception as e:
             print('Exception', type(e), 'in Curve.funcListGUI')
         if self.getAttribute('offset', None) is not None or self.getAttribute('muloffset', None) is not None:
-            out.append([self.updateValuesDictkeys, 'Modify screen offsets', ['offset', 'muloffset'], [self.getAttribute('offset'), self.getAttribute('muloffset')], {'keys': ['offset', 'muloffset']}]) # one line per function
+            from grapa.graph import Graph
+            at = ['offset', 'muloffset']
+            values = {'offset': [], 'muloffset': []}
+            for key in at:
+                for i in range(len(Graph.dataInfoKeysGraphData)):
+                    if Graph.dataInfoKeysGraph[i] == key:
+                        values.update({key: Graph.dataInfoKeysGraphExalist[i]})
+                        break
+            out.append([self.updateValuesDictkeys, 'Modify screen offsets',
+                        at,
+                        [self.getAttribute(a) for a in at],
+                        {'keys': at},
+                        [{'field':'Combobox','values':values[a]} for a in at]])
         return out
     
     def funcListGUI_errorbar(self, graph, c):
@@ -189,19 +201,35 @@ class Curve:
         """
         Same as x(), including the effect of offset and muloffset on output.
         """
+        reserved = ['minmax', '0max']
+        special = None
         x = self.x(**kwargs)
         offset = self.getAttribute('offset', None)
         if offset is not None:
             o = offset[0] if isinstance(offset, list) else 0
             if isinstance(o, str):
-                o = self._fractionToFloat(o)
+                if o in reserved:
+                    special = o
+                    o = 0
+                else:
+                    o = self._fractionToFloat(o)
             x = x + o
         muloffset = self.getAttribute('muloffset', None)
         if muloffset is not None:
             o = muloffset[0] if isinstance(muloffset, list) else 1
             if isinstance(o, str):
-                o = self._fractionToFloat(o)
+                if o.replace(' ','') in reserved:
+                    special = o
+                    o = 1
+                else:
+                    o = self._fractionToFloat(o)
             x = x * o
+        if special is not None:
+            m, M = np.min(x), np.max(x)
+            if special == 'minmax':
+                x = (x - m) / (M - m)
+            elif special == '0max':
+                x = x / M
         return x
     
     def x (self, index=np.nan, alter='', xyValue=None, errorIfxyMix=False, neutral=False):
@@ -265,19 +293,35 @@ class Curve:
         """
         Same as y(), including the effect of offset and muloffset on output.
         """
+        reserved = ['minmax', '0max']
+        special = None
         y = self.y(**kwargs)
         offset = self.getAttribute('offset', None)
         if offset is not None:
             o = offset[1] if isinstance(offset, list) else offset
             if isinstance(o, str):
-                o = self._fractionToFloat(o)
+                if o in reserved:
+                    special = o
+                    o = 0
+                else:
+                    o = self._fractionToFloat(o)
             y = y + o
         muloffset = self.getAttribute('muloffset', None)
         if muloffset is not None:
             o = muloffset[1] if isinstance(muloffset, list) else muloffset
             if isinstance(o, str):
-               o = self._fractionToFloat(o)
+                if o.replace(' ','') in reserved:
+                    special = o
+                    o = 1
+                else:
+                    o = self._fractionToFloat(o)
             y = y * o
+        if special is not None:
+            m, M = np.min(y), np.max(y)
+            if special == 'minmax':
+                y = (y - m) / (M - m)
+            elif special == '0max':
+                y = y / M
         return y
         
     def y (self, index=np.nan, alter='', xyValue=None, errorIfxyMix=False, neutral=False) :

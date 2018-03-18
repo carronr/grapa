@@ -23,7 +23,9 @@ class GraphJV(Graph):
     def isFileReadable(cls, fileName, fileExt, line1='', line2='', line3='', **kwargs):
         if fileExt == '.txt' and line1[-11:] == '_ParamDescr':
             return True # JV
-        if fileExt == '.txt' and line1.strip().startswith('Sample name:') and (not fileName.startswith('I-V_')):
+        if (fileExt == '.txt' and line1.strip().startswith('Sample name:') and
+            line2.strip().startswith('Cell name:') and 
+            line3.strip().startswith('Cell area [cm')):
             return True # TIV
         if fileExt == '.csv' and len(line1) > 40 and line1.strip()[:21] == '"Time";"Temperature [' and line1.strip()[-38:] == '";"Illumination [mV]";"Humidity [%RH]"':
             return True # J-V from Heat-Light soaking setup

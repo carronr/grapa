@@ -58,7 +58,11 @@ class CurveArrhenius(Curve):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
         variant = self.getVariant()
+        isFit = True
         if self.getAttribute('_fitFunc', None) is None or self.getAttribute('_popt', None) is None:
+            isFit = False
+        
+        if not isFit:
             out.append([self.CurveArrhenius_fit, variant.BUTTONFitLabel(), [variant.BUTTONFitROI()], [[min(self.x_1000overK())*0.9, 1.1*max(self.x_1000overK())]]])
         else:
             lbl = variant.poptLabel
@@ -77,20 +81,30 @@ class CurveArrhenius(Curve):
         if 'graph' in kwargs:
             alter = kwargs['graph'].getAttribute('alter')
             if alter in ['', ['','']]:
-                if hasattr(variant, 'dataLabel'):
-                    out.append([kwargs['graph'].updateValuesDictkeys,
-                                'Save',
-                                ['xlabel', 'ylabel'],
-                                variant.dataLabel,
+                vals = self.getAttribute('_arrhenius_dataLabel', None)
+                if vals is None and hasattr(variant, 'dataLabel'):
+                    vals = variant.dataLabel
+                if vals is not None:
+                        out.append([kwargs['graph'].updateValuesDictkeys,
+                                'Save', ['xlabel', 'ylabel'], vals,
                                 {'keys': ['xlabel', 'ylabel']}])
             elif alter == ['CurveArrhenius.x_1000overK', 'CurveArrhenius.y_Arrhenius']:
-                if hasattr(variant, 'dataLabelArrhenius'):
+                vals = self.getAttribute('_arrhenius_dataLabelArrhenius', None)
+                if vals is None and hasattr(variant, 'dataLabelArrhenius'):
+                    vals = variant.dataLabelArrhenius
+                if vals is not None:
                     out.append([kwargs['graph'].updateValuesDictkeys,
-                                'Save',
-                                ['xlabel', 'ylabel'],
-                                variant.dataLabelArrhenius,
+                                'Save', ['xlabel', 'ylabel'], vals,
                                 {'keys': ['xlabel', 'ylabel']}])
-                
+        # resample X
+        if isFit:
+            xmin, xmax = np.min(self.x()), np.max(self.x())
+            out.append([self.resampleX, 'Resample X',
+                        ['', 'min', 'max', '#, step'],
+                        ['linspace', xmin, xmax, 51],
+                        {},
+                        [{'field': 'Combobox', 'values': ['linspace', 'logspace', 'arange']},
+                         {}, {}, {}]])
         out.append([self.printHelp, 'Help!', [], []])
         return out
     
@@ -151,7 +165,7 @@ class CurveArrhenius(Curve):
         variant = self.getVariant()
         popt = self.fit_Arrhenius(Tlim=Tlim, silent=silent)
         attr = {'color': 'k', '_popt': popt, '_fitFunc': 'func_Arrhenius',
-                '_Arrhenius_variant': variant.name}
+                '_Arrhenius_variant': variant.name, '_fitROI': Tlim}
         lbl = variant.poptLabel
         if not silent:
             print('Fit results:', lbl[0],'=', lbl[2].format(popt[0]) + ',',
@@ -196,7 +210,32 @@ class CurveArrhenius(Curve):
         print('CurveArrhenius func_Arrhenius, normally should not come to this point!')
         return prefactor - E / (CurveArrhenius.k_eVoverK * T)
             
-
+    def resampleX(self, method, xmin, xmax, cpl):
+        """ Resample the X values and computes the Y values on it """ 
+        func = {'linspace': [np.linspace, 'num'],
+                'arange': [np.arange, ''],
+                'logspace': [np.logspace, 'num']}
+        if method not in func:
+            print('Error CurveArrhenius.resampleX: cannot find selected method', method, ', aborted.')
+            return False
+        args = [xmin, xmax]
+        kwargs = {}
+        if func[method][1] == '':
+            args.append(cpl)
+        else:
+            kwargs[func[method][1]] = cpl
+        try:
+            x = func[method][0](*args, **kwargs)
+        except Exception as e:
+            print('Exception', type(e),'in CurveArrhenius.resampleX:')
+            print(e)
+            return False
+        y = [0] * len(x)
+        self.data = np.array([x, y])
+        self.updateFitParam(*self.getAttribute('_popt'))
+        return True
+        
+        
     def printHelp(self):
         print('*** *** ***')
         print('Curve Arrhenius general help:')

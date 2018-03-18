@@ -20,11 +20,13 @@ def bind_tree(widget, event, callback, add=''):
         
 class OptionMenuVar(tk.OptionMenu):
     """ replacement for tk.OptionMenu, with embedded tk.Stringvar """
-    def __init__(self, frame, values, default='', func=None):
+    def __init__(self, frame, values, default='', func=None, width=None):
         self.values = values
         self.var = tk.StringVar()
         tk.OptionMenu.__init__(self, frame, self.var, self.values)
         self.resetValues(self.values, default=default, func=func)
+        if width is not None:
+            self.configure(width=width)
     def get(self):
         return self.var.get()
     def set(self, val):
@@ -180,11 +182,15 @@ def imageToClipboard(graph):
     """ copy the image output of a Graph to the clipboard - Windows only """
     # save image, because we don't have pixel map at the moment
     print('Copying graph image to clipboard')
+    selffilename = graph.filename if hasattr(graph, 'filename') else None
     fileClipboard = '_grapatoclipboard'
     tmp = graph.getAttribute('saveSilent')
     graph.update({'saveSilent': True})
     graph.plot(ifSave=True, ifExport=False, filesave=fileClipboard)
     graph.update({'saveSilent': tmp})
+    if selffilename is not None: # restore self.filename
+        graph.filename = selffilename
+    
     from io import BytesIO
     from PIL import Image
     try:

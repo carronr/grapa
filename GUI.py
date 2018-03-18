@@ -46,7 +46,7 @@ from grapa.observable import Observable, ObserverStringVarMethodOrKey
 print ('Loading Tooltip')
 from grapa.gui.createToolTip import CreateToolTip
 from grapa.gui.GUImisc import FrameTitleContentHide, FrameTitleContentHideHorizontal
-from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, CheckbuttonVar
+from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, CheckbuttonVar, ComboboxVar
 
 # WISHLIST:
 #- config autotemplate for boxplot
@@ -57,15 +57,21 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow JV
 # TODO: Write workflow Jsc Voc
 
-# TODO: avoid resizing when opening/hiding panels
-# TODO:(?)  Keep same zoom upon refresh
 
 
-# 0.5.0.4r1
+
+# Version 0.5.1.0
 #Additions
 #- CurveJV can now read an updated version of the TIV files
+#- In the Actions specific to the Curves, the quick access to the offset and muloffset attributes was changed to be Combobox instead of Entries.
+#- Added special keywords for offset and muloffset keywords: 'minmax' and '0max', which stretch the data from min to max, and 0 to max respectively.
+#- Added options to export Curves or Graph to clipboard with raw or screen data, and with or without properties.
+#- JscVoc curves: added a button to separate the data series as Voc vs T. The data is supposed to converge to the bandgap at T=0.
+#- CurveArrhenius: the fit range ROI is indicated in the attributes of the fitted Curve.
+#- CurveArrhenius: a new possibility is offered to define the x values after the curve creation.
 #Bugs
 #- Solved a graphical glitch in the annotation popup, regarding inappropriate "new" labels upon creation and deletion of annotations.
+#- Solved a glitch, the filename is not changed when copying the graph to the clipboard
 #Under the hood
 #- Moved the class GraphJV from the file curveJV to graphJV
 
@@ -167,7 +173,7 @@ class Application(tk.Frame):
         self.createWidgets(FrameMain)
         # optional
         self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'subplots_examples.txt'))
-#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'Spectra', 'CdS32nm_on_SLG_T.txt'))
+#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'JscVoc', 'JscVoc_SAMPLE_a3_Values.txt'))
         
         self.varScreenDpi.set(75)
         self.setScreenDpi()
@@ -187,14 +193,17 @@ class Application(tk.Frame):
         self.master.bind('<Control-Shift-C>', lambda e: self.curveDataToClipboard())
         self.master.bind('<Control-m>', lambda e: self.dataPickerSavePoint())
     
-    def createFrame(self, frame, func, dictArgsInit, dictArgsPack, argsFunc=None):
+    def createFrame(self, frame, func, dictArgsInit, dictArgsPack, argsFunc=None, geometry='pack'):
         """
         All frames are generated according to this 3-line pattern
         1/ creation inside a know frame, 2/ pack, 3/ fill frame by executing a function with frame name as parameter
         Possible extension is to handle a different geometry manager
         """
         newFrame = tk.Frame(frame, **dictArgsInit)
-        newFrame.pack(**dictArgsPack) # if manager=='place': newFrame.place(*dictArgsPack*) an so on
+        if geometry == 'grid':
+            newFrame.grid(**dictArgsPack) # if manager=='place': newFrame.place(*dictArgsPack*) an so on
+        else:
+            newFrame.pack(**dictArgsPack) # if manager=='place': newFrame.place(*dictArgsPack*) an so on
         if func is not None:
             func(newFrame) if argsFunc is None else func(newFrame, *argsFunc)
         return newFrame
@@ -262,7 +271,7 @@ class Application(tk.Frame):
         self.ValCheckbuttonSave.set(0)
         self.ValCheckbuttonSaveCompactnot = tk.IntVar()
         self.ValCheckbuttonSaveCompactnot.set(0)
-        tk.Checkbutton(frame, text='Transformed data (better not)', variable=self.ValCheckbuttonSave          ).pack(side='top', anchor='w', padx=5)
+        tk.Checkbutton(frame, text='Screen data (better not)', variable=self.ValCheckbuttonSave          ).pack(side='top', anchor='w', padx=5)
         tk.Checkbutton(frame, text='Keep separated x columns',      variable=self.ValCheckbuttonSaveCompactnot).pack(side='top', anchor='w', padx=5)
     
     def fillUIFrameOpenTitle(self, frame):
@@ -448,7 +457,7 @@ class Application(tk.Frame):
         CreateToolTip(u, 'Ctrl+M')
         self.varDataPickerSaveTransform = tk.BooleanVar()
         self.varDataPickerSaveTransform.set(True)
-        tk.Checkbutton(frame, text='transformed data', variable=self.varDataPickerSaveTransform).pack(side='left', anchor='c')
+        tk.Checkbutton(frame, text='screen data', variable=self.varDataPickerSaveTransform).pack(side='left', anchor='c')
         self.varDataPickerSaveCurveSpec = tk.BooleanVar()
         self.varDataPickerSaveCurveSpec.set(False)
         tk.Checkbutton(frame, text='Curve specific', variable=self.varDataPickerSaveCurveSpec).pack(side='left', anchor='c')
@@ -591,8 +600,13 @@ class Application(tk.Frame):
         tk.Label (frame, text='Copy to clipboard').pack(side='left')
         tk.Button(frame, text='Curve', command=self.curveDataToClipboard).pack(side='left', padx='5')
         tk.Button(frame, text='Graph', command=self.graphDataToClipboard).pack(side='left')
-        self.ChkBtnToClipboardAttr = CheckbuttonVar(frame, 'attributes', False)
-        self.ChkBtnToClipboardAttr.pack(side='left')
+        vals = ['raw', 'with properties', 'screen data', 'screen data, prop.']
+        self.OptMenuToClipboardAttr = OptionMenuVar(frame, vals, default='options', width=6)
+        self.OptMenuToClipboardAttr.pack(side='left')
+#        self.ChkBtnToClipboardAttr = CheckbuttonVar(frame, 'props', False)
+#        self.ChkBtnToClipboardAttr.pack(side='left')
+#        self.ChkBtnToClipboardAlter = CheckbuttonVar(frame, 'screen data', False)
+#        self.ChkBtnToClipboardAlter.pack(side='left')
         
     def fillUIFrameRightAGShowHide(self, frame):
         ObsShowHideCurve = ObserverStringVarMethodOrKey(tk.StringVar(), 'Select Curve', 'isHidden', valuesDict={True: 'Show Curve', False: 'Hide Curve'})
@@ -1534,7 +1548,10 @@ class Application(tk.Frame):
     def curveDataToClipboard(self):
         curves = self.getActiveCurve()
         content = ''
-        if not self.ChkBtnToClipboardAttr.get():
+        opts = self.OptMenuToClipboardAttr.get()
+        ifAttrs = 'prop' in opts
+        ifTrans = 'screen' in opts
+        if not ifAttrs:
             labels = [self.back_graph.curve(c).getAttribute('label').replace('\n', '\\n') for c in curves]
             content += ('\t' + '\t\t\t'.join(labels) + '\n')
         else:
@@ -1547,7 +1564,7 @@ class Application(tk.Frame):
             for key in keys:
                 labels = [str(self.back_graph.curve(c).getAttribute(key)).replace('\n','\\n') for c in curves]
                 content += (key+'\t' + '\t\t\t'.join(labels) + '\n')
-        data = [self.back_graph.getCurveData(c) for c in curves]
+        data = [self.back_graph.getCurveData(c, ifAltered=ifTrans) for c in curves]
         length = max([d.shape[1] for d in data])
         for l in range(length):
             tmp = []
@@ -1560,8 +1577,10 @@ class Application(tk.Frame):
         self.sendToClipboard(content)
         
     def graphDataToClipboard(self):
-        val = not self.ChkBtnToClipboardAttr.get()
-        data = self.back_graph.export(ifClipboardExport=True, ifOnlyLabels=val)
+        opts = self.OptMenuToClipboardAttr.get()
+        ifAttrs = 'prop' in opts
+        ifTrans = 'screen' in opts
+        data = self.back_graph.export(ifClipboardExport=True, ifOnlyLabels=(not ifAttrs), saveAltered=ifTrans)
         self.sendToClipboard(data)
         
     def clipboardToGraphMerge(self):
