@@ -13,7 +13,7 @@ from copy import deepcopy
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
 from grapa.curve import Curve
-from grapa.mathModule import is_number, roundSignificant
+from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
 
 
 
@@ -84,7 +84,7 @@ class CurveTRPL(Curve):
         out.append([self.addXOffset, 'Time offset', ['new horizontal offset (leave empty for autodetect)'], [xOffset if xOffset != 0 else '']]) # one line per function
         # fit
         if self.getAttribute('_fitFunc', None) is None or self.getAttribute('_popt', None) is None:
-            ROI = [20, max(self.x())]
+            ROI = roundSignificantRange([20, max(self.x())], 2)
             out.append([self.CurveTRPL_fitExp,
                         'Fit exp',
                         ['Nb exp', 'ROI', 'Fixed values', 'show residuals'],
@@ -193,6 +193,7 @@ class CurveTRPL(Curve):
         datay = self.y()[mask]
         # check for fixed params, construct p0
         p0default = [0, 1e4, 30, 1000, 100]
+        p0default = [(p if p%2 or p==0  else np.log(p)) for p in p0default]
         while len(p0default) < len(fixed):
             p0default += [p0default[-2] / 2, p0default[-1]*2]
         p0 = []
@@ -214,6 +215,7 @@ class CurveTRPL(Curve):
                 else:
                     params.append(p0[j])
                     j += 1
+            params = [(p if p%2 or p==0  else np.exp(p)) for p in params]
             return self.func_fitExp(datax, *params)
         # actual fitting
         from scipy.optimize import curve_fit

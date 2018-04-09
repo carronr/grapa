@@ -57,6 +57,26 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow JV
 # TODO: Write workflow Jsc Voc
 
+# Version 0.5.2.0
+# Additions
+#- Actions specific can now be performed on several curves at the same time, provided The corresponding action is available on each selected curve. Example: bandgap from EQE curve, JV fit, fitted curve resample, etc.
+#- When extracting Voc(T) from Jsc-Voc data, the data can now be fitted to a certain range and the fit extrapolated to 0 with a single clic.
+#  Moreover the Voc @ T=0 are printed in the console.
+#- The determination of the optical bandgap from EQE curves can be restricted to a certain wavelength range, in the derivative method. 
+# Modifications
+#- Curves created from curves actions (fit, etc) are now placed just after the selected curve.
+#- Improved the robustness of the JV curve fitting
+#- Adjusted precision of default parameters for TRPL fit, EQE exponential decay, and JscVoc curves.
+#- In the fits to TRPL data the tau are now non-negative, helping finding a good fit.
+#- SIMS data: the GGT keyword now refers to the ^72Ge+ trace and not ^70Ge+ anymore.
+#- The color picker popup now displays the current defined color, if possible.
+#Bugs
+#- Minor bug solved with overriding textxy values
+#- Bug solved that prevented the opening of the annotation popup with some input textxy values
+#- Legend location 'w' and 'e' were swapped
+#- Solved an issue that cause buttons to not disappear in the actions specific panel.
+#- Fit of JV curves, prevents creation of fit curves with non-sensical data in the 1e308 range
+#- Solved a bug in the output of summary file of boxplots, not correctly identifying the name of some sample names
 
 
 
@@ -174,7 +194,8 @@ class Application(tk.Frame):
         # optional
         self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'subplots_examples.txt'))
 #        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'JscVoc', 'JscVoc_SAMPLE_a3_Values.txt'))
-        
+#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), r'C:\Users\Romain\Desktop', 'export_fsc eb 001_a1_02-01log.txt'))
+
         self.varScreenDpi.set(75)
         self.setScreenDpi()
         # update GUI
@@ -632,12 +653,19 @@ class Application(tk.Frame):
         from tkinter.colorchooser import askcolor
         curve = self.getActiveCurve(multiple=False)
         if curve != -1:
-            self.ObsRAGQAColor.set(self.listToString([np.round(val/256,3) for val in askcolor()[0]]))
+            from matplotlib.colors import hex2color, rgb2hex
+            try:
+                colorcurrent = rgb2hex(stringToVariable(self.VarRAGQAColor.get()))
+            except Exception:
+                colorcurrent = None
+            ans = askcolor(color=colorcurrent)
+            if ans[0] is not None:
+                self.ObsRAGQAColor.set(self.listToString([np.round(a,3) for a in hex2color(ans[1])])) # [np.round(val/256,3) for val in ans[0]]
     def fillUIFrameRightAGQuickAttr(self, frame):
         VarRAGQALabel = tk.StringVar()
-        VarRAGQAColor = tk.StringVar()
+        self.VarRAGQAColor = tk.StringVar()
         self.ObsRAGQALabel = ObserverStringVarMethodOrKey(VarRAGQALabel, '', 'label')
-        self.ObsRAGQAColor = ObserverStringVarMethodOrKey(VarRAGQAColor, '', 'color')
+        self.ObsRAGQAColor = ObserverStringVarMethodOrKey(self.VarRAGQAColor, '', 'color')
         self.observableCurve.register(self.ObsRAGQALabel)
         self.observableCurve.register(self.ObsRAGQAColor)
         tk.Label(frame, text='Label').pack(side='left')
@@ -645,7 +673,7 @@ class Application(tk.Frame):
         a.pack(side='left')
         tk.Label(frame, text='Color').pack(side='left')
         tk.Button(frame, text='Pick', command=self.chooseColor).pack(side='left')
-        b = tk.Entry(frame, text=VarRAGQAColor, width=8)
+        b = tk.Entry(frame, text=self.VarRAGQAColor, width=8)
         b.pack(side='left')
         tk.Button(frame, text='Save', command=self.AGQuickAttrSet).pack(side='left')
         a.bind('<Return>', lambda event: self.AGQuickAttrSet())
@@ -792,10 +820,15 @@ class Application(tk.Frame):
             funcList = self.back_graph.curve(curve).funcListGUI(graph=self.back_graph, graph_i=curve)
             for j in range(len(funcList)):
                 act = funcList[j]
+                # clean input
                 if len(act) == 3:
-                    act.append([] * len(act[2]))
+                    act.append([''] * len(act[2]))
+                try:
+                    len(act[3])
+                except TypeError as e:
+                    act[3] = [''] * len(act[2])
                 for i in range(len(act[3])): # default values
-                    if isinstance(act[3][i], list) or isinstance(act[3][i], np.ndarray):
+                    if isinstance(act[3][i], (list, np.ndarray)):
                         act[3][i] = self.listToString(act[3][i])
                     #act[3][i] = '"'+str(act[3][i])+'"'
                 tmp.append([])
@@ -903,6 +936,7 @@ class Application(tk.Frame):
     
     
     def curveAction(self, j):
+        curve = self.getActiveCurve(multiple=False)
         args = self.FrameRActionList[j][0]
         # retrieve function to call
         func = args[0]
@@ -917,39 +951,70 @@ class Application(tk.Frame):
         # check if func is method of Graph object and not of the Curve
         if not hasattr(func, '__self__'):
             args = [self.back_graph] + args
-        res = func(*args, **hidden)
-        if self.varPrintCommands.get():
-            try:
-                subject = func.__module__
-                if 'graph' in subject:
-                    subject = 'graph'
-                elif 'curve' in subject:
-                    curve = self.getActiveCurve(multiple=False)
-                    subject = 'graph.curve('+str(curve)+')'
+        
+        def executeFunc(curve, func, *args, **kwargs):
+            # execute curve action
+            res = func(*args, **hidden)
+            if self.varPrintCommands.get():
+                try:
+                    subject = func.__module__
+                    if 'graph' in subject:
+                        subject = 'graph'
+                    elif 'curve' in subject:
+                        subject = 'graph.curve('+str(curve)+')'
+                    else:
+                        print('WARNING curveAction print commands: subject not determined (', subject, func.__name__, j, ')')
+                    p = [("'"+a+"'" if isinstance(a, str) else str(a)) for a in args]
+                    p +=[(a+"='"+hidden[a]+"'" if isinstance(hidden[a], str) else a+"="+str(hidden[a])) for a in hidden]
+                    print('res = '+subject+'.'+func.__name__ +'('+ ', '.join(p)+')')
+                except Exception:
+                    pass # error while doing useless output does not really matter
+            # where to place new Curves
+            idx = curve + 1
+            while idx < self.back_graph.length():
+                type_ = self.back_graph.curve(idx).getAttribute('type')
+                if not type_.startswith('scatter') and not type_.startswith('errorbar'):
+                    break
+                idx += 1
+            if isinstance (res, Curve):
+                self.back_graph.append(res, idx=idx)
+                if self.varPrintCommands.get():
+                    print("graph.append(res"+('' if idx == self.back_graph.length() else ', idx='+str(idx))+")")
+            elif isinstance(res, list) and np.array([isinstance(c, Curve) for c in res]).all():
+                self.back_graph.append(res, idx=idx)
+                if self.varPrintCommands.get():
+                    print("graph.append(res"+('' if idx == self.back_graph.length() else ', idx='+str(idx))+")")
+            elif res:
+                if res == True:
+                    pass
                 else:
-                    print('WARNING curveAction print commands: subject not determined (', subject, func.__name__, j, ')')
-                p = [("'"+a+"'" if isinstance(a, str) else str(a)) for a in args]
-                p +=[(a+"='"+hidden[a]+"'" if isinstance(hidden[a], str) else a+"="+str(hidden[a])) for a in hidden]
-                print('res = '+subject+'.'+func.__name__ +'('+ ', '.join(p)+')')
-            except Exception:
-                pass # error while doing useless output do matter little
-        if isinstance (res, Curve):
-            self.back_graph.append(res)
-            if self.varPrintCommands.get():
-                print("graph.append(res)")
-        elif isinstance(res, list) and np.array([isinstance(c, Curve) for c in res]).all():
-            self.back_graph.append(res)
-            if self.varPrintCommands.get():
-                print("graph.append(res)")
-        elif res:
-            if res == True:
-                pass
+    #                print ('Curve action output:')
+                    print (res)
             else:
-#                print ('Curve action output:')
+                print ('Curve action output:')
                 print (res)
-        else:
-            print ('Curve action output:')
-            print (res)
+        
+        # handling actions on multiple Curves
+        toExecute = {curve: func}
+        curves = self.getActiveCurve(multiple=True)
+        if len(curves) > 1:
+            funcListRef = self.back_graph.curve(curve).funcListGUI(graph=self.back_graph, graph_i=curve)
+            for c in curves:
+                if c != curve:
+                    funcListOth = self.back_graph.curve(c).funcListGUI(graph=self.back_graph, graph_i=c)
+                    if len(funcListOth) > j:
+                        if (funcListOth[j][0].__name__ == funcListRef[j][0].__name__ and
+                            funcListOth[j][1] == funcListRef[j][1] and 
+                            funcListOth[j][2] == funcListRef[j][2]):
+                            toExecute.update({c: funcListOth[j][0]})
+        keys = list(toExecute.keys())
+        keys.sort(reverse=True)
+        for c in keys:
+            if len(keys) > 1:
+                lbl = self.back_graph.curve(c).getAttribute('label', '')
+                print('Action on Curve', c, (('('+lbl+')') if len(lbl) > 0 else ''))
+            executeFunc(c, toExecute[c], *args, **hidden)
+        # after execution
         self.updateUI()
 
     def castCurve(self):

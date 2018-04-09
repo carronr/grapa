@@ -32,7 +32,7 @@ class GraphSIMS(Graph):
                 'znsn':   [['Zn+'],   ['Sn+']],
                 'cuznsn': [['Cu+'],   ['Zn+', 'Sn+']],
                 'cgt':    [['Cu+'],   ['^70Ge+', 'Sn+']],
-                'ggt':    [['^70Ge+'],['^70Ge+', 'Sn+']]
+                'ggt':    [['^72Ge+'],['^72Ge+', 'Sn+']]
                 }
     
     TOHIDE = ['F+', 'Mg+', 'Al+', '^41K+', 'Fe+', '^65Cu+', '^66Zn+', 'Ga+',

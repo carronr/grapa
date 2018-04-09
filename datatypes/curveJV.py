@@ -351,6 +351,7 @@ class CurveJV(Curve):
     def fit_func_diodeResistors_AbsLog (self, V, logJ, n, Jl, J0, Rs, Rp, Vshift=0, sigma=[]) :
         if sigma == []:
             sigma = [1]*len(V)
+        J0, Rs, Rp = np.abs(J0), np.abs(Rs), np.abs(Rp)
         self.fitFixPar = {'Vshift': Vshift, 'Jl': Jl, 'Rs': Rs, 'Rp': Rp}
         # trick: define fit variable J0shift as J(Vshift) in order to help decoupling the effect of n and J0 in the fit function
         # Vshift is where slope of log(V) is highest
@@ -363,8 +364,9 @@ class CurveJV(Curve):
         [n, J0, Rs, Rp] = popt
         # Jl is never fitted as is computed as to ensure J(V=0) = Jsc
         # restore inital problem parametrization
-        Rp = np.power(10, Rp)
-        J0 = J0 / (np.exp(self.q * Vshift / (n * self.k * self.T)))
+        Rp = np.power(10, np.abs(Rp))
+        Rs = np.abs(Rs)
+        J0 = np.abs(J0) / (np.exp(self.q * Vshift / (n * self.k * self.T)))
         # calculation of Jl
         Jsc = self.getAttribute('Jsc') if self.getAttribute('Jsc') != '' else 0
         Jl = self.JlSuchAsJ0VJsc(Jsc, n, J0, Rs, Rp)
@@ -381,7 +383,7 @@ class CurveJV(Curve):
     def func_diodeResistorsAbsLog10_modParam_red (self, V, n, J0, Rs, Rp) :
         Vshift = self.fitFixPar['Vshift']
         Jl = self.fitFixPar['Jl']
-        J0 = J0 / (np.exp(self.q * Vshift / (n * self.k * self.T)))
+        J0 = np.abs(J0) / (np.exp(self.q * Vshift / (n * self.k * self.T)))
         Rp = np.power(10, Rp)
         return np.log10(np.abs(self.func_diodeResistors (V, n, Jl, J0, Rs, Rp)))
 
@@ -391,6 +393,8 @@ class CurveJV(Curve):
         return np.log(np.abs(self.func_diodeResistors (V, n, Jl, J0, Rs, Rp)))
 
     def func_diodeResistors_Jsc(self, V, n, Jl, J0, Rs, Rp):
+        if np.isnan(n):
+            return [np.nan] * len(V)
 #        return self.func_diodeResistors (V, n, Jl, J0, Rs, Rp)
         Jsc = self.getAttribute('Jsc') if self.getAttribute('Jsc') != '' else 0
         return -Jsc + self.func_diodeResistors (V, n, Jl, J0, Rs, Rp)
@@ -520,7 +524,7 @@ class CurveJV(Curve):
         [n, Jl, J0, Rs, Rp, Vshift] = self.diodeFit_BestGuess(V=V, J=J, alsoVShift=True)
         if np.isnan(n):
             self.update({'diodeFit': [np.nan]*5})
-            return np.array([np.nan]*5)
+            return [np.nan] * 5
 
         # estimation of noise: minimal noise level, plus relative proportonal to input signal
         # assuming 8e-3 fluctuations in signal (ie. lamp), and base noise 1e-5*max
@@ -533,8 +537,7 @@ class CurveJV(Curve):
         if diodeFitWeight != 0:
             for i in idx_DiodeRegion:
                 sigma[i] /= diodeFitWeight
-
-            
+                
          # perform actual fit
         try:
             popt, pcov = self.fit_func_diodeResistors_AbsLog (V, JLogAbs, n, Jl, J0, Rs, Rp, Vshift=Vshift, sigma=sigma)

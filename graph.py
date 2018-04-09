@@ -319,21 +319,37 @@ class Graph:
         for c in range(self.length()):
             yield self.curve(c)
     
-    def append(self, curve):
+    def append(self, curve, idx=None):
         """
         Add into the object list a Curve, a list or Curves, or every Curve in a
         Graph object.
         """
+        insert = False if idx is None else True
         if isinstance(curve, Graph):
             for c in curve.iterCurves():
-                self.data.append(c) # has to be Curves
-        if isinstance(curve, list):
+                if insert:
+                    self.data.insert(idx, c)
+                    idx += 1
+                else:
+                    self.data.append(c) # c are Curves, we can do like that
+        elif isinstance(curve, list):
             for c in curve:
-                self.append(c) # call itself, must check if c is a Curve
+                if insert:
+                    self.data.insert(idx, c)
+                    idx += 1
+                else:
+                    self.append(c) # call itself, must check if c is a Curve
         elif isinstance(curve, Curve):
-            self.data.append(curve)
+            if insert:
+                self.data.insert(idx, curve)
+            else:
+                self.data.append(curve)
         elif isinstance(curve, str) and curve == 'empty':
-            self.data.append(Curve([[np.inf],[np.inf]], {}))
+            curve = Curve([[np.inf],[np.inf]], {})
+            if insert:
+                self.data.insert(idx, curve)
+            else:
+                self.data.append(curve)
         else:
             print('Graph.append: failed (type:',type(curve),')')
 
@@ -594,7 +610,7 @@ class Graph:
             targ = [targ]
         if not isinstance(texy, list):
             texy = [texy]
-        if len(texy) == 2 and isinstance(texy[0], (list, tuple)):
+        if len(texy) == 2 and not isinstance(texy[0], (list, tuple)) and not texy in [['',''], ('','')]:
             texy = [texy]  # if texy was like (0.5,0.8)
         for i in range(len(targ)):
             if not isinstance(targ[i], dict):

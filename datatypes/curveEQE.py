@@ -9,11 +9,12 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 import numpy as np
 import os
 from scipy import interpolate
+from scipy.signal import medfilt
 
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.mathModule import roundSignificant
+from grapa.mathModule import roundSignificant, roundSignificantRange
 
 
 
@@ -162,8 +163,14 @@ class CurveEQE(Curve):
             out.append([None, 'Cannot update, must create a new one from '
                         +'initial EQE curve', [], []])
         elif self.attributeEqual('_popt'):
+            xdata = self.x()
+            try:
+                tmpmed = medfilt(self.y(), 5)
+                ROI = [xdata[np.argmax(tmpmed)], np.max(xdata)]
+            except Exception:
+                ROI = [np.min(xdata), np.max(xdata)]
             out.append([self.CurveEQE_bandgapDeriv_print, 'Bandgap derivative',
-                        ['Savitsky Golay width', 'degree'], [5,2]])
+                        ['Savitsky Golay width', 'degree', 'nm range'], [5,2, roundSignificantRange(ROI,3)]])
         # EQE current
         if self.attributeEqual('_popt'):
             out.append([self.currentCalc, 'EQE current', ['ROI', 'interpolate', 'spectrum'],
@@ -198,6 +205,7 @@ class CurveEQE(Curve):
                 x0, x1 = self.shape()[1] - x0, self.shape()[1] - x1
                 ROI = [self.x(index=x0, alter='nmeV'), self.x(index=x1, alter='nmeV')]
                 ROI.sort()
+                ROI = roundSignificantRange(ROI, 3)
                 mulOffset = self.getAttribute('mulOffset', 1)
                 out.append([self.CurveUrbachEnergy,
                             CurveArrheniusExpDecay.BUTTONFitLabel(),
@@ -317,7 +325,7 @@ class CurveEQE(Curve):
         return fit
 
 
-    def bandgapDeriv(self, SGwidth=None, SGdegree=None, x_y_savgol=None):
+    def bandgapDeriv(self, SGwidth=None, SGdegree=None, x_y_savgol=None, ROI=None):
         """
         Computes the bandgap based on the savitsky golay derivative,
         with a gaussian fit to the highest values
@@ -329,7 +337,7 @@ class CurveEQE(Curve):
         # need dummy x argument to use the updateFitParam method
         from scipy.optimize import curve_fit
         if x_y_savgol is None:
-            x_, y_, savgol = self.bandgapDeriv_savgol(SGwidth, SGdegree)
+            x_, y_, savgol = self.bandgapDeriv_savgol(SGwidth, SGdegree, ROI=ROI)
         else:
             x_, y_, savgol = x_y_savgol
         order = True if x_[1] > x_[0] else False
@@ -344,7 +352,7 @@ class CurveEQE(Curve):
         popt, pcov = curve_fit(func_gaussSimple, datax, datay, p0=p0)
         self.update({'bandgapDeriv': Curve.NMTOEV/popt[1]})
         return popt
-    def bandgapDeriv_savgol(self, SGwidth=None, SGdegree=None):
+    def bandgapDeriv_savgol(self, SGwidth=None, SGdegree=None, ROI=None):
         """ returns a reduced x,y range and the savitsky golay derivative """
         from scipy.signal import savgol_filter
         if SGwidth is None:
@@ -368,26 +376,29 @@ class CurveEQE(Curve):
         order = True if x[1] > x[0] else False
         # data selection - up to EQE maximum
         iMax = np.argmax(y)
-        if order:
-            ROI = range(max(0,iMax-2), len(y))
+        if ROI is None:
+            if order:
+                ROI_ = range(max(0,iMax-2), len(y))
+            else:
+                ROI_ = range(0, min(iMax+2, len(y)))
         else:
-            ROI = range(0, min(iMax+2, len(y)))
-        x_, y_, eV = x[ROI], y[ROI], Curve.NMTOEV / x[ROI]
+            ROI_ = (x >= min(ROI)) * (x <= max(ROI))
+        x_, y_, eV = x[ROI_], y[ROI_], Curve.NMTOEV / x[ROI_]
         # locate peak using Savitsky Golay filtering; then correct for possible
         # uneven data point spacing
         savgol = savgol_filter(y_, SGwidth, SGdegree, deriv=1)
         savgol /= np.append(np.append(eV[1]-eV[0], (eV[2:]-eV[:-2])/2),
                                       eV[-1]-eV[-2])
         return x_, y_, savgol
-    def CurveEQE_bandgapDeriv_print(self, SGwidth=None, SGdegree=None):
-        out = self.CurveEQE_bandgapDeriv(SGwidth=SGwidth, SGdegree=SGdegree)
+    def CurveEQE_bandgapDeriv_print(self, SGwidth=None, SGdegree=None, ROI=None):
+        out = self.CurveEQE_bandgapDeriv(SGwidth=SGwidth, SGdegree=SGdegree, ROI=ROI)
         print ('Bandgap (derivative):',
                roundSignificant(out.getAttribute('bandgapDeriv'), 4), 'eV')
         return out
-    def CurveEQE_bandgapDeriv(self, SGwidth=None, SGdegree=None):
+    def CurveEQE_bandgapDeriv(self, SGwidth=None, SGdegree=None, ROI=None):
         """ returns the curve, with correspoding bandgap in the attributes """
         x_, y_, savgol = self.bandgapDeriv_savgol(SGwidth=SGwidth,
-                                                  SGdegree=SGdegree)
+                                                  SGdegree=SGdegree, ROI=ROI)
         popt = self.bandgapDeriv(SGwidth=SGwidth, SGdegree=SGdegree,
                                  x_y_savgol=[x_,y_,savgol])
         out = CurveEQE([x_, savgol],
@@ -395,8 +406,7 @@ class CurveEQE(Curve):
                        'bandgapDeriv': Curve.NMTOEV/popt[1],
                        '_fitFunc': 'bandgapDeriv_savgol',
                        'data filename': self.getAttribute('filename')})
-        out.update({'muloffset': -self.getAttribute('mulOffset', 1)*0.1,
-                    'offset':-max(out.y())})
+        out.update({'muloffset': self.getAttribute('mulOffset', 1)*0.1})# , 'offset':-max(out.y())})
         return out
 
 
@@ -516,7 +526,7 @@ class CurveEQE(Curve):
         from grapa.datatypes.curveArrhenius import CurveArrhenius, CurveArrheniusExpDecay
         ROIeV.sort()
         curve = CurveArrhenius(self.data, CurveArrheniusExpDecay.attr)
-        out = curve.CurveArrhenius_fit(Tlim=ROIeV)
+        out = curve.CurveArrhenius_fit(ROIeV)
         out.update(self.getAttributes(['offset', 'muloffset']))
         return out
         

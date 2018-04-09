@@ -27,12 +27,20 @@ def roundSignificant(xSeries, nDigits):
         out = roundSignificant([xSeries], nDigits)
         return out[0]
     try:
-        out = [x if x==0 or np.isnan(x) or np.isinf(x) else np.round(x, int(nDigits-1-np.floor(np.log10(np.abs(x))))) for x in xSeries]
+        out = [x if (x==0 or np.isnan(x) or np.isinf(x)) else np.round(x, int(nDigits-1-np.floor(np.log10(np.abs(x))))) for x in xSeries]
     except TypeError as e:
         print('TypeError in roundSignificant, returned input.')
         print(e)
+        print(type(xSeries), xSeries)
         out = xSeries
     return np.array(out)
+
+def roundSignificantRange(xSeries, nDigits):
+    nDigitsAdd = 0
+    span = np.abs(xSeries[1] - xSeries[0])
+    refs = np.abs([span, (xSeries[1] + xSeries[0])/2, xSeries[0], xSeries[1]])
+    nDigitsAdd = int(np.max([0, np.log10(np.max(refs)/span)]))
+    return roundSignificant(xSeries, nDigits+nDigitsAdd)
 
 
 def roundgraphlim (lim):
@@ -255,8 +263,3 @@ def polynomFromDataSeries (xSeries, ySeries) :
 
 
 
-
-
-
-
-    

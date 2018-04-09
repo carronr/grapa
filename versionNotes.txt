@@ -14,6 +14,28 @@ KNOWN BUGS
 
 
 
+Version 0.5.2.0
+Released 09.04.2018
+Additions
+- Actions specific can now be performed on several curves at the same time, provided The corresponding action is available on each selected curve. Example: bandgap from EQE curve, JV fit, fitted curve resample, etc.
+- When extracting Voc(T) from Jsc-Voc data, the data can now be fitted to a certain range and the fit extrapolated to 0 with a single clic.
+  Moreover the Voc @ T=0 are printed in the console.
+- The determination of the optical bandgap from EQE curves can be restricted to a certain wavelength range, in the derivative method. 
+Modifications
+- Curves created from curves actions (fit, etc) are now placed just after the selected curve.
+- Improved the robustness of the JV curve fitting
+- Adjusted precision of default parameters for TRPL fit, EQE exponential decay, and JscVoc curves.
+- In the fits to TRPL data the tau are now non-negative, helping finding a good fit.
+- SIMS data: the GGT keyword now refers to the ^72Ge+ trace and not ^70Ge+ anymore.
+- The color picker popup now displays the current defined color, if possible.
+Bugs
+- Minor bug solved with overriding textxy values
+- Bug solved that prevented the opening of the annotation popup with some input textxy values
+- Legend location 'w' and 'e' were swapped
+- Solved an issue that cause buttons to not disappear in the actions specific panel.
+- Fit of JV curves, prevents creation of fit curves with non-sensical data in the 1e308 range
+- Solved a bug in the output of summary file of boxplots, not correctly identifying the name of some sample names
+
 
 
 Version 0.5.1.0

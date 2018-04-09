@@ -1496,7 +1496,7 @@ class GraphIO(Graph):
                 args.append(deepcopy(args[-1]))
             for i in range(len(text)):
                 if text[i] != '':
-                    if texy[i] != '' and texy[i] is not None:
+                    if texy[i] != '' and texy[i] is not None and texy[i] not in [['',''], ('','')]:
                         if 'xytext' in args[i]:
                             print('Graph plot annotate:', text[i], 'textxy', texy[i], 'override', args[i]['xytext'])
                         args[i].update({'xytext': texy[i]})
@@ -1526,7 +1526,7 @@ class GraphIO(Graph):
                 legPropUser = {'loc': legPropUser}
             if 'loc' in legPropUser:
                 legPropUser['loc'] = str(legPropUser['loc']).lower()
-                rep = {'best': 0, 'ne': 1, 'nw': 2, 'sw': 3, 'se': 4, 'right': 5, 'e': 6, 'w': 7, 's': 8, 'n': 9, 'center': 10}
+                rep = {'best': 0, 'ne': 1, 'nw': 2, 'sw': 3, 'se': 4, 'right': 5, 'w': 6, 'e': 7, 's': 8, 'n': 9, 'center': 10}
                 if legPropUser['loc'] in rep:
                     legPropUser['loc'] = rep[legPropUser['loc']]
             prop = {} if 'fontsize' not in self.graphInfo else {'size': self.graphInfo['fontsize']}

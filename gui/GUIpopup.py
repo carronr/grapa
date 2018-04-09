@@ -145,7 +145,7 @@ class GuiManagerAnnotations(tk.Frame):
         # override xytext in textargs with content of textxy - later can ignore textxy
         for i in range(len(self.attr['textxy'])):
             if self.attr['textxy'][i] != '':
-                self.attr['textargs'].update({'xytext': self.attr['textxy'][i]})
+                self.attr['textargs'][i].update({'xytext': self.attr['textxy'][i]})
         if self.attr['text'] == ['']:
             self.attr['text'] = []
         

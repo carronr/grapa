@@ -63,7 +63,9 @@ class CurveArrhenius(Curve):
             isFit = False
         
         if not isFit:
-            out.append([self.CurveArrhenius_fit, variant.BUTTONFitLabel(), [variant.BUTTONFitROI()], [[min(self.x_1000overK())*0.9, 1.1*max(self.x_1000overK())]]])
+            out.append([self.CurveArrhenius_fit, variant.BUTTONFitLabel(),
+                        [variant.BUTTONFitROI()],
+                        [min(self.x_1000overK())*0.9, 1.1*max(self.x_1000overK())]])
         else:
             lbl = variant.poptLabel
             param = roundSignificant(self.getAttribute('_popt'), 5)
@@ -160,10 +162,11 @@ class CurveArrhenius(Curve):
         return True
         
     # functions for Arrhenius plot
-    def CurveArrhenius_fit(self, Tlim=None, silent=False):
+    def CurveArrhenius_fit(self, Tlim, *args, silent=False):
         """ Returns a Curve based on a fit on Arrhenius plot. """
         variant = self.getVariant()
-        popt = self.fit_Arrhenius(Tlim=Tlim, silent=silent)
+        
+        popt = self.fit_Arrhenius(Tlim=Tlim, addargs=args, silent=silent)
         attr = {'color': 'k', '_popt': popt, '_fitFunc': 'func_Arrhenius',
                 '_Arrhenius_variant': variant.name, '_fitROI': Tlim}
         lbl = variant.poptLabel
@@ -183,11 +186,13 @@ class CurveArrhenius(Curve):
         datax = self.x_1000overK()[mask]
         datay = self.y_Arrhenius()[mask]
         return datax, datay
-    def fit_Arrhenius(self, Tlim=None, silent=False):
+    def fit_Arrhenius(self, Tlim=None, addargs=None, silent=False):
         """
         Fits the data on the Arrhenius plot, in ROI Tlim[0] to Tlim[1].
         Returns Energy barrier [eV] and prefactor.
         """
+        if addargs is None:
+            addargs = []
         datax, datay = self._fit_Arrhenius_getData(Tlim=Tlim)
         z = np.polyfit(datax, datay, 1, full=True)[0]
         # output

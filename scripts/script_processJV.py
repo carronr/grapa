@@ -25,7 +25,7 @@ from grapa.colorscale import Colorscale
 from grapa.curve import Curve
 from grapa.curve_subplot import Curve_Subplot
 
-from grapa.datatypes.curveJV import GraphJV
+from grapa.datatypes.graphJV import GraphJV
 from grapa.datatypes.graphJVDarkIllum import GraphJVDarkIllum
 
 
@@ -307,7 +307,14 @@ def writeFileAvgMax(fileOrContent, filesave=None, withHeader=True, colSample=Tru
         out += '\n'
     # averages
     if colSample:
-        out += (content.headers['sample'] if 'sample' in content.headers else 'SOMETHING') + '\t'
+        samplename = 'SOMETHING'
+        if 'sample' in content.headers:
+            samplename = content.headers['sample']
+        elif content.curve(-1).getAttribute('sample name', None) is not None:
+            samplename = content.curve(-1).getAttribute('sample name')
+            if isinstance(samplename, list):
+                samplename = str(samplename[0])
+        out += samplename + '\t'
     for c in cols:
         out += str(np.average(c)) + '\t'
     # best cell

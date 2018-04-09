@@ -12,7 +12,7 @@ import numpy as np
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
 from grapa.curve import Curve
-from grapa.mathModule import is_number, roundSignificant
+from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
 
 
 
@@ -176,7 +176,7 @@ class GraphJscVoc(Graph):
         return out
 
     
-    def splitIllumination(self, threshold=3, curve=None):
+    def splitIllumination(self, threshold=3, ifFit=False, fitTlim=None, extend0=False, curve=None):
         """
         Splits Jsc Voc data according to illumination intensity.
         Assumes data are stored as intensity series, grouped by temperatures
@@ -215,6 +215,7 @@ class GraphJscVoc(Graph):
             colors = [''] * len(data)
         xylbls = [self.formatAxisLabel(['Temperature', 'T', 'K']),
                   self.formatAxisLabel(['Voc', '', 'V'])]
+        res = []
         out = []
         for j in range(len(data)-1,-1,-1):
             out.append(CurveArrhenius(data[j], attr))
@@ -223,6 +224,18 @@ class GraphJscVoc(Graph):
                             '_Arrhenius_variant': 'ExtrapolationTo0',
                             '_Arrhenius_dataLabel': xylbls,
                             '_Arrhenius_dataLabelArrhenius': xylbls})
+            if ifFit:
+                Tlim = fitTlim
+                if fitTlim is None:
+                    Tlim = [0.9 * min(out[-1].x_1000overK())*0.9, 1.1*max(out[-1].x_1000overK())]
+                out.append(out[-1].CurveArrhenius_fit(Tlim, silent=True))
+                res.append([j, out[-1].getAttribute('_popt')])
+            if extend0:
+                out[-1].resampleX('linspace', 0, np.max(out[-1].x_1000overK()), 51)
+        if len(res) > 0:
+            print('Intensity level, Voc @ T=0 [V]')
+            for r in res:
+                print(str(r[0]), r[1][1])
         return out
         
             
@@ -248,18 +261,32 @@ class CurveJscVoc(Curve):
     # RELATED TO GUI
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
+        graph = kwargs['graph'] if 'graph' in kwargs else None
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...] (, [default1, default2, ...]) ]
         lbl = 'Area [cm2] (old value ' + "{:4.3f}".format(self.getArea()) + ')'
         out.append([self.setArea, 'Area correction', [lbl], [ "{:6.5f}".format(self.getArea())]]) # one line per function
         # fit function
         if self.getAttribute('_fitFunc') == '' or self.getAttribute('_popt', None) is None:
-            out.append([GraphJscVoc.CurveJscVoc_fitNJ0, 'Fit J0 & ideality', ['Voclim', 'Jsclim', 'T max fluct.', 'compile'], [[0, max(self.x())], [0.1, max(self.y())], 3, True], {'curve': self}])
+            Voclim = roundSignificantRange([0, max(self.x())*1.01], 3)
+            Jsclim = roundSignificantRange([0.1, max(self.y())*1.1], 2)
+            out.append([GraphJscVoc.CurveJscVoc_fitNJ0, 'Fit J0 & ideality', ['Voclim', 'Jsclim', 'T max fluct.', 'compile'], [Voclim, Jsclim, 3, True], {'curve': self}])
         else: # if fitted Curve
             out.append([self.updateFitParam, 'Modify fit', ['n', 'J0'], roundSignificant(self.getAttribute('_popt'), 5)])
         # split according to temperatures
         out.append([GraphJscVoc.CurvesJscVocSplitTemperature, 'Separate according to T', ['T max fluctuations'], [3], {'curve': self}])
         # split according to illumination intensities (Voc vs T)
-        out.append([GraphJscVoc.splitIllumination, 'Separate according to intensity', ['T max fluctuations'], [3], {'curve': self}])
+        Tlim = [0,350]
+        if graph is not None:
+            for c in range(graph.length() - 1):
+                if graph.curve(c) == self:
+                    if np.array_equiv(graph.curve(c+1).x(), graph.curve(c).x()):
+                        Tlim = [0.99*np.min(graph.curve(c+1).y()), 1.01*np.max(graph.curve(c+1).y())]
+                        break
+        Tlim = roundSignificantRange(Tlim, 3)
+        out.append([GraphJscVoc.splitIllumination, 'Separate Voc vs T',
+                    ['T max fluct.', 'fit Voc(T)', 'T limits', 'extend to 0'],
+                    [3, True, Tlim, True], {'curve': self},
+                    [{}, {'field': 'Checkbutton'}, {}, {'field': 'Checkbutton'}]])
         out.append([self.printHelp, 'Help!', [], []])
         return out
     
@@ -318,6 +345,8 @@ class CurveJscVoc(Curve):
         Splits the compiled data into different data (one for each intensity)
         curve: stores the Jsc-Voc pairs - will need to find the T
         threshold in °C
+        ifFit: bool. if True, also fits the output Curves
+        fitTlim: T range to for the fit Voc(T)
         """
         T = GraphJscVoc.findCurveWithX(self, curve)
         if T == False:
@@ -385,6 +414,9 @@ class CurveJscVoc(Curve):
         print('   compile: after fitting data, returns Curves with results: ideality factor versus T,')
         print('      J0 versus T, and J0 vs A * T.')
         print(' - Separate according to T: split data in several Curves according to the temperature identified.')
-        print('      A new Curve is created once a point deviates more than "value" from the average.')
+        print('   T max fluct.: identify groups of temperatures to fit only relevant data together.')
+        print('       A new Curve is created once a point deviates more than this value from the average.')
+        print(' - Extract Voc vs T: split data in several Curves, grouping Voc vs T data acquired with same illumination intensity.')
+        print('   T max fluct.: identify groups of temperatures to group relevant intensities together.')
         return True
 
