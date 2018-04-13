@@ -7,7 +7,7 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 import numpy as np
 import ast
-
+import warnings
 
 
 def find_nearest(array,value):
@@ -39,7 +39,12 @@ def roundSignificantRange(xSeries, nDigits):
     nDigitsAdd = 0
     span = np.abs(xSeries[1] - xSeries[0])
     refs = np.abs([span, (xSeries[1] + xSeries[0])/2, xSeries[0], xSeries[1]])
-    nDigitsAdd = int(np.max([0, np.log10(np.max(refs)/span)]))
+    try:
+        with warnings.catch_warnings(): # don't want warnings div by 0, etc.
+            warnings.simplefilter("ignore")
+            nDigitsAdd = int(np.max([0, np.log10(np.max(refs)/span)]))
+    except Exception:
+        pass
     return roundSignificant(xSeries, nDigits+nDigitsAdd)
 
 

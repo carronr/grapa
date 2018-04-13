@@ -57,6 +57,12 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow JV
 # TODO: Write workflow Jsc Voc
 
+
+# Version 0.5.2.1
+#Bugs
+#- Bugs in rounding with infinity values, notably in EQE Curves
+    
+
 # Version 0.5.2.0
 # Additions
 #- Actions specific can now be performed on several curves at the same time, provided The corresponding action is available on each selected curve. Example: bandgap from EQE curve, JV fit, fitted curve resample, etc.
