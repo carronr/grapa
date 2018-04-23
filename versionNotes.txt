@@ -15,6 +15,11 @@ KNOWN BUGS
 
 
 
+Version 0.5.2.2
+Release 23.04.2018
+Bugs
+- Bugs in some curve actions, where the curve was passed in argument.
+
 
 Version 0.5.2.1
 Released 13.04.2018

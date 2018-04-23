@@ -58,6 +58,10 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow Jsc Voc
 
 
+# Version 0.5.2.2
+# Bugs
+#- Bugs in some curve actions, where the curve was passed in argument.
+
 # Version 0.5.2.1
 #Bugs
 #- Bugs in rounding with infinity values, notably in EQE Curves
@@ -958,7 +962,7 @@ class Application(tk.Frame):
         if not hasattr(func, '__self__'):
             args = [self.back_graph] + args
         
-        def executeFunc(curve, func, *args, **kwargs):
+        def executeFunc(curve, func, args, kwargs):
             # execute curve action
             res = func(*args, **hidden)
             if self.varPrintCommands.get():
@@ -1019,7 +1023,7 @@ class Application(tk.Frame):
             if len(keys) > 1:
                 lbl = self.back_graph.curve(c).getAttribute('label', '')
                 print('Action on Curve', c, (('('+lbl+')') if len(lbl) > 0 else ''))
-            executeFunc(c, toExecute[c], *args, **hidden)
+            executeFunc(c, toExecute[c], args, hidden)
         # after execution
         self.updateUI()
 
