@@ -10,7 +10,7 @@ import numpy as np
 import warnings
 
 from grapa.curve import Curve
-from grapa.mathModule import roundSignificant
+from grapa.mathModule import roundSignificant, roundSignificantRange
 
 
         
@@ -65,7 +65,7 @@ class CurveArrhenius(Curve):
         if not isFit:
             out.append([self.CurveArrhenius_fit, variant.BUTTONFitLabel(),
                         [variant.BUTTONFitROI()],
-                        [min(self.x_1000overK())*0.9, 1.1*max(self.x_1000overK())]])
+                        [list(roundSignificant([min(self.x_1000overK())*0.95, 1.05*max(self.x_1000overK())], 4))]])
         else:
             lbl = variant.poptLabel
             param = roundSignificant(self.getAttribute('_popt'), 5)
@@ -101,6 +101,8 @@ class CurveArrhenius(Curve):
         # resample X
         if isFit:
             xmin, xmax = np.min(self.x()), np.max(self.x())
+            tmp = roundSignificantRange([xmin, xmax], 3)
+            xmin, xmax = tmp[0], tmp[1]
             out.append([self.resampleX, 'Resample X',
                         ['', 'min', 'max', '#, step'],
                         ['linspace', xmin, xmax, 51],
@@ -167,7 +169,7 @@ class CurveArrhenius(Curve):
         variant = self.getVariant()
         
         popt = self.fit_Arrhenius(Tlim=Tlim, addargs=args, silent=silent)
-        attr = {'color': 'k', '_popt': popt, '_fitFunc': 'func_Arrhenius',
+        attr = {'color': 'k', '_popt': list(popt), '_fitFunc': 'func_Arrhenius',
                 '_Arrhenius_variant': variant.name, '_fitROI': Tlim}
         lbl = variant.poptLabel
         if not silent:

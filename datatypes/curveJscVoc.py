@@ -220,6 +220,7 @@ class GraphJscVoc(Graph):
         for j in range(len(data)-1,-1,-1):
             out.append(CurveArrhenius(data[j], attr))
             out[-1].update({'label': 'Voc vs T, intensity ' + str(j),
+                            'labelhide': 1,
                             'linespec': 'o', 'color': colors[j],
                             '_Arrhenius_variant': 'ExtrapolationTo0',
                             '_Arrhenius_dataLabel': xylbls,
@@ -236,6 +237,9 @@ class GraphJscVoc(Graph):
             print('Intensity level, Voc @ T=0 [V]')
             for r in res:
                 print(str(r[0]), r[1][1])
+        if len(out) > 0:
+            out[0].update({'labelhide': ''})
+            out[-2].update({'labelhide': ''})
         return out
         
             

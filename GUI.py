@@ -58,9 +58,24 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow Jsc Voc
 
 
+
+# Version 0.5.2.3
+# Release 23.05.2018
+# Modifications:
+# - Jsc-Voc: the data separation Voc vs T now hides most created labels.
+# Bugs:
+#- Handling of colors in stackplot curves is now effective.
+#- Solved an issue wen saving files with fitted curves, which could not be opened when reloaded.
+#- in Jsc-Voc data treatment, solved a bug providing faulty default fitting range for J0 vs At.
+
+
+
 # Version 0.5.2.2
+# released
 # Bugs
 #- Bugs in some curve actions, where the curve was passed in argument.
+
+
 
 # Version 0.5.2.1
 #Bugs

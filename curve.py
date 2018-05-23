@@ -837,7 +837,8 @@ class Curve:
         #    tripcolor
         # Partial support for:
         #    imgshow
-        
+        attrIgnore = ['label', 'plot', 'linespec', 'type', 'ax_twinx', 'ax_twiny', 'offset', 'muloffset', 'labelhide', 'colorbar']
+         
         # "simple" plotting methods, with prototype similar to plot()
         if type_graph in ['fill', 'semilogx', 'semilogy', 'loglog', 'plot_date', 'stem', 'step', 'triplot']:
             handle = getattr(ax, type_graph)(x, y, linespec, **fmt)
@@ -854,17 +855,26 @@ class Curve:
         elif type_graph == 'stackplot':
             # look for next Curves with type == 'stackplot', and same x
             nexty = []
-            fmt['labels'] = [fmt['label']]
-            del fmt['label']
+            fmt['labels'], fmt['colors'] = [''], ['']
+            if 'label' in fmt:
+                fmt['labels'] = [fmt['label']]
+                del fmt['label']
+            if 'color' in fmt:
+                fmt['colors'] = [fmt['color']]
+                del fmt['color']
+            attrIgnore.append('color')
             if graph is not None:
                 for j in range(graph_i+1, graph.length()):
                     if graph.curve(j).getAttribute('type') == type_graph and np.array_equal(x, graph.curve(j).x_offsets(alter=alter[0])):
                         ignoreNext += 1
                         nexty.append(graph.curve(j).y_offsets(alter=alter[1]))
                         fmt['labels'].append(graph.curve(j).getAttribute('label'))
+                        fmt['colors'].append(graph.curve(j).getAttribute('color'))
                         continue
                     else:
                         break
+            if np.all([(c=='') for c in fmt['colors']]):
+                del fmt['colors']
             handle = getattr(ax, type_graph)(x, y, *nexty, **fmt)
         elif type_graph == 'errorbar':
             # look for next Curves, maybe xerr/yerr was provided
@@ -959,7 +969,7 @@ class Curve:
     
         handles = handle if isinstance(handle, list) else [handle]
         for key in attr:
-            if key not in fmt and key not in ['label', 'plot', 'linespec', 'type', 'ax_twinx', 'ax_twiny', 'offset', 'muloffset', 'labelhide', 'colorbar']:
+            if key not in fmt and key not in attrIgnore:
                 for h in handles:
                     if hasattr(h, 'set_'+key):
                         try:
