@@ -174,7 +174,7 @@ class CurveEQE(Curve):
         # EQE current
         if self.attributeEqual('_popt'):
             out.append([self.currentCalc, 'EQE current', ['ROI', 'interpolate', 'spectrum'],
-                        [[min(self.x()), max(self.x())], 'cubic', self.EQE_AM15_REFERENCE.replace('.txt','')], {},
+                        [[min(self.x()), max(self.x())], 'linear', self.EQE_AM15_REFERENCE.replace('.txt','')], {},
                         [{'width': 15},
                          {'width': 8, 'field':'Combobox', 'values':['linear', 'quadratic', 'cubic']},
                          {'width': 8, 'field':'Combobox', 'values':[self.EQE_AM15_REFERENCE.replace('.txt',''), self.EQE_AM0_REFERENCE.replace('.txt','')]}]])
@@ -213,7 +213,15 @@ class CurveEQE(Curve):
             except ImportError as e:
                 print('WARNING CurveEQE: do not find grapa.datatypes.curveArrhenius.')
                 print(type(e), e)
-            
+        # ERE external radiative efficiency
+        if self.attributeEqual('_popt'):
+            Emin, unit = self.ERE_EminAuto()
+            out.append([self.ERE_GUI, 'ERE external radiative eff.',
+                        ['cell Voc', 'T', 'cut data', ''],
+                        ['0.700', 273.15+25, Emin, unit],
+                        {},
+                        [{'width':6}, {'width':7}, {'width':7},
+                         {'field': 'Combobox', 'values': ['nm', 'eV'], 'width':4}]])
         out.append([self.printHelp, 'Help!', [], []])
         return out
     
@@ -482,12 +490,12 @@ class CurveEQE(Curve):
         return False
     
     
-    def currentCalc(self, ROI=None, interpolatekind='cubic',
+    def currentCalc(self, ROI=None, interpolatekind='linear',
                     spectralPhotonIrrad=None, silent=False):
         """
         Computes the current EQE current using AM1.5 spectrum
         ROI: [nm_min, nm_max]
-        interpolatekind: order for interpolation of EQE data. default 'cubic'.
+        interpolatekind: order for interpolation of EQE data. default 'linear'.
         refSpectrum: by default AM1.5G; otherwise filename in folder datatypes
         """
         if spectralPhotonIrrad is None:
@@ -520,7 +528,7 @@ class CurveEQE(Curve):
                   EQEcurrent, 'mA/cm2')
         return EQEcurrent
         
-    
+        
     def CurveUrbachEnergy(self, ROIeV):
         """ Return fit in a Curve object, giving Urbach energy decay """
         from grapa.datatypes.curveArrhenius import CurveArrhenius, CurveArrheniusExpDecay
@@ -530,7 +538,73 @@ class CurveEQE(Curve):
         out.update(self.getAttributes(['offset', 'muloffset']))
         return out
         
+        
+    def ERE(self, Voc, T, Emin='auto', EminUnit='nm'):
+        """
+        Computes the External Radiative Efficiency from the EQE curve and the cell
+        Voc.
+        Returns ERE, and a Curve with the integrand
+        Parameters:
+        - Voc: cell Voc voltage in [V]
+        - T: temperature in [K]
+        - Emin: min E on which the integral is computed.
+            Can be given in eV or in nm, see Eminunit.
+        - Eminunit: 'eV' if Emin is given in eV, 'nm' otherwise. Default 'nm'
+        """
+        import scipy.integrate as integrate
+        CST_q = 1.602176634e-19 # elemental charge [C]
+        CST_h = 6.62606979e-34 # Planck [J s]
+        CST_c = 299792458 # speed of light [m s-1]
+        CST_kb= 1.38064852e-23 # [J K-1]
+        # variables check
+        if Emin == 'auto':
+            Emin, EminUnit = self.ERE_EminAuto()
+        if EminUnit != 'eV':
+            EminUnit = 'nm'
+        if Emin != 'auto' and EminUnit == 'nm':
+            Emin = Curve.NMTOEV / Emin # convert nm into eV
+       # retrieve data
+        nm, EQE = self.x(), self.y()
+        E = Curve.NMTOEV / nm * CST_q # photon energy [J]
+        Jsc = self.currentCalc(silent=True) * 10 # [A m-2] instead of [mA cm-2]
+        # mask for integration
+        mask = (E >= Emin * CST_q) if Emin != 'auto' else (E > 0)
+        # start computing the expression
+        integrand = EQE * E**2 / (np.exp(E / (CST_kb * T)) - 1) # [J2]
+        integral = np.abs(integrate.trapz(integrand[mask], x=E[mask])) # [J3]
+        ERE  = 2 * np.pi * CST_q / CST_h**3 / CST_c**2 / Jsc # [J-3]
+        ERE *= np.exp(CST_q * Voc / CST_kb / T) # new term unitless
+        ERE *= integral # output [unitless]
+        return ERE, Curve([nm[mask], integrand[mask]], {'label': 'ERE integrand'})
+    def ERE_GUI(self, Voc, T, Emin='auto', EminUnit='nm'):
+        ERE, curve = self.ERE(Voc, T, Emin=Emin, EminUnit=EminUnit)
+        print('External radiative efficiency estimate:', "{:.2E}".format(ERE))
+        curve.update({'ax_twinx':1, 'color': 'k', 'label': 'ERE integrand to '+self.getAttribute('label')})
+        return curve
+    def ERE_EminAuto(self):
+        # smart Emin autodetect
+        nm, EQE = self.x(), self.y()
+        nmMax = np.max(nm[(EQE > 0.5*np.max(EQE))]) # identify nm where EQE = 0.5
+        mask = (nm > nmMax) * (EQE > 0)
+        nm_, EQElog = nm[mask], np.log10(EQE[mask])
+        E = Curve.NMTOEV / nm_
+        # sort nm & EQE in ascending nm order
+        EQElog = EQElog[nm_.argsort()]
+        nm_.sort()
+        diff = (EQElog[1:] - EQElog[:-1]) / (E[1:] - E[:-1]) # d/dE log(EQE)
+        nfault = 0
+        Emin = np.max(nm) + 1 # by default, just below lowest point
+        for i in range(1, len(diff)):
+            if diff[i] < np.min(diff[:i]) * 0.5: # 0.5 can be adjusted
+                nfault += 1 # or another algorithm implemented
+            if nfault > 1 or diff[i] < 0:
+                Emin = roundSignificantRange([np.mean(nm_[i:i+2]), nm_[i]], 2)[0]
+    #    graph2 = Graph([(0.5*(nm_[:-1]+nm_[1:])), diff])
+    #    graph2.curve(0).update({'linespec': '-x'})
+    #    graph2.plot()
+        return [Emin, 'nm']
     
+        
     def printHelp(self):
         print('*** *** ***')
         print('CurveEQE offer basic treatment of (external) quantum')
@@ -568,6 +642,11 @@ class CurveEQE(Curve):
         print('   A new Curve is created, with main parameters the decay')
         print('   energy U and the energy at 100% EQE.')
         print('   ROI [eV]: limits to the fitted data, in eV.')
+        print(' - ERE estimate of the external radiative efficiency, based on')
+        print('   the EQE and the cell Voc. Parameters:')
+        print('   Voc: cell Voc voltage, in [V].')
+        print('   Emin: min E on which the integral is computed.')
+        print('   EminUnit: "eV" if Emin is given in eV, "nm" otherwise.')
         return True
 
         

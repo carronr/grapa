@@ -405,7 +405,18 @@ class Graph:
         self.data[idx1] = self.curve(idx2)
         self.data[idx2] = swap
         return True
-
+        
+    def moveCurveToIndex(self, idxsource, idxtarget):
+        """ Change the position of a Curve in the list """
+        tmp = self.data.pop(idxsource)
+        self.data.insert(idxtarget, tmp)
+        return True
+        
+    def reverseCurves(self):
+        """ Reverse the order of the Curves. """
+        self.data.reverse()
+        return True
+            
     def duplicateCurve(self, idx1):
         """ Duplicate (clone) an existing curve and append it in the curves list."""
         if idx1 < -self.length() or idx1 >= self.length():

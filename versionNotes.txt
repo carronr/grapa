@@ -13,6 +13,18 @@ KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
 
+Version 0.5.2.4rc1
+Addition
+- In the user interface, two buttons were added to reorder the stack and place the selected Curve at the top or at the bottom of the stack.
+- CurveEQE: a new anaysis tool is provided, the external radiative efficiency. This estimates is computed from the EQE and the cell Voc.
+- CurveJV: added a new data visualization: differential R, defined as dV/dJ.
+- Added an option for the plot method 'fill'. Points with 0 value can be added at first and last data positions thanks to the keyword 'fill_padto0'.
+Modification
+- CurveEQE: the default interpolation for the current calculation currentcalc is now 'linear' and not 'cubic'
+Bugs
+- The stackplot method now properly ignores hidden Curves.
+
+
 
 Version 0.5.2.3
 Release 23.05.2018

@@ -80,6 +80,7 @@ class CurveJV(Curve):
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
         out.append(['Log10 abs', ['', 'abs'], 'semilogy'])
+        out.append(['Differential R = dV/dJ [Ohm cm2]', ['', 'CurveJV.yDifferentialR'], 'semilogy'])
         return out
 
 
@@ -132,7 +133,17 @@ class CurveJV(Curve):
     def J (self, idx=np.nan) :
         return self.y(idx)
     
-
+    def yDifferentialR(self, index=np.nan, xyValue=None):
+        """ Returns differential resistance of the J-V curve R = dV/dI"""
+        if xyValue is not None:
+            return np.array(xyValue)[1]
+        V, J = self.x(), self.y()/1000 # J in A/cm2
+        val = derivative(J, V) # R in Ohm cm2
+        if np.isnan(index).any():
+            return val[:]
+        return val[index]
+        
+        
     def interpJ (self, V) :
         # returns values of a spline interpolation degree 3 at the V values
         f = interpolate.interp1d(self.V(), self.J()) # spline interpolation degree 3

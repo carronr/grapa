@@ -77,9 +77,9 @@ class Curve:
             c = kwargs['graph_i']
             if typeplot == 'errorbar': # assist functions for type errorbar
                 out += self.funcListGUI_errorbar(graph, c)
-            if typeplot == 'scatter': # assist function for type errorbar
+            if typeplot == 'scatter': # assist function for type scatter
                 out += self.funcListGUI_scatter(graph, c)
-            if typeplot.startswith('fill'): # assist function for type errorbar
+            if typeplot.startswith('fill'): # assist function for type fill
                 out += self.funcListGUI_fill(graph, c)
         except Exception as e:
             print('Exception', type(e), 'in Curve.funcListGUI')
@@ -136,11 +136,14 @@ class Curve:
         
     def funcListGUI_fill(self, graph, c):
         out = []
-        at = ['fill', 'hatch']
-        out.append([self.updateValuesDictkeys, 'Save', at,
+        at = ['fill', 'hatch', 'fill_padto0']
+        at2 = list(at)
+        at2[2] = 'pad to 0'
+        out.append([self.updateValuesDictkeys, 'Save', at2,
                     [self.getAttribute(a) for a in at], {'keys': at},
                     [{'field': 'Combobox', 'values': ['True', 'False']},
-                     {'field': 'Combobox', 'values': ['', '.', '+', '/', r'\\'], 'width': 7}]])
+                     {'field': 'Combobox', 'values': ['', '.', '+', '/', r'\\'], 'width': 7},
+                     {'field': 'Combobox', 'values': ['', 'True', 'False']}]])
         return out
         
         
@@ -840,8 +843,13 @@ class Curve:
         attrIgnore = ['label', 'plot', 'linespec', 'type', 'ax_twinx', 'ax_twiny', 'offset', 'muloffset', 'labelhide', 'colorbar']
          
         # "simple" plotting methods, with prototype similar to plot()
-        if type_graph in ['fill', 'semilogx', 'semilogy', 'loglog', 'plot_date', 'stem', 'step', 'triplot']:
+        if type_graph in ['semilogx', 'semilogy', 'loglog', 'plot_date', 'stem', 'step', 'triplot']:
             handle = getattr(ax, type_graph)(x, y, linespec, **fmt)
+        elif type_graph in ['fill']:
+            if self.getAttribute('fill_padto0', False):
+                handle = ax.fill([x[0]]+list(x)+[x[-1]], [0]+list(y)+[0], linespec, **fmt)
+            else:
+                handle = ax.fill(x, y, linespec, **fmt)
         # plotting methods not accepting formatting string as 3rd argument
         elif type_graph in ['bar', 'barbs', 'barh', 'cohere', 'csd', 'fill_between', 'fill_betweenx', 'hexbin', 'hist2d', 'quiver', 'xcorr']:
             handle = getattr(ax, type_graph)(x, y, **fmt)
@@ -867,10 +875,11 @@ class Curve:
                 for j in range(graph_i+1, graph.length()):
                     if graph.curve(j).getAttribute('type') == type_graph and np.array_equal(x, graph.curve(j).x_offsets(alter=alter[0])):
                         ignoreNext += 1
-                        nexty.append(graph.curve(j).y_offsets(alter=alter[1]))
-                        fmt['labels'].append(graph.curve(j).getAttribute('label'))
-                        fmt['colors'].append(graph.curve(j).getAttribute('color'))
-                        continue
+                        if not graph.curve(j).isHidden():
+                            nexty.append(graph.curve(j).y_offsets(alter=alter[1]))
+                            fmt['labels'].append(graph.curve(j).getAttribute('label'))
+                            fmt['colors'].append(graph.curve(j).getAttribute('color'))
+                            continue
                     else:
                         break
             if np.all([(c=='') for c in fmt['colors']]):

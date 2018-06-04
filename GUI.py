@@ -58,6 +58,22 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow Jsc Voc
 
 
+#- Add button reverse curve order
+#- Stackplot: reorder at creation?
+#- Image in nannal (???)
+
+# Version 0.5.2.4rc1
+#Addition
+#- In the user interface, two buttons were added to reorder the stack and place the selected Curve at the top or at the bottom of the stack.
+#- CurveEQE: a new anaysis tool is provided, the external radiative efficiency. This estimates is computed from the EQE and the cell Voc.
+#- CurveJV: added a new data visualization: differential R, defined as dV/dJ.
+#- Added an option for the plot method 'fill'. Points with 0 value can be added at first and last data positions thanks to the keyword 'fill_padto0'.
+# Modification
+#- CurveEQE: the default interpolation for the current calculation currentcalc is now 'linear' and not 'cubic'
+#Bugs
+#- The stackplot method now properly ignores hidden Curves.
+
+
 
 # Version 0.5.2.3
 # Release 23.05.2018
@@ -563,7 +579,7 @@ class Application(tk.Frame):
         self.OMTypePlot.pack(side='left')
         # popup to handle text annotations
         tk.Label(frame, text='     ').pack(side='left')
-        tk.Button(frame, text='Text annotations, legend and titles', command=self.manageAnnotations).pack(side='left', anchor='n', pady=5)
+        tk.Button(frame, text='Annotations, legend and titles', command=self.manageAnnotations).pack(side='left', anchor='n', pady=5)
         # screen dpi
         self.createFrame(frame, self.fillUIFrameCenterTopDPI, {}, {'side': 'right', 'anchor': 'n'})
 
@@ -636,7 +652,7 @@ class Application(tk.Frame):
         
     def fillUIFrameRightAGDelete(self, frame):
         tk.Label (frame, text='Delete Curve').pack(side='left')
-        tk.Button(frame, text='Curve', command=self.curveDelete).pack(side='left')
+        tk.Button(frame, text='Curve', command=self.curveDelete).pack(side='left', padx=3)
         tk.Button(frame, text='All hidden', command=self.curveDeleteAllHidden).pack(side='left')
     def fillUIFrameRightAGDuplicate(self, frame):
         tk.Label (frame, text='Duplicate Curve').pack(side='left')
@@ -662,9 +678,12 @@ class Application(tk.Frame):
         tk.Button(frame, text='Invert', command=self.curveShowHideInvert).pack(side='left')
         
     def fillUIFrameRightAGShift(self, frame):
-        tk.Label (frame, text='Shift curve').pack(side='left')
-        tk.Button(frame, text=u"\u21D1 Up", command=self.curveShiftUp).pack(side='left')
-        tk.Button(frame, text=u"\u21D3 Down", command=self.curveShiftDown).pack(side='left', padx='5')
+        tk.Label (frame, text='Reorder').pack(side='left')
+        tk.Button(frame, text=u"\u21E7",      command=self.curveShiftTop ).pack(side='left', padx=1)
+        tk.Button(frame, text=u"\u21D1 Up",   command=self.curveShiftUp  ).pack(side='left', padx=1)
+        tk.Button(frame, text=u"\u21D3 Down", command=self.curveShiftDown).pack(side='left', padx=1)
+        tk.Button(frame, text=u"\u21E9",      command=self.curveShiftBott).pack(side='left', padx=1)
+        
     def fillUIFrameRightAGCast(self, frame):
         tk.Label(frame, text='Change Curve type').pack(side='left')
         self.castCurveList = []
@@ -1055,19 +1074,29 @@ class Application(tk.Frame):
                 print ('castCurve impossible (', newType, curve, ')')
         self.updateUI()
     
-    def curveShift(self, upDown):
+    def curveShift(self, upDown, relative=True):
         curves_ = self.getActiveCurve()
         curves = list(curves_)
-        curves.sort(reverse=(True if upDown > 0 else False))
+        curves.sort(reverse=(True if (upDown > 0) else False))
         selected = []
+        print('---')
         for curve in curves:
             idx2 = upDown
             if curve == 0:
                 idx2 = max(idx2, 0)
-            if curve == self.back_graph.length()-1:
+            if curve == self.back_graph.length()-1 and relative:
                 idx2 = min(idx2, 0)
-            selected.append(curve+idx2)
-            self.executeGraphMethod('swapCurves', curve, idx2, relative=True)
+            if relative:
+                self.executeGraphMethod('swapCurves', curve, idx2, relative=True)
+                selected.append(curve+idx2)
+            else:
+                self.executeGraphMethod('moveCurveToIndex', curve, idx2)
+                selected.append(idx2)
+                print('moveCurve', curve, idx2, upDown)
+                if idx2 < curve or (idx2 == curve and curve == 0):
+                    upDown += 1
+                elif idx2 > curve or (idx2 == curve and curve >= self.back_graph.length()-1):
+                    upDown -= 1
             #self.back_graph.swapCurves(curve, upDown, relative=True)
         for i in range(len(selected)):
             selected[i] = max(0, min(self.back_graph.length()-1, selected[i]))
@@ -1077,6 +1106,10 @@ class Application(tk.Frame):
         self.curveShift(1)
     def curveShiftUp(self):
         self.curveShift(-1)
+    def curveShiftTop(self):
+        self.curveShift(0, relative=False)
+    def curveShiftBott(self):
+        self.curveShift(self.back_graph.length()-1, relative=False)
     
     def curveShowHideCurve(self):
         curves = self.getActiveCurve()
