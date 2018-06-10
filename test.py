@@ -19,8 +19,29 @@ from grapa.mathModule import roundSignificantRange
 
 
 
-graph = Graph('examples/JV/SAMPLE_A/I-V_SAMPLE_A_a2_01.txt')
+graph = Graph('examples/EQE/SAMPLE_A_d1_1.sr')
+res = graph.curve(0).CurveEQE_bandgapLog_print([30.0, 88.0])
+nm = graph.curve(0).x()
 
-graph.update({'alter': ['', 'CurveJV.yDifferentialRs'], 'typeplot': 'semilogy'})
 
+bandgap = [1.1811625274956468, 43.884021117356845]
+from grapa.datatypes.curveEQE import CurveEQE
+
+
+z = [bandgap[1], -bandgap[0]*bandgap[1]]
+p = np.poly1d(z)
+fit = p(Curve.NMTOEV / nm)
+print(list(fit))
+for i in range(len(fit)):
+    if fit[i] >=0:
+        fit[i] = 1 - np.exp(- np.sqrt(fit[i]) / (Curve.NMTOEV/nm[i]))
+    else:
+        fit[i] = np.nan
+print(list(fit))
+
+
+graph.append(res)
+print(res.getData())
+
+graph.update({'xlim':'', 'ylim':''})
 graph.plot()

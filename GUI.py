@@ -62,8 +62,15 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- Stackplot: reorder at creation?
 #- Image in nannal (???)
 
-# Version 0.5.2.4rc1
-#Addition
+# TODO: export fails ehen special character. 1/ catch error and display; 2/ solve!
+# UnicodeEncodeError, 'charmap' codec can't encode character '\u3b1' in position 396: character maps to <undefined>
+
+
+# Version 0.5.2.4rc2
+# New features
+#- A data editor was implemented, accessible immediately below the graph.
+#- The Property edition tool was removed from the user interface. The 'New property' is now renamed 'Property editor' 
+#Additions
 #- In the user interface, two buttons were added to reorder the stack and place the selected Curve at the top or at the bottom of the stack.
 #- CurveEQE: a new anaysis tool is provided, the external radiative efficiency. This estimates is computed from the EQE and the cell Voc.
 #- CurveJV: added a new data visualization: differential R, defined as dV/dJ.
@@ -284,13 +291,15 @@ class Application(tk.Frame):
         self.createFrame(frame, self.fillUIFrameMain, {}, {'side': 'left', 'anchor': 'n', 'fill': BOTH, 'expand': True})
 
     def fillUIFrameMain(self, frame):
-        self.createFrame(frame, self.fillUIFrameMainTop,    {}, {'side': 'top', 'fill': BOTH, 'expand': True})
+        # create console, indicators
         self.createFrame(frame, self.fillUIFrameMainBottom, {}, {'side': 'bottom', 'fill': X})
+        # create graph and left menu
+        self.createFrame(frame, self.fillUIFrameMainTop,    {}, {'side': 'top', 'fill': BOTH, 'expand': True})
 
     def fillUIFrameMainTop(self, frame):
         # left frame
         self.createFrame(frame, self.fillUIFrameLeft,   {'relief': 'raised', 'borderwidth': 2}, {'side': 'left', 'anchor': 'n', 'fill': Y, 'pady':2})
-        # graph frame
+        # graph + options frame
         self.createFrame(frame, self.fillUIFrameCenter, {'relief': 'raised', 'borderwidth': 2}, {'side': 'left', 'anchor': 'n', 'fill': BOTH, 'pady':2, 'expand':True})
 
     def fillUIFrameMainBottom(self, frame):
@@ -420,9 +429,9 @@ class Application(tk.Frame):
 
     def fillUIFrameCenter(self, frame):
         # some container for graph
-        self.createFrame(frame, self.fillUIFrameGraphBox,  {}, {'side':'top', 'anchor':'w', 'fill':BOTH, 'expand':True})
-        self.createFrame(frame, self.fillUIFrameCenterTop, {}, {'side':'top', 'anchor':'w', 'fill':X})
         self.createFrame(frame, self.fillUIFrameGraphBelow,{}, {'side':'bottom', 'anchor':'w', 'fill': X})
+        self.createFrame(frame, self.fillUIFrameCenterTop, {}, {'side':'bottom', 'anchor':'w', 'fill':X})
+        self.createFrame(frame, self.fillUIFrameGraphBox,  {}, {'side':'top', 'anchor':'w', 'fill':BOTH, 'expand':True})
     def fillUIFrameGraphBox(self, frame):
         # canvas for graph
         figsize = Graph.FIGSIZE_DEFAULT
@@ -536,14 +545,14 @@ class Application(tk.Frame):
         
         
     def fillUIFrameGraphQuickMods(self, frame):
-        tk.Label (frame, text='Quick modifs').pack(side='left', anchor='c')
+        #tk.Label (frame, text='Quick modifs').pack(side='left', anchor='c')
         self.varQuickModsXlabel = EntryVar(frame, '', width=15)
         self.varQuickModsYlabel = EntryVar(frame, '', width=15)
         self.varQuickModsXlim0  = EntryVar(frame, '', width=5)
         self.varQuickModsXlim1  = EntryVar(frame, '', width=5)
         self.varQuickModsYlim0  = EntryVar(frame, '', width=5)
         self.varQuickModsYlim1  = EntryVar(frame, '', width=5)
-        tk.Label (frame, text='   xlabel:').pack(side='left', anchor='c')
+        tk.Label (frame, text='xlabel:').pack(side='left', anchor='c')
         self.varQuickModsXlabel.pack          (side='left', anchor='c')
         tk.Label (frame, text='   ylabel:').pack(side='left', anchor='c')
         self.varQuickModsYlabel.pack          (side='left', anchor='c')
@@ -555,7 +564,7 @@ class Application(tk.Frame):
         self.varQuickModsYlim0.pack     (side='left', anchor='c')
         tk.Label (frame, text='to').pack(side='left', anchor='c')
         self.varQuickModsYlim1.pack     (side='left', anchor='c')
-        tk.Label(frame, text='     ').pack(side='left')
+        tk.Label(frame, text='   ').pack(side='left')
         tk.Button(frame, text='Save', command=self.quickMods).pack(side='left', anchor='c')
         self.varQuickModsXlabel.bind('<Return>', lambda event: self.quickMods())
         self.varQuickModsYlabel.bind('<Return>', lambda event: self.quickMods())
@@ -563,6 +572,7 @@ class Application(tk.Frame):
         self.varQuickModsXlim1.bind ('<Return>', lambda event: self.quickMods())
         self.varQuickModsYlim0.bind ('<Return>', lambda event: self.quickMods())
         self.varQuickModsYlim1.bind ('<Return>', lambda event: self.quickMods())
+        tk.Button(frame, text='Data editor', command=self.popupDataEditor).pack(side='right', anchor='c')
         
     def fillUIFrameCenterTop(self, frame):
         tk.Label (frame, text='Data transform').pack(side='left', anchor='n', pady=7)
@@ -579,7 +589,7 @@ class Application(tk.Frame):
         self.OMTypePlot.pack(side='left')
         # popup to handle text annotations
         tk.Label(frame, text='     ').pack(side='left')
-        tk.Button(frame, text='Annotations, legend and titles', command=self.manageAnnotations).pack(side='left', anchor='n', pady=5)
+        tk.Button(frame, text='Annotations, legend and titles', command=self.popupAnnotations).pack(side='left', anchor='n', pady=5)
         # screen dpi
         self.createFrame(frame, self.fillUIFrameCenterTopDPI, {}, {'side': 'right', 'anchor': 'n'})
 
@@ -619,7 +629,8 @@ class Application(tk.Frame):
     def fillUIFrameRightTreeContent(self, frame):
         self.createFrame(frame, self.fillUIFrameRightTree, {}, {'side':'top', 'fill':X, 'padx':5})
         # EDIT property
-        FrameTitleContentHide(frame, self.fillUIFrameRightEditTitle, self.fillUIFrameRightEdit, contentkwargs={'padx':10}, default='hide').pack(side='top', fill=X, anchor='w')
+        fr = FrameTitleContentHide(frame, self.fillUIFrameRightEditTitle, self.fillUIFrameRightEdit, contentkwargs={'padx':10}, default='hide')
+        #fr.pack(side='top', fill=X, anchor='w')
     def fillUIFrameRightTree(self, frame):
         self.Tree = ttk.Treeview(frame, columns=('#1'))
         self.Tree.pack(side='left', anchor='n')
@@ -818,7 +829,7 @@ class Application(tk.Frame):
         entry.bind('<Return>', lambda event: self.editProperty())
 
     def fillUIFrameRightNewTitle(self, frame):
-        tk.Label(frame, text='New property', font=self.fontBold).pack(side='top', anchor='w')
+        tk.Label(frame, text='Property editor', font=self.fontBold).pack(side='top', anchor='w')
     def fillUIFrameRightNew(self, frame):
         self.createFrame(frame, self.fillUIFrameRightNewH,  {}, {'side':'top', 'anchor':'w', 'fill': X})
         self.NewPropExample = tk.StringVar() 
@@ -1215,15 +1226,24 @@ class Application(tk.Frame):
 
         
     # manager for text annotations
-    def manageAnnotations(self):
+    def popupAnnotations(self):
         # opens manager
         from gui.GUIpopup import GuiManagerAnnotations
         self.windowAnnotate = tk.Toplevel(self.master)
-        self.test = GuiManagerAnnotations(self.windowAnnotate, self.back_graph, self.manageAnnotationsCatch)
-    def manageAnnotationsCatch(self, dictupdate):
+        self.test = GuiManagerAnnotations(self.windowAnnotate, self.back_graph, self.popupAnnotationsCatch)
+    def popupAnnotationsCatch(self, dictupdate):
         self.back_graph.update(dictupdate)
         self.updateUI()
-
+    # manager for data edition
+    def popupDataEditor(self):
+        # opens manager
+        from gui.GUIdataEditor import GuiDataEditor
+        self.windowDataEditor = tk.Toplevel(self.master)
+        self.test = GuiDataEditor(self.windowDataEditor, self.back_graph, self.popupDataEditorCatch)
+    def popupDataEditorCatch(self):
+        # modification of the Curve are performed within popup. Nothing else to do
+        self.updateUI()
+        
     def updateUI(self):
         self.updateUI_graph()
         try:

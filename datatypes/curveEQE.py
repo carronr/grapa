@@ -329,7 +329,7 @@ class CurveEQE(Curve):
             if fit[i] >=0:
                 fit[i] = 1 - np.exp(- np.sqrt(fit[i]) / (Curve.NMTOEV/nm[i]))
             else:
-                np.nan
+                fit[i] = np.nan
         return fit
 
 
@@ -493,7 +493,8 @@ class CurveEQE(Curve):
     def currentCalc(self, ROI=None, interpolatekind='linear',
                     spectralPhotonIrrad=None, silent=False):
         """
-        Computes the current EQE current using AM1.5 spectrum
+        Computes the current EQE current using AM1.5 spectrum.
+        Assumes the EQE vales are in range [0,1] and NOT [0,100].
         ROI: [nm_min, nm_max]
         interpolatekind: order for interpolation of EQE data. default 'linear'.
         refSpectrum: by default AM1.5G; otherwise filename in folder datatypes
@@ -551,6 +552,8 @@ class CurveEQE(Curve):
             Can be given in eV or in nm, see Eminunit.
         - Eminunit: 'eV' if Emin is given in eV, 'nm' otherwise. Default 'nm'
         """
+        # does not matter if EQE is [0,1] or [0,100], this is corrected by the 
+        # calculation of Jsc (beware the day Jsc is patched!)
         import scipy.integrate as integrate
         CST_q = 1.602176634e-19 # elemental charge [C]
         CST_h = 6.62606979e-34 # Planck [J s]
@@ -570,16 +573,19 @@ class CurveEQE(Curve):
         # mask for integration
         mask = (E >= Emin * CST_q) if Emin != 'auto' else (E > 0)
         # start computing the expression
+        print('max EQE', np.max(EQE))
         integrand = EQE * E**2 / (np.exp(E / (CST_kb * T)) - 1) # [J2]
         integral = np.abs(integrate.trapz(integrand[mask], x=E[mask])) # [J3]
         ERE  = 2 * np.pi * CST_q / CST_h**3 / CST_c**2 / Jsc # [J-3]
         ERE *= np.exp(CST_q * Voc / CST_kb / T) # new term unitless
         ERE *= integral # output [unitless]
-        return ERE, Curve([nm[mask], integrand[mask]], {'label': 'ERE integrand'})
+        lbl = ['ERE integrand to '+self.getAttribute('label'), '', 'eV$^2$']
+        return ERE, Curve([nm[mask], integrand[mask]/(CST_q)**2],
+                          {'label': Graph().formatAxisLabel(lbl)})
     def ERE_GUI(self, Voc, T, Emin='auto', EminUnit='nm'):
         ERE, curve = self.ERE(Voc, T, Emin=Emin, EminUnit=EminUnit)
         print('External radiative efficiency estimate:', "{:.2E}".format(ERE))
-        curve.update({'ax_twinx':1, 'color': 'k', 'label': 'ERE integrand to '+self.getAttribute('label')})
+        curve.update({'ax_twinx':1, 'color': 'k'})
         return curve
     def ERE_EminAuto(self):
         # smart Emin autodetect
@@ -647,6 +653,7 @@ class CurveEQE(Curve):
         print('   Voc: cell Voc voltage, in [V].')
         print('   Emin: min E on which the integral is computed.')
         print('   EminUnit: "eV" if Emin is given in eV, "nm" otherwise.')
+        print('   Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476')
         return True
 
         

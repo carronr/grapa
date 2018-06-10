@@ -754,7 +754,10 @@ class GraphIO(Graph):
         for key in keysList:
             out = out + key
             for c in range(self.length()):
-                out = out + separator[c] + str(self.curve(c).getAttribute(key)).replace('\n', '\\n')
+                value = self.curve(c).getAttribute(key)
+                if isinstance(value, np.ndarray):
+                    value = list(value)
+                out = out + separator[c] + str(value).replace('\n', '\\n')
             out = out.rstrip('\t') + '\n'
         # format data
         for curve in self.data:

@@ -80,7 +80,19 @@ class CheckbuttonVar(tk.Checkbutton):
     def set(self, value):
         self.var.set(value)
 
-
+        
+        
+class ButtonSmall(tk.Frame):
+    """ fabricate a Button with a tunable size """
+    def __init__(self, frame, text, command, width=16, height=16, **kwargs):
+        tk.Frame.__init__(self, frame, width=width, height=height)
+        self.propagate(0)
+        self._button = tk.Button(self, text=text, command=command, **kwargs)
+        self._button.pack(fill=tk.BOTH, expand=True)
+        
+        
+        
+        
 class FrameTitleContentHide(tk.Frame):
     """ A class to show and hide some content in the user-interface """
     def __init__(self, master, funcFillTitle, funcFillContent,
