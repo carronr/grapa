@@ -108,7 +108,7 @@ class Graph:
     graphInfoKeysData.append(['== Misc ==', ''])
     graphInfoKeysData.append(['alter',           'Data transform keyword, specific to the type of manipulated data.\nExamples: "linear", or "[\'nmeV\', \'tauc\']"'])
     graphInfoKeysData.append(['typeplot',        'General graph plotting instruction, based on ax.set_xscale() and ax.set_yscale().\nExamples: "plot", "semilogx", etc.'])
-    graphInfoKeysData.append(['arbitraryfunctions', 'A list of instructions. Each instruction is a list as\n[method of ax, list of arguments, dict of keyword arguments]', ["[[\'xaxis.set_ticks\',[[1.5, 5.5]],{\'minor\':True}], [\'set_xticklabels\',[[\'a\',\'b\']],{\'minor\':True}]]", "[['set_axis_off', [], {}]]", "[['yaxis.set_major_formatter', ['StrMethodFormatter({x:.2f})'], {}]]", "[['xaxis.set_minor_locator', ['MultipleLocator(0.5)'], {}]]"]])
+    graphInfoKeysData.append(['arbitraryfunctions', 'A list of instructions. Each instruction is a list as\n[method of ax, list of arguments, dict of keyword arguments]', ["[[\'xaxis.set_ticks\',[[1.5, 5.5]],{\'minor\':True}], [\'set_xticklabels\',[[\'a\',\'b\']],{\'minor\':True}]]", "[['set_axis_off', [], {}]]", "[['grid', [True], {'axis': 'both'}]]", "[['yaxis.set_major_formatter', ['StrMethodFormatter({x:.2f})'], {}]]", "[['xaxis.set_minor_locator', ['MultipleLocator(0.5)'], {}]]"]])
     graphInfoKeysData_ = np.array([d[0:2] for d in graphInfoKeysData])
     graphInfoKeys = list(graphInfoKeysData_[:,0])
     graphInfoKeysExample = list(graphInfoKeysData_[:,1])

@@ -57,16 +57,15 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow JV
 # TODO: Write workflow Jsc Voc
 
-
 #- Add button reverse curve order
 #- Stackplot: reorder at creation?
-#- Image in nannal (???)
-
-# TODO: export fails ehen special character. 1/ catch error and display; 2/ solve!
-# UnicodeEncodeError, 'charmap' codec can't encode character '\u3b1' in position 396: character maps to <undefined>
 
 
-# Version 0.5.2.4rc2
+#Stackplot: transparency Alpha ?
+
+
+
+# Version 0.5.3.0
 # New features
 #- A data editor was implemented, accessible immediately below the graph.
 #- The Property edition tool was removed from the user interface. The 'New property' is now renamed 'Property editor' 
@@ -75,11 +74,15 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- CurveEQE: a new anaysis tool is provided, the external radiative efficiency. This estimates is computed from the EQE and the cell Voc.
 #- CurveJV: added a new data visualization: differential R, defined as dV/dJ.
 #- Added an option for the plot method 'fill'. Points with 0 value can be added at first and last data positions thanks to the keyword 'fill_padto0'.
+#- Added a value for keyword 'arbitraryfunction": [['grid', [True], {'axis': 'both'}]], which displays a grid at the major ticks locations
 # Modification
 #- CurveEQE: the default interpolation for the current calculation currentcalc is now 'linear' and not 'cubic'
+#- When trying to save a graph with special characters that cannot be saved in a text file, some clearer (and hopefully helpful) message is now displayed.
 #Bugs
 #- The stackplot method now properly ignores hidden Curves.
-
+#- The stackplot now hides the curves labels when the keyword labelhide is set
+#- Solved a bug for invalid input for the estimate of ERE cut wavelength
+#- Solved a bug with improper inputs for the subplots_adjust that frooze the graph
 
 
 # Version 0.5.2.3
@@ -1090,7 +1093,6 @@ class Application(tk.Frame):
         curves = list(curves_)
         curves.sort(reverse=(True if (upDown > 0) else False))
         selected = []
-        print('---')
         for curve in curves:
             idx2 = upDown
             if curve == 0:
@@ -1103,7 +1105,7 @@ class Application(tk.Frame):
             else:
                 self.executeGraphMethod('moveCurveToIndex', curve, idx2)
                 selected.append(idx2)
-                print('moveCurve', curve, idx2, upDown)
+                #print('moveCurve', curve, idx2, upDown)
                 if idx2 < curve or (idx2 == curve and curve == 0):
                     upDown += 1
                 elif idx2 > curve or (idx2 == curve and curve >= self.back_graph.length()-1):

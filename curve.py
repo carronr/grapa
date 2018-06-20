@@ -865,7 +865,7 @@ class Curve:
             nexty = []
             fmt['labels'], fmt['colors'] = [''], ['']
             if 'label' in fmt:
-                fmt['labels'] = [fmt['label']]
+                fmt['labels'] = ['' if self.getAttribute('labelhide') else fmt['label']]
                 del fmt['label']
             if 'color' in fmt:
                 fmt['colors'] = [fmt['color']]
@@ -877,7 +877,8 @@ class Curve:
                         ignoreNext += 1
                         if not graph.curve(j).isHidden():
                             nexty.append(graph.curve(j).y_offsets(alter=alter[1]))
-                            fmt['labels'].append(graph.curve(j).getAttribute('label'))
+                            lbl = graph.curve(j).getAttribute('label')
+                            fmt['labels'].append('' if graph.curve(j).getAttribute('labelhide') else lbl)  
                             fmt['colors'].append(graph.curve(j).getAttribute('color'))
                             continue
                     else:

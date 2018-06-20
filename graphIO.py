@@ -798,7 +798,22 @@ class GraphIO(Graph):
             if self.getAttribute('saveSilent') != True:
                 print('Graph data saved as', filename.replace('/','\\'))
             f = open(filename, 'w')
-            f.write(out)
+            try:
+                f.write(out)
+            except UnicodeEncodeError as e:
+                # give some details to the user, otherwise can become quite difficult to identify where the progrem originates from
+                print('ERROR! Could not save the file!')
+                print('Exception', type(e), 'when exporting the graph. Exception:')
+                print(e)
+                ident = 'in position '
+                errmsg = e.__str__()
+                if ident in errmsg:
+                    idx = errmsg.find(ident) + len(ident)
+                    from re import findall
+                    chari = findall(('[0-9]+'), errmsg[idx:])
+                    if len(chari) > 0:
+                        chari = int(chari[0])
+                        print('--> surrounding characters:', out[max(0,chari-20):min(len(out),chari+15)].replace('\n','\\n'))
             f.close()
         return filename
 
@@ -1079,9 +1094,9 @@ class GraphIO(Graph):
                         val[i] = val[i] / fs[i % 2]
                 indic = ['left', 'bottom', 'right', 'top', 'wspace', 'hspace']
                 for i in range(min(len(val), len(indic))):
-                    subplotAdjust.update({indic[i]: val[i]})
+                    subplotAdjust.update({indic[i]: float(val[i])})
             else:
-                subplotAdjust.update({'bottom': val})
+                subplotAdjust.update({'bottom': float(val)})
         if fig is not None:
             fig.subplots_adjust(**subplotAdjust)
         if gs is not None:

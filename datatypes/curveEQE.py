@@ -590,7 +590,10 @@ class CurveEQE(Curve):
     def ERE_EminAuto(self):
         # smart Emin autodetect
         nm, EQE = self.x(), self.y()
-        nmMax = np.max(nm[(EQE > 0.5*np.max(EQE))]) # identify nm where EQE = 0.5
+        try:
+            nmMax = np.max(nm[(EQE > 0.5*np.max(EQE))]) # identify nm where EQE = 0.5
+        except: # no suitable point
+            return [0, 'nm']
         mask = (nm > nmMax) * (EQE > 0)
         nm_, EQElog = nm[mask], np.log10(EQE[mask])
         E = Curve.NMTOEV / nm_
