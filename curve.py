@@ -77,10 +77,12 @@ class Curve:
             c = kwargs['graph_i']
             if typeplot == 'errorbar': # assist functions for type errorbar
                 out += self.funcListGUI_errorbar(graph, c)
-            if typeplot == 'scatter': # assist function for type scatter
+            elif typeplot == 'scatter': # assist function for type scatter
                 out += self.funcListGUI_scatter(graph, c)
-            if typeplot.startswith('fill'): # assist function for type fill
+            elif typeplot.startswith('fill'): # assist function for type fill
                 out += self.funcListGUI_fill(graph, c)
+            elif typeplot.startswith('boxplot'): # assist function for type boxplot
+                out += self.funcListGUI_boxplot(graph, c)
         except Exception as e:
             print('Exception', type(e), 'in Curve.funcListGUI')
         if self.getAttribute('offset', None) is not None or self.getAttribute('muloffset', None) is not None:
@@ -146,6 +148,21 @@ class Curve:
                      {'field': 'Combobox', 'values': ['', 'True', 'False']}]])
         return out
         
+    def funcListGUI_boxplot(self, graph, c):
+        out = []
+        at = ['boxplot_position']
+        at2 = ['position']
+        out.append([self.updateValuesDictkeys, 'Save', at2,
+                    [self.getAttribute(a) for a in at], {'keys': at},
+                    [{}]])
+        at =  ['widths', 'notch', 'vert']
+        out.append([self.updateValuesDictkeysGraph, 'Save', at,
+                    [self.getAttribute(a) for a in at],
+                    {'keys': at, 'graph': graph, 'alsoAttr': ['type'], 'alsoVals': ['boxplot']},
+                    [{},
+                     {'field': 'Combobox', 'values': ['True', 'False']},
+                     {'field': 'Combobox', 'values': ['True', 'False']}]])
+        return out
         
     def updateNextCurvesScatter(self, *values, **kwargs):
         try:
@@ -448,7 +465,7 @@ class Curve:
         """
         Performs update({key1: value1, key2: value2, ...}) with
         arguments value1, value2, ... , (*args) and
-        kwargument key=['key1', 'key2', ...]
+        kwargument keys=['key1', 'key2', ...]
         """
         if 'keys' not in kwargs:
             print('Error Curve updateValuesDictkeys: "keys" key must be provided, must be a list of keys corresponding to the values provided in *args.')
@@ -459,6 +476,36 @@ class Curve:
         for i in range(lenmax):
             self.update({kwargs['keys'][i]: args[i]})
         return True
+
+    def updateValuesDictkeysGraph(self, *args, keys=None, graph=None, alsoAttr=None, alsoVals=None, **kwargs):
+        """
+        similar as updateValuesDictkeys, for all curves inside a given graph
+        """
+        from grapa.graph import Graph
+        if not isinstance(keys, list):
+            print('Error Curve updateValuesDictkeysGraph: "keys" key must be provided, must be a list of keys corresponding to the values provided in *args.')
+            return False
+        if not isinstance(graph, Graph):
+            print('Error Curve updateValuesDictkeysGraph: "graph" key must be provided, must be a Graph object.')
+            return False
+        if not isinstance(alsoAttr, list):
+            print('Error Curve updateValuesDictkeysGraph: "alsoAttr" key must be provided, must be a list of attributes.')
+            return False
+        if not isinstance(alsoVals, list):
+            print('Error Curve updateValuesDictkeysGraph: "alsoVals" key must be provided, must be a list of values matching alsoAttr.')
+            return False
+        while len(alsoVals) < len(alsoAttr):
+            alsoVals.append('')
+        for curve in graph.iterCurves():
+            flag = True
+            for i in range(len(alsoAttr)):
+                if not curve.getAttribute(alsoAttr[i]) == alsoVals[i]:
+                    flag = False
+            if flag:
+                curve.updateValuesDictkeys(*args, keys=keys)
+        return True
+            
+
         
         
     def delete (self, key) :
@@ -938,15 +985,20 @@ class Curve:
                 print(type(e), e)
         elif type_graph == 'boxplot':
             if len(y) > 0 and not np.isnan(y).all():
+                bxpltpos = self.getAttribute('boxplot_position', None)
                 boxplot['y'].append(y[~np.isnan(y)])
-                boxplot['positions'].append(boxplot['i'])
+                boxplot['positions'].append(boxplot['i'] if bxpltpos is None else bxpltpos)
                 boxplot['labels'].append(fmt['label'] if 'label' in fmt else '')
                 boxplot['color'].append (fmt['color'] if 'color' in fmt else '')
+                for key in ['widths', 'notch', 'vert']:
+                    if self.getAttribute(key, None) is not None:
+                        boxplot.update({key: self.getAttribute(key)})
                 boxplot['i'] += 1
         elif type_graph == 'violinplot':
             if len(y) > 0 and not np.isnan(y).all():
+                bxpltpos = self.getAttribute('boxplot_position', None)
                 violinplot['y'].append(y[~np.isnan(y)])
-                violinplot['positions'].append(boxplot['i'])
+                violinplot['positions'].append(boxplot['i'] if bxpltpos is None else bxpltpos)
                 violinplot['labels'].append(fmt['label'] if 'label' in fmt else '')
                 violinplot['color'].append (fmt['color'] if 'color' in fmt else '')
                 if 'showmeans' in attr:

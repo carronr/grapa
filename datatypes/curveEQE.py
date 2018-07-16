@@ -573,7 +573,6 @@ class CurveEQE(Curve):
         # mask for integration
         mask = (E >= Emin * CST_q) if Emin != 'auto' else (E > 0)
         # start computing the expression
-        print('max EQE', np.max(EQE))
         integrand = EQE * E**2 / (np.exp(E / (CST_kb * T)) - 1) # [J2]
         integral = np.abs(integrate.trapz(integrand[mask], x=E[mask])) # [J3]
         ERE  = 2 * np.pi * CST_q / CST_h**3 / CST_c**2 / Jsc # [J-3]
@@ -584,7 +583,7 @@ class CurveEQE(Curve):
                           {'label': Graph().formatAxisLabel(lbl)})
     def ERE_GUI(self, Voc, T, Emin='auto', EminUnit='nm'):
         ERE, curve = self.ERE(Voc, T, Emin=Emin, EminUnit=EminUnit)
-        print('External radiative efficiency estimate:', "{:.2E}".format(ERE))
+        print('External radiative efficiency estimate:', "{:.2E}".format(ERE), '(input Voc:', Voc, ')')
         curve.update({'ax_twinx':1, 'color': 'k'})
         return curve
     def ERE_EminAuto(self):

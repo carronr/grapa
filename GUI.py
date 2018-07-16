@@ -60,8 +60,15 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- Add button reverse curve order
 #- Stackplot: reorder at creation?
 
-
 #Stackplot: transparency Alpha ?
+
+
+
+# Version 0.5.3.1rc1
+#Additions
+#- Shortcut were placed to tune the boxplot appearance: horizontal position, width of the boxes, presence of a notch, vertical or horizontal orientation.
+# Modifications
+#- EQE ERE estimate now discplays the input Voc of the device as a double check
 
 
 
@@ -569,6 +576,7 @@ class Application(tk.Frame):
         self.varQuickModsYlim1.pack     (side='left', anchor='c')
         tk.Label(frame, text='   ').pack(side='left')
         tk.Button(frame, text='Save', command=self.quickMods).pack(side='left', anchor='c')
+        tk.Label(frame, text='   ').pack(side='left')
         self.varQuickModsXlabel.bind('<Return>', lambda event: self.quickMods())
         self.varQuickModsYlabel.bind('<Return>', lambda event: self.quickMods())
         self.varQuickModsXlim0.bind ('<Return>', lambda event: self.quickMods())

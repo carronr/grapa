@@ -1284,7 +1284,11 @@ class GraphIO(Graph):
 
         # generates boxplot and violinplot, somehow differently than others
         if len(boxplot['y']) > 0:
-            boxplot_dict = ax.boxplot(boxplot['y'], positions=boxplot['positions'], labels=boxplot['labels'])
+            bxpltkwargs = {}
+            for key in ['widths', 'notch', 'vert']:
+                if key in boxplot:
+                    bxpltkwargs.update({key: boxplot[key]})
+            boxplot_dict = ax.boxplot(boxplot['y'], positions=boxplot['positions'], labels=boxplot['labels'], **bxpltkwargs)
             nb_el_boxplot = {'whiskers': 2, 'caps': 2}
             for key in boxplot_dict:
                 for i in range(len(boxplot_dict[key])):
