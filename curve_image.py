@@ -139,9 +139,12 @@ class Curve_Image(Curve):
                     if transpose:
                         data = np.transpose(data)
                     if self.getAttribute('datafile_XY1rowcol', False):
-                        X = data[0,1:]
-                        Y = data[1:,0]
-                        data = data[1:,1:]
+                        try:
+                            X = data[0,1:]
+                            Y = data[1:,0]
+                            data = data[1:,1:]
+                        except:
+                            pass
                     if rotate:
                         data = np.rot90(data, k=int(rotate)) # only by 90°
                 else:
@@ -158,6 +161,14 @@ class Curve_Image(Curve):
                         ignoreNext += 1
                     else:
                         break
+            data = np.array(data)
+            if self.getAttribute('datafile_XY1rowcol', False):
+                try:
+                    X = data[0,1:]
+                    Y = data[1:,0]
+                    data = data[1:,1:]
+                except:
+                    pass
             data = np.transpose(data) if transpose else np.array(data)
             if rotate:
                 data = np.rot90(data, k=int(rotate)) # only by 90°

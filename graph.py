@@ -155,7 +155,7 @@ class Graph:
     dataInfoKeysGraphData.append(['facecolor',      'Color of "fill" Curve types. Examples: "r", "[0.5,0,0]"'])
     dataInfoKeysGraphData.append(['cmap',           'Colormap, for Curve types which accept this keyword such as scatter). Examples:\n"afmhot", "inferno", or "[[0.91,0.25,1], [1.09,0.75,1], \'hls\']" (see Colorize options)'])
     dataInfoKeysGraphData.append(['vminmax',        'Bounds values for cmap. Examples: "[0,7]", or "[3, \'\']"'])
-    dataInfoKeysGraphData.append(['colorbar',       'If not empty display a colorbar according to keyword cmap. Example: "1",\n"{\'ticks\': [-1, 0, 2]}", or "{\'orientation\':\'horizontal\', \'adjust\':[0.1, 0.1, 0.7, 0.1]}"'])
+    dataInfoKeysGraphData.append(['colorbar',       'If not empty display a colorbar according to keyword cmap. Example: "1",\n"{\'ticks\': [-1, 0, 2]}" or "{\'orientation\':\'horizontal\', \'adjust\':[0.1, 0.1, 0.7, 0.1]}",\nor "{\'label\': \'Some text\', \'adjust\': [1.01, 0, 0.05, 1, \'ax\']}"'])
     dataInfoKeysGraphData.append(['xerr',           'x error for curve type "errorbar". Example: "1", or "5"'])
     dataInfoKeysGraphData.append(['yerr',           'y error for curve type "errorbar". Example: "1", or "5"'])
     dataInfoKeysGraphData.append(['== Misc ==',     ''])

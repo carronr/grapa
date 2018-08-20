@@ -20,6 +20,8 @@ from grapa.graph import Graph
 from grapa.graphIO import GraphIO
 from grapa.curve import Curve
 from grapa.colorscale import Colorscale
+from grapa.curve_image import Curve_Image
+from grapa.mathModule import roundSignificant
 
 from grapa.datatypes.curveCf import GraphCf
 from grapa.datatypes.curveCV import GraphCV, CurveCV
@@ -120,14 +122,14 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     presets.update({'NV': {'ylim': [0, np.nan],
                            'typeplot': '',
                            'alter': ['', 'CurveCV.y_CV_Napparent'],
-                           'ylabel': graph.formatAxisLabel(['Apparent doping density', 'N_{CV}', 'm$^{-3}$']),
+                           'ylabel': graph.formatAxisLabel(['Apparent doping density', 'N_{CV}', 'cm$^{-3}$']),
                            'xlabel': labels[0]}})
     presets.update({'NVlog': copy.deepcopy(presets['NV'])})
     presets['NVlog'].update({'ylim': '', 'typeplot': 'semilogy'})
     presets.update({'Nx': {'ylim': [0, np.nan],
                            'alter': ['CurveCV.x_CVdepth_nm', 'CurveCV.y_CV_Napparent'],
                            'typeplot': '',
-                           'ylabel': graph.formatAxisLabel(['Apparent doping density', 'N_{CV}', 'm$^{-3}$']),
+                           'ylabel': graph.formatAxisLabel(['Apparent doping density', 'N_{CV}', 'cm$^{-3}$']),
                            'xlabel': graph.formatAxisLabel(['Apparent depth', 'd', 'nm'])}})
     presets.update({'Nxlog': copy.deepcopy(presets['Nx'])})
     presets['Nxlog'].update({'ylim': '', 'typeplot': 'semilogy'})
@@ -260,6 +262,7 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     newGraphKwargs.update({'silent': True})
     graph = Graph('', **newGraphKwargs)
     graphPhase = Graph('', **newGraphKwargs)
+    graphNyqui = Graph('', **newGraphKwargs)
     # list possible files
     listdir = []
     for file in os.listdir(folder):
@@ -275,32 +278,41 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     # open all data files
     for file in listdir:
         print(file)
-        graphTmp = Graph(os.path.join(folder, file), complement={'_CfLoadPhase': True}, **newGraphKwargs)
+        graphTmp = Graph(os.path.join(folder, file), complement={'_CfLoadPhase': True, '_CfLoadNyquist': True}, **newGraphKwargs)
         if graph.length() == 0:
-            graph = graphTmp
-            while graph.length() > 1:
-                graph.deleteCurve(1)
-        else:
-            graph.append(graphTmp.curve(0))
+            graph.update(graphTmp.graphInfo)
+        graph.append(graphTmp.curve(0)) # append C-f
         if graphTmp.length() > 1:
-            graphPhase.append(graphTmp.curve(1))
-    graph.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
+            for c in graphTmp.iterCurves():
+                if c.getAttribute('_CfPhase', False):
+                    graphPhase.append(c)
+                if c.getAttribute('_CfNyquist', False):
+                    graphNyqui.append(c)
+    graph.colorize     (Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
     graphPhase.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
+    graphNyqui.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
     lbl = graph.curve(-1).getAttribute('label').replace(' K','K').split(' ')
     if len(lbl) > 1:
-        graph.update({'title': ' '.join(lbl[:-1])})
-        graph.replaceLabels(' '.join(lbl[:-1]), '')
+        graph.update     ({'title': ' '.join(lbl[:-1])})
         graphPhase.update({'title': ' '.join(lbl[:-1])})
+        graphNyqui.update({'title': ' '.join(lbl[:-1])})
+        graph.replaceLabels     (' '.join(lbl[:-1]), '')
         graphPhase.replaceLabels(' '.join(lbl[:-1]), '')
+        graphNyqui.replaceLabels(' '.join(lbl[:-1]), '')
     graphPhase.update({'xlabel': graph.getAttribute('xlabel'),
                        'ylabel': graphPhase.formatAxisLabel('Impedance angle [°]')})
+    graphNyqui.update({'xlabel': graph.getAttribute('xlabel'),
+                       'ylabel': graphNyqui.formatAxisLabel('Impedance angle [°]')})
+    graphNyqui.update({'xlabel': graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[0]),
+                       'ylabel': graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[1])})
     # mask undesired legends
     maskUndesiredLegends(graph, legend)
     maskUndesiredLegends(graphPhase, legend)
-    # set xlim
+    maskUndesiredLegends(graphNyqui, legend)
     # set xlim
     setXlim(graph, 'tight')
     setXlim(graphPhase, 'tight')
+    setXlim(graphNyqui, 'tight')
     
     # save
     filesave = os.path.join(folder, graph.getAttribute('title').replace(' ','_')+'_') # graphIO.filesave_default(self)
@@ -329,6 +341,69 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     graphPhase.plot(filesave=filesave+'phase', **plotargs)
     if pltClose:
         plt.close()
+    # graph 5: Nyquist
+    limmax = -np.inf
+    for c in graphNyqui.iterCurves():
+        limmax = max(limmax, max(c.x()), max(c.y()))
+    graphNyqui.update({'alter': '', 'xlim': [0, limmax], 'ylim': [0, limmax],
+                       'subplots_adjust': [0.15, 0.15, 0.95, 0.95],
+                       'figsize': [5,5]})
+    graphNyqui.plot(filesave=filesave+'Nyquist', **plotargs)
+    if pltClose:
+        plt.close()
+    # graph 6: image derivative, T vs f
+    graphImage = Graph()
+    flag = True
+    x = [0] + list(graph.curve(0).x())
+    Tmin, Tmax = np.inf, -np.inf
+    for c in graph.iterCurves():
+        T = c.getAttribute('temperature', None)
+        if T is None:
+            T = c.getAttribute('temperature [k]', None)
+        if T is None:
+            print('Script Cf, image, cannot identify Temperature', c.getAttributes())
+            flag = False
+        else:
+            Tmin, Tmax = min(Tmin, T),  max(Tmax, T)
+        y = [T] + list(c.y(alter='CurveCf.y_mdCdlnf'))
+        graphImage.append(Curve_Image([x, y], {}))
+    if flag:
+        # levels -> int value does not seem to work (matplotlib version?)
+        m, M = np.inf, -np.inf
+        for c in graphImage.iterCurves():
+            m = min(m, np.min(c.y()[1:]))
+            M = max(M, np.max(c.y()[1:]))
+        space = roundSignificant(M / 12, 1)
+        levels = [m] + list(np.arange(0, M*1.5, space))
+        for l in range(len(levels)-2, -1, -1):
+            if levels[l] > M:
+                del levels[-1]
+            else:
+                break
+        # graph size
+        Tdelta = (Tmax - Tmin) / 50
+        if Tdelta > 0:
+            fmin, fmax = np.min(graph.curve(0).x()), np.max(graph.curve(0).x())
+            fdelta = (np.log10(fmax) - np.log10(fmin))
+            subadj = [0.8, 0.5, 0.8+fdelta, 0.5+Tdelta, 'abs']
+            graphImage.update({'subplots_adjust': subadj,
+                               'figsize': [2+fdelta, 1+Tdelta]})
+        else:
+            print('script Cf, image, Warning T delta <=0, cannot properly scale image.')
+        graphImage.update({'typeplot': 'semilogx',
+                           'xlabel': graph.getAttribute('xlabel'),
+                           'ylabel': graphImage.formatAxisLabel(['Temperature', '', 'K'])})
+        graphImage.curve(0).update({'datafile_xy1rowcol': 1,
+                                    'cmap': 'afmhot',
+                                    'type': 'contourf',
+                                    'colorbar': {'label': graph.getAttribute('ylabel'),#'-dC / dln(f)',
+                                                 'adjust': [1.05, 0, 0.05, 1, 'ax']},
+                                    'vmin': 0,
+                                    'levels': levels})
+        # 'cmap': [[0.91, 0.25, 1], [1.09, 0.75, 1], 'hls']
+        graphImage.plot(filesave=filesave+'image', **plotargs)
+        if pltClose:
+            plt.close()
     
     print('End of process C-f.')
     return graph

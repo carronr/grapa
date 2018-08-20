@@ -13,6 +13,25 @@ KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
 
+
+Version 0.5.3.1
+Release 20.08.2018
+Additions
+- A Nyquist plot is created when executing the script C-f.
+- An image is created when executing the script C-f, showing the derivative as function of T and frequency.
+- Shortcut were placed to tune the boxplot appearance: horizontal position, width of the boxes, presence of a notch, vertical or horizontal orientation.
+- Keyboard shortcuts were added:
+    Ctrl+h: hide (or show) the active curve
+    Ctrl+Delete: delete the active curve
+- References were added to the help function of CurveCf, papers from Walter, and Decock.
+ Modifications
+- EQE ERE estimate now discplays the input Voc of the device as a double check
+- In the script treating C-V data, the units of the apparent doping density are now properly displayed in [cm-3] units and not [m-3]
+- An additional example is provided for the keyword colorbar
+
+
+
+
 Version 0.5.3.0
 Release 20.06.2018
 New features

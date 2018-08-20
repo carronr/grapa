@@ -8,6 +8,7 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 import numpy as np
 from re import findall as refindall
+from copy import deepcopy
 
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
@@ -21,6 +22,7 @@ class GraphCf(Graph):
     FILEIO_GRAPHTYPE = 'C-f curve'
     
     AXISLABELS = [['Frequency', 'f', 'Hz'], ['Capacitance', 'C', 'nF']] 
+    AXISLABELSNYQUIST = [['Real(Z)', 'Z\'', 'Ohm'], ['- Imag(Z)', '-Z"', 'Ohm']]
 
 
     @classmethod
@@ -31,46 +33,38 @@ class GraphCf(Graph):
         
         
     def readDataFromFile(self, attributes, **kwargs):
+        """
+        Possible kwargs:
+            - _CfLoadPhase: also load the phase, in degrees
+        """
         len0 = self.length()
         GraphIO.readDataFromFileGeneric(self, attributes)
         self.castCurve('Curve Cf', len0, silentSuccess=True)
         # label based on file name, maybe want to base it on file content
         self.curve(len0).update({'label': self.curve(len0).getAttribute('label').replace('C-f ','').replace(' Cp','').replace(' C','').replace('T=','').replace(' [nF]','').replace(' (nF)','')})
-        # graph cosmetics
-        self.update({'typeplot': 'semilogx', 'alter': ['', 'idle']})
-        self.update({'xlabel': self.formatAxisLabel(GraphCf.AXISLABELS[0]),
-                     'ylabel': self.formatAxisLabel(GraphCf.AXISLABELS[1])}) # default
+        # retrieve units, change label
         colName = self.curve(len0).getAttribute('frequency [Hz]', -1) # retrieve actual unit
+        ylabel = GraphCf.AXISLABELS
+        convertToF = 1e-9
         if isinstance(colName, str): # retrieve yaxis information in file, interpret it
             ylabel = colName.replace('C ', 'Capacitance ').replace('Cp ', 'Capacitance ').replace('(','[').replace(')',']')
             expr = '^(.* )\[(.*)\]$'
             f = refindall(expr, ylabel)
             if isinstance(f, list) and len(f) == 1 and len(f[0]) == 2:
                 ylabel = [f[0][0], GraphCf.AXISLABELS[1][1], f[0][1]]
-            self.update({'ylabel': self.formatAxisLabel(ylabel)}) # default
-        # generate additional curves if interesting
-        nb_add = 0
-        # if phase is required
-        if self.getAttribute('_CfLoadPhase', False) is not False:
-            f = self.curve(len0).x()
-            C = self.curve(len0).y() * 1e-9 # in [F], not [nF]
-            conductance = None
-            for c in range(len0+1, self.length()): # retrieve resistance curve, not always same place
-                lbl = self.curve(c).getAttribute('frequency [hz]')
-                if isinstance(lbl, str) and lbl[:1] == 'R':
-                    conductance = 1 / self.curve(c).y()
-                    break
-            if conductance is None:
-                print('ERROR Read', self.filename, 'as CurveCf with phase: cannot find R.')
-            else:
-                phase_angle = np.arctan(f * 2 * np.pi * C / conductance) * 180. / np.pi
-                self.append(Curve([f, phase_angle], self.curve(len0).getAttributes()))
-                nb_add += 1
-            
-        # delete Rp and Temperature
-        for c in range(self.length()-1-nb_add, len0, -1):
-            self.deleteCurve(c)
-        # normalize with area C, Nyquist
+            if f[0][1] != 'nF':
+                print('CurveCf read, detected capacitance unit', f[0][1], '. Cannot proceed further with phase and Nyquist.')
+                convertToF = None
+            # TODO: add warning if not nF
+        # identify Rp curve
+        idxRp = None
+        for c in range(len0, self.length()): # retrieve resistance curve
+            lbl = self.curve(c).getAttribute('label')
+            #print('scan curves label', c, lbl)
+            if lbl.endswith('R') or lbl.endswith('Rp [Ohm]'):
+                idxRp = c
+                break
+        # normalize with area C, R
         area = self.curve(len0).getAttribute('cell area (cm2)', None)
         if area is None:
             area = self.curve(len0).getAttribute('cell area', None)
@@ -78,13 +72,53 @@ class GraphCf(Graph):
             area = self.curve(len0).getAttribute('area', None)
         if area is not None:
             self.curve(len0).setY(self.curve(len0).y() / area)
-#            self.curve(len0+1).setX(self.curve(len0+1).x() / area) # uncomment if created Nyquist
-#            self.curve(len0+1).setY(self.curve(len0+1).y() / area) # uncomment if created Nyquist
+            if idxRp is not None:
+                self.curve(idxRp).setY(self.curve(idxRp).y() * area)
             self.curve(len0).update({'cell area (cm2)': area})
-            self.update({'ylabel': self.getAttribute('ylabel').replace('F', 'F cm$^{-2}$')})
             if not self.silent:
                 print('Capacitance normalized to area', self.curve(len0).getArea(),'cm2.')
- 
+        # generate additional curves if interesting
+        nb_add = 0
+        # if phase is required
+        if self.getAttribute('_CfLoadPhase', False) is not False:
+            f = self.curve(len0).x()
+            C = self.curve(len0).y() * convertToF # C input assumed to be [nF], need [F] for calculation
+            if idxRp is None:
+                print('Warning CurveCf read file', self.filename, ': cannot find R. Cannot compute phase.')
+            else:
+                conductance = 1 / self.curve(idxRp).y()
+                phase_angle = np.arctan(f * 2 * np.pi * C / conductance) * 180. / np.pi
+                self.append(Curve([f, phase_angle], deepcopy(self.curve(len0).getAttributes())))
+                self.curve(-1).update({'_CfPhase': True})
+                nb_add += 1
+#            conductance = None
+#            for c in range(len0+1, self.length()): # retrieve resistance curve, not always same place
+#                lbl = self.curve(c).getAttribute('frequency [hz]')
+#                if isinstance(lbl, str) and lbl[:1] == 'R':
+#                    conductance = 1 / self.curve(c).y()
+#                    break
+        if self.getAttribute('_CfLoadNyquist', False) is not False:
+            if idxRp is None:
+                print('ERROR CurveCf read file', self.filename, ': cannot find Rp. Cannot compute Nyquist plot.')
+            else:
+                C = self.curve(len0).y() * convertToF # C input assumed to be [nF], need [F] for calculation
+                omega = self.curve(len0).x() * 2 * np.pi
+                Rp = self.curve(idxRp).y()
+                Z = 1 / (1 / Rp +  1j * omega * C)
+                self.append(Curve([Z.real, -Z.imag], deepcopy(self.curve(len0).getAttributes())))
+                self.curve(-1).update({'_CfNyquist': True})
+                nb_add += 1
+        # delete Rp, temperature, etc
+        for c in range(self.length()-1-nb_add, len0, -1):
+            self.deleteCurve(c)
+        # cosmetics
+        self.update({'typeplot': 'semilogx', 'alter': ['', 'idle']})
+        self.update({'xlabel': self.formatAxisLabel(GraphCf.AXISLABELS[0]),
+                     'ylabel': self.formatAxisLabel(ylabel)}) # default
+        if self.curve(len0).getAttribute('cell area (cm2)', None) is not None:
+            self.update({'ylabel': self.getAttribute('ylabel').replace('F', 'F cm$^{-2}$')})
+        
+
 
 
 class CurveCf(Curve):
@@ -153,7 +187,7 @@ class CurveCf(Curve):
             attr = CurveArrheniusCfdefault.attr
         except Exception:
             attr = {'Curve': 'Fit Arrhenius',
-                    '_Arrhenius_variant': 'Cfdefects',
+                    '_Arrhenius_variant': 'Cfdefault',
                     'label': 'omega vs Temperature'}
             print('WARNING Exception during opening of CurveArrhenius module. Does not perturb saving of the data.')
         attr.update({'sample name': self.getAttribute('sample name')})
@@ -184,4 +218,7 @@ class CurveCf(Curve):
         print(' - Report inflection point for different T, then the fit activation energy.')
         print('   Traps can follow omega = 2 ksi T^2 exp(- E_omega / (kT)')
         print('   plot ln(omega T^-2) = ln(2 ksi) - E_omega / (kT)')
+        print('References:')
+        print('Decock et al., J. Appl. Phys. 110, 063722 (2011); doi: 10.1063/1.3641987')
+        print('Walter et al., J. Appl. Phys. 80, 4411 (1996); doi: 10.1063/1.363401')
         return True

@@ -51,6 +51,7 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # WISHLIST:
 #- config autotemplate for boxplot
 #- B+W preview
+#Stackplot: transparency Alpha ?
 
 # TODO: Write workflow Cf
 # TODO: Write workflow CV
@@ -60,15 +61,25 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- Add button reverse curve order
 #- Stackplot: reorder at creation?
 
-#Stackplot: transparency Alpha ?
+# colorbar: also shortcut for type image?
 
 
 
-# Version 0.5.3.1rc1
+# Version 0.5.3.1
 #Additions
+#- A Nyquist plot is created when executing the script C-f.
+#- An image is created when executing the script C-f, showing the derivative as function of T and frequency.
 #- Shortcut were placed to tune the boxplot appearance: horizontal position, width of the boxes, presence of a notch, vertical or horizontal orientation.
+#- Keyboard shortcuts were added:
+#    Ctrl+h: hide (or show) the active curve
+#    Ctrl+Delete: delete the active curve
+#- References were added to the help function of CurveCf, papers from Walter, and Decock.
 # Modifications
 #- EQE ERE estimate now discplays the input Voc of the device as a double check
+#- In the script treating C-V data, the units of the apparent doping density are now properly displayed in [cm-3] units and not [m-3]
+#- An additional example is provided for the keyword colorbar
+
+
 
 
 
@@ -271,6 +282,10 @@ class Application(tk.Frame):
         self.master.bind('<Control-r>', lambda e: self.updateUI())
         self.master.bind('<Control-Shift-C>', lambda e: self.curveDataToClipboard())
         self.master.bind('<Control-m>', lambda e: self.dataPickerSavePoint())
+        self.master.bind('<Control-h>', lambda e: self.curveShowHideCurve())
+        self.master.bind('<Control-Delete>', lambda e: self.curveDelete())
+        
+        
     
     def createFrame(self, frame, func, dictArgsInit, dictArgsPack, argsFunc=None, geometry='pack'):
         """
@@ -674,8 +689,12 @@ class Application(tk.Frame):
         
     def fillUIFrameRightAGDelete(self, frame):
         tk.Label (frame, text='Delete Curve').pack(side='left')
-        tk.Button(frame, text='Curve', command=self.curveDelete).pack(side='left', padx=3)
+        de = tk.Button(frame, text='Curve', command=self.curveDelete)
+        de.pack(side='left', padx=3)
         tk.Button(frame, text='All hidden', command=self.curveDeleteAllHidden).pack(side='left')
+        CreateToolTip(de, "Ctrl+Delete")        
+        
+        
     def fillUIFrameRightAGDuplicate(self, frame):
         tk.Label (frame, text='Duplicate Curve').pack(side='left')
         tk.Button(frame, text='Duplicate', command=self.curveDuplicate).pack(side='left')
@@ -695,9 +714,12 @@ class Application(tk.Frame):
     def fillUIFrameRightAGShowHide(self, frame):
         ObsShowHideCurve = ObserverStringVarMethodOrKey(tk.StringVar(), 'Select Curve', 'isHidden', valuesDict={True: 'Show Curve', False: 'Hide Curve'})
         self.observableCurve.register(ObsShowHideCurve)
-        tk.Button(frame, textvariable=ObsShowHideCurve.var(), command=self.curveShowHideCurve).pack(side='left')
+        sh = tk.Button(frame, textvariable=ObsShowHideCurve.var(), command=self.curveShowHideCurve)
+        sh.pack(side='left')
         tk.Button(frame, text='All',    command=self.curveShowHideAll).pack(side='left', padx='5')
         tk.Button(frame, text='Invert', command=self.curveShowHideInvert).pack(side='left')
+        CreateToolTip(sh, "Ctrl+H")
+
         
     def fillUIFrameRightAGShift(self, frame):
         tk.Label (frame, text='Reorder').pack(side='left')
