@@ -28,7 +28,7 @@ from grapa.mathModule import is_number, stringToVariable
 from grapa.curve_inset import Curve_Inset
 from grapa.curve_subplot import Curve_Subplot
 from grapa.curve_image import Curve_Image # needed for curve casting
-
+from grapa.graphIO_aux import ParserAxhline, ParserAxvline
 
 
 FILEIO_GRAPHTYPE_DATABASE = 'Database'
@@ -1380,6 +1380,9 @@ class GraphIO(Graph):
                 ax.yaxis.set_label_coords(val, 0.5)
         # other
         if 'axhline' in self.graphInfo:
+            lst = ParserAxhline(self.graphInfo['axhline'])
+            lst.plot(ax.axhline, curvedummy, alter, type_plot)
+            """
             if isinstance(self.graphInfo['axhline'], list):
                 for h in self.graphInfo['axhline']:
                     pos = curvedummy.y(alter=alter[1], xyValue=[1, h], errorIfxyMix=True, neutral=True)
@@ -1389,7 +1392,11 @@ class GraphIO(Graph):
                 pos = curvedummy.y(alter=alter[1], xyValue=[1, self.graphInfo['axhline']], errorIfxyMix=True, neutral=True)
                 if not pos == 0 or not type_plot in ['semilogy', 'loglog']:
                     ax.axhline(pos, 0, 1, color='k')
+            """
         if 'axvline' in self.graphInfo:
+            lst = ParserAxvline(self.graphInfo['axvline'])
+            lst.plot(ax.axvline, curvedummy, alter, type_plot)
+            """
             if isinstance(self.graphInfo['axvline'], list):
                 for v in self.graphInfo['axvline']:
                     pos = curvedummy.x(alter=alter[0], xyValue=[v, 1], errorIfxyMix=True, neutral=True)
@@ -1399,7 +1406,7 @@ class GraphIO(Graph):
                 pos = curvedummy.x(alter=alter[0], xyValue=[self.graphInfo['axvline'], 1], errorIfxyMix=True, neutral=True)
                 if not pos == 0 or not type_plot in ['semilogx', 'loglog']:
                     ax.axvline(pos, 0, 1, color='k')
-        
+           """
         # xlim, ylim. Start with xtickslabels as this guy would override xlim
         if 'xtickslabels' in self.graphInfo and not ignoreXLim:
             val = self.graphInfo['xtickslabels']
@@ -1439,12 +1446,15 @@ class GraphIO(Graph):
                     lim = list(curvedummy.y(alter=alter[1], xyValue=[[0]*len(lim), lim], errorIfxyMix=True, neutral=True))
                 else:
                     return False
-            except ValueError:
+            except ValueError as e:
+                print('GraphIO set lim ValueError, abort.', e)
                 return False
-            except TypeError:
+            except TypeError as e:
+                print('GraphIO set lim TypeError, comtinue with limAuto', e)
                 lim = limAuto
             lim = [limAuto[i] if np.isnan(lim[i]) or np.isinf(lim[i]) else lim[i] for i in range(len(lim))]
-            fun((lim[0], lim[1]))
+            if lim[0] != lim[1]:
+                fun((lim[0], lim[1]))
         # xlim should be after xtickslabels
         if 'xlim' in self.graphInfo:
             alterLim(ax, deepcopy(self.graphInfo['xlim']), 'x')
@@ -1737,3 +1747,6 @@ class GraphIO(Graph):
             print(' - file config.txt in grapa directory,')
             print(' - in file config.txt a line exists, similar as that, and indicate a valid inkscape executable: inkscape_path	["C:\Program Files\Inkscape\inkscape.exe"]')
 
+
+            
+            

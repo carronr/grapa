@@ -52,6 +52,14 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- config autotemplate for boxplot
 #- B+W preview
 #Stackplot: transparency Alpha ?
+#- Data editor: based on Canvas, to handle way more datapoints than with fields
+
+
+# BUG: fit JV, when unit in mV
+# BUG: curveMath multiplication by cst ? (ThomasF to send screen shot)
+
+
+
 
 # TODO: Write workflow Cf
 # TODO: Write workflow CV
@@ -59,9 +67,21 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow Jsc Voc
 
 #- Add button reverse curve order
-#- Stackplot: reorder at creation?
-
 # colorbar: also shortcut for type image?
+
+
+
+# Version 0.5.3.2
+# Additions
+# - New values possible for keyword "alter": 'y' and 'x', with combination ['y','x'] enabling graph transposition
+# - Curve Cf: the dataset can now be displayed as "Frequency [Hz] vs Apparent depth [nm]"
+# - Script Cf: the "Frequency [Hz] vs Apparent depth [nm]" is now automatically generated
+# - The "axhline" and "axvline" keywords can be used to specify the formatting, independently for different sets of lines. Examples are provided.
+# Bugs
+#- CurveJV: when creating a CurveJV object, an "area" parameter is set by default with value 1.
+#- Script process JV: a cause for exception and script failure was corrected, in case of missing data.
+#- Script process JV: script execution should be more robust with untypical data. Basic JV parameters should be extracted, and failures with JV fits should not affect script execution. Missing Rs, Jo and ideality values might result.
+#- Prevents the data editor to crash when first Curve contains too many data. 
 
 
 
@@ -78,8 +98,6 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- EQE ERE estimate now discplays the input Voc of the device as a double check
 #- In the script treating C-V data, the units of the apparent doping density are now properly displayed in [cm-3] units and not [m-3]
 #- An additional example is provided for the keyword colorbar
-
-
 
 
 
@@ -101,89 +119,6 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- The stackplot now hides the curves labels when the keyword labelhide is set
 #- Solved a bug for invalid input for the estimate of ERE cut wavelength
 #- Solved a bug with improper inputs for the subplots_adjust that frooze the graph
-
-
-# Version 0.5.2.3
-# Release 23.05.2018
-# Modifications:
-# - Jsc-Voc: the data separation Voc vs T now hides most created labels.
-# Bugs:
-#- Handling of colors in stackplot curves is now effective.
-#- Solved an issue wen saving files with fitted curves, which could not be opened when reloaded.
-#- in Jsc-Voc data treatment, solved a bug providing faulty default fitting range for J0 vs At.
-
-
-
-# Version 0.5.2.2
-# released
-# Bugs
-#- Bugs in some curve actions, where the curve was passed in argument.
-
-
-
-# Version 0.5.2.1
-#Bugs
-#- Bugs in rounding with infinity values, notably in EQE Curves
-    
-
-# Version 0.5.2.0
-# Additions
-#- Actions specific can now be performed on several curves at the same time, provided The corresponding action is available on each selected curve. Example: bandgap from EQE curve, JV fit, fitted curve resample, etc.
-#- When extracting Voc(T) from Jsc-Voc data, the data can now be fitted to a certain range and the fit extrapolated to 0 with a single clic.
-#  Moreover the Voc @ T=0 are printed in the console.
-#- The determination of the optical bandgap from EQE curves can be restricted to a certain wavelength range, in the derivative method. 
-# Modifications
-#- Curves created from curves actions (fit, etc) are now placed just after the selected curve.
-#- Improved the robustness of the JV curve fitting
-#- Adjusted precision of default parameters for TRPL fit, EQE exponential decay, and JscVoc curves.
-#- In the fits to TRPL data the tau are now non-negative, helping finding a good fit.
-#- SIMS data: the GGT keyword now refers to the ^72Ge+ trace and not ^70Ge+ anymore.
-#- The color picker popup now displays the current defined color, if possible.
-#Bugs
-#- Minor bug solved with overriding textxy values
-#- Bug solved that prevented the opening of the annotation popup with some input textxy values
-#- Legend location 'w' and 'e' were swapped
-#- Solved an issue that cause buttons to not disappear in the actions specific panel.
-#- Fit of JV curves, prevents creation of fit curves with non-sensical data in the 1e308 range
-#- Solved a bug in the output of summary file of boxplots, not correctly identifying the name of some sample names
-
-
-
-# Version 0.5.1.0
-#Additions
-#- CurveJV can now read an updated version of the TIV files
-#- In the Actions specific to the Curves, the quick access to the offset and muloffset attributes was changed to be Combobox instead of Entries.
-#- Added special keywords for offset and muloffset keywords: 'minmax' and '0max', which stretch the data from min to max, and 0 to max respectively.
-#- Added options to export Curves or Graph to clipboard with raw or screen data, and with or without properties.
-#- JscVoc curves: added a button to separate the data series as Voc vs T. The data is supposed to converge to the bandgap at T=0.
-#- CurveArrhenius: the fit range ROI is indicated in the attributes of the fitted Curve.
-#- CurveArrhenius: a new possibility is offered to define the x values after the curve creation.
-#Bugs
-#- Solved a graphical glitch in the annotation popup, regarding inappropriate "new" labels upon creation and deletion of annotations.
-#- Solved a glitch, the filename is not changed when copying the graph to the clipboard
-#Under the hood
-#- Moved the class GraphJV from the file curveJV to graphJV
-
-
-
-# 0.5.0.3
-# change in setup, now working
-
-# 0.5.0.0
-#New major version number, indicating that grapa can installed using pip!
-#Otherwise no big changes in the software.
-#Additions:
-#- Can now reads some reflectance files (Perkin Elmer spectrophotometer).
-#- CurveSpectrum has beed significantly extended, to offer some support to reflectance and transmittance curves. The following functions were added:
-#  - Correct for instrumental response, stored in datatypes/spectrumInstrumentalResponses.txt.
-#  - Compute the absorptance, defined as A = 1 - R - T
-#  - Estimate the absorption coefficient alpha, with input the thickness of the layer. A simple is also provided to account for the absorption in the substrate (see file datatypes/spectrumSubstrates.txt)
-#  The last 2 functions request selecting a transmittance/reflectance curve.
-#  More details are given in the manual.
-#Modifications:
-#- Added options to easily change the calibration of XRF files
-#Under the hood:
-#- Revised the code for opening spectrum files.
 
 
 

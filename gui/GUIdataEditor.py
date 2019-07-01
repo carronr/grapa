@@ -76,10 +76,10 @@ class GuiDataEditor(tk.Frame):
         frame = self.frameData
         self._fieldsNum = 0
         for c in range(self.graph.length()):
-            if self._fieldsNum > 1000:
-                print('Data editor: too many fields, stopped display after curve '+str(c-1)+'.')
-                break
             curve = self.graph.curve(c)
+            if self._fieldsNum + len(curve.x()) > 1500:
+                print('Data editor: too many data, '+('stopped display after curve '+str(c-1) if c>0 else 'did not display anything')+'.')
+                break
             if c >= len(self._fields):
                 self._fields.append({'data':[], 'new': [], 'frame': None, 'headers':None})
                 self._fields[c]['frame'] = tk.Frame(frame)

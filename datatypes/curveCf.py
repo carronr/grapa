@@ -147,6 +147,7 @@ class CurveCf(Curve):
         #out.append(['nm <-> eV', ['nmeV', ''], ''])
         out.append(['semilogx', ['','idle'], 'semilogx'])
         out.append(['-dC / dln(f)', ['', 'CurveCf.y_mdCdlnf'], 'semilogx'])
+        out.append(['Frequency [Hz] vs Apparent depth [nm]', ['CurveCV.x_CVdepth_nm', 'x'], 'semilogy'])
         return out
 
     def y_mdCdlnf(self, index=np.nan, xyValue=None):

@@ -42,6 +42,9 @@ class CurveJV(Curve):
         Curve.__init__ (self, dataJV, attributes, silent=silent)
         if 'area' in tempArea: # by default: do not normalize data
             Curve.update(self, tempArea)
+        if self.getAttribute('area', None) is None: # set 1 if no input
+            Curve.update(self, {'area': 1}) # to allow later changes
+            print('dchange aera!')
         # internally all units are treated as V and mA/cm2
         if units[0] == 'mV' :
             self.setX (self.x() / 1000)
@@ -155,7 +158,7 @@ class CurveJV(Curve):
 
     def simpleLabel (self, forceCalc=False):
         if self.getAttribute('label') == '' or forceCalc:
-            old = self.getAttribute('label').split('/')[-1].split('\\')[-1]
+            old = os.path.split(self.getAttribute('label'))[1]
             old = old.split('\\')[-1] + ' '
             old = resub(r'_[0-9][0-9](?P<next>[_ d$])', '\g<1>', old) # remove msmt number
             old = old.replace('I-V_','').replace('_',' ').replace('  ',' ').strip(' ')
@@ -165,7 +168,7 @@ class CurveJV(Curve):
 
     def sample (self, forceCalc=False) :
         if self.getAttribute('sample') == '' or forceCalc :
-            name = self.getAttribute('filename').split('/')[-1]
+            name = os.path.split(self.getAttribute('filename'))[1]
             split = refindall('I-V_(.*)_[a-zA-Z][0-9]_', name)
             if len(split) > 0 :
                 self.update({'sample': split[0].lower()})
@@ -173,7 +176,7 @@ class CurveJV(Curve):
     
     def cell (self, forceCalc=False) :
         if self.getAttribute('cell') == '' or forceCalc :
-            name = self.getAttribute('filename').split('/')[-1]
+            name = os.path.split(self.getAttribute('filename'))[1]
             split = refindall('_([a-zA-Z][0-9])_', name)
             if len(split) > 0 :
                 self.update({'cell': split[0].lower()})
@@ -181,7 +184,7 @@ class CurveJV(Curve):
 
     def measId (self, forceCalc=False) :
         if self.getAttribute('measId') == '' or forceCalc :
-            name = self.getAttribute('filename').split('/')[-1]
+            name = os.path.split(self.getAttribute('filename'))[-1]
             split = refindall('_([0-9][0-9])[._]', name)
             if len(split) > 0 :
                 self.update({'measId': split[0]})
@@ -501,7 +504,7 @@ class CurveJV(Curve):
         # Rp: actually no calculation, the standard value is the most robust indicator
         Rp = self.getAttribute('Rp') # Ohm/cm2
         # calculation of n
-        n = self.q / (self.k * self.T * maxdlogJdV) * 0.75
+        n = self.q / (self.k * self.T * max(0.001, maxdlogJdV)) * 0.75
         n = min (2, max(1, n)) # check starting value between 1 and 2
 #        Rs = dlogJdV[-1]*0.05  # Ohm/cm2 # rough approximetion, only temporary for I0 estimation! -> not close enough to reality
         Rs = 0.5 # start with a low value

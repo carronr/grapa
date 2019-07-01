@@ -286,6 +286,13 @@ class Curve:
                 offset = self.getAttribute('_SIMSdepth_offset', default=0)
                 mult   = self.getAttribute('_SIMSdepth_mult',   default=1)
                 return mult * (self.x(index, xyValue=xyValue) + offset)
+            elif alter == 'y':
+                try:
+                    xyValue = xyValue[::-1]
+                except TypeError:
+                    pass
+                # print('x xyValue', xyValue, self.y(index, xyValue=xyValue))
+                return self.y(index, xyValue=xyValue)
             elif alter != '':
                 split = alter.split('.')
                 if len(split) == 2:
@@ -372,6 +379,13 @@ class Curve:
             elif alter == 'normalized':
                 out = self.y(index, xyValue=xyValue)
                 return out / np.max(out)
+            elif alter == 'x':
+                #print('y xyValue', xyValue[::-1], self.x(index, xyValue=xyValue))
+                try:
+                    xyValue = xyValue[::-1]
+                except TypeError:
+                    pass
+                return self.x(index, xyValue=xyValue)
             elif alter != '':
                 split = alter.split('.')
                 if len(split) == 2:

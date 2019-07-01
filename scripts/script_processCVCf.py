@@ -404,6 +404,14 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
         graphImage.plot(filesave=filesave+'image', **plotargs)
         if pltClose:
             plt.close()
+    # graph 7: f vs apparent doping
+    graph.update({'alter': ['CurveCV.x_CVdepth_nm', 'x'], 'typeplot': 'semilogy'})
+    graph.update({'xlabel': graph.formatAxisLabel(['Apparent depth', 'd', 'nm']),
+                  'ylabel': graph.formatAxisLabel(['Frequency', 'f', 'Hz']),
+                  'xlim':'', 'ylim':''})
+    graph.plot(filesave=filesave+'apparentDepth', **plotargs)
+    if pltClose:
+        plt.close()
     
     print('End of process C-f.')
     return graph

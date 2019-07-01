@@ -394,15 +394,16 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newG
     bottom, top, hspace = 0.5, 0.5, 0.5
     totalh = [(sum(tmp) + (len(tmp)-1)*hspace + bottom + top) for tmp in axisheights]
     for i in range(2):
-        figsize = graphs[i].getAttribute('figsize')
+        figsize = graphs[i].getAttribute('figsize', None)
         sadjust = graphs[i].getAttribute('subplots_adjust')
-        attr = {'figsize': [figsize[0], totalh[i]]}
-        attr.update({'subplots_adjust': [sadjust[0], bottom/totalh[i], sadjust[2], 1-top/totalh[i], 0, hspace/axisheights[i][0]]})
-        attr.update({'subplotsncols': 1, 'subplotsheight_ratios': axisheights[i]})
-        graphs[i].update(attr)
-        filesave = '.'.join(file.split('.')[:-1]) + '_' + ['basic','diode'][i]
-        graphs[i].filename = filesave
-        graphs[i].plot(filesave=filesave, figAx=figAx)
+        if figsize is not None: # if not already set means nothing to show
+            attr = {'figsize': [figsize[0], totalh[i]]}
+            attr.update({'subplots_adjust': [sadjust[0], bottom/totalh[i], sadjust[2], 1-top/totalh[i], 0, hspace/axisheights[i][0]]})
+            attr.update({'subplotsncols': 1, 'subplotsheight_ratios': axisheights[i]})
+            graphs[i].update(attr)
+            filesave = '.'.join(file.split('.')[:-1]) + '_' + ['basic','diode'][i]
+            graphs[i].filename = filesave
+            graphs[i].plot(filesave=filesave, figAx=figAx)
     return filelist
             
     
@@ -495,7 +496,8 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
 if __name__ == "__main__":
     # go through files, store files content in order to later select pairs
     folder = './../examples/JV/SAMPLE_A/'
-    processJVfolder(folder, fitDiodeWeight=5, pltClose=False)
+    folder = r'C:/Users/Romain/Desktop/I-V_Oct1553_LTBR04_f2_01/'
+    processJVfolder(folder, fitDiodeWeight=5, pltClose=True)
 #    processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
 
 
