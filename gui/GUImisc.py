@@ -54,7 +54,19 @@ class EntryVar(tk.Entry):
     def set(self, val):
         self.var.set(val)
 
+        
+class LabelVar(tk.Label):
+    """ replacement for tk.Label, with embedded tk.Stringvar """
+    def __init__(self, frame, value, **kwargs):
+        self.var = tk.StringVar()
+        self.var.set(value)
+        tk.Label.__init__(self, frame, textvariable=self.var, **kwargs)
+    def get(self):
+        return self.var.get()
+    def set(self, val):
+        self.var.set(val)
 
+        
 class ComboboxVar(ttk.Combobox):
     """ replacement for tk.Combobbox, with embedded tk.Stringvar """
     def __init__(self, frame, values, default='', **kwargs):

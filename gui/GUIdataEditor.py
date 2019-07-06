@@ -18,27 +18,78 @@ if path not in sys.path:
 
 from grapa.mathModule import stringToVariable
 from grapa.gui.createToolTip import CreateToolTip
-from grapa.gui.GUImisc import EntryVar, CheckbuttonVar, OptionMenuVar, ComboboxVar, ButtonSmall
+from grapa.gui.GUImisc import EntryVar, LabelVar, CheckbuttonVar, OptionMenuVar, ComboboxVar, ButtonSmall
 
 
 class GuiDataEditor(tk.Frame):
     """
-    This class creates a window to edit data of a Curve (of a Graph?)
+    This class creates a window to edit data of a Graph
     """
+    
+    fieldWidth = 55
+    fieldHeight = 15
+    curveWidth = 2 * fieldWidth + 25
+    
     
     def __init__(self, master, graph, callback, curve_i=0):
         tk.Frame.__init__(self, master)
         self.master = master
         self.graph = graph
         self.callback = callback
-        self._fields = []
+        self._fields = {'idx':[], 'curve':[]}
         self._fieldsNum = 0
         # fill GUI
         width = min(800, max(200, self.graph.length() * 200))
-        self.frame = tk.Frame(self.master, width=width)
-        self.initFonts(self.frame)
-        self.frame.pack(side='top', fill=tk.BOTH, expand=True)
-        self.fillUIMain(self.frame)
+        height = 400
+        
+        self.initFonts(self.master)
+        self.frameHead = tk.Frame(self.master, borderwidth=2, relief='raised')
+        self.frameHead.pack(side='top', fill=tk.X)
+        frame = tk.Frame(self.master)
+        frame.pack(side='top', fill=tk.BOTH, expand=True)
+        
+        # --- create canvas with scrollbar ---
+        def on_configure(event):
+            self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+            self.canTop.configure(scrollregion=self.canTop.bbox('all'))
+            self.canLef.configure(scrollregion=self.canLef.bbox('all'))
+        def on_clickCanvas(event):
+            self.clickCanvas(event)
+        def scrollx(*args):
+            self.canvas.xview(*args)
+            self.canTop.xview(*args)
+            self.canLef.xview(*args)
+        def scrolly(*args):
+            self.canvas.yview(*args)
+            self.canTop.yview(*args)
+            self.canLef.yview(*args)
+        scrollbarx = tk.Scrollbar(frame, command=scrollx, orient=tk.HORIZONTAL)
+        scrollbary = tk.Scrollbar(frame, command=scrolly, orient=tk.VERTICAL)
+        self.canvas = tk.Canvas(frame, bg='white')
+        self.canTop = tk.Canvas(frame, height=30)
+        self.canLef = tk.Canvas(frame, width=45)
+        self.canToL = tk.Canvas(frame, width=45, height=30)
+        self.canvas.configure(yscrollcommand = scrollbary.set)
+        self.canvas.configure(xscrollcommand = scrollbarx.set)
+        self.canTop.configure(xscrollcommand = scrollbarx.set)
+        self.canLef.configure(yscrollcommand = scrollbary.set)
+        scrollbarx.grid(row=2, column=1, sticky='we')#pack(side=tk.BOTTOM, fill='x')
+        scrollbary.grid(row=1, column=2, sticky='ns')#pack(side=tk.RIGHT, fill='y')
+        self.canvas.grid(row=1, column=1, sticky='nsew')#side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canTop.grid(row=0, column=1, sticky='we')
+        self.canLef.grid(row=1, column=0, sticky='ns')
+        self.canToL.grid(row=0, column=0, sticky='')
+        frame.columnconfigure(1, weight=1)
+        frame.rowconfigure(1, weight=1)
+        # update scrollregion after starting 'mainloop'
+        # when all widgets are in canvas
+        self.canvas.bind('<Configure>', on_configure)
+        self.canTop.bind('<Configure>', on_configure)
+        self.canLef.bind('<Configure>', on_configure)
+        self.canvas.bind('<Button-1>', on_clickCanvas)
+        # populate different canvas
+        self.fillUIHead()
+        self.fillUICurves()
         
         
     def initFonts(self, frame):
@@ -46,152 +97,202 @@ class GuiDataEditor(tk.Frame):
         a = tk.Label(frame, text='')
         self.fontBold = font.Font(font=a['font'])
         self.fontBold.configure(weight='bold')
-    
-    def fillUIMain(self, frame):
-        def on_configure(event):
-            # update scrollregion after starting 'mainloop'
-            # when all widgets are in canvas
-            canvas.configure(scrollregion=canvas.bbox('all'))
-        # --- create canvas with scrollbar ---
-        canvas = tk.Canvas(frame)
-        scrollbarx = tk.Scrollbar(frame, command=canvas.xview, orient=tk.HORIZONTAL)
-        scrollbary = tk.Scrollbar(frame, command=canvas.yview, orient=tk.VERTICAL)
-        canvas.configure(xscrollcommand = scrollbarx.set)
-        canvas.configure(yscrollcommand = scrollbary.set)
-        scrollbarx.pack(side=tk.BOTTOM, fill='x')
-        scrollbary.pack(side=tk.RIGHT, fill='y')
-        canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        # update scrollregion after starting 'mainloop'
-        # when all widgets are in canvas
-        canvas.bind('<Configure>', on_configure)
-
-        self.frameData = tk.Frame(canvas)
-        canvas.create_window((0,0), window=self.frameData, anchor='nw')
-#        self.frameData.pack(side='top', anchor='w')
-
-        self.fillUIData()
         
     
-    def fillUIData(self):
-        frame = self.frameData
-        self._fieldsNum = 0
-        for c in range(self.graph.length()):
-            curve = self.graph.curve(c)
-            if self._fieldsNum + len(curve.x()) > 1500:
-                print('Data editor: too many data, '+('stopped display after curve '+str(c-1) if c>0 else 'did not display anything')+'.')
-                break
-            if c >= len(self._fields):
-                self._fields.append({'data':[], 'new': [], 'frame': None, 'headers':None})
-                self._fields[c]['frame'] = tk.Frame(frame)
-                self._fields[c]['frame'].grid(row=0, column=c, padx=10, sticky='n')
-            self.fillUICurve(self._fields[c]['frame'], c, curve)
-        # clean possibly useless fields related to nonexistent curves from memory
-        while len(self._fields) > self.graph.length():
-            for what in ['data', 'new']:
-                for column in self._fields[-1]['data']:
-                    for f in column:
-                        if hasattr(f, 'destroy'):
-                            f.destroy()
-            for f in self._fields[-1]['headers']:
-                if hasattr(f, 'destroy'):
-                    f.destroy()
-            if hasattr(self._fields[-1]['frame'], 'destroy'):
-                self._fields[-1]['frame'].destroy()
-            
-    def fillUICurve(self, frame, c, curve):
-        lbl = curve.getAttribute('label')
-        if len(lbl) > 20:
-            lbl = lbl[0:15]+ '...'
-        if self._fields[c]['headers'] is None:
-            self._fields[c]['headers'] = []
-            self._fields[c]['headers'].append(tk.Label (frame, text='Curve '+str(c)+': '+lbl))
-            self._fields[c]['headers'].append(tk.Button(frame, text='Save data', command=lambda x=c:self.saveDataCurve(x)))
-            self._fields[c]['headers'].append(tk.Frame(frame))
-            self._fields[c]['headers'][0].pack(side='top', anchor='w')
-            self._fields[c]['headers'][1].pack(side='top', anchor='w')
-            self._fields[c]['headers'][2].pack(side='top', anchor='w')
-        self.fillUICurveData(self._fields[c]['headers'][2], c, curve)
-        
-    def fillUICurveData(self, frame, c, curve):
-        # clear memory (to avoid memeory leak). Not optimal, should try to reuse existing fields
-        if len(self._fields[c]['data']) > 0:
-            for column in self._fields[c]['data']:
-                for f in column:
-                    if hasattr(f, 'destroy'):
-                        f.destroy()
-        if len(self._fields[c]['new']) > 0: # want to erase these fields anyways, lenght (thus position) may have changed
-            for column in self._fields[c]['new']:
-                for f in column:
-                    if hasattr(f, 'destroy'):
-                        f.destroy()
-        # make new display
-        # new value at index 0
-        self._fields[c]['new'] = [[], []]
-        self._fields[c]['new'][0].append(EntryVar(frame, '', width=10))
-        self._fields[c]['new'][1].append(EntryVar(frame, '', width=10))
-        self._fields[c]['new'][0][-1].grid(row=0, column=0)
-        self._fields[c]['new'][1][-1].grid(row=0, column=1)
-        # data
-        self._fields[c]['data'] = [[], [], []]
-        x, y = curve.x(), curve.y()
-        for i in range(len(x)):
-            self._fields[c]['data'][0].append(EntryVar(frame, str(x[i]), width=10))
-            self._fields[c]['data'][0][i].grid(row=i+2, column=0)
-        for i in range(len(x)):
-            self._fields[c]['data'][1].append(EntryVar(frame, str(y[i]), width=10))
-            self._fields[c]['data'][1][i].grid(row=i+2, column=1)
-        for i in range(len(x)):
-            self._fields[c]['data'][2].append(ButtonSmall(frame, text='X', command=lambda x=c, y=i: self.deleteXYPair(x, y)))
-            self._fields[c]['data'][2][i].grid(row=i+2, column=2)
-        # new value at last index
-        self._fields[c]['new'][0].append(EntryVar(frame, '', width=10))
-        self._fields[c]['new'][1].append(EntryVar(frame, '', width=10))
-        self._fields[c]['new'][0][-1].grid(row=len(x)+3, column=0)
-        self._fields[c]['new'][1][-1].grid(row=len(x)+3, column=1)
-        self._fields[c]['new'][0].append(tk.Frame(frame, height=8, width=8))
-        self._fields[c]['new'][0].append(tk.Frame(frame, height=8, width=8))
-        self._fields[c]['new'][0][2].grid(row=1, column=0)
-        self._fields[c]['new'][0][3].grid(row=len(x)+2, column=1)
-        # update number of created fields
-        self._fieldsNum += len(x)
-
-        
-    def deleteXYPair(self, c, i):
+    def clickCanvas(self, event, c=None, i=None):
+        if event is not None:
+            c = 0
+            for c_ in range(len(self._fields['curve'])):
+                if self.canvas.canvasx(event.x) > self._fields['curve'][c_]['dx']:
+                    c = c_
+            i = int(np.floor((self.canvas.canvasy(event.y) - self._fields['curve'][c]['dy0']) / self.fieldHeight))
+        elif c is not None and i is not None:
+            pass
+        else:
+            return
+        x = self.graph.curve(c).x()
+        y = self.graph.curve(c).y()
+        if i < len(x):
+            x, y = x[i], y[i]
+        else:
+            x, y = '', ''
+        self._headCurve1.set(str(c))
+        self._headCurve3.set(str(i))
+        self._headCurve5.set(str(x))
+        self._headCurve7.set(str(y))
+        self._headCurBo1.set(str(c))
+        self._headCurBo3.set(str(i))
+#        print('clicked at ', event.x, event.y, 'curve', c, 'idx', i)
+    def saveData(self):
+        c = int(self._headCurve1.get())
+        i = int(self._headCurve3.get())
+        x = float(self._headCurve5.get())
+        y = float(self._headCurve7.get())
+        x_, y_ = self.graph.curve(c).x(), self.graph.curve(c).y()
+        x_[i] = x
+        y_[i] = y
+        self.graph.curve(c).setX(x_)
+        self.graph.curve(c).setY(y_)
+        self.fillUICurveData(c)
+        self.clickCanvas(None, c=c, i=i)
+        if self.callback is not None:
+            self.callback()
+    def deletePoint(self):
+        c = int(self._headCurve1.get())
+        i = int(self._headCurve3.get())
         curve = self.graph.curve(c)
         data = np.delete(curve.getData(), i, axis=1)
         curve.data = data
+        self.fillUICurveData(c)
+        self.fillUICurvesIndex()
+        self.clickCanvas(None, c=c, i=i)
         if self.callback is not None:
             self.callback()
-        self.fillUIData()
+    def insertPoint(self):
+        c = int(self._headCurBo1.get())
+        i = int(self._headCurBo3.get())
+        x = float(self._headCurBo5.get())
+        y = float(self._headCurBo7.get())
+        curve = self.graph.curve(c)
+        x_, y_ = curve.x(), curve.y()
+        x_ = np.insert(x_, i, x)
+        y_ = np.insert(y_, i, y)
+        curve.data = np.array([x_, y_])
+        self.fillUICurveData(c)
+        self.fillUICurvesIndex()
+        self.clickCanvas(None, c=c, i=i)
+        if self.callback is not None:
+            self.callback()
         
-    def saveDataCurve(self, c):
-        x = [float(f.get()) for f in self._fields[c]['data'][0]]
-        y = [float(f.get()) for f in self._fields[c]['data'][1]]
-        x_, y_ = self._fields[c]['new'][0][0].get(), self._fields[c]['new'][1][0].get()
-        if x_ is not '' and y_ is not '':
-            x = [float(x_)] + x
-            y = [float(y_)] + y
-        x_, y_ = self._fields[c]['new'][0][1].get(), self._fields[c]['new'][1][1].get()
-        if x_ is not '' and y_ is not '':
-            x = x + [float(x_)]
-            y = y + [float(y_)]            
-        self.graph.curve(c).data = np.array([x, y])
-        if self.callback is not None:
-            self.callback()
-        self.fillUIData()
+        
+
+
+
+    def fillUIHead(self):
+        frame = self.frameHead
+        frameup = tk.Frame(frame)
+        framedw = tk.Frame(frame)
+        frameup.pack(side='top', fill='x')
+        framedw.pack(side='top', fill='x')
+        self.fillUIHeadTop(frameup)
+        self.fillUIHeadBot(framedw)
+    def fillUIHeadTop(self, frame):
+        self._headCurve0 = tk.Label(frame, text='Modify data, curve no')
+        self._headCurve1 = LabelVar(frame, '')
+        self._headCurve2 = tk.Label(frame, text='index')
+        self._headCurve3 = LabelVar(frame, '', width=2)
+        self._headCurve4 = tk.Label(frame, text='x')
+        self._headCurve5 = EntryVar(frame, '', width=10)
+        self._headCurve6 = tk.Label(frame, text='y')
+        self._headCurve7 = EntryVar(frame, '', width=10)
+        self._headCurve8 = tk.Button(frame, text='Save', command=self.saveData)
+        self._headCurve9 = tk.Button(frame, text='Delete Point', command=self.deletePoint)
+        self._headCurve0.pack(side='left')
+        self._headCurve1.pack(side='left')
+        self._headCurve2.pack(side='left')
+        self._headCurve3.pack(side='left')
+        self._headCurve4.pack(side='left')
+        self._headCurve5.pack(side='left')
+        self._headCurve6.pack(side='left')
+        self._headCurve7.pack(side='left')
+        self._headCurve8.pack(side='left')
+        self._headCurve9.pack(side='left')
+    def fillUIHeadBot(self, frame):
+        self._headCurBo0 = tk.Label(frame, text='New data point, curve no')
+        self._headCurBo1 = LabelVar(frame, '0')
+        self._headCurBo2 = tk.Label(frame, text='index')
+        self._headCurBo3 = ComboboxVar(frame, [0, '-1', '', 1, 2], default='0', width=3)
+        self._headCurBo4 = tk.Label(frame, text='x')
+        self._headCurBo5 = EntryVar(frame, '', width=10)
+        self._headCurBo6 = tk.Label(frame, text='y')
+        self._headCurBo7 = EntryVar(frame, '', width=10)
+        self._headCurBo8 = tk.Button(frame, text='Save', command=self.insertPoint)
+        self._headCurBo0.pack(side='left')
+        self._headCurBo1.pack(side='left')
+        self._headCurBo2.pack(side='left')
+        self._headCurBo3.pack(side='left')
+        self._headCurBo4.pack(side='left')
+        self._headCurBo5.pack(side='left')
+        self._headCurBo6.pack(side='left')
+        self._headCurBo7.pack(side='left')
+        self._headCurBo8.pack(side='left')
+
+        
+        
+    def fillUICurves(self):
+        self._fieldsNum = 0
+        for c in range(self.graph.length()):
+            if self._fieldsNum + len(self.graph.curve(c).x()) > 100000:
+                print('Data editor: too many data, '+('stopped display after curve '+str(c-1) if c>0 else 'did not display anything')+'.')
+                break
+            if c >= len(self._fields['curve']):
+                self._fields['curve'].append({'data':[], 'head':[]})
+            self.fillUICurveData(c)
+        # clean possibly useless fields related to nonexistent curves from memory
+        while len(self._fields['curve']) > self.graph.length():
+            for column in self._fields['curve'][-1]['data']:
+                for f in column:
+                    self.canvas.delete(f)
+        self.fillUICurvesIndex()
+    
+    
+    def fillUICurvesIndex(self):
+        maxlen = 0
+        for c in range(len(self._fields['curve'])):
+            maxlen = max(maxlen, len(self.graph.curve(c).x()))
+        if len(self._fields['idx']) > 0:
+            for f in self._fields['idx']:
+                self.canLef.delete(f)
+        self.canToL.create_text(0, 0*self.fieldHeight, anchor='nw', font=self.fontBold, text=" Curve")
+        self.canToL.create_text(0, 1*self.fieldHeight, anchor='nw', font=self.fontBold, text=" Label")
+        for i in range(maxlen):
+            self._fields['idx'].append(self.canLef.create_text(0, (i)*self.fieldHeight, anchor='nw', font=self.fontBold, text=' '+str(i)))
+        # empty text at far right to ensure same width of different canvas
+        self.canvas.create_text(self.graph.length()*self.curveWidth, 0, anchor='nw', text=' ')
+        self.canTop.create_text(self.graph.length()*self.curveWidth, 0, anchor='nw', text=' ')
+        
+    
+    def fillUICurveData(self, c):
+        # clear memory, explicitely destroy writings (to avoid memory leak)
+        for column in self._fields['curve'][c]['data']:
+            for f in column:
+                self.canvas.delete(f)
+        for f in self._fields['curve'][c]['head']:
+            self.canTop.delete(f)
+        self._fields['curve'][c]['data'] = [[],[]]
+        self._fields['curve'][c]['head'] = []
+        # make new display
+        curve = self.graph.curve(c)
+        lbl = str(curve.getAttribute('label'))
+        if len(lbl) > 25:
+            lbl = lbl[:20] + '...'
+        x, y = curve.x(), curve.y()
+        dx = c * self.curveWidth + 10
+        self._fields['curve'][c]['dx'] = dx
+        self._fields['curve'][c]['dy0'] = (0) * self.fieldHeight
+        self._fields['curve'][c]['head'].append(self.canTop.create_text(dx, 0, anchor='nw', font=self.fontBold, text=str(c)))
+        self._fields['curve'][c]['head'].append(self.canTop.create_text(dx, self.fieldHeight, anchor='nw', font=self.fontBold, text=lbl))
+        for i in range(len(x)):
+            dy = (i) * self.fieldHeight
+            self._fields['curve'][c]['data'][0].append(self.canvas.create_text(dx, dy, anchor='nw', text=str(x[i])))
+            self._fields['curve'][c]['data'][1].append(self.canvas.create_text(dx + self.fieldWidth, dy, anchor='nw', text=str(y[i])))
+        # update number of created fields
+        self._fieldsNum += len(x)
+
+
         
         
 def buildUI():
     import grapa
     from grapa.graph import Graph
     root = tk.Tk()
+    
     graph = Graph(r'./../examples/EQE/SAMPLE_A_d1_1.sr')
-    graph.duplicateCurve(0)
-    graph.duplicateCurve(0)
-    graph.duplicateCurve(0)
-    graph.duplicateCurve(0)
-    graph.duplicateCurve(0)
-    graph.duplicateCurve(0)
+    curve = graph.curve(0)
+    from copy import deepcopy
+    for i in range(6):
+        graph.append(deepcopy(curve))
+
     app = GuiDataEditor(root, graph, None)
     app.master.title('Grapa software v'+grapa.__version__+' Data editor')
     app.mainloop()

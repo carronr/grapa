@@ -1550,7 +1550,11 @@ class GraphIO(Graph):
                     if 'fontsize' not in args[i] and 'fontsize' in self.graphInfo:
                         args[i].update({'fontsize': self.graphInfo['fontsize']})
                     #print('Graph plot annotate', text[i], 'args', args[i])
-                    ax.annotate(text[i], **args[i])
+                    try:
+                        ax.annotate(text[i], **args[i])
+                    except Exception as e:
+                        print('Exception', type(e), 'during ax.annotate:', text[i], args[i])
+                        print(e)
         # legend
         if gs is None: # create legend on current ax
             legPropUser = deepcopy(self.getAttribute('legendproperties', default='best'))

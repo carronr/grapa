@@ -6,19 +6,18 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 print ('Loading matplotlib...')
 import matplotlib
-print ('matplotlib 1')
 matplotlib.use("TkAgg")
-print ('matplotlib 2')
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-print ('matplotlib 3')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+try:
+    from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg as NavigationToolbar2Tk
+except ImportError:
+    from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import matplotlib.pyplot as plt
-
 print ('Loading tkinter...')
 import tkinter as tk
-print ('tkinter 1')
 from tkinter import ttk
-print ('tkinter 2')
 from tkinter import BOTH, X, Y
+import tkinter.filedialog
 
 print ('Loading os...')
 import os
@@ -29,21 +28,16 @@ import copy
 print ('Loading sys...')
 import sys
 
-print ('loading Graph...')
+print ('Loading grapa...')
 path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 if path not in sys.path:
     sys.path.append(path)
 from grapa.graph import Graph
 from grapa.graphIO import FILEIO_GRAPHTYPE_GRAPH
-print ('Loading Curve...')
 from grapa.curve import Curve
-print ('Loading mathModule...')
 from grapa.mathModule import is_number, stringToVariable, roundSignificant
-print ('Loading Colorscale')
 from grapa.colorscale import Colorscale, PhotoImageColorscale
-print ('Loading Observable')
 from grapa.observable import Observable, ObserverStringVarMethodOrKey
-print ('Loading Tooltip')
 from grapa.gui.createToolTip import CreateToolTip
 from grapa.gui.GUImisc import FrameTitleContentHide, FrameTitleContentHideHorizontal
 from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, CheckbuttonVar, ComboboxVar
@@ -52,7 +46,6 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- config autotemplate for boxplot
 #- B+W preview
 #Stackplot: transparency Alpha ?
-#- Data editor: based on Canvas, to handle way more datapoints than with fields
 
 
 # BUG: fit JV, when unit in mV
@@ -68,6 +61,15 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 #- Add button reverse curve order
 # colorbar: also shortcut for type image?
+
+
+
+
+#Version 0.5.3.3rc1
+# Modifications
+#- The code was slightly modified to enable compatibility with winpython 3.6 (matplotlib 3.01)
+#- The data editor was revised and can now handle significanly larger datasets before speed becoms an issue (ca. 100'000 points instead of ~1'500)
+
 
 
 
@@ -410,7 +412,10 @@ class Application(tk.Frame):
         # toolbar
         self.canvas._tkcanvas.pack(side='top', anchor='w', expand=True, fill=BOTH) #, fill=BOTH, expand=True
         self.createFrame(frame, self.fillUIFrameGraphBoxToolbar,  {}, {'side': 'top', 'anchor': 'w', 'fill': X})
-        self.canvas.show()
+        try:
+            self.canvas.show()
+        except AttributeError:
+            pass # handles FigureCanvasTkAgg has no attribute show in later versions of matplotlib
         self.Graph_ax = self.Graph_fig.add_subplot(111)
     def enableCanvasCallbacks(self):
         def callback_pressCanvas(event):
@@ -448,7 +453,7 @@ class Application(tk.Frame):
         CreateToolTip(u, 'Ctrl+R')
         tk.Button(frame, text='Save zoom/subplots', command=self.setLimitsSubplotsToCurrent).pack(side='left', anchor='center', padx=5, pady=2)
         tk.Label(frame, text="   ").pack(side='left')
-        self.toolbar = NavigationToolbar2TkAgg(self.canvas, frame)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, frame)
         self.toolbar.update()
         
     def fillUIFrameGraphBelow(self, frame):
@@ -1238,7 +1243,10 @@ class Application(tk.Frame):
             print('Exception', e)
             pass
         self.callback_updateCrosshair(draw=False)
-        self.canvas.show()
+        try:
+            self.canvas.show()
+        except AttributeError:
+            pass # handles FigureCanvasTkAgg has no attribute show in later versions of matplotlib
         self.canvas.draw()
 
     

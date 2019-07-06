@@ -44,7 +44,7 @@ class CurveJV(Curve):
             Curve.update(self, tempArea)
         if self.getAttribute('area', None) is None: # set 1 if no input
             Curve.update(self, {'area': 1}) # to allow later changes
-            print('dchange aera!')
+            print('Cell area was set to 1.')
         # internally all units are treated as V and mA/cm2
         if units[0] == 'mV' :
             self.setX (self.x() / 1000)

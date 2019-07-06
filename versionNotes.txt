@@ -14,7 +14,14 @@ KNOWN BUGS
 
 
 
+Version 0.5.3.3rc1
+Modifications
+- The code was slightly modified to enable compatibility with winpython 3.6 (matplotlib 3.01)
+- The data editor was revised and can now handle significanly larger datasets before speed becoms an issue (ca. 100'000 points instead of ~1'500)
+
+
 Version 0.5.3.2
+Release 01.07.2019
 Additions
 - New values possible for keyword "alter": 'y' and 'x', with combination ['y','x'] enabling graph transposition
 - Curve Cf: the dataset can now be displayed as "Frequency [Hz] vs Apparent depth [nm]"
