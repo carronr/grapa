@@ -65,11 +65,12 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
-#Version 0.5.3.3rc1
+#Version 0.5.3.3
 # Modifications
 #- The code was slightly modified to enable compatibility with winpython 3.6 (matplotlib 3.01)
 #- The data editor was revised and can now handle significanly larger datasets before speed becoms an issue (ca. 100'000 points instead of ~1'500)
-
+# Bugs
+#- CurveJV was modified to better fit JV curves of (mini-)modules. A warning is printed if input data may be provided in mV. Also, the area works as expected.
 
 
 

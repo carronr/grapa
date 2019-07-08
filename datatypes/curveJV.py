@@ -42,9 +42,11 @@ class CurveJV(Curve):
         Curve.__init__ (self, dataJV, attributes, silent=silent)
         if 'area' in tempArea: # by default: do not normalize data
             Curve.update(self, tempArea)
-        if self.getAttribute('area', None) is None: # set 1 if no input
+        if self.area() == 0: # set 1 if no input
             Curve.update(self, {'area': 1}) # to allow later changes
             print('Cell area was set to 1.')
+        elif self.getAttribute('area', None) is None:
+            Curve.update(self, {'area': self.area()}) # to allow later changes
         # internally all units are treated as V and mA/cm2
         if units[0] == 'mV' :
             self.setX (self.x() / 1000)
@@ -59,6 +61,9 @@ class CurveJV(Curve):
         if self.getAttribute('_fitDiodeWeight') == '':
             self.update({'_fitDiodeWeight': 5})
         self.update ({'Curve': self.CURVE}) # for saved files further re-reading
+        # some warning for the user
+        if np.max(self.x() > 10):
+            print('Warning CurveJV: max voltage > 10 detected. Voltage input expected in V, please correct if possible. Fitting is likely to fail on provided input.')
         if ifCalc:
             self.calcVocJscFFEffMPP ()
 
@@ -280,7 +285,7 @@ class CurveJV(Curve):
         return True
 
     def calcVocJscFFEffMPP(self):
-        # need to remove NaN values from data, as well as saturated datapoints
+        # remove NaN values from data, as well as saturated datapoints
         V, J = self.cleanDataVJ()
         # calculate Jsc
         Jsc = self.calcJsc(V, J)
@@ -290,7 +295,6 @@ class CurveJV(Curve):
         self.update({'Rp': Rp})
         # calculate Voc
         # idea: interpolate JV curve with 3-order polynom between 2 closest datapoints, then look for V @ J=0
-        tol = 1e-4 # V # tolerance on Voc calculation
         Jabs = np.abs(J)
         try:
             i = list(Jabs).index(min(Jabs))
@@ -300,7 +304,11 @@ class CurveJV(Curve):
             if idx[0] < 0:
                 idx = [0, 1, 2, 3]
             f = interpolate.interp1d(V[idx], J[idx], 3) # spline interpolation
-            x = np.arange(V[idx[0]], V[idx[-1]], tol)
+            dx = np.abs(V[idx[:-1]] - V[idx[1:]])
+            dxmin = np.min(dx[dx > 0])
+            maxV = np.max(V[idx])
+            x = np.arange(V[idx[0]], V[idx[-1]], dxmin/100) # tolerance is 1/100 of smallest dx
+            x = np.array([min(v, maxV) for v in x])
             Voc = xAtValue (x, f(x), 0, silent=True)
         except ValueError:
             Voc = np.nan
@@ -317,7 +325,11 @@ class CurveJV(Curve):
             if idx[-1] >= len(powDens):
                 idx = [-4, -3, -2, -1]
             f = interpolate.interp1d(V[idx], powDens[list(idx)], kind=3)
-            x = np.arange(V[idx[0]], V[idx[-1]], tol)
+            dx = np.abs(V[idx[:-1]] - V[idx[1:]])
+            dxmin = np.min(dx[dx > 0])
+            maxV = np.max(V[idx])
+            x = np.arange(V[idx[0]], V[idx[-1]], dxmin/100)
+            x = np.array([min(v, maxV) for v in x])
             try:
                 Vmpp = x[list(f(x)).index(max(f(x)))]
                 Pmpp = f(Vmpp)
@@ -503,14 +515,17 @@ class CurveJV(Curve):
         Vshift = V[idx_maxdlogJdV]
         # Rp: actually no calculation, the standard value is the most robust indicator
         Rp = self.getAttribute('Rp') # Ohm/cm2
-        # calculation of n
+        # calculation of n. Starting value between 1 and 2 (* maxV to fit modules)
+        maxV = max(1, np.max(V))
         n = self.q / (self.k * self.T * max(0.001, maxdlogJdV)) * 0.75
-        n = min (2, max(1, n)) # check starting value between 1 and 2
+        n = min (2 * maxV, max(1, n))
 #        Rs = dlogJdV[-1]*0.05  # Ohm/cm2 # rough approximetion, only temporary for I0 estimation! -> not close enough to reality
         Rs = 0.5 # start with a low value
         # J0: assume Jsc=0, invert diode equation 
         i = idx_maxdlogJdV
         J0_init =  np.abs(Jl - J[i] - V[i]/(Rp/1000)) / (np.exp(self.q / (n * self.k * self.T) * (V[i] + J[i] * (-Rs/1000))) - 1)
+        if J0_init == 0: # must prove a sensical starting value
+            J0_init = 1e-5
         J0 = J0_init
         # update previous crude value of Rs, by calculation at last point
         Rs = -1000 * 1/J[-2] * (n*self.k*self.T/self.q * np.log(1 + (J[-2]-Jl)/J0) - V[-2]) # in front for sign convention+units : -1/1000
