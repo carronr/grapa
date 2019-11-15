@@ -18,6 +18,14 @@ from grapa.mathModule import roundSignificantRange
 from grapa.datatypes.curveJV import CurveJV
 
 
+file = r'C:\Users\Romain\Desktop\TOIMPLEMENT\2__Constant Current 20190918 115606.csv'
+#file = r'C:\Users\Romain\Desktop\TOIMPLEMENT\3_LCO OCP-EIS-CV0_1-EIS-OCV_Cyclic Voltammetry Start 20190911 101750.csv'
+#file = r'C:\Users\Romain\Desktop\TOIMPLEMENT\7_LCO OCP-EIS-CV0_1-EIS-OCV_Potentiostatic EIS 20190912 104832.csv'
+#file = r'C:\Users\Romain\Desktop\TOIMPLEMENT\8_LCO OCP-EIS-CV0_1-EIS-OCV_Open Circuit Potential 20190912 104933.csv'
+graph = Graph(file)
+graph.plot()
+
+"""
 def testCurve(curve):
     print('=== Test Curve')
     print(curve.diodeFit_BestGuess())
@@ -42,3 +50,4 @@ graph.update({'ylim':[-50, 50]})
 graph.plot()
 graph.update({'alter':['', 'log10abs']})
 graph.plot()
+"""

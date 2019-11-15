@@ -64,6 +64,12 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
+#Version 0.5.3.4a
+# NOT RELEASED
+#- Read CSV export files of the PAIOS system
+#BUGS
+#- Modified the output of scriptJV so samples with name purely numerical correctly proceed through the script
+
 
 #Version 0.5.3.3
 # Modifications

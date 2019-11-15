@@ -174,9 +174,10 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
     # sweep through files, identify pairs
     listSample = dictToListSorted(cellDict)
     for s in listSample :
-        out      = 'Sample\t' + s + '\n' + 'label\t' + s.replace('_','\\n') + '\n' + deepcopy(out0)
-        outIllum = 'Sample\t' + s + '\n' + 'label\t' + s.replace('_','\\n') + '\n' + deepcopy(out0)
-        outDark  = 'Sample\t' + s + '\n' + 'label\t' + s.replace('_','\\n') + '\n' + deepcopy(out0)
+        s_str = 'Sample '+str(s) if is_number(s) else str(s)
+        out      = 'Sample\t' + s_str + '\n' + 'label\t' + s_str.replace('_','\\n') + '\n' + deepcopy(out0)
+        outIllum = 'Sample\t' + s_str + '\n' + 'label\t' + s_str.replace('_','\\n') + '\n' + deepcopy(out0)
+        outDark  = 'Sample\t' + s_str + '\n' + 'label\t' + s_str.replace('_','\\n') + '\n' + deepcopy(out0)
         listCell = dictToListSorted(cellDict[s])
         for c in listCell :
             listDarkIllum = dictToListSorted(cellDict[s][c])
