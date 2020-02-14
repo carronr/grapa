@@ -19,7 +19,7 @@ from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
 class GraphJscVoc(Graph):
     
     FILEIO_GRAPHTYPE = 'Jsc-Voc curve'
-
+    
     AXISLABELS = [['Voc', '', 'V'], ['Jsc', '', 'mA cm$^{-2}$']]
     
     @classmethod
@@ -176,7 +176,7 @@ class GraphJscVoc(Graph):
         return out
 
     
-    def splitIllumination(self, threshold=3, ifFit=False, fitTlim=None, extend0=False, curve=None):
+    def splitIllumination(self, threshold=3, ifFit=False, fitTlim=None, extend0=False, curve=None, silent=False):
         """
         Splits Jsc Voc data according to illumination intensity.
         Assumes data are stored as intensity series, grouped by temperatures
@@ -233,10 +233,11 @@ class GraphJscVoc(Graph):
                 res.append([j, out[-1].getAttribute('_popt')])
             if extend0:
                 out[-1].resampleX('linspace', 0, np.max(out[-1].x_1000overK()), 51)
-        if len(res) > 0:
-            print('Intensity level, Voc @ T=0 [V]')
-            for r in res:
-                print(str(r[0]), r[1][1])
+        if not silent:
+            if len(res) > 0:
+                print('Intensity level, Voc @ T=0 [V]')
+                for r in res:
+                    print(str(r[0]), r[1][1])
         if len(out) > 0:
             out[0].update({'labelhide': ''})
             out[-2].update({'labelhide': ''})
@@ -249,6 +250,8 @@ class GraphJscVoc(Graph):
 class CurveJscVoc(Curve):
 
     CURVE = 'Curve JscVoc'
+    
+    CST_Jsclim0 = 1.0 # mA/cm2
     
     q = 1.60217657E-19 # [C]
     k = 1.38E-23    # [J K-1]
@@ -318,6 +321,8 @@ class CurveJscVoc(Curve):
     def fit_nJ0(self, Voclim=None, Jsclim=None, data=None, T=None):
         """ perform fitting, returns best fit parameters """
         datax, datay = self.selectData(xlim=Voclim, ylim=Jsclim, data=data)
+        if len(datax) < 2 or len(datay) < 2:
+            return [np.nan, np.nan]
         if T is None:
             T = self.T()
         # actual fitting

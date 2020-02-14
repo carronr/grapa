@@ -64,11 +64,14 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
-#Version 0.5.3.4a
+#Version 0.5.4.0
 # NOT RELEASED
-#- Read CSV export files of the PAIOS system
+#- Read CSV export files of the SquidAdmiral system
+#- Implemented automatic processing of Jsc-Voc data. Careful, the fit limits may be quite off from reasonable values.
 #BUGS
 #- Modified the output of scriptJV so samples with name purely numerical correctly proceed through the script
+#- Solved a bug in script Cf that prevented the correct display of the map dC/dln(f) vs T vs frequency.
+#- Solved a bug in script CV that stopped the execution when for some reason, negative values of N_CV were computed.
 
 
 #Version 0.5.3.3
@@ -356,15 +359,16 @@ class Application(tk.Frame):
         # button chooseFolder
         tk.Label (frame, text='JV curves (files in 1 folder):').pack(side='top', anchor='w', padx=10, pady=2)
         self.createFrame(frame, self.fillUIFrameLeftMiddleFitDiodeWeight,  {}, {'side': 'top', 'fill': X, 'padx': 20})
-        tk.Label (frame, text='1 neutral, 10 increased weight').pack(side='top', anchor='w', padx=20)
+        #tk.Label (frame, text='1 neutral, 10 increased weight').pack(side='top', anchor='w', padx=20)
         tk.Button(frame, text='Fit cell-by-cell', command=self.folder_JV_combined).pack(side='top', anchor='w', padx=20)
         tk.Button(frame, text='Fit curves separately', command=self.folder_JV_all).pack(side='top', anchor='w', padx=20)
         tk.Label (frame, text='Operations on JV summaries:').pack(side='top', anchor='w', padx=0, pady=2)
         tk.Button(frame, text='JV sample maps (1 file)', command=self.folder_JV_sampleMaps).pack(side='top', anchor='w', padx=10)
         tk.Button(frame, text='JV boxplots (files in 1 folder)', command=self.folder_JV_boxplots).pack(side='top', anchor='w', padx=10)
-        tk.Label (frame, text='C-V, C-f data processing').pack(side='top', anchor='w', padx=0, pady=2)
+        tk.Label (frame, text='C-V, C-f, Jsc-Voc data processing').pack(side='top', anchor='w', padx=0, pady=2)
         self.createFrame(frame, self.fillUIFrameLeftMiddleCV,    {}, {'side': 'top', 'fill': X, 'padx': 10})
         tk.Button(frame, text='C-f (1 folder)', command=self.folder_Cf).pack(side='top', anchor='w', padx=10)
+        self.createFrame(frame, self.fillUIFrameLeftMiddleJscVoc,    {}, {'side': 'top', 'fill': X, 'padx': 10})
 #        tk.Label(frame, text='\n').pack(side='top')
 
     def fillUIFrameLeftQuitTitle(self, frame):
@@ -383,6 +387,17 @@ class Application(tk.Frame):
         tk.Button(frame, text='C-V (1 folder)', command=self.folder_CV).pack(side='left', pady=2)
         tk.Label (frame, text='ROI').pack(side='left', pady=2)
         tk.Entry (frame, text=self.varProcessCVROI, width=10).pack(side='left', pady=2)
+    def fillUIFrameLeftMiddleJscVoc(self, frame):
+        from grapa.datatypes.curveJscVoc import CurveJscVoc
+        self.varProcessJscVocJscROI = tk.StringVar()
+        self.varProcessJscVocJscROI.set(str(CurveJscVoc.CST_Jsclim0))
+        tk.Button(frame, text='Jsc-Voc (1 file)', command=self.file_JscVoc).pack(side='left', pady=2)
+        lbl = tk.Label (frame, text='Jsc min')
+        lbl.pack(side='left', pady=2)
+        ent = tk.Entry (frame, text=self.varProcessJscVocJscROI, width=6)
+        ent.pack(side='left', pady=2)
+        CreateToolTip(lbl, "fit range of interest (min value or range), in mA/cm2")
+        CreateToolTip(ent, "fit range of interest (min value or range), in mA/cm2")
     
     def FrameLeftMiddleUpdateQuit(self, frame):
         #u = tk.Button(frame, text="Refresh GUI", command=self.updateUI)
@@ -391,10 +406,14 @@ class Application(tk.Frame):
 
     
     def fillUIFrameLeftMiddleFitDiodeWeight (self, frame):
-        tk.Label(frame, text='Fit weight diode region').pack(side='left', anchor='n')
+        lbl = tk.Label(frame, text='Fit weight diode region')
+        lbl.pack(side='left', anchor='n')
         self.FolderFitDiodeWeight = tk.StringVar()
         self.FolderFitDiodeWeight.set('5')
-        tk.Entry(frame, text=self.FolderFitDiodeWeight, width=6).pack(side='left', anchor='n')
+        ent = tk.Entry(frame, text=self.FolderFitDiodeWeight, width=6)
+        ent.pack(side='left', anchor='n')
+        CreateToolTip(lbl, "1 neutral, 10 increased weight")
+        CreateToolTip(ent, "1 neutral, 10 increased weight")
 
     def fillUIFrameCenter(self, frame):
         # some container for graph
@@ -1946,7 +1965,18 @@ class Application(tk.Frame):
             if len(filelist) > 0:
                 self.file_open_internal(filelist[-1])
         self.updateUI()
-
+        
+    def file_JscVoc(self):
+        from grapa.scripts.script_processJscVoc import script_processJscVoc
+        folder = ''
+        if self.back_file != '':
+            folder = os.path.dirname(os.path.abspath(self.back_file))
+        file = tk.filedialog.askopenfilename(initialdir=folder)
+        ROIJsclim = stringToVariable(self.varProcessJscVocJscROI.get())
+        self.back_graph = script_processJscVoc(file, newGraphKwargs=self.newGraphKwargs,
+                                               ROIJsclim=ROIJsclim)
+        self.updateUI()
+        
     def folder_CV(self):
         from grapa.scripts.script_processCVCf import script_processCV
         ROIfit = stringToVariable(self.varProcessCVROI.get())
@@ -1962,7 +1992,6 @@ class Application(tk.Frame):
             self.back_graph = script_processCf(self.back_folder, newGraphKwargs=self.newGraphKwargs)
         self.updateUI()
         
-    
     def folder_JV_boxplots(self):
         from grapa.scripts.script_JVSummaryToBoxPlots import JVSummaryToBoxPlots
         self.ask_folder(self.back_folder)

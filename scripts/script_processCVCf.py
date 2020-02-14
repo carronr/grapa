@@ -38,10 +38,10 @@ def maskUndesiredLegends(graph, legend):
         pass
     elif legend == 'none':
         for c in range(0, graph.length()):
-            graph.curve(c).update({'label': ''})
+            graph.curve(c).update({'labelhide': 1})
     else: # legend == 'minmax':
         for c in range(1, graph.length()-1):
-            graph.curve(c).update({'label': ''})
+            graph.curve(c).update({'labelhide': 1})
 
 def setXlim(graph, keyword='tight'):
     if keyword != 'tight':
@@ -317,6 +317,9 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     # save
     filesave = os.path.join(folder, graph.getAttribute('title').replace(' ','_')+'_') # graphIO.filesave_default(self)
     plotargs = {} # {'ifExport': False, 'ifSave': False}
+    graphattr = {}
+    for attr in ['alter', 'typeplot', 'xlim', 'ylim', 'xlabel', 'ylabel']:
+        graphattr.update({attr: graph.getAttribute(attr)})
     # default graph: C vs log(f)
     graph.update({'ylim': [0, np.nan]})
     graph.plot(filesave=filesave+'Clogf', **plotargs)
@@ -380,6 +383,8 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
                 del levels[-1]
             else:
                 break
+        if len(levels) > 1 and levels[0] > levels[1]:
+            del levels[0]
         # graph size
         Tdelta = (Tmax - Tmin) / 50
         if Tdelta > 0:
@@ -413,6 +418,8 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     if pltClose:
         plt.close()
     
+    graph.update(graphattr) # restore initial graph
+    print('Tip for next step: pick inflection points for different T, then the fit activation energy.')
     print('End of process C-f.')
     return graph
 

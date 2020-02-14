@@ -32,6 +32,8 @@ class GraphSquidAdmiral(Graph):
                 return True
             elif 'Open Circuit Potential ' in fileName:
                 return True
+            elif 'Galvanostatic EIS ' in fileName:
+                return True
             elif 'Charge_Discharge ' in fileName:
                 return True
         return False
@@ -42,20 +44,39 @@ class GraphSquidAdmiral(Graph):
         # no headers to parse
         basename = os.path.basename(self.filename)
         usecols, labels, data = None, None, None
+        
         # retieve instructions for openning file
-        if 'Constant Current ' in basename:
-            usecols = (7,3)
-        elif 'Cyclic Voltammetry Start ' in basename:
+        if 'Cyclic Voltammetry Start ' in basename:
             usecols = (3,5)
         elif 'Potentiostatic EIS ' in basename:
-            usecols = (9,8)
+            usecols = (8,9)
+        elif 'Galvanostatic EIS ' in basename:
+            usecols = (8,9)
         elif 'Open Circuit Potential ' in basename:
             usecols = (2,3)
+        elif 'Constant Current ' in basename:
+            try:
+                data = np.genfromtxt(self.filename, skip_header=1,
+                                     delimiter=',', invalid_raise=False)
+            except Exception as e:
+                print('GraphSquidAdmiral Constant Current: actually, cannot read file!?')
+                print(e)
+                return False
+            x, tm = [], data[0,2]
+            y = data[:,4]
+            for line in data: # some quite dirty and innefficient data parsing
+                x.append((x[-1] if len(x)>0 else 0) + (line[2]-tm) * line[5])
+                tm = line[2]
+            if len(x) > 0:
+                self.append(Curve([np.abs(np.array(x))/3600,y], attributes))
+            labels = [['Charge', '', 'mAh'], ['Working Electrode', '', 'V']]
+            data, usecols = 1, 1 # bypass default data opening, ensure algo knows everything ok
         elif 'Charge_Discharge ' in basename:
             try:
-                data = np.genfromtxt(self.filename, skip_header=1, delimiter=',', invalid_raise=False)
+                data = np.genfromtxt(self.filename, skip_header=1,
+                                     delimiter=',', invalid_raise=False)
             except Exception as e:
-                print('GraphPaios Charge_Discharge: actually, cannot read file!?')
+                print('GraphSquidAdmiral Charge_Discharge: actually, cannot read file!?')
                 print(e)
                 return False
             def createCurve(x, y, sign):
@@ -76,22 +97,21 @@ class GraphSquidAdmiral(Graph):
             if len(x) > 0:
                 createCurve(x, y, previous)
             labels = [['Charge', '', 'mAh'], ['Working Electrode', '', 'V']]
-            data = 1 # bypass default data opening
-            usecols = 1 # ensure algorithm knows everything ok
+            data, usecols = 1, 1 # bypass default data opening, ensure algo knows everything ok
         # open file
         if usecols is None:
-            print('GraphPaios: actually, cannot read file!?')
+            print('GraphSquidAdmiral: actually, cannot read file!?')
             return False
         # default data file reading
         if data is None:
             try:
                 data = np.genfromtxt(self.filename, skip_header=1, delimiter=',',
                                      usecols=usecols, invalid_raise=False)
-                self.append(Curve(np.transpose(data), attributes))
             except Exception as e:
-                    print('WARNING GraphPaios cannot read file', self.filename)
+                    print('WARNING GraphSquidAdmiral cannot read file', self.filename)
                     print(type(e), e)
                     return False
+            self.append(Curve(np.transpose(data), attributes))
         if labels is None:
             labels = [kwargs['line1'].split(',')[c][1:-2].replace('""',"''") for c in usecols]
             labels = [[l.split(' (')[0], '', l.split(' (')[-1]] for l in labels]

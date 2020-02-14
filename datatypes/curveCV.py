@@ -210,6 +210,8 @@ class CurveCV(Curve):
         Output: C [nF cm-2]
         """
         out = V * np.nan
+        if N_CV < 0:
+            return out
         mask = (V < Vbi)
         Cm2 = 2 / (CurveCV.CST_q * CurveCV.getEpsR(self) * CurveCV.CST_eps0 * (N_CV * 1e6)) * (Vbi - V)
         out[mask] = (Cm2[mask] ** (-0.5))
@@ -240,7 +242,9 @@ class CurveCV(Curve):
         N_ = medfilt(N, 3) # thus we eliminate faulty points
         idx = np.argmin(N_[ROI[0]:ROI[1]])
         #print(self.getAttribute('temperature [k]'), [V[ROI[0]+idx+window[0]], V[ROI[0]+idx+window[1]]])
-        return [V[ROI[0]+idx+window[0]], V[ROI[0]+idx+window[1]]]
+        i = [max(ROI[0]+idx+window[0], 0),
+             min(ROI[0]+idx+window[1], len(V)-1)]
+        return [V[i[0]], V[i[1]]]
         
         
         

@@ -366,7 +366,10 @@ class Graph:
                 del self.data[i]
                 # delete in headers
                 if 'collabels' in self.headers and i < len(self.headers['collabels']):
-                    del self.headers['collabels'][i]
+                    if len(self.headers['collabels']) == 0:
+                        del self.headers['collabels']
+                    else:
+                        del self.headers['collabels'][i]
                 if 'collabelsdetail' in self.headers: # certainly only useful for "databases"
                     for j in range(len(self.headers['collabelsdetail'])):
                         if i < len(self.headers['collabelsdetail'][j]):
