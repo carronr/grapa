@@ -546,6 +546,7 @@ class GraphIO(Graph):
                     del attributes[key]
             if 'label' not in parsedAttr and 'collabels' in self.headers :
                 parsedAttr['label'] = self.headers['collabels']
+            
             # parse through data
             if singlecurve:
                 self.data.append(Curve(data, attributes))
@@ -572,7 +573,8 @@ class GraphIO(Graph):
                             val = parsedAttr[key][cols[i]]
                         except IndexError:
                             continue
-                        val = stringToVariable(val)
+                        if key not in ['label']: # for 'label', want to keep as string
+                            val = stringToVariable(val)
                         if val != '':
                             self.curve(i).update({key: val})
                 # cast Curve in child class if required by parameter read

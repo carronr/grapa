@@ -49,9 +49,8 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 # BUG: fit JV, when unit in mV
-# BUG: curveMath multiplication by cst ? (ThomasF to send screen shot)
 
-
+# TODO: Also: TIV JSC even if not VOC
 
 
 # TODO: Write workflow Cf
@@ -64,73 +63,17 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
-#Version 0.5.4.0
-# NOT RELEASED
-#- Read CSV export files of the SquidAdmiral system
-#- Implemented automatic processing of Jsc-Voc data. Careful, the fit limits may be quite off from reasonable values.
+#Version 0.5.4.1
+#- Added method __len__() to the class Graph, returning the number of Curves.
+#- Added method __getitem__() to the class Graph, enabling call to Graph[0] or for c, curve in enumerate(graph).
+#- Added method __delitem__() to the class Graph, enabling to del Graph[0]. Calls Graph.deleteCurve(key)
+#- Added method attr() to the class Graph, a shorter alias to Graph.getAttribute()
+#- Added method attr() to the class Curve, a shorter alias to Graph.getAttribute()
+#Improvements
+#- Improved the reliability of CV and Cf script processing versus noisy data and incomplete input files.
 #BUGS
-#- Modified the output of scriptJV so samples with name purely numerical correctly proceed through the script
-#- Solved a bug in script Cf that prevented the correct display of the map dC/dln(f) vs T vs frequency.
-#- Solved a bug in script CV that stopped the execution when for some reason, negative values of N_CV were computed.
+#- The attribute label is now parsed as a string, so Curve labels such as "1", "2" can be used.
 
-
-#Version 0.5.3.3
-# Modifications
-#- The code was slightly modified to enable compatibility with winpython 3.6 (matplotlib 3.01)
-#- The data editor was revised and can now handle significanly larger datasets before speed becoms an issue (ca. 100'000 points instead of ~1'500)
-# Bugs
-#- CurveJV was modified to better fit JV curves of (mini-)modules. A warning is printed if input data may be provided in mV. Also, the area works as expected.
-
-
-
-# Version 0.5.3.2
-# Additions
-# - New values possible for keyword "alter": 'y' and 'x', with combination ['y','x'] enabling graph transposition
-# - Curve Cf: the dataset can now be displayed as "Frequency [Hz] vs Apparent depth [nm]"
-# - Script Cf: the "Frequency [Hz] vs Apparent depth [nm]" is now automatically generated
-# - The "axhline" and "axvline" keywords can be used to specify the formatting, independently for different sets of lines. Examples are provided.
-# Bugs
-#- CurveJV: when creating a CurveJV object, an "area" parameter is set by default with value 1.
-#- Script process JV: a cause for exception and script failure was corrected, in case of missing data.
-#- Script process JV: script execution should be more robust with untypical data. Basic JV parameters should be extracted, and failures with JV fits should not affect script execution. Missing Rs, Jo and ideality values might result.
-#- Prevents the data editor to crash when first Curve contains too many data. 
-
-
-
-# Version 0.5.3.1
-#Additions
-#- A Nyquist plot is created when executing the script C-f.
-#- An image is created when executing the script C-f, showing the derivative as function of T and frequency.
-#- Shortcut were placed to tune the boxplot appearance: horizontal position, width of the boxes, presence of a notch, vertical or horizontal orientation.
-#- Keyboard shortcuts were added:
-#    Ctrl+h: hide (or show) the active curve
-#    Ctrl+Delete: delete the active curve
-#- References were added to the help function of CurveCf, papers from Walter, and Decock.
-# Modifications
-#- EQE ERE estimate now discplays the input Voc of the device as a double check
-#- In the script treating C-V data, the units of the apparent doping density are now properly displayed in [cm-3] units and not [m-3]
-#- An additional example is provided for the keyword colorbar
-
-
-
-# Version 0.5.3.0
-# New features
-#- A data editor was implemented, accessible immediately below the graph.
-#- The Property edition tool was removed from the user interface. The 'New property' is now renamed 'Property editor' 
-#Additions
-#- In the user interface, two buttons were added to reorder the stack and place the selected Curve at the top or at the bottom of the stack.
-#- CurveEQE: a new anaysis tool is provided, the external radiative efficiency. This estimates is computed from the EQE and the cell Voc.
-#- CurveJV: added a new data visualization: differential R, defined as dV/dJ.
-#- Added an option for the plot method 'fill'. Points with 0 value can be added at first and last data positions thanks to the keyword 'fill_padto0'.
-#- Added a value for keyword 'arbitraryfunction": [['grid', [True], {'axis': 'both'}]], which displays a grid at the major ticks locations
-# Modification
-#- CurveEQE: the default interpolation for the current calculation currentcalc is now 'linear' and not 'cubic'
-#- When trying to save a graph with special characters that cannot be saved in a text file, some clearer (and hopefully helpful) message is now displayed.
-#Bugs
-#- The stackplot method now properly ignores hidden Curves.
-#- The stackplot now hides the curves labels when the keyword labelhide is set
-#- Solved a bug for invalid input for the estimate of ERE cut wavelength
-#- Solved a bug with improper inputs for the subplots_adjust that frooze the graph
 
 
 
@@ -210,7 +153,7 @@ class Application(tk.Frame):
         # optional
         self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'subplots_examples.txt'))
 #        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'JscVoc', 'JscVoc_SAMPLE_a3_Values.txt'))
-#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), r'C:\Users\Romain\Desktop', 'export_fsc eb 001_a1_02-01log.txt'))
+#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), r'C:\Users\Romain\Desktop', 'dummy.txt'))
 
         self.varScreenDpi.set(75)
         self.setScreenDpi()

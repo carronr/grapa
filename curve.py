@@ -441,6 +441,9 @@ class Curve:
         self.data = np.append(self.data, np.array([xSeries, ySeries]), axis=1)
         return True
         
+    def attr(self, key, default=''):
+        """ Shorter alias to getAttribute. """
+        return self.getAttribute(key, default=default)
     def getAttribute (self, key, default='') :
         """ Getter of attribute """
         if key.lower() in self.attributes :

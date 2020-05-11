@@ -369,6 +369,9 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
         else:
             Tmin, Tmax = min(Tmin, T),  max(Tmax, T)
         y = [T] + list(c.y(alter='CurveCf.y_mdCdlnf'))
+        if len(x) != len(y):
+            print('WARNING data curve', T, 'not consistent number of points throughout the input files!', c.getAttribute('filename'))
+            continue
         graphImage.append(Curve_Image([x, y], {}))
     if flag:
         # levels -> int value does not seem to work (matplotlib version?)

@@ -197,6 +197,8 @@ class CurveCV(Curve):
         Returns built-in voltage Vbi [V] and apparent doping density N_CV [cm-3].
         """
         datax, datay = self.selectData(xlim=Vlim)
+        if len(datax) == 0:
+            return np.nan, np.nan
         datay =  1 / (datay * 1e-5) ** 2  # calculation in SI units [F m-2]
         z = np.polyfit(datax, datay, 1, full=True)[0]
         Vbi = - z[1] / z[0]
@@ -210,7 +212,7 @@ class CurveCV(Curve):
         Output: C [nF cm-2]
         """
         out = V * np.nan
-        if N_CV < 0:
+        if np.isnan(Vbi) or N_CV < 0:
             return out
         mask = (V < Vbi)
         Cm2 = 2 / (CurveCV.CST_q * CurveCV.getEpsR(self) * CurveCV.CST_eps0 * (N_CV * 1e6)) * (Vbi - V)
@@ -237,14 +239,15 @@ class CurveCV(Curve):
                 ROI[0] = min(i, ROI[0])
             if V[i] <= Vlim[1]:
                 ROI[1] = max(i, ROI[1])
-        # identify best: smooth, take few points around minimum of N
+        # identify best: take few points around minimum of N
+        N[N<0] = np.inf					   
         from scipy.signal import medfilt
         N_ = medfilt(N, 3) # thus we eliminate faulty points
         idx = np.argmin(N_[ROI[0]:ROI[1]])
         #print(self.getAttribute('temperature [k]'), [V[ROI[0]+idx+window[0]], V[ROI[0]+idx+window[1]]])
-        i = [max(ROI[0]+idx+window[0], 0),
-             min(ROI[0]+idx+window[1], len(V)-1)]
-        return [V[i[0]], V[i[1]]]
+        lim0 = max(ROI[0]+idx+window[0], 0)
+        lim1 = min(ROI[0]+idx+window[1], len(V)-1)
+        return [V[lim0], V[lim1]]
         
         
         

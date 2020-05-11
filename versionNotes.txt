@@ -13,6 +13,30 @@ KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
 
+Version 0.5.4.1
+Released 11.05.2020
+- Added method __len__() to the class Graph, returning the number of Curves.
+- Added method __getitem__() to the class Graph, enabling call to Graph[0] or for c, curve in enumerate(graph).
+- Added method __delitem__() to the class Graph, enabling to del Graph[0]. Calls Graph.deleteCurve(key)
+- Added method attr() to the class Graph, a shorter alias to Graph.getAttribute()
+- Added method attr() to the class Curve, a shorter alias to Graph.getAttribute()
+Improvements
+- Improved the reliability of CV and Cf script processing versus noisy data and incomplete input files.
+BUGS
+- The attribute label is now parsed as a string, so Curve labels such as "1", "2" can be used.
+
+
+Version 0.5.4.0
+NOT RELEASED
+- Read CSV export files of the SquidAdmiral system
+- Implemented automatic processing of Jsc-Voc data. Careful, the fit limits may be quite off from reasonable values.
+BUGS
+- Modified the output of scriptJV so samples with name purely numerical correctly proceed through the script
+- Solved a bug in script Cf that prevented the correct display of the map dC/dln(f) vs T vs frequency.
+- Solved a bug in script CV that stopped the execution when for some reason, negative values of N_CV were computed.
+
+
+
 Version 0.5.3.3
 Release 08.07.2019
 Modifications

@@ -296,22 +296,26 @@ class CurveJV(Curve):
         # calculate Voc
         # idea: interpolate JV curve with 3-order polynom between 2 closest datapoints, then look for V @ J=0
         Jabs = np.abs(J)
-        try:
-            i = list(Jabs).index(min(Jabs))
-            idx = list(range(i-1, i+3) if J[i] < 0 else range (i-2, i+2))
-            if idx[-1] >= len(V):
-                idx = [-4, -3, -2, -1]
-            if idx[0] < 0:
-                idx = [0, 1, 2, 3]
-            f = interpolate.interp1d(V[idx], J[idx], 3) # spline interpolation
-            dx = np.abs(V[idx[:-1]] - V[idx[1:]])
-            dxmin = np.min(dx[dx > 0])
-            maxV = np.max(V[idx])
-            x = np.arange(V[idx[0]], V[idx[-1]], dxmin/100) # tolerance is 1/100 of smallest dx
-            x = np.array([min(v, maxV) for v in x])
-            Voc = xAtValue (x, f(x), 0, silent=True)
-        except ValueError:
+        if np.abs(np.sum(np.sign(J))) == len(J):
+            # J does not cross 0
             Voc = np.nan
+        else:
+            try:
+                i = list(Jabs).index(min(Jabs))
+                idx = list(range(i-1, i+3) if J[i] < 0 else range (i-2, i+2))
+                if idx[-1] >= len(V):
+                    idx = [-4, -3, -2, -1]
+                if idx[0] < 0:
+                    idx = [0, 1, 2, 3]
+                f = interpolate.interp1d(V[idx], J[idx], 3) # spline interpolation
+                dx = np.abs(V[idx[:-1]] - V[idx[1:]])
+                dxmin = np.min(dx[dx > 0])
+                maxV = np.max(V[idx])
+                x = np.arange(V[idx[0]], V[idx[-1]], dxmin/100) # tolerance is 1/100 of smallest dx
+                x = np.array([min(v, maxV) for v in x])
+                Voc = xAtValue (x, f(x), 0, silent=True)
+            except ValueError:
+                Voc = np.nan
         self.update ({'Voc': Voc})
         # calculate Eff (method with interpolation)
         # idea: interpolate JV curve with 3-order polynom between 2 closest datapoints, then look for max(J*V)

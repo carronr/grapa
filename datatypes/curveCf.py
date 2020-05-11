@@ -61,7 +61,7 @@ class GraphCf(Graph):
         for c in range(len0, self.length()): # retrieve resistance curve
             lbl = self.curve(c).getAttribute('label')
             #print('scan curves label', c, lbl)
-            if lbl.endswith('R') or lbl.endswith('Rp [Ohm]'):
+            if lbl.endswith('R') or lbl.endswith('Rp') or lbl.endswith('Rp [Ohm]'):
                 idxRp = c
                 break
         # normalize with area C, R
@@ -108,6 +108,28 @@ class GraphCf(Graph):
                 self.append(Curve([Z.real, -Z.imag], deepcopy(self.curve(len0).getAttributes())))
                 self.curve(-1).update({'_CfNyquist': True})
                 nb_add += 1
+		# check temperature is parsed
+        if self.curve(len0).getAttribute('temperature [k]', None) is None:
+            def guessed(value):
+                if value > 5 and value < 1000: # plausability check for guessed temperature
+                    import os
+                    print('File', os.path.basename(self.filename), 'temperature guessed', value)
+                    self.curve(len0).update({'temperature':value})
+                    return True
+                return False
+            guess = self.curve(len0).getAttribute('label').split(' ')[-1]
+            if guess.endswith('K') and is_number(guess[:-1]):
+                flag = guessed(float(guess[:-1]))
+            if not flag:
+                for c in range(self.length()-1-nb_add, len0, -1):
+                    if 'Temperature' in self.curve(c).getAttribute('label'):
+                        try:
+                            guessed = self.curve(c).y()
+                            guessed = np.average(guessed[~np.isnan(guessed)])
+                            if guessed(guessed):
+                                continue
+                        except:
+                            pass				
         # delete Rp, temperature, etc
         for c in range(self.length()-1-nb_add, len0, -1):
             self.deleteCurve(c)

@@ -280,10 +280,19 @@ class Graph:
 
     
     # methods handling the bunch of curves
+    def __len__(self):
+        """ Returns the number of Curves. """
+        return len(self.data)
+    def __getitem__(self, key):
+        """ Returns a Curve object at index key. """
+        return self.data[key]
+    def __delitem__(self, key):
+        """ Deletes the Curve at index key. """
+        self.deleteCurve(key)
+        
     def length(self):
         """ Returns the number of Curve objects in the list. """
         return len(self.data)
-
     def curve(self, index):
         """ Returns the Curve object at index i in the list. """
         if index >= self.length() or self.length() == 0:
@@ -512,16 +521,20 @@ class Graph:
                 out.update(self.curve(-1).delete(key))
         return out
 
-    def getAttribute(self, attr, default=''):
-        at = attr.lower()
-        if at in self.headers:
-            return self.headers[at]
-        if at in self.graphInfo:
-            return self.graphInfo[at]
-        if at in self.sampleInfo:
-            return self.sampleInfo[at]
+    def attr(self, key, default=''):
+        """ Shorter alias to getAttribute. """
+        return self.getAttribute(key, default=default)
+    def getAttribute(self, key, default=''):
+        k = key.lower()
+        if k in self.headers:
+            return self.headers[k]
+        if k in self.graphInfo:
+            return self.graphInfo[k]
+        if k in self.sampleInfo:
+            return self.sampleInfo[k]
         if self.length() > 0:
-            return self.curve(0).getAttribute(attr, default=default)
+            return self[0].attr(k, default=default)
+#            return self.curve(0).getAttribute(k, default=default)
         return default
 
     def deleteAttr(self, attrList):
