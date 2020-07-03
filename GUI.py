@@ -63,6 +63,11 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
+
+#Current Version 
+#- Script JV: now also generates a compilation of (area-corrected) JV curves processed by the script
+
+
 #Version 0.5.4.1
 #- Added method __len__() to the class Graph, returning the number of Curves.
 #- Added method __getitem__() to the class Graph, enabling call to Graph[0] or for c, curve in enumerate(graph).

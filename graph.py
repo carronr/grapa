@@ -655,7 +655,7 @@ class Graph:
             text, texy, targ = text[0], texy[0], targ[0]
         if text != self.getAttribute('text'):
             print('Corrected attribute text', text, '(former', self.getAttribute('text'),')')
-        if texy != self.getAttribute('textxy'):
+        if texy != self.getAttribute('textxy') and self.getAttribute('textxy', None) is not None:
             print('Corrected attribute textxy', texy, '(former', self.getAttribute('textxy'),')')
         if targ != self.getAttribute('textargs'):
             print('Corrected attribute textargs', targ, '(former', self.getAttribute('textargs'),')')

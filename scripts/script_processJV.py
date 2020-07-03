@@ -126,6 +126,8 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
     out0 = ''
     
     graph = Graph('', **newGraphKwargs)
+    graphAllJV = Graph('', **newGraphKwargs)
+
     for file in glob.glob(path):
         fileName, fileExt = os.path.splitext(file)
         fileExt = fileExt.lower()
@@ -191,7 +193,8 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                         graph = GraphJVDarkIllum (cellDict[s][c][d][m], '', area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
                         out = out + graph.printShort()
                         filesave = os.path.join(folder, filesave)
-                        graph.plot(filesave=filesave, figAx=figAx, pltClose=pltClose)
+                        graph.plot(filesave, figAx=figAx, pltClose=pltClose)
+                        graphAllJV.append(graph.returnDataCurves())
             else:
                 # if want to restrict 1 msmt dark + 1 illum per cell
                 if len(listDarkIllum) > 2 :
@@ -218,6 +221,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     #if len(listGraph) > 1 :
                     #    msg = '.'.join([cellDict[s][c][d][m2] for m2 in cellDict[s][c][d]][1:])
                     #    print ('test WARNING: other files ignored (,',msg,')')
+                    graphAllJV.append(graph.returnDataCurves())
     
                 # can identify pair of dark-illum files
                 if len(listDarkIllum) == 2 :
@@ -238,6 +242,12 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     out      = out      + graph.printShort()
                     outIllum = outIllum + graph.printShort(onlyIllum=True)
                     outDark  = outDark  + graph.printShort(onlyDark =True)
+                    graphAllJV.append(graph.returnDataCurves())
+        # graph with all raw JV curves processed
+        for c in graphAllJV:
+            c.update({'color':''})
+        filesave = os.path.join(folder, 'export_' + s + '_all')
+        graphAllJV.plot(filesave, figAx=figAx)
         # print sample summary
         filesave = 'export_' + s + '_summary' + '.txt'
         filesave = os.path.join(folder, filesave)
@@ -484,9 +494,9 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
 
     if filesave is not None:
         graph.headers.update({'filesave': os.path.basename(filesave)})
-        graph.plot(figAx=figAx, filesave=filesave)
+        graph.plot(filesave, figAx=figAx)
     else:
-        graph.plot(figAx=figAx, ifSave=False, ifExport=False, ifSubPlot=True)
+        graph.plot(figAx=figAx, ifSubPlot=True)
     if pltClose and figAx is None:
         plt.close()
     return graph
@@ -497,7 +507,6 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
 if __name__ == "__main__":
     # go through files, store files content in order to later select pairs
     folder = './../examples/JV/SAMPLE_A/'
-    folder = r'C:/Users/Romain/Desktop/I-V_Oct1553_LTBR04_f2_01/'
     processJVfolder(folder, fitDiodeWeight=5, pltClose=True)
 #    processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
 

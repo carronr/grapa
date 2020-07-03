@@ -210,3 +210,12 @@ class GraphJVDarkIllum(Graph):
         for i in range(len(linestIdx)):
             self.curve(linestIdx[i]).update({'linestyle': linestyle[i]})
         self.update(temp)
+
+    def returnDataCurves(self):
+        out = []
+        if self.length() > 0: # first curve
+            out.append(self.curve(0))
+        if self.length() > 2: # scond curve, ignoring the fit which is in position 1
+            out.append(self.curve(2))
+        return out
+        
