@@ -147,7 +147,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
         except Exception:
             continue # go to next file
         
-        print ('file', file)
+        print ('file', os.path.basename(file))
         if sample == '' or cell == '':
             print('WARNING: cannot identify sample (', sample, ') or cell (', cell, ').')
 
@@ -243,10 +243,10 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     outIllum = outIllum + graph.printShort(onlyIllum=True)
                     outDark  = outDark  + graph.printShort(onlyDark =True)
                     graphAllJV.append(graph.returnDataCurves())
-        # graph with all raw JV curves processed
+        # graph with all JV curves area-corrected
         for c in graphAllJV:
             c.update({'color':''})
-        filesave = os.path.join(folder, 'export_' + s + '_all')
+        filesave = os.path.join(folder, 'export_' + s + '_summary_allJV')
         graphAllJV.plot(filesave, figAx=figAx)
         # print sample summary
         filesave = 'export_' + s + '_summary' + '.txt'
@@ -379,6 +379,7 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newG
     # main loop
     for i in range(len(colToPlot)):
         look = colToPlot[i]
+        colFound = False
         for j in range(len(cols)):
             c = cols[j]
             if c[:len(look)] == look and (len(c) <= len(look) or c[len(look)] in [' ','_','-','.','[',']','(',')']):
@@ -400,7 +401,10 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newG
                     sadjust = res.getAttribute('subplots_adjust', [0.1,0.1,0.9,0.9])
                     graphs[AB].update({'figsize': figsize, 'subplots_adjust': sadjust})
                     axisheights[AB].append(figsize[1] * (sadjust[3]-sadjust[1]))
+                colFound = True
                 break
+        if not colFound:
+            print('Warning processSampleCellsMap: column not found (',look,' or similar)')
     # set correct graph size for compiled graph
     bottom, top, hspace = 0.5, 0.5, 0.5
     totalh = [(sum(tmp) + (len(tmp)-1)*hspace + bottom + top) for tmp in axisheights]
