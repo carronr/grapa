@@ -68,6 +68,7 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- Script JV: now also generates a compilation of (area-corrected) JV curves processed by the script
 #- Script JV: minor adjustments to the script.
 #- Script JV sample map: minor adjustments to the script, indication of columns not found.
+#- SIMS: Solved an occasional bug with automatic edge detection that prevented opening SIMS data files.
 
 
 

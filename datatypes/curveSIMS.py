@@ -26,8 +26,8 @@ def findXAtValuePolynom(datax, datay, target, ifPlot=False):
         rootsInROI = rootsReal
     if len(rootsInROI) == 0:
         print('Error findXAtValuePolynom cannot find suitable value.', target, datax, datay)
-    root = np.average(rootsInROI)
-    idx = np.argmin(np.abs(datax - rootsInROI))
+    root = np.average(rootsInROI) # to handle cases where the polynom has several solutions
+    idx = np.argmin(np.abs(datax - root))
     if ifPlot:
         import matplotlib.pyplot as plt
         plt.figure()
