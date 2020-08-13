@@ -64,7 +64,7 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
-#Current Version 
+#Version 0.5.4.2
 #- Script JV: now also generates a compilation of (area-corrected) JV curves processed by the script
 #- Script JV: minor adjustments to the script.
 #- Script JV sample map: minor adjustments to the script, indication of columns not found.

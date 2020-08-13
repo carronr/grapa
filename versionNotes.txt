@@ -13,6 +13,17 @@ KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
 
+
+Version 0.5.4.2
+Released 13.08.2020
+- Script JV: now also generates a compilation of (area-corrected) JV curves processed by the script
+- Script JV: minor adjustments to the script.
+- Script JV sample map: minor adjustments to the script, indication of columns not found.
+BUGS
+- SIMS: Solved an occasional bug with automatic edge detection that prevented opening SIMS data files.
+
+
+
 Version 0.5.4.1
 Released 11.05.2020
 - Added method __len__() to the class Graph, returning the number of Curves.
