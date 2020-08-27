@@ -147,7 +147,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
         except Exception:
             continue # go to next file
         
-        print ('file', os.path.basename(file))
+        print ('File', os.path.basename(file))
         if sample == '' or cell == '':
             print('WARNING: cannot identify sample (', sample, ') or cell (', cell, ').')
 
@@ -248,6 +248,8 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
             c.update({'color':''})
         filesave = os.path.join(folder, 'export_' + s + '_summary_allJV')
         graphAllJV.plot(filesave, figAx=figAx)
+        if pltClose and figAx is None:
+            plt.close()
         # print sample summary
         filesave = 'export_' + s + '_summary' + '.txt'
         filesave = os.path.join(folder, filesave)

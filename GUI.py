@@ -64,6 +64,11 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 
 
 
+#Version 0.5.4.3
+#- ScriptJV: can now handle samples with cells identifiers with numeric > 9. The cell identifer is assumed to be with the form a1, b3, etc.
+#- CurveEQE: added a new analysis function, for crude estimate of thickness of layer with parasitic absorption (e.g. CdS). The deature can be hacked e.g. to reproduce absorption edge of perovskites.
+
+
 #Version 0.5.4.2
 #- Script JV: now also generates a compilation of (area-corrected) JV curves processed by the script
 #- Script JV: minor adjustments to the script.

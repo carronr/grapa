@@ -104,7 +104,7 @@ class CurveEQE(Curve):
     EQE_AM0_REFERENCE = 'AM0_2000_ASTM_E-490-00.txt'
     EQE_BEST_CELL_REF = 'EQE_20.4_cell.txt'
     EQE_BEST_CELL_LABEL = 'Empa 20.4%'
-
+    
     
     def __init__(self, data, attributes, silent=False):
         # modify default label
@@ -179,7 +179,8 @@ class CurveEQE(Curve):
                          {'width': 8, 'field':'Combobox', 'values':['linear', 'quadratic', 'cubic']},
                          {'width': 8, 'field':'Combobox', 'values':[self.EQE_AM15_REFERENCE.replace('.txt',''), self.EQE_AM0_REFERENCE.replace('.txt','')]}]])
         # EQE 20.4%
-        out.append([self.CurveEQE_Empa20p4, self.EQE_BEST_CELL_LABEL, [], []])
+        if self.attributeEqual('_popt'):
+            out.append([self.CurveEQE_Empa20p4, self.EQE_BEST_CELL_LABEL, [], []])
         # tauc (E*ln(1-EQE))**2
         if (not self.attributeEqual('_popt')
             and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurveLog')):
@@ -222,6 +223,18 @@ class CurveEQE(Curve):
                         {},
                         [{'width':6}, {'width':7}, {'width':7},
                          {'field': 'Combobox', 'values': ['nm', 'eV'], 'width':4}]])
+        # Absortion edge (CdS, etc)
+        if self.attributeEqual('_popt'):
+            out.append([self.CurveEQE_absorptionEdge, 'Quick & dirty CdS estimate',
+                        ['thickness [nm]', 'I0', 'material'],
+                        [50, 1.0, 'CdS'],
+                        {},
+                        [{'width':6}, {'width':7}, {'width':7}]])
+        if (not self.attributeEqual('_popt')
+            and self.attributeEqual('_fitfunc', 'func_absorptionedge')):
+            out.append([self.updateFitParam, 'Update fit',
+                        ['thickness [nm]', 'I0', 'material'], self.attr('_popt')])
+        # Help button!
         out.append([self.printHelp, 'Help!', [], []])
         return out
     
@@ -235,6 +248,13 @@ class CurveEQE(Curve):
                         ['nmeV', 'taucln1-eqe'], ''])
         return out
 
+
+
+    def updateFitParamFormatPopt(self, f, param):
+        """ override, for func_absorptionedge """
+        if f == 'func_absorptionedge':
+            return list(param) # not np.array: last parameter can be str
+        return Curve.updateFitParamFormatPopt(self, f, param)
 
 
     # FUNCTIONS RELATED TO FIT
@@ -419,7 +439,6 @@ class CurveEQE(Curve):
 
 
 
-
     def CurveEQE_Empa20p4(self):
         """ Returns the 20.4% Empa cell EQE. """
         import os.path
@@ -471,6 +490,8 @@ class CurveEQE(Curve):
             return Curve([ref.curve(0).x(), irrad], {})
         return False
     
+    
+    
     # other functions
     def _curveReference(self, file):
         """ returns some reference spectrum """
@@ -488,6 +509,7 @@ class CurveEQE(Curve):
             return ref.curve(0)
         print('ERROR CurveEQE._curveReference: cannot find reference file', file)
         return False
+    
     
     
     def currentCalc(self, ROI=None, interpolatekind='linear',
@@ -529,6 +551,7 @@ class CurveEQE(Curve):
                   EQEcurrent, 'mA/cm2')
         return EQEcurrent
         
+    
         
     def CurveUrbachEnergy(self, ROIeV):
         """ Return fit in a Curve object, giving Urbach energy decay """
@@ -540,6 +563,7 @@ class CurveEQE(Curve):
         return out
         
         
+    
     def ERE(self, Voc, T, Emin='auto', EminUnit='nm'):
         """
         Computes the External Radiative Efficiency from the EQE curve and the cell
@@ -611,8 +635,62 @@ class CurveEQE(Curve):
     #    graph2.curve(0).update({'linespec': '-x'})
     #    graph2.plot()
         return [Emin, 'nm']
-    
+
+
+
+    # Layer thickness estiamte (e.g. CdS)
+    def _materialRefractivek(self, material):
+        """
+        Returns imaginary part of refractive index of CdS, k 
+        Energy to be given in nm
+        """
+        from grapa.graph import Graph
+        path = os.path.dirname(os.path.abspath(__file__))
+        matclean = 'EQE_absorption_' + material.replace('/','').replace('\\','') + '.txt'
+        pathtest = os.path.join(path, matclean)
+        if os.path.exists(pathtest):
+            return Graph(pathtest)[0]
+        try:
+            # try open the file, and return first Curve assumed to be (nm, k)
+            return Graph(material)[0]
+        except Exception as e:
+            print('CurveEQE._materialRefractivek: please choose a material, or')
+            print('a file with (nm,k) data as 2-column. Input:', material)
+            print('Exception', type(e), e)
+            return False
+        return False
+    def func_absorptionedge(self, nm, thickness, I0, material='CdS'):
+        try: # check parameters are numeric
+            thickness, I0 = float(thickness), float(I0)
+        except ValueError:
+            print('CurveEQE.func_absorptionedge: Did you really enter thickness and I0 as float?')
+            return False
+        k = self._materialRefractivek(material)
+        if not k:
+            return False
+        alpha = 4 * np.pi * k.y() / (k.x() * 1e-7) # in cm-1
+        transmitted = I0 * np.exp(-alpha * thickness * 1e-7)
+        f = interpolate.interp1d(k.x(), transmitted, kind='linear', bounds_error=False)
+        return f(nm)
+    def CurveEQE_absorptionEdge(self, thickness, I0, material='CdS'):
+        """
+        Returns a Curve for quick-and-dirty estimate layer thickness, e.g. CdS.
+        Curve represents the light transmitted through the layer and is computed
+        from Beer-Lambert law as I0 * exp(-alpha * thickness),
+        with alpha computed from k imaginary refractive index of material.
+        thickness: layer thickness, in nm
+        I0: amount of light entering the layer. Default: 1
+        material: data  provided for 'CdS'. A file path might be provided,
+            storing k data in 2-column file (nm, k)
+        """
+        values = self.func_absorptionedge(self.x(), thickness, I0, material)
+        return CurveEQE([self.x(), values],
+                         {'_fitfunc': 'func_absorptionedge',
+                          '_popt':[thickness, I0, material],
+                          'muloffset': self.attr('muloffset')})
         
+    
+    
     def printHelp(self):
         print('*** *** ***')
         print('CurveEQE offer basic treatment of (external) quantum')
@@ -656,6 +734,13 @@ class CurveEQE(Curve):
         print('   Emin: min E on which the integral is computed.')
         print('   EminUnit: "eV" if Emin is given in eV, "nm" otherwise.')
         print('   Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476')
+        print(' - Quick & dirty CdS estimate: for crude estimation of layer')
+        print('   thickness, e.g. CdS. The light transmitted is computed from')
+        print('   Beer-Lambert law I0*exp(-alpha*thickness).')
+        print('   thickness: layer thickness, in nm')
+        print('   I0: amount of light entering the layer. Default: 1')
+        print('   material: data provided for "CdS". Custom 2-column files')
+        print('      might be provided (nm, k).')
         return True
 
         

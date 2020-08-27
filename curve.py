@@ -194,11 +194,14 @@ class Curve:
         if f != '' and not self.attributeEqual('_popt'):
             if hasattr(self, f):
                 self.setY(getattr(self, f)(self.x(), *param))
-                self.update({'_popt': np.array(param)})
+                self.update({'_popt': self.updateFitParamFormatPopt(f, param)})
                 return True
             return 'ERROR Update fit parameter: No such fit function (',f,').'
         return 'ERROR Update fit parameter: Empty parameter (_fitFunc:',f,', _popt:',self.getAttribute('_popt'),').'
-    
+    def updateFitParamFormatPopt(self, f, param):
+         # possibility to override in subclasses, esp. when handling of tet input is required.
+         # by default, assumes all numeric -> best stored in a np.array
+        return np.array(param)
 
 
     # more classical class methods

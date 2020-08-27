@@ -32,6 +32,9 @@ class CurveJV(Curve):
     defaultIllumPower = 1000 # W/m2
     
     CURVE = 'Curve JV'
+    
+    # to retrieve info from filename: sample name, cell, measurement id
+    FINDALLSTR = '^(I-V_)*(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt'
 
     def __init__ (self, dataJV, attributes, units=['V', 'mAcm-2'], illumPower=defaultIllumPower, ifCalc=True, silent=False) :
         # delete area from attributes, to avoid normalization during initialization
@@ -174,25 +177,31 @@ class CurveJV(Curve):
     def sample (self, forceCalc=False) :
         if self.getAttribute('sample') == '' or forceCalc :
             name = os.path.split(self.getAttribute('filename'))[1]
-            split = refindall('I-V_(.*)_[a-zA-Z][0-9]_', name)
-            if len(split) > 0 :
-                self.update({'sample': split[0].lower()})
+            split = refindall(self.FINDALLSTR, name)
+            if len(split) > 0 and len(split[0]) > 1:
+                self.update({'sample': split[0][1]})
+            # old version, replaced on 19.08.2020
+            # split = refindall('I-V_(.*)_[a-zA-Z][0-9]_', name); split[0].lower()})
         return self.getAttribute('sample')
     
     def cell (self, forceCalc=False) :
         if self.getAttribute('cell') == '' or forceCalc :
             name = os.path.split(self.getAttribute('filename'))[1]
-            split = refindall('_([a-zA-Z][0-9])_', name)
-            if len(split) > 0 :
-                self.update({'cell': split[0].lower()})
+            split = refindall(self.FINDALLSTR, name)
+            if len(split) > 0 and len(split[0]) > 2:
+                self.update({'cell': split[0][2].lower()})
+            # old version, replaced on 19.08.2020
+            # split = refindall('_([a-zA-Z][0-9])_', name); split[0].lower()})
         return self.getAttribute('cell')
 
     def measId (self, forceCalc=False) :
         if self.getAttribute('measId') == '' or forceCalc :
             name = os.path.split(self.getAttribute('filename'))[-1]
-            split = refindall('_([0-9][0-9])[._]', name)
-            if len(split) > 0 :
-                self.update({'measId': split[0]})
+            split = refindall(self.FINDALLSTR, name)
+            if len(split) > 0 and len(split[0]) > 3:
+                self.update({'measId': split[0][3]})
+            # old version, replaced on 19.08.2020
+            # split = refindall('_([0-9][0-9])[._]', name); split[0]})
         return self.getAttribute('measId')
     
 
