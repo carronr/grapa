@@ -564,29 +564,40 @@ class Graph:
         return False
     
 
-    def colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False):
+    def colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False, curvesselection=None):
         """
         Colorize a graph, by coloring each Curve along a colorscale gradient.
         """
         from grapa.colorscale import Colorscale
         if not isinstance(colorscale, Colorscale):
             colorscale = Colorscale(colorscale)
-        if self.length() == 1:
-            self.curve(0).update({'color': colorscale.valuesToColor(0.0, avoidWhite=avoidWhite)})
+        # determines which curves on want to colorize
+        curves = range(self.length())
+        if curvesselection is not None:
+            try:
+                curves = [int(c) for c in curvesselection]
+            except Exception:
+                print('Graph.colorize Exception, please provide list of curves index to colorize')
+        # special cases
+        if len(curves) < 1:
             return
-        show = np.arange(0, self.length())
-        if sameIfEmptyLabel:
-            show = np.array([0.0] * self.length())
-            i = 0.0
-            for c in range(self.length()):
-                show[c] = i
-                if self.curve(c).getAttribute('label') != '' and not self.curve(c).isHidden():
-                    i += 1.0
-                elif c > 0:
-                    show[c] = show[c-1]
+        if len(curves) == 1:
+            self[curves[0]].update({'color': colorscale.valuesToColor(0.0, avoidWhite=avoidWhite)})
+            return
+        # general case
+        show = np.arange(len(curves))
+        if sameIfEmptyLabel: # if needs to have several curves with same color
+            show = np.array([0.0] * len(curves))
+            val = 0.0
+            for i in range(len(curves)):
+                show[i] = val
+                if self[curves[i]].attr('label') != '' and not self[curves[i]].isHidden():
+                    val += 1.0
+                elif i > 0:
+                    show[i] = show[i-1]
         cols = colorscale.valuesToColor(show/max(max(show),1.0), avoidWhite=avoidWhite)
-        for c in range(self.length()):
-            self.curve(c).update({'color': cols[c]})
+        for i in range(len(curves)):
+            self[curves[i]].update({'color': cols[i]})
 
 
     def applyTemplate(self, graph, alsoCurves=True):

@@ -157,7 +157,16 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     graph.plot(filesave=filesave+'NVlog', **plotargs)
     if pltClose:
         plt.close()
+
     # graph 4: N vs depth
+    # add doping V=0
+    curves = []
+    for curve in graph:
+        tmp = curve.CurveCV_0V()
+        if tmp is not False:
+            tmp.update({'label': tmp.attr('label')+' Ncv @ 0V'})
+            curves.append(tmp)
+    graph.append(curves)
     graph.update(presets['Nx'])
     graph.plot(filesave=filesave+'Ndepth', **plotargs)
     if pltClose:
@@ -166,6 +175,17 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     graph.plot(filesave=filesave+'Ndepthlog', **plotargs)
     if pltClose:
         plt.close()
+    # save V=0 doping values
+    N0V_T, N0V_N = [], []
+    for curve in curves:
+        N = curve.y(alter=presets['Nxlog']['alter'][1])
+        N0V_T.append(curve.attr('temperature [k]'))
+        N0V_N.append(N[2])
+    N0V = Curve([N0V_T, N0V_N], {'label': 'N$_\mathrm{CV}$ (0V)', 'linestyle': 'none', 'linespec':'s', 'markeredgewidth':0, 'color':'b'})
+    for c in range(len(graph)-1, -1, -1): # remove unnecessary curves
+        if graph[c] in curves:
+            graph.deleteCurve(c)
+        
     # Fit Mott-Schottky curves
     Ncvminmax0 = [np.inf, -np.inf]
     Ncvminmax1 = [np.inf, -np.inf]
@@ -173,6 +193,7 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     graphVbi.append(Curve([[], []], {'linestyle': 'none'}))
     graphVbi.append(Curve([[], []], CurveArrheniusExtrapolToZero.attr))
     graphVbi.append(Curve([[], []], {'linestyle': 'none'}))
+    graphVbi.append(N0V)
     graphSmart = Graph('', **newGraphKwargs)
     numCurves = graph.length()
     for curve in range(numCurves):
@@ -196,9 +217,9 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
             Ncvminmax1 = [min(Ncvminmax1[0], Ncv), max(Ncvminmax1[1], Ncv)]
     graphVbi.update({'legendtitle': 'Mott-Schottky fit'})
     graphVbi.curve(0).update({'linespec': 'o', 'color': 'k', 'label': 'Built-in voltage (same Vlim)', 'markeredgewidth': 0, })
-    graphVbi.curve(1).update({'linespec': 'x', 'color': 'k', 'label': 'Ncv (same Vlim)'})
+    graphVbi.curve(1).update({'linespec': 'x', 'color': 'k', 'label': 'N$_\mathrm{CV}$ (same Vlim)'})
     graphVbi.curve(2).update({'linespec': 'o', 'color': 'r', 'label': 'Built-in voltage (adaptative Vlim)', 'markeredgewidth': 0})
-    graphVbi.curve(3).update({'linespec': 'x', 'color': 'r', 'label': 'Ncv (adaptative Vlim)'})
+    graphVbi.curve(3).update({'linespec': 'x', 'color': 'r', 'label': 'N$_\mathrm{CV}$ (adaptative Vlim)'})
     graphVbi.update({'xlabel': graphVbi.formatAxisLabel(['Temperature', 'T', 'K']),
                      'ylabel': graphVbi.formatAxisLabel(['Built-in voltage', 'V_{bi}', 'V'])})
     graphVbi.plot(filesave=filesave+'VbiT', **plotargs)
@@ -430,11 +451,11 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
 if __name__ == "__main__":
 
     folder = './../examples/Cf/'
-    graph = script_processCf(folder, pltClose=False)
+    #graph = script_processCf(folder, pltClose=False)
 
 
     folder = './../examples/CV/'
-    #graph = script_processCV(folder, ROIfit=[0.15,0.3], pltClose=False)
+    graph = script_processCV(folder, ROIfit=[0.15,0.3], pltClose=True)
 
     plt.show()
     

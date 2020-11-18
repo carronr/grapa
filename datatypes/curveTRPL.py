@@ -69,21 +69,63 @@ class CurveTRPL(Curve):
     CURVE = 'Curve TRPL'
     SMOOTH_WINDOW = ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']
     
+
     def __init__(self, data, attributes, silent=False):
         # main constructor
         Curve.__init__(self, data, attributes, silent=silent)
         self.update ({'Curve': self.CURVE})
+        # retrieve parameters required for normalization
+        if self.attr('_repetfreq_Hz', None) is None:
+            try:
+                rep = float(self.attr('sync_frequency', None).split(' ')[0])
+            except Exception:
+                rep = 1
+            self.update({'_repetfreq_Hz': rep})
+        if self.attr('_acquistime_s', None) is None:
+            try:
+                time0 = float(self.attr('meas_time', None).split(' ')[0])
+                time1 = float(self.attr('meas_stop', None).split(' ')[0])
+                time = time1 - time0
+                if time == 0 or np.isnan(time):
+                    time = 1
+            except Exception:
+                time = 1
+            self.update({'_acquistime_s': time})
+        if self.attr('_binwidth_s', None) is None:
+            try:
+                binw = float(self.attr('meas_binwidth', None).split(' ')[0]) * 1e-12
+            except Exception:
+                binw = 1
+            self.update({'_binwidth_s': binw})
+        # backward compatibility
+        if self.attr('_spectrumOffset', None) is not None and self.attr('_TRPLOffset', None) is None:
+            self.update({'_TRPLOffset': self.attr('_spectrumOffset')})
+        
 
 
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
-        out.append([self.addOffset, 'Add offset', ['new vertical offset'], [self.getOffset()]]) # one line per function
         xOffset = self.getXOffset()
         out.append([self.addXOffset, 'Time offset', ['new horizontal offset (leave empty for autodetect)'], [xOffset if xOffset != 0 else '']]) # one line per function
+        unit = self.attr('_unit', 'cts')
+        out.append([self.addOffset, 'Add offset', ['new vertical offset ('+unit+')'], [self.getOffset()]]) # one line per function
+        # normalization
+        unit = self.attr('_unit', None)
+        revert = False if unit is None else True
+        if not revert:
+            out.append([self.normalize, 'Normalize intensity',
+                        ['pulse freq Hz', 'acquis time s', 'bin ps'],
+                        [self.attr('_repetfreq_Hz', 1), self.attr('_acquistime_s', 1), self.attr('_binwidth_s', 1)*1e12],
+                        {},
+                        [{'width':10}, {'width':7}, {'width':6}]]) # one line per function
+        else: # get back cts data
+            out.append([self.normalizerevert, 'Restore intensity cts',
+                        ['Current intensity unit: '+str(unit)+'. factor'],
+                        [self.getFactor()], {}, [{'field':'Label'}]]) # one line per function
         # fit
-        if self.getAttribute('_fitFunc', None) is None or self.getAttribute('_popt', None) is None:
+        if self.attr('_fitFunc', None) is None or self.attr('_popt', None) is None:
             ROI = roundSignificantRange([20, max(self.x())], 2)
             out.append([self.CurveTRPL_fitExp,
                         'Fit exp',
@@ -104,6 +146,7 @@ class CurveTRPL(Curve):
                     ['9', 'hanning', '1'],
                     {},
                     [{},{'field':'Combobox', 'values':self.SMOOTH_WINDOW},{'field':'Combobox','values':['1','2','4','8','16']}]])
+
         out.append([self.printHelp, 'Help!', [], []]) # one line per function
         return out
     
@@ -115,13 +158,63 @@ class CurveTRPL(Curve):
     
     # handling of offsets - same as Curve Spectrum, with same keyword
     def getOffset(self):
-        return self.getAttribute('_spectrumOffset', 0)
+        return self.attr('_TRPLOffset', 0)
+    def getFactor(self):
+        return self.attr('_TRPLFactor', 1)
+    def setIntensity(self, offsetnew=None, factornew=None):
+        """ Data stored as (raw + offset) * factor """
+        """
+        cts = self.y() / self.getFactor() - self.getOffset()
+        if is_number(offsetnew):
+            self.update({'_spectrumOffset': offsetnew})
+        if is_number(factornew):
+            self.update({'_spectrumFactor': factornew})
+        self.setY((cts + self.getOffset()) * self.getFactor())
+        """
+        factorold = self.getFactor()
+        cts = (self.y() - self.getOffset()) / factorold
+        if is_number(offsetnew):
+            self.update({'_TRPLOffset': offsetnew})
+        if is_number(factornew):
+            self.update({'_TRPLFactor': factornew})
+            self.update({'_TRPLOffset': self.getOffset() * factornew / factorold})
+        self.setY((cts * self.getFactor()) + self.getOffset())
+        # backward compatibility
+        if self.attr('_spectrumOffset', None) is not None:
+            self.update({'_spectrumOffset': self.attr('_TRPLOffset')})
+        return True
+    
     def addOffset(self, value):
         if is_number(value):
-            self.setY(self.y() + value - self.getOffset())
-            self.update({'_spectrumOffset': value})
+            self.setIntensity(offsetnew=value)
             return True
         return False
+    
+    def normalize(self, repetfreq_Hz, duration_s, binwidth_ps):
+        """
+        Normalizes intensity of TRPL to account for repetition rate,
+        acquisition duration and binwidth.
+        Assumes data is in unit counts.
+        Data: (raw+offset) * (1 / (syncfreq * (measstop-meastime) * binwidth))
+        """
+        try:
+            factor = float(1 / (repetfreq_Hz * duration_s * (1e-12*binwidth_ps)))
+        except Exception:
+            return False
+        if factor == 0 or np.isinf(factor):
+            print('CurveTRPL.normlize: non-sensical normalization factor (0 or inf).')
+            return False
+        if self.attr('_unit', None) is not None: # should not happen if using only the GUI
+            print('CurveTRPL.normalize: data may have been already normalized (Curve labelled as "'+self.attr('_unit')+'", "'+self.attr('_unitfactor')+'").')
+        self.setIntensity(factornew=factor)
+        self.update({'_unit': 'cts/Hz/s/s'})
+        return True
+    def normalizerevert(self, *args):
+        self.setIntensity(factornew=1)
+        self.update({'_unit': ''})
+        return True
+    
+    
     
         # temporal offset
     def getXOffset(self):
@@ -147,6 +240,7 @@ class CurveTRPL(Curve):
         return self.x(0)
         
 
+    
         
     def CurveTRPL_fitExp(self, nbExp=2, ROI=None, fixed=None, showResiduals=False, silent=False):
         """

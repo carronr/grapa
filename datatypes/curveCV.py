@@ -13,7 +13,7 @@ from copy import deepcopy
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
 from grapa.curve import Curve
-from grapa.mathModule import roundSignificant, derivative
+from grapa.mathModule import roundSignificant, derivative, is_number
 
 
 
@@ -111,6 +111,8 @@ class CurveCV(Curve):
         else:
             param = roundSignificant(self.getAttribute('_popt'), 5)
             out.append([self.updateFitParam, 'Update fit', ['V_bi', 'N_CV'], [param[0], '{:1.4e}'.format(param[1])]])
+        # curve extraction for doping at 0 V
+        out.append([self.CurveCV_0V, 'Show doping at', ['V='], [0]])
         # set epsilon
         out.append([self.setEpsR, 'Set epsilon r', ['default = 10'], [self.getEpsR()]])
         out.append([self.printHelp, 'Help!', [], []])
@@ -249,6 +251,26 @@ class CurveCV(Curve):
         lim1 = min(ROI[0]+idx+window[1], len(V)-1)
         return [V[lim0], V[lim1]]
         
+        
+    def CurveCV_0V(self, Vtarget=0):
+        """
+        Creates a curve with require data to compute doping at V=0
+        Parameters:
+            Vtarget: extract doping around other voltage
+        """ 
+        if not is_number(Vtarget):
+            print('CurveCV.CurveCV_0V: please provide a number')
+            return False
+        Vtarget
+        i = np.argmin(np.abs(self.x() - Vtarget))
+        if i > 0 and i < len(self.x()) - 1:
+            x = np.concatenate(([0]     , self.x()[i-1:i+2], [0]))
+            y = np.concatenate(([np.nan], self.y()[i-1:i+2], [np.nan]))
+            curve = CurveCV([x, y], self.attributes)
+            curve.update({'linespec':'s', 'markeredgewidth':0, 'labelhide':1})
+            return curve
+        return False
+
         
         
     # other functions

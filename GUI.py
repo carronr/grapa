@@ -47,22 +47,25 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- B+W preview
 #Stackplot: transparency Alpha ?
 
-
 # BUG: fit JV, when unit in mV
-
-# TODO: Also: TIV JSC even if not VOC
-
+#- Add button reverse curve order
 
 # TODO: Write workflow Cf
 # TODO: Write workflow CV
 # TODO: Write workflow JV
 # TODO: Write workflow Jsc Voc
 
-#- Add button reverse curve order
-# colorbar: also shortcut for type image?
+# TODO LIST PRIORITY
+#- colorbar: also shortcut for type image?
+#- update repository package
 
 
-
+#Version 0.5.4.4
+#New features:
+#- Colorscale: it is now possible to colorize a selction of curves using colorscale, and not only the whole graph.
+#- Curve CV: a new function allows to display the doping at 0V (or other bias voltage value)
+#- Script CV: the automatic VC data processing now exports the doping at 0V on the plots N_CV versus depths. the oping at 0V as function of temperature is also reported in the NcvT summary.
+#- TRPL: Added a intensity normlization function, to compare intensities of time traces acquired with different instrument parameters (acquisition time, laser repetition frequency, time bin width). The normalized data are expressed in units of (cts+offset)/(repetition*duratio*binwidth) [cts/Hz/s/s]. It interplays with the existing offset feature, such that raw data can always be retrieved by setting the offset to 0 and removing the normalization.
 
 #Version 0.5.4.3
 #- ScriptJV: can now handle samples with cells identifiers with numeric > 9. The cell identifer is assumed to be with the form a1, b3, etc.
@@ -715,6 +718,7 @@ class Application(tk.Frame):
     def fillUIFrameRightTemplateColorize(self, frame):
         self.createFrame(frame, self.fillUIFrameRightTemplate,         {}, {'side': 'top', 'anchor':'w', 'fill': X})
         self.createFrame(frame, self.fillUIFrameRightAGColorizeTop,    {}, {'side': 'top', 'anchor':'w'})
+        self.createFrame(frame, self.fillUIFrameRightAGColorizeMiddle, {}, {'side': 'top', 'anchor':'w'})
         self.createFrame(frame, self.fillUIFrameRightAGColorizeBottom, {}, {'side': 'top', 'anchor':'w'})
     def fillUIFrameRightAGColorizeTop(self, frame):
         self.varRColEmpty = tk.IntVar()
@@ -723,13 +727,17 @@ class Application(tk.Frame):
         self.varRColInvert.set(0)
         self.varRColAvoidWhite = tk.IntVar()
         self.varRColAvoidWhite.set(1)
+        self.varRColCurvesList = tk.IntVar()
+        self.varRColCurvesList.set(0)
         tk.Button     (frame, text='Colorize',    command=self.colorizeGraph).pack(side='left')
         tk.Checkbutton(frame, text='repeat if no label  ', variable=self.varRColEmpty).pack(side='left')
         tk.Checkbutton(frame, text='invert',      variable=self.varRColInvert).pack(side='left')
-        tk.Checkbutton(frame, text='Avoid white', variable=self.varRColAvoidWhite).pack(side='left')
+        tk.Checkbutton(frame, text='avoid white', variable=self.varRColAvoidWhite).pack(side='left')
+        tk.Checkbutton(frame, text='curve selection', variable=self.varRColCurvesList).pack(side='left')
+    def fillUIFrameRightAGColorizeMiddle(self, frame):
         self.varRColChoice = tk.StringVar()
         self.varRColChoice.set('')
-        tk.Entry(frame, text=self.varRColChoice, width=23).pack(side='left')
+        tk.Entry(frame, text=self.varRColChoice, width=50).pack(side='left')
     def fillUIFrameRightAGColorizeBottom(self, frame):
         nbPerLine = 12
         self.colList = Colorscale.GUIdefaults(**self.newGraphKwargs)
@@ -1106,11 +1114,16 @@ class Application(tk.Frame):
         if len(col) == 0:
             col = self.colList[0].getColorScale()
             self.colorizeGraphSetScale(0)
-        sameIfEmptyLabel = self.varRColEmpty.get()
         invert = self.varRColInvert.get()
-        avoidWhite = self.varRColAvoidWhite.get()
+        kwargs = {'avoidWhite': self.varRColAvoidWhite.get(),
+                  'sameIfEmptyLabel':  self.varRColEmpty.get()}
+        if self.varRColCurvesList.get():
+            curves = self.getActiveCurve()
+            if len(curves) > 0 and curves[0] >= 0:
+                # if no curve is selected, colorize all curves
+                kwargs.update({'curvesselection': curves})
         try:
-            self.back_graph.colorize(Colorscale(col, invert=invert), sameIfEmptyLabel=sameIfEmptyLabel, avoidWhite=avoidWhite)
+            self.back_graph.colorize(Colorscale(col, invert=invert), **kwargs)
         except ValueError as e:
             # want error to be printed in GUI console, and not hidden in the python console
             print('ValueError:', e)
