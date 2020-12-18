@@ -13,9 +13,15 @@ KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
 
+Version 0.5.4.5
+Released 18.12.2020
+Changes
+- CurveTRPL: small changes in the handling of TRPL data label and normalization factors
+- CurveCV: change in labeling for doping extracted at given voltage
+
 
 Version 0.5.4.4
-Release data 18.11.2020
+Released 18.11.2020
 New features:
 - Colorscale: it is now possible to colorize a selction of curves using colorscale, and not only the whole graph.
 - Curve CV: a new function allows to display the doping at 0V (or other bias voltage value)

@@ -41,8 +41,22 @@ class GraphTRPL(Graph):
             kw.update({'delimiterHeaders': ':'})
         GraphIO.readDataFromFileGeneric(self, attributes, **kw)
         self.castCurve(CurveTRPL.CURVE, len0, silentSuccess=True)
+        # label management
         filenam_, fileext = ospath.splitext(self.filename) # , fileExt
-        self.curve(len0).update({'label': filenam_.split('/')[-1].split('\\')[-1]})
+        #self.curve(len0).update({'label': filenam_.split('/')[-1].split('\\')[-1]})
+        lbl = filenam_.split('/')[-1].split('\\')[-1].replace('_',' ').split(' ')
+        smp = str(self.curve(len0).attr('sample'))
+        try:
+            if float(int(float(smp))) == float(smp):
+                smp = str(int(float(smp)))
+        except Exception:
+            pass
+        smp = smp.replace('_',' ').split(' ')
+        new = lbl
+        if len(smp) > 0:
+            new = [l for l in lbl if l not in smp] + smp
+        print('label', self.attr('label'), [l for l in lbl if l not in smp], smp)
+        self.curve(len0).update({'label': ' '.join(new)})
         xlabel = self.getAttribute('xlabel').replace('[',' [').replace('  ',' ').capitalize() # ] ]
         if xlabel in ['', ' ']:
             xlabel = GraphTRPL.AXISLABELS[0]
@@ -208,6 +222,16 @@ class CurveTRPL(Curve):
             print('CurveTRPL.normalize: data may have been already normalized (Curve labelled as "'+self.attr('_unit')+'", "'+self.attr('_unitfactor')+'").')
         self.setIntensity(factornew=factor)
         self.update({'_unit': 'cts/Hz/s/s'})
+        # overwrite acquisition parameters, if significant deviation from 
+        try:
+            if np.abs(self.attr('_repetfreq_Hz',1) - repetfreq_Hz) / repetfreq_Hz > 1e-6:
+                self.update({'_repetfreq_Hz': repetfreq_Hz})
+            if np.abs(self.attr('_acquistime_s') - duration_s) / duration_s > 1e-6:
+                self.update({'_acquistime_s': duration_s})
+            if np.abs(self.attr('_binwidth_s') - (1e-12*binwidth_ps)) / (1e-12*binwidth_ps) > 1e-6:
+                self.update({'_binwidth_s': (1e-12*binwidth_ps)})
+        except Exception:
+            pass
         return True
     def normalizerevert(self, *args):
         self.setIntensity(factornew=1)

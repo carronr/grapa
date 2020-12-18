@@ -268,6 +268,7 @@ class CurveCV(Curve):
             y = np.concatenate(([np.nan], self.y()[i-1:i+2], [np.nan]))
             curve = CurveCV([x, y], self.attributes)
             curve.update({'linespec':'s', 'markeredgewidth':0, 'labelhide':1})
+            curve.update({'label':curve.attr('label')+' V='+str(Vtarget)})
             return curve
         return False
 

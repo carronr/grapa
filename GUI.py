@@ -60,12 +60,23 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 #- update repository package
 
 
+# TRPL label
+# CV curve 0V error
+
+
+#Version 0.5.4.5
+#Changes
+#- CurveTRPL: small changes in the handling of TRPL data label and normalization factors
+#- CurveCV: change in labeling for doping extracted at given voltage
+
+
 #Version 0.5.4.4
 #New features:
 #- Colorscale: it is now possible to colorize a selction of curves using colorscale, and not only the whole graph.
 #- Curve CV: a new function allows to display the doping at 0V (or other bias voltage value)
 #- Script CV: the automatic VC data processing now exports the doping at 0V on the plots N_CV versus depths. the oping at 0V as function of temperature is also reported in the NcvT summary.
 #- TRPL: Added a intensity normlization function, to compare intensities of time traces acquired with different instrument parameters (acquisition time, laser repetition frequency, time bin width). The normalized data are expressed in units of (cts+offset)/(repetition*duratio*binwidth) [cts/Hz/s/s]. It interplays with the existing offset feature, such that raw data can always be retrieved by setting the offset to 0 and removing the normalization.
+
 
 #Version 0.5.4.3
 #- ScriptJV: can now handle samples with cells identifiers with numeric > 9. The cell identifer is assumed to be with the form a1, b3, etc.
