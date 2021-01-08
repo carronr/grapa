@@ -63,44 +63,14 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TRPL label
 # CV curve 0V error
 
+#Version 0.5.4.6
+# - Added Integration function to the CurveTRPL and CurveSpectrum
+
 
 #Version 0.5.4.5
 #Changes
 #- CurveTRPL: small changes in the handling of TRPL data label and normalization factors
 #- CurveCV: change in labeling for doping extracted at given voltage
-
-
-#Version 0.5.4.4
-#New features:
-#- Colorscale: it is now possible to colorize a selction of curves using colorscale, and not only the whole graph.
-#- Curve CV: a new function allows to display the doping at 0V (or other bias voltage value)
-#- Script CV: the automatic VC data processing now exports the doping at 0V on the plots N_CV versus depths. the oping at 0V as function of temperature is also reported in the NcvT summary.
-#- TRPL: Added a intensity normlization function, to compare intensities of time traces acquired with different instrument parameters (acquisition time, laser repetition frequency, time bin width). The normalized data are expressed in units of (cts+offset)/(repetition*duratio*binwidth) [cts/Hz/s/s]. It interplays with the existing offset feature, such that raw data can always be retrieved by setting the offset to 0 and removing the normalization.
-
-
-#Version 0.5.4.3
-#- ScriptJV: can now handle samples with cells identifiers with numeric > 9. The cell identifer is assumed to be with the form a1, b3, etc.
-#- CurveEQE: added a new analysis function, for crude estimate of thickness of layer with parasitic absorption (e.g. CdS). The deature can be hacked e.g. to reproduce absorption edge of perovskites.
-
-
-#Version 0.5.4.2
-#- Script JV: now also generates a compilation of (area-corrected) JV curves processed by the script
-#- Script JV: minor adjustments to the script.
-#- Script JV sample map: minor adjustments to the script, indication of columns not found.
-#- SIMS: Solved an occasional bug with automatic edge detection that prevented opening SIMS data files.
-
-
-
-#Version 0.5.4.1
-#- Added method __len__() to the class Graph, returning the number of Curves.
-#- Added method __getitem__() to the class Graph, enabling call to Graph[0] or for c, curve in enumerate(graph).
-#- Added method __delitem__() to the class Graph, enabling to del Graph[0]. Calls Graph.deleteCurve(key)
-#- Added method attr() to the class Graph, a shorter alias to Graph.getAttribute()
-#- Added method attr() to the class Curve, a shorter alias to Graph.getAttribute()
-#Improvements
-#- Improved the reliability of CV and Cf script processing versus noisy data and incomplete input files.
-#BUGS
-#- The attribute label is now parsed as a string, so Curve labels such as "1", "2" can be used.
 
 
 
@@ -1395,9 +1365,12 @@ class Application(tk.Frame):
             self.canvas.draw()
 
     def treeActiveCurve(self, curItem):
+        # handle several selected items
         if isinstance(curItem, tuple):
             out = [self.treeActiveCurve(item) for item in curItem]
-            return tuple(set(out)) # remove duplicates
+            out = tuple(set(out)) # remove duplicates
+            out = tuple(sorted(list(out)))
+            return out
         # handle single element
         itemP = self.Tree.parent(curItem)
         itemList = self.Tree.item(curItem)

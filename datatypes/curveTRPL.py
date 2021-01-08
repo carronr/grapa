@@ -73,7 +73,6 @@ class GraphTRPL(Graph):
                 if isinstance(val, str) and val.startswith('\t'):
                     self.curve(len0).update({key:''})
 
-
     
     
 
@@ -160,7 +159,13 @@ class CurveTRPL(Curve):
                     ['9', 'hanning', '1'],
                     {},
                     [{},{'field':'Combobox', 'values':self.SMOOTH_WINDOW},{'field':'Combobox','values':['1','2','4','8','16']}]])
-
+        # integration
+        alter = str(kwargs['graph'].attr('alter')) if 'graph' in kwargs else "['', '']"
+        ROI = roundSignificantRange([min(self.x()), max(self.x())], 2)
+        out.append([self.integrate, 'Integrate',
+                    ['ROI', 'data transform'], [ROI, alter], {},
+                    [{}, {'field':'Combobox','values': ['raw', alter]}]])
+        # help
         out.append([self.printHelp, 'Help!', [], []]) # one line per function
         return out
     
@@ -207,8 +212,7 @@ class CurveTRPL(Curve):
     def normalize(self, repetfreq_Hz, duration_s, binwidth_ps):
         """
         Normalizes intensity of TRPL to account for repetition rate,
-        acquisition duration and binwidth.
-        Assumes data is in unit counts.
+        acquisition duration and binwidth. Assumes data is in unit 'counts'.
         Data: (raw+offset) * (1 / (syncfreq * (measstop-meastime) * binwidth))
         """
         try:
@@ -268,7 +272,17 @@ class CurveTRPL(Curve):
         
     def CurveTRPL_fitExp(self, nbExp=2, ROI=None, fixed=None, showResiduals=False, silent=False):
         """
-        Returns a Curve based on a fit on TRPL decay.
+        Fit exp: fits the data as a constant plus a sum of exponentials.
+        Returns a Curve as the best fit to the TRPL decay.
+        Formula: y(t) = BG + A1 exp(-t/tau1) + A2 exp(-t/tau2) + ...
+        thus y(0) = BG + A1 + A2 + ...
+        Parameters:
+        - nbExp: The number of exponentials in the fit
+        - ROI: minimum and maximum on horizontal axis, e.g. [min, max]
+        - fixed: an array of values. When a number is set, the corresponding
+          fit parameter is fixed. The order of fit parametersis as follows:
+          BG, A1, tau1, A2, tau2, .... e.g. [0,'','']
+        - showResiduals: when 1, also returns a Curve as the fit residuals.
         """
         # set nb of exponentials, adjust variable "fixed" accordingly
         while len(fixed) > 1 + 2 * nbExp:
@@ -374,6 +388,14 @@ class CurveTRPL(Curve):
         
     
     def CurveTRPL_smoothBin(self, window_len=9, window='hanning', binning=4):
+        """
+        Smooth & bin: returns a copy of the Curve after smoothening and data
+        binning. Parameters:
+        - width (window_len): number of points in the smooth window,
+        - convolution (window): the type of window. Possible values: 'hanning',
+          'hamming', 'bartlett', 'blackman', or 'flat' (moving average).
+        - binning: how many points are merged.
+        """
         if not is_number(window_len) or window_len < 1:
             print('Warning CurveTRPL smoothBin: cannot interpret window_len value (got',window_len,', request int larger than 0.) Set 1.')
             window_len = 1
@@ -397,7 +419,31 @@ class CurveTRPL(Curve):
         attr.update({'label': str(self.getAttribute('label'))+' '+'smooth'})
         return CurveTRPL([x_, y_], attr)
         
-    
+
+
+    def integrate(self, ROI=None, alter=None, curve=None):
+        """
+        Integrate: returns the integral of the curve, within ROI. Parameters:
+        - ROI: example [xmin, xmax]
+        - data transform (alter): 'raw', or any Graph 'alter' value including
+          (mul-)offsets.
+        """
+        # curve: tweak to be able to integrate from the GUI a Curve not CurveTRPL
+        if curve is None:
+            curve = self
+        mask = CurveTRPL.ROItoMask(curve, ROI) # self may be not instance of CurveTRPL
+        if alter is not None and alter not in ['raw']:
+            if isinstance(alter, str):
+                alter = ['', alter]
+            datax = curve.x_offsets(alter=alter[0])[mask]
+            datay = curve.y_offsets(alter=alter[1])[mask]
+        else:
+            datax = curve.x()[mask]
+            datay = curve.y()[mask]
+        integral = np.trapz(datay, datax)
+        return integral
+
+        
 
     def printHelp(self):
         print('*** *** ***')
@@ -412,21 +458,9 @@ class CurveTRPL(Curve):
               '   If value is empty, the software tries to autodetect the\n',
               '   leading edge, as the last point below a threshold defined as\n',
               '   the average of the 25% and 95% percentiles.')
-        print(' - Fit exp: offers possibility of fitting with the sum of a\n',
-              '   constant, plus an arbitrary number of exponential functions.\n',
-              '   Formula: y(t) = BG + A1 exp(-t/tau1) + A2 exp(-t/tau2) + ...\n',
-              '   thus y(0) = BG + A1 + A2 + ...\n',
-              '   Options:,\n',
-              '   The number of exponentials can be selected,\n',
-              '   ROI, with minimum and maximum on horizontal axis,\n',
-              '   Fixed: an array of values. When a number is set the\n',
-              '      corresponding fit parameter is fixed. The fit parameters\n',
-              '      go as follows: BG, A1, tau1, A2, tau2, ...\n',
-              '   Residuals: when 1, also returns the fit residuals.')
-        print(' - Smooth & bin: smooth the Curve, and then bin the data.\n',
-              '   Options:\n',
-              '   width: number of points in the smooth window,\n',
-              '   convolution: the type of window. Possible values are \'hanning\',\n',
-              '      \'hamming\', \'bartlett\', \'blackman\', or \'flat\' (moving average).\n',
-              '   binning: how many points are merged.')
+        self.printHelpFunc(self.normalize)
+        self.printHelpFunc(self.CurveTRPL_fitExp)
+        self.printHelpFunc(self.CurveTRPL_smoothBin)
+        self.printHelpFunc(self.integrate)
+        
         return True

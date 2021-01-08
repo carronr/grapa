@@ -12,6 +12,14 @@ WISH LIST
 KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
+Version 0.5.4.6
+Released 08.01.2021
+Additions
+- Added Integration function to the CurveTRPL and CurveSpectrum
+Bugs
+- Fixed a bug with Colorize function with curve selection where the order was not sorted under some conditions.
+
+
 
 Version 0.5.4.5
 Released 18.12.2020

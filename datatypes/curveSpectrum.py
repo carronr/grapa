@@ -77,6 +77,17 @@ class CurveSpectrum(Curve):
                          {'field':'Combobox', 'width':13,'values':['1 interpolate both', '2 interpolate dark', '0 element-wise']},
                          {'field':'Combobox', 'width':8, 'values':['1 new curve', '0 replace']},
                          {'field':'Combobox', 'width':13,'values':['0 ignore offsets', '1 with offsets']}]])
+        # integration
+        try:
+            from grapa.datatypes.curveTRPL import CurveTRPL
+            from grapa.mathModule import roundSignificantRange
+            alter = str(kwargs['graph'].attr('alter')) if 'graph' in kwargs else "['', '']"
+            ROI = roundSignificantRange([min(self.x()), max(self.x())], 2)
+            out.append([CurveTRPL.integrate, 'Integrate',
+                        ['ROI', 'data transform'], [ROI, alter], {'curve': self},
+                        [{}, {'field':'Combobox','values': ['raw', alter]}]])
+        except ImportError:
+            pass
         # other, specific
         if subclass is not None and hasattr(subclass, 'funcListGUISpecific'):
             out += subclass.funcListGUISpecific(self, **kwargs)
