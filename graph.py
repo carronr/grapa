@@ -17,6 +17,16 @@ from grapa.mathModule import is_number, stringToVariable
 
 class Graph:
     """
+    Arguments:
+    filename: filename to open (str), or list of str. Default ''
+    complement: dict, the elements will be stored as graph attributes.
+      Example: {'xlim':[1,'']
+      - 'isfilecontent' = True: filename interpreted as data
+      - 'readas' in ['database', 'generic']). 'database' can be
+          useful. You may consider using pandas instead
+    silent: to get more details on whats going on. Default True
+    config: configuration datafile. Default 'config.txt'
+
 ## TO UPDATE
      content of the class
     'filename': str
@@ -27,7 +37,7 @@ class Graph:
     'sampleInfo': Deprecated. Dict containing various information about the
                   sample. Generally is empty, as the relevant data are stored
                   in the Curve object.
-    
+
     List of useful methods
     __init__(self, filename, complement='', silent=False)
     __str__(self)
@@ -35,7 +45,7 @@ class Graph:
     length(self)
     merge(self, graph)
     append(self, curve)
-	
+
     curve(self, index)
     curves(self, attr, value, strLower=False, strStartWith=False):
     iterCurves(self)
@@ -50,12 +60,11 @@ class Graph:
 	replaceLabels(self, old, new)
     colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False)
     applyTemplate(self, graph)
-    
+
     formatAxisLabel(self, default)
-    
+
     config(self, key, default='', astype='auto')
 
-	
     export(self, filesave='', saveAltered=False, ifTemplate=False, ifCompact=True, ifClipboardExport=False)
     plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave=True, ifExport=True, figAx=None, ifSubPlot=False)
     """
@@ -69,9 +78,11 @@ class Graph:
     # subclasses. Possible data formats are:
     # ['x axis label [unit]', 'y axis label [unit]']
     # [['Quantity x', 'Q', 'unit'], ['Quantity y', 'Q', 'unit']]. Q will be placed in between $ $
-    AXISLABELS = ['', ''] 
-    
-    
+    AXISLABELS = ['', '']
+
+    CONFIG_FILENAME = None
+    CONFIG_GRAPH = None
+
     headersKeys = ['meastype', 'sample', 'collabels'] + ['savesilent']
     graphInfoKeysData = []
     graphInfoKeysData.append(['== Figure ==', ''])
@@ -89,7 +100,7 @@ class Graph:
     graphInfoKeysData.append(['yticksstep',      'Value difference between ticks on y axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"']) # ax.yaxis.set_ticks
     graphInfoKeysData.append(['xtickslabels',    'Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: "[[0,1],[\'some\',\'value\']]", or "[None, None, {\'rotation\':45, \'size\': 6, \'color\':\'r\'}]"']) # plt.xticks
     graphInfoKeysData.append(['ytickslabels',    'Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: "[[0,1],[\'some\',\'value\']]", or "[None, None, {\'rotation\':45, \'size\': 6, \'color\':\'r\'}]"']) # plt.yticks
-    graphInfoKeysData.append(['xlabel_coords',   'Position of xlabel, based on ax.xaxis.set_label_coords().\nExamples: "-0.1", or "[0.5,-0.15]"']) 
+    graphInfoKeysData.append(['xlabel_coords',   'Position of xlabel, based on ax.xaxis.set_label_coords().\nExamples: "-0.1", or "[0.5,-0.15]"'])
     graphInfoKeysData.append(['ylabel_coords',   'Position of ylabel, based on ax.yaxis.set_label_coords().\nExamples: "-0.1", or "[-0.1,0.5]"'])
     graphInfoKeysData.append(['== Legends ==', ''])
     graphInfoKeysData.append(['legendproperties','Position, or keywords to ax.legend(). Examples: "best", "sw", or\n"{\'bbox_to_anchor\':(0.2,0.8), \'ncol\':2, \'fontsize\':8}"'])
@@ -119,7 +130,7 @@ class Graph:
             graphInfoKeysExalist.append(['']+split[1::2])
         else:
             graphInfoKeysExalist.append(graphInfoKeysData[i][2])
-    
+
 #    graphInfoKeys = ['xlim', 'ylim', 'figsize', 'title', 'xlabel', 'ylabel'] + ['text', 'textxy', 'textargs'] + ['xticksstep', 'yticksstep'] + ['axhline', 'axvline'] + ['legendproperties', 'legendtitle'] + ['alter', 'typeplot'] + ['twinx_ylabel', 'twinx_ylim', 'twiny_xlabel', 'twiny_xlim'] + ['xlabel_coords', 'ylabel_coords'] + ['subplots_adjust', 'fontsize'] + ['xtickslabels', 'ytickslabels'] + ['arbitraryfunctions'] + ['dpi']
 #    graphInfoKeysExample = ["[2,9], or ['',4]", "[0,100], or [0,'']", str(FIGSIZE_DEFAULT)+' (inch)', 'Some title', 'Axis x [unit]', 'Axis y [unit]'] + ['Some text, or [\'Here\', \'There\']', "(0.05, 0.95) , or [(0.2, 0.3), (0.8, 0.9)] if multiple text", "{'fontsize':15}, or \n[{'horizontalalignment': 'right', 'xytext': (0.4, 0.65),\n'arrowprops': {'shrink': 0.05}, 'xy': (0.46, 0.32)}, {}]"] + ['0.01, or [0,1,2]', '0.01, or [0,1,2]'] + ['0, or [-1, 1]', '0, or [-1, 1]'] + ["best, sw, etc., or\n{'bbox_to_anchor':(0.2,0.8),'ncol':2, 'fontsize':8} kwargs to ax.legend()", 'Some title, or [\'Some title\', {\'size\':25}] font properties prop'] + ["linear, or ['nmeV', 'tauc']", 'plot, fill, scatter, boxplot, etc.'] + ['Secondary y axis label [unit]', "[0,100], or [0,'']", 'Secondary x axis label [unit]', "[2,9], or ['',4]"] + ['-0.15 or [0.5,-0.15]', '-0.1 or [-0.1,0.5]'] + ['0.15 (bottom only), or [0.125, 0.1, 0.9, 0.9] left,b,r,top, or [1,1,5,3.5,\'abs\']', '12'] + ["[[0,1],['some','value']], or [None, None, {'rotation':45, 'color':'r'}]", "[[0,1],['some','value']], or [None, None, {'rotation':45, 'color':'r'}]"] + ["[['xaxis.set_ticks',[[1.5, 5.5]],{'minor':True}],\n['set_xticklabels',[['a','b']],{'minor':True}]]"] + [300]
     type_examples = ['', '== usual methods ==']
@@ -175,7 +186,7 @@ class Graph:
             dataInfoKeysGraphExalist.append(['']+split[1::2])
         else:
             dataInfoKeysGraphExalist.append(dataInfoKeysGraphData[i][2])
-        
+
 #    dataInfoKeysGraph = ['type', 'linespec', 'color', 'legend', 'label', 'labelhide', 'linewidth', 'facecolor', 'linestyle', 'alpha', 'marker', 'markersize', 'markerfacecolor', 'markeredgewidth', 'markeredgecolor', 'cmap', 'vminmax', 'colorbar', 'xerr', 'yerr', 'offset', 'muloffset', 'ax_twinx', 'ax_twiny', 'insetfile', "['key', value]"]
 #    dataInfoKeysGraphExample = ['plot, scatter, fill, boxplot, errorbar, etc. (scatter_c after previous scatter)', '--r', 'r, [0.5,0,0], etc.', 'Some legend', 'Some legend', '1 to hide label in graph', '1.5', 'r, [0.5,0,0], etc.', '"" or none', '0.5, 1, etc.', 'o, or s, etc.', '2', 'r, [0.5,0,0], etc.', '1.', 'r, [0.5,0,0], etc.', 'afmhot, or inferno, or color list as in Colorize', 'Imposes bounds for cmap. Ex: [0,7], or [3, \'\']', '1, or {\'ticks\': [-1, 0, 2]}, or {\'orientation\':\'horizontal\', \'adjust\':[0.1, 0.1, 0.7, 0.1]}', '1, or 5. Requires \'type\': \'errorbar\'.', '1, or 5. Requires \'type\': \'errorbar\'.', '-10, or [2,20]', '0.01, or [10, 1e2]', 'True, or anything', 'True, or anything', 'file to place as inset. Related keywords: insetcoords and insetupdate', "['color', [0,0.2,0.7], or ['comment', 'a valuable info']]"]
 
@@ -186,10 +197,15 @@ class Graph:
         if config is not None:
             if config == 'config.txt':
                 config = os.path.join(os.path.dirname(os.path.realpath(__file__)), config)
-            self._config = Graph(config, complement={'readas': 'database'}, config=None)
+            if Graph.CONFIG_GRAPH is not None and Graph.CONFIG_FILENAME == config:
+                self._config = Graph.CONFIG_GRAPH
+            else:
+                self._config = Graph(config, complement={'readas': 'database'}, config=None)
+                if self.CONFIG_FILENAME is None:
+                    Graph.CONFIG_FILENAME = config
+                    Graph.CONFIG_GRAPH = self._config
         # actually load the file
         self.reset(filename, complement=complement, silent=silent)
-    
 
     def reset(self, filename, complement='', silent=True):
         # complement: special keywords: 'readas', 'isfilecontent'
@@ -248,7 +264,7 @@ class Graph:
 
 
 
-# "USUAL" CLASS METHODS
+    # "USUAL" CLASS METHODS
     def __str__(self):
         """ Returns some information about the class instance. """
         out = 'Content of Graph stored in file ' + self.filename + '\n'
@@ -256,7 +272,6 @@ class Graph:
         out += str(self.headers)
         out += '\nNumber of Curves: '+str(self.length())
         return out
-
 
     # interactions with other Graph objects
     def merge(self, graph):
@@ -278,33 +293,35 @@ class Graph:
             if not key in self.sampleInfo:
                 self.sampleInfo.update({key: graph.sampleInfo[key]})
 
-    
     # methods handling the bunch of curves
     def __len__(self):
         """ Returns the number of Curves. """
         return len(self.data)
+
     def __getitem__(self, key):
         """ Returns a Curve object at index key. """
         return self.data[key]
+
     def __delitem__(self, key):
         """ Deletes the Curve at index key. """
         self.deleteCurve(key)
-        
+
     def length(self):
         """ Returns the number of Curve objects in the list. """
         return len(self.data)
+
     def curve(self, index):
         """ Returns the Curve object at index i in the list. """
         if index >= self.length() or self.length() == 0:
             print ('ERROR Class Graph method Curve: cannot find Curve (index',index,', max possible',self.length()-1,')')
-            return 
+            return
         return self.data[index]
 
     def curves(self, attr, value, strLower=False, strStartWith=False):
-        """ 
+        """
         Returns a list of Curves which attribute attr == value (also same type)
         attr: the attribute to check. By default 'label'.
-        strLower: if True, 
+        strLower: if True,
         strStartWith: is both value and the attribute are str, only look at the
             first characters
         """
@@ -327,7 +344,7 @@ class Graph:
         """ Returns an iterator over the different Curves """
         for c in range(self.length()):
             yield self.curve(c)
-    
+
     def append(self, curve, idx=None):
         """
         Add into the object list a Curve, a list or Curves, or every Curve in a
@@ -340,27 +357,27 @@ class Graph:
                     self.data.insert(idx, c)
                     idx += 1
                 else:
-                    self.data.append(c) # c are Curves, we can do like that
+                    self.data.append(c)  # c are Curves, we can do like that
         elif isinstance(curve, list):
             for c in curve:
                 if insert:
                     self.data.insert(idx, c)
                     idx += 1
                 else:
-                    self.append(c) # call itself, must check if c is a Curve
+                    self.append(c)  # call itself, must check if c is a Curve
         elif isinstance(curve, Curve):
             if insert:
                 self.data.insert(idx, curve)
             else:
                 self.data.append(curve)
         elif isinstance(curve, str) and curve == 'empty':
-            curve = Curve([[np.inf],[np.inf]], {})
+            curve = Curve([[np.inf], [np.inf]], {})
             if insert:
                 self.data.insert(idx, curve)
             else:
                 self.data.append(curve)
         else:
-            print('Graph.append: failed (type:',type(curve),')')
+            print('Graph.append: failed (type:', type(curve), ')')
 
     def deleteCurve(self, i):
         """ Delete a Curve at index i from the Graph object. """
@@ -397,7 +414,7 @@ class Graph:
         else:
             print ('Graph.replaceCurve: newCurve is not a Curve (type', type(newCurve), ')')
         return False
-    
+
     def swapCurves(self, idx1, idx2, relative=False):
         """
         Exchange the Curves at index idx1 and idx2.
@@ -408,7 +425,7 @@ class Graph:
             return False
         if relative:
             idx2 = idx1 + idx2
-        if idx2 == idx1: # swap with itself
+        if idx2 == idx1:  # swap with itself
             return True
         if idx2 < -self.length() or idx2 >= self.length():
             print ('Graph.swapCurves: idx2 not valid (value', idx2, ').')
@@ -417,18 +434,18 @@ class Graph:
         self.data[idx1] = self.curve(idx2)
         self.data[idx2] = swap
         return True
-        
+
     def moveCurveToIndex(self, idxsource, idxtarget):
         """ Change the position of a Curve in the list """
         tmp = self.data.pop(idxsource)
         self.data.insert(idxtarget, tmp)
         return True
-        
+
     def reverseCurves(self):
         """ Reverse the order of the Curves. """
         self.data.reverse()
         return True
-            
+
     def duplicateCurve(self, idx1):
         """ Duplicate (clone) an existing curve and append it in the curves list."""
         if idx1 < -self.length() or idx1 >= self.length():
@@ -437,7 +454,6 @@ class Graph:
         curve = deepcopy(self.curve(idx1))
         self.data.insert(idx1+1, curve)
 
-        
     # methods handling content of curves
     def getCurveData(self, idx, ifAltered=True):
         if ifAltered:
@@ -447,7 +463,7 @@ class Graph:
         else:
             x = self.curve(idx).x(alter='')
             y = self.curve(idx).y(alter='')
-        return np.array([x,y])
+        return np.array([x, y])
 
     def update(self, attributes, ifAll=False, forceGraphInfo=False):
         """ Update the properties of the Graph object.
@@ -459,7 +475,7 @@ class Graph:
         self.graphInfo)
         """
         for key in attributes:
-            k = key.lower().replace('ï»¿','')
+            k = key.lower().replace('ï»¿', '')
             try:
                 if   k in self.headersKeys:
                     if attributes[key] != '':
@@ -467,7 +483,7 @@ class Graph:
                     elif k in self.headers:
                         del self.headers[k]
                 elif (k in self.graphInfoKeys or forceGraphInfo) or k.startswith('subplots'):
-                    if attributes[key] is not '':
+                    if attributes[key] != '':
                         self.graphInfo.update({k: attributes[key]})
                     elif k in self.graphInfo:
                         del self.graphInfo[k]
@@ -496,7 +512,7 @@ class Graph:
         for i in range(lenmax):
             self.update({kwargs['keys'][i]: args[i]})
         return True
-                
+
     def delete(self, key, ifAll=False):
         """
         Delete an attribute of the Graph if recognized as such, or of the curve.
@@ -546,7 +562,7 @@ class Graph:
 
     def castCurve(self, newtype, idx, silentSuccess=False):
         """
-        Replace a Curve with another type of Curve with identical data and 
+        Replace a Curve with another type of Curve with identical data and
         properties.
         """
         if idx >= - self.length() and idx < self.length():
@@ -555,14 +571,13 @@ class Graph:
                 flag = self.replaceCurve(newCurve, idx)
                 if flag:
                     if not silentSuccess:
-                        print ('Graph.castCurve: new Curve type:', self.curve(idx).classNameGUI() + '.')
+                        print('Graph.castCurve: new Curve type:', self.curve(idx).classNameGUI() + '.')
                 else:
-                    print ('Graph.castCurve')
+                    print('Graph.castCurve')
                 return flag
         else:
-            print ('Graph.castCurve: idx not in suitable range (', idx,', max', self.length(),').')
+            print('Graph.castCurve: idx not in suitable range (', idx,', max', self.length(),').')
         return False
-    
 
     def colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False, curvesselection=None):
         """
@@ -625,7 +640,7 @@ class Graph:
                     val = graph.curve(c).getAttribute(key)
                     if val != '':
                         self.curve(c).update({key: val})
-    
+
     def replaceLabels(self, old, new):
         """
         Modify all labels of the Graph, by replacing 'old' by 'new'
@@ -637,7 +652,7 @@ class Graph:
         text = self.getAttribute('text', None)
         texy = self.getAttribute('textxy', '')
         targ = self.getAttribute('textargs', {})
-        if text == None:
+        if text is None:
             self.update({'textxy': '', 'textargs': ''})
             return
         onlyfirst = False if isinstance(text, list) else True
@@ -652,11 +667,11 @@ class Graph:
             texy = [texy]  # if texy was like (0.5,0.8)
         for i in range(len(targ)):
             if not isinstance(targ[i], dict):
-                #print('Graph.checkValidText targ set', i, '{} (previous', targ[i], ')')
+                # print('Graph.checkValidText targ set', i, '{} (previous', targ[i], ')')
                 targ[i] = {}
         for i in range(len(texy)):
             if not isinstance(texy[i], (tuple, list)):
-                #print('Graph.checkValidText texy set', i, '\'\' (previous', texy[i], ')')
+                # print('Graph.checkValidText texy set', i, '\'\' (previous', texy[i], ')')
                 texy[i] = ''
         while len(texy) < len(text):
             texy.append(texy[-1])
@@ -671,7 +686,7 @@ class Graph:
         if targ != self.getAttribute('textargs'):
             print('Corrected attribute textargs', targ, '(former', self.getAttribute('textargs'),')')
         self.update({'text': text, 'textxy': texy, 'textargs': targ})
-                    
+
     def addText(self, text, textxy, textargs=None):
         """
         Adds a text to be annotated in the plot, handling the not-so-nice
@@ -694,6 +709,7 @@ class Graph:
             for key in attrs.keys():
                 self.update({key: self.getAttribute(key) + [attrs[key]]})
         return restore
+
     def removeText(self):
         restore = []
         restore.append({'text':     self.getAttribute('text'),
@@ -704,25 +720,25 @@ class Graph:
             pass
         else:
             if not isinstance(self.getAttribute('text'), list):
-                for key in attrs: # ensures attributes are list
+                for key in attrs:  # ensures attributes are list
                     self.update({key: [self.getAttribute(key, '')]})
             for key in attrs:
                 self.update({key: self.getAttribute(key)[:-1]})
         return restore
 
-            
-            
-    
+
+
     # some mathemetical operation on curves
     def curvesAdd(self, idx0, idx1, interpolate=0, **kwargs):
         """ addition operation when only knowing curves indices """
         kwargs.update({'interpolate': interpolate, 'sub': False})
         return self.curve(idx0).__add__(self.curve(idx1), **kwargs)
+
     def curvesSub(self, idx0, idx1, interpolate=0, **kwargs):
         """ substraction operation when only knowing curves indices """
         kwargs.update({'interpolate': interpolate, 'sub': True})
         return self.curve(idx0).__add__(self.curve(idx1), **kwargs)
-        
+
     def _curveMethod_graphRef(self, *args, **kwargs):
         """
         Allows operations on the graph to be executed from inside the Curve
@@ -736,21 +752,21 @@ class Graph:
             del kwargs['curve'], kwargs['method']
             return getattr(curve, m)(*args, graph=self, **kwargs)
 
-    
     def _getAlter(self):
         """ returns the formatted alter instruction of self """
         return self._getAlterToFormat(self.getAttribute('alter'))
+
     @classmethod
     def _getAlterToFormat(cls, alter):
         """ Return a formatted alter instruction """
         if alter == '':
             alter = ['', '']
-        if isinstance(alter, str): # nothing to do if it is dict
+        if isinstance(alter, str):  # nothing to do if it is dict
             alter = ['', alter]
         return alter
-        
 
-            
+
+
     def formatAxisLabel(self, label):
         """
         Returns a string for label according to user preference.
@@ -763,7 +779,7 @@ class Graph:
         units = units.replace('unit', '').replace(' ','')
         # format input
         if isinstance(label, str):
-            if units != '[]': # that is default, no need to do anything
+            if units != '[]':  # that is default, no need to do anything
                 expr = '^(.* )\[(.*)\](.*)$'
                 if label != '':
                     f = refindall(expr, label)
@@ -787,8 +803,7 @@ class Graph:
                     out += ' [' + label[2] + ']'
             return out.replace('  ', ' ')
         return label
-        
-        
+
     def config(self, key, default='', astype='auto'):
         """
         returns the value corresponding to key in the configuration file.
@@ -802,7 +817,6 @@ class Graph:
                 return stringToVariable(out)
         return default
 
-    
     def filenamewithpath(self, filename):
         # if relative, join the path of the file with
         if os.path.isabs(filename):
@@ -811,8 +825,7 @@ class Graph:
         if hasattr(self, 'filename') and isinstance(self.filename, str) and len(self.filename) > 0:
             path = os.path.dirname(os.path.abspath(self.filename))
         return os.path.join(path, filename)
-        
-        
+
     # For convenience we offer a shortcut to GraphIO.export
     def export(self, filesave='', saveAltered=False, ifTemplate=False,
                ifCompact=True, ifOnlyLabels=False, ifClipboardExport=False):
@@ -825,7 +838,6 @@ class Graph:
                               ifTemplate=ifTemplate, ifCompact=ifCompact,
                               ifOnlyLabels=ifOnlyLabels,
                               ifClipboardExport=ifClipboardExport)
-        
 
     # For convenience we offer a shortcut to GraphIO.plot
     def plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave='auto',
@@ -850,7 +862,7 @@ class Graph:
         ifSubPlot: [True/False/'auto'] If True, prevents deletion of the
             existing axes in the figure.
             By default keeps axes if axes are provided in figAx.
-            
+
         """
         if ifSave not in [True, False]:
             ifSave = False if filesave == '' else True

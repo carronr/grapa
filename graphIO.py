@@ -58,11 +58,9 @@ class GraphIO(Graph):
               if so, call readDataFromFileGeneric
               else call readDataFromFileDatabase
     """
-        
+
     childClasses = None
     # list of child classes of Graph
-
-
 
     def dataFromVariable(self, data, attributes):
         """ Initializes content of object using data given in constructor. """
@@ -71,7 +69,6 @@ class GraphIO(Graph):
         # nevertheless want to import all Curve types, if not already done
         # so Curve will know all its possible subtypes and can tell to GUI
         GraphIO._listGraphChildClasses()
-
 
     @classmethod
     def _listGraphChildClasses(cls):
@@ -104,7 +101,7 @@ class GraphIO(Graph):
                             break
                     if isValid:
                         subclasses.append(typeM)
-        Graph.childClasses = subclasses # class constant
+        Graph.childClasses = subclasses  # class constant
         return subclasses
 
     @classmethod
@@ -115,16 +112,16 @@ class GraphIO(Graph):
         line1, line2, line3 = '', '', ''
         try:
             f = open(filename, 'r')
-        except Exception as e: # if file does not exist
+        except Exception:  # if file does not exist
             # do NOT want to append Curve object if file empty
             return line1, line2, line3
         # if file exist, try to open first line
         try:
-            line1 = f.readline().rstrip(' \r\n\t').replace('ï»¿','')
+            line1 = f.readline().rstrip(' \r\n\t').replace('ï»¿', '')
             try:
-                line2 = f.readline().rstrip(' \r\n\t').replace('ï»¿','')
+                line2 = f.readline().rstrip(' \r\n\t').replace('ï»¿', '')
                 try:
-                    line3 = f.readline().rstrip(' \r\n\t').replace('ï»¿','')
+                    line3 = f.readline().rstrip(' \r\n\t').replace('ï»¿', '')
                 except Exception:
                     pass
             except Exception:
@@ -134,17 +131,16 @@ class GraphIO(Graph):
         f.close()
         return line1, line2, line3
 
-        
     def readDataFile(self, complement=''):
         """
         Reads a file.
         Complement: ...
         Opens file self.filename
         """
-        self.isFileContent = True if (isinstance(complement, dict) and
-                                      'isfilecontent' in complement and
-                                      complement['isfilecontent']) else False
-        # attempt reading the file to identify types
+        self.isFileContent = True if (isinstance(complement, dict)
+                                      and 'isfilecontent' in complement
+                                      and complement['isfilecontent']) else False
+        # reads the file to identify types
         if not self.isFileContent:
             fileName, fileExt = os.path.splitext(self.filename)
             fileExt = fileExt.lower()
@@ -161,18 +157,14 @@ class GraphIO(Graph):
         # default attributes of curve
         if 'label' not in attributes:
             attributes.update({'label': fileName.split('/')[-1].split('\\')[-1].replace('_', ' ').replace('  ',' ')})
-        # default attributes of Graph
-        if 'subplots_adjust' in attributes:
-            self.update({'subplots_adjust': attributes['subplots_adjust']})
-            del attributes['subplots_adjust']
-        else:
-            self.update({'subplots_adjust': Graph.DEFAULT['subplots_adjust']})
-        if 'fontsize' in attributes:
-            self.update({'fontsize': attributes['fontsize']})
-            del attributes['fontsize']
-        else:
-            self.update({'fontsize': Graph.DEFAULT['fontsize']})
-        # guess keys of complement which are for Graph
+        # default (mandatory) attributes of Graph
+        for key in ['subplots_adjust', 'fontsize']:
+            if key in attributes:
+                self.update({key: attributes[key]})
+                del attributes[key]
+            else:
+                self.update({key: Graph.DEFAULT[key]})
+        # guess keys of complement which are for Graph and not for Curves
         toDel = []
         for key in complement:
             try:
@@ -204,11 +196,11 @@ class GraphIO(Graph):
         # without: MCA fit (html output of XRF), MBElog
         loaded = False
         # first check if instructed to open the file in a certain way
-        if ('readas' in attributes and
-            attributes['readas'].lower() in ['database', 'generic']):
-                msg = 'opened using standard methods.'
-                GraphIO.readDataFromFileTxt(self, attributes)
-                loaded = True
+        if ('readas' in attributes
+                and attributes['readas'].lower() in ['database', 'generic']):
+            msg = 'opened using standard methods.'
+            GraphIO.readDataFromFileTxt(self, attributes)
+            loaded = True
         # if not, then try every possibility
         if not loaded:
             childClasses = GraphIO._listGraphChildClasses()
@@ -233,8 +225,7 @@ class GraphIO(Graph):
         if msg != '':
             if not self.silent:
                 print('File '+fileName.split('/')[-1]+'... ' + msg)
-    
-        
+
     def _funcReadDataFile(self, filecontent, attributes=None):
         """ Try to guess which method is best suited to open the file """
         if attributes is None:
@@ -244,7 +235,8 @@ class GraphIO(Graph):
                 return GraphIO.readDataFromFileDatabase
             if attributes['readas'].lower() == 'generic':
                 return GraphIO.readDataFromFileGeneric
-        # test to identify if file is organized as series of headers + x-y columns, or as database
+        # test to identify if file is organized as series of
+        # headers + x-y columns, or as database
         for i in range(len(filecontent)):
             try:
                 float(filecontent[i][0])
@@ -256,8 +248,6 @@ class GraphIO(Graph):
                 pass
         return GraphIO.readDataFromFileDatabase
 
-        
-    
     def readDataFromFileTxt(self, attributes):
         """
         Reads content of a .txt file, and parse it as a database or as a
@@ -270,7 +260,7 @@ class GraphIO(Graph):
                 print('Exception', type(e), 'in GraphIO.readDataFromFileTxt:')
                 print(e)
                 return False
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 return False
         else:
             fileContent = self.filename.split('\n')
@@ -284,28 +274,27 @@ class GraphIO(Graph):
             # will read file again with the desired data processing
             f(self, attributes)
         else:
-            self.filename = '.txt' # free some memory
+            self.filename = '.txt'  # free some memory
             attributes.update({'filename': 'From clipboard'})
             f(self, attributes, fileContent=fileContent)
             self.isFileContent = False
 
-            
     def _readDataIdentifyDelimiter(self, lines):
-        # determine data character separator - only useful if reads file, otherwise is supposed to be already separated
+        # determine data character separator - only useful if reads file,
+        # otherwise is supposed to be already separated
         delimiter = '\t'
-        nTab = np.sum([l.count('\t') for l in lines])
-        threshold = np.ceil( max(1, len(lines)-5) / 2)
+        nTab = np.sum([line.count('\t') for line in lines])
+        threshold = np.ceil(max(1, len(lines)-5) / 2)
         if nTab < threshold: # if really not enough tabs in the file to be reasonable that data are tab-separated
             delimiters = [',', ';', ' ']
             for s in delimiters:
-                n = np.sum([l.count(s) for l in lines])
+                n = np.sum([line.count(s) for line in lines])
                 if n > threshold:
                     delimiter = s
                     print ('Graph file generic: data delimiter identified as "'+s+'".')
                     break
         return delimiter
 
-        
     def readDataFromFileGeneric(self, attributes, fileContent=None,
                                 ifReplaceCommaByPoint=False, **kwargs):
         """
@@ -335,15 +324,15 @@ class GraphIO(Graph):
 
         skipLines = 0
         skipFooters = 0
-        lastSampleInfo = '' # key of last saved parameter
+        lastSampleInfo = ''  # key of last saved parameter
         lastLine = ''
         colLabels = []
         # load content of file
-        if fileContent is None: # default behavior
+        if fileContent is None:  # default behavior
             lines = [line.rstrip(':\r\n\t') for line in open(self.filename, 'r')]
             if ifReplaceCommaByPoint:
                 lines = [resub('(?P<a>[0-9]),(?P<b>[0-9])', lambda word: word.group('a')+'.'+word.group('b'), line) for line in lines]
-        else: # if some content was provided
+        else:  # if some content was provided
             lines = fileContent
         # identify data separator (tab, semicolumn, etc.)
         if 'delimiter' in kwargs and isinstance(kwargs['delimiter'], str):
@@ -351,12 +340,11 @@ class GraphIO(Graph):
         else:
             delimiter = GraphIO._readDataIdentifyDelimiter(self, lines)
         delimiterHeaders = None if 'delimiterHeaders' not in kwargs else kwargs['delimiterHeaders']
-            
-        
+
         def splitline(line, delimiter):
             couple = line.split(delimiter)
             return [couple[i].strip(' :') for i in range(len(couple))]
-            
+
         # process header lines
         numEmpty = 0
         for line in lines:
@@ -371,8 +359,10 @@ class GraphIO(Graph):
                     couple2 = splitline(lastLine[0], delimiter)
                     if len(couple2) > 1:
                         lastLine = couple2
-                if lastSampleInfo != '' and ('label' not in attributes or
-                       (isLabelDefault and len(lastLine) > 1 and lastSampleInfo not in self.graphInfoKeys + self.headersKeys + self.dataInfoKeysGraph)):
+                if (lastSampleInfo != ''
+                    and ('label' not in attributes
+                        or (isLabelDefault and len(lastLine) > 1
+                            and lastSampleInfo not in self.graphInfoKeys + self.headersKeys + self.dataInfoKeysGraph))):
                     # if some column names were identified, try to define labels by concatenating filename stripped from numerics with colum name
                     lbl = attributes['label'].split(' ') if 'label' in attributes else ['']
                     for i in range(len(lbl)-1, -1, -1):
@@ -408,7 +398,7 @@ class GraphIO(Graph):
                 # all keywords in lowercase
                 if not is_number(couple[0]):
                     couple[0] = couple[0].lower()
-                
+
                 # conversion from matlab terminology
                 if couple[0] == 'figuresize':
                     couple[0] = 'figsize'
@@ -450,7 +440,7 @@ class GraphIO(Graph):
                     if couple[0] in ['label']:
                         couple = [couple[0]] + [cpl.replace('\\n','\n').replace('\t','\\t') for cpl in couple[1:]]
                     parsedAttr.update({couple[0]: couple})
-                
+
                 if couple[0] in self.graphInfo:
                     if isinstance(self.graphInfo[couple[0]], str):
                         self.graphInfo[couple[0]] = self.graphInfo[couple[0]].replace('\\n', '\n')
@@ -482,7 +472,7 @@ class GraphIO(Graph):
                 test = [bool(isnum0[i] == isnum1[i]) for i in range(1, len(isnum0))]
                 if np.array(test).all():
                     skipLines = max(skipLines-1, 0)
-        
+
         # if last text line was not empty -> interpret that as x-y-labels
         if colLabels != []:
             self.headers['collabels'] = colLabels
@@ -495,7 +485,7 @@ class GraphIO(Graph):
             if 'ylabel' not in self.graphInfo and len(colLabels) > 1:
                 self.graphInfo['ylabel'] = colLabels[1]
 
-        while lines[-1] is '':
+        while lines[-1] == '':
             lines.pop()
             skipFooters += 1
         skipFooters = 0  # do not understand it... genfromtxt can fail when files ends with several \n and this is not set!?
@@ -522,7 +512,7 @@ class GraphIO(Graph):
                 data = np.transpose(np.array(fileContent[skipLines:]))
             colX = 0
             cols = []
-            
+
             # some checks, and build array test -> know which data column are not empty (returned as nan values)
             if len(data.shape) < 2 and len(lines) == skipLines + 1:
                 # only 1 data row
@@ -546,12 +536,12 @@ class GraphIO(Graph):
                     del attributes[key]
             if 'label' not in parsedAttr and 'collabels' in self.headers :
                 parsedAttr['label'] = self.headers['collabels']
-            
+
             # parse through data
             if singlecurve:
                 self.data.append(Curve(data, attributes))
                 cols.append(1)
-            for colY in range(1, len(test)): # normal column guessing
+            for colY in range(1, len(test)):  # normal column guessing
                 # if nan -> column empty -> start new xy pair
                 if test[colY]:
                     colX = colY + 1
@@ -573,7 +563,7 @@ class GraphIO(Graph):
                             val = parsedAttr[key][cols[i]]
                         except IndexError:
                             continue
-                        if key not in ['label']: # for 'label', want to keep as string
+                        if key not in ['label']:  # for 'label', want to keep as string
                             val = stringToVariable(val)
                         if val != '':
                             self.curve(i).update({key: val})
@@ -583,7 +573,6 @@ class GraphIO(Graph):
                     if newtype not in ['', 'curve', 'curvexy']:
                         self.castCurve(newtype, c, silentSuccess=True)
 
-                            
     def readDataFromFileDatabase(self, attributes, fileContent=None, **kwargs):
         """
         fileContent: list of lists containing file content (imagine csv file)
@@ -651,7 +640,7 @@ class GraphIO(Graph):
             self.data[-1].update({'label': labels[i]})
 
         # update the header info
-        # first change datatype for display purposes 
+        # first change datatype for display purposes
         for key in toUpdate:
             if key in ['color']:
                 toUpdate[key] = stringToVariable(toUpdate[key])
@@ -662,10 +651,10 @@ class GraphIO(Graph):
             line = fileContent[i+nLinesHeaders]
             self.headers['rowlabels'].append(line[0])
             try:
-#                self.headers['rowlabelnums'].append(float(''.join(ch for ch in line[0] if ch.isdigit() or ch=='.')))
+                # self.headers['rowlabelnums'].append(float(''.join(ch for ch in line[0] if ch.isdigit() or ch=='.')))
                 split = refindall('([0-9]*[.]*[0-9]*)', line[0])
                 split = [s for s in split if len(s) > 0]
-#                print (line[0], split)
+                # print (line[0], split)
                 if len(split) > 0:
                     self.headers['rowlabelnums'].append(float(split[0]))
                 else:
@@ -677,8 +666,8 @@ class GraphIO(Graph):
                 if is_number(line[j+1]):
                     self.data[j].setY(float(line[j+1]), index=i)
 
-                    
-                    
+
+
     def filesave_default(self, filesave=''):
         """ (private) default filename when saving. """
         if filesave == '':
@@ -692,7 +681,7 @@ class GraphIO(Graph):
                 filesave = filesave + '_series'
         return filesave
 
-    
+
     def export(self, filesave='', saveAltered=False, ifTemplate=False,
                ifCompact=True, ifOnlyLabels=False, ifClipboardExport=False):
         """
@@ -709,16 +698,16 @@ class GraphIO(Graph):
             alter = ['', alter]
         # handle saving of original data or altered data
         tempAttr = {}
-        if saveAltered: # if modified parameter, want to save modified data, and not save the alter attribute
+        if saveAltered:  # if modified parameter, want to save modified data, and not save the alter attribute
             tempAttr = self.deleteAttr(['alter'])
         else:
-            alter = ['', ''] # want to save original data, and alter atribute
+            alter = ['', '']  # want to save original data, and alter atribute
         # preparation
         dataLe1 = 0
         out = ''
         # format general information for graph
         # template: do not wish any other information than graphInfo -> that looks good
-        if not ifOnlyLabels: # if ifOnlyLabels: only export label argument
+        if not ifOnlyLabels:  # if ifOnlyLabels: only export label argument
             for key in self.graphInfo:
                 out = out + key + '\t' + str(self.graphInfo[key]).replace('\n', '\\n') + '\n'
             if not ifTemplate:
@@ -727,7 +716,7 @@ class GraphIO(Graph):
                     if key in self.headers:
                         out = out + key + '\t' + str(self.headers[key]).replace('\n', '\\n') + '\n'
         # if compact mode, loop over curves to identify consecutive with identical x axis
-        separator = ['\t'] + ['\t\t\t'] *  (self.length()-1) + ['\t']
+        separator = ['\t'] + ['\t\t\t'] * (self.length()-1) + ['\t']
         if ifCompact and not ifTemplate:
             for i in range(self.length()):
                 if i > 0 and np.array_equal(self.curve(i).x(), self.curve(i-1).x()):
@@ -735,14 +724,15 @@ class GraphIO(Graph):
         # format information for graph specific for each curve
         # first establish list of attributes, then loop over curves to construct export
         keysList = ['label']
-        if not ifOnlyLabels: # if ifOnlyLabels: only export label argument
+        if not ifOnlyLabels:  # if ifOnlyLabels: only export label argument
             for c in range(self.length()):
                 for attr in self.curve(c).getAttributes():
                     if attr not in keysList:
-                        #print ('Graph export', attr, keysList, attr in self.dataInfoKeysGraph, (not ifTemplate))
+                        # print ('Graph export', attr, keysList, attr in self.dataInfoKeysGraph, (not ifTemplate))
                         if attr in self.dataInfoKeysGraph or (not ifTemplate):
                             keysList.append(attr)
-        # if save altered Curce export curves modified for alterations and offsets, and delte offset and muloffset key
+        # if save altered Curce export curves modified for alterations and
+        # offsets, and delete offset and muloffset key
         if saveAltered:
             funcx, funcy = Curve.x_offsets, Curve.y_offsets
             if 'offset' in keysList:
@@ -785,7 +775,7 @@ class GraphIO(Graph):
                         if c == 0:
                             separator[0] = '\t'
                         out += separator[c]
-                            
+
             out += '\n'
             if ifTemplate:
                 break
@@ -819,7 +809,7 @@ class GraphIO(Graph):
             f.close()
         return filename
 
-    
+
     def exportXML(self, filesave='', **kwargs):
         """
         Exports Graph as .xml file
@@ -865,7 +855,7 @@ class GraphIO(Graph):
         if self.getAttribute('saveSilent') != True:
             print('Graph data saved as', filesave.replace('/','\\'))
         return filesave
-        
+
 
     def _createSubplotsGridspec(self, figAx=None, ifSubPlot=False):
         """
@@ -876,18 +866,18 @@ class GraphIO(Graph):
         # set fig as the active figure, if provided. Else with current figure
         if figAx is not None:
             fig, ax = figAx
-            plt.figure(fig.number) # bring existing figure to front
+            plt.figure(fig.number)  # bring existing figure to front
             # delete all except the provided axis
             if not ifSubPlot:
                 for ax_ in fig.get_axes():
                     if ax_ is not ax:
                         plt.delaxes(ax_)
         else:
-            fig = plt.figure() # create a new figure
+            fig = plt.figure()  # create a new figure
             ax = None
         # count number of graphs to be plotted
         axes = [{'ax': None, 'activenext': True} for c in self.iterCurves()]
-        ncurvesondefault = 0 # if no curve is displayed on default axis, do not create it
+        ncurvesondefault = 0  # if no curve is displayed on default axis, do not create it
         ngraphs = 0
         for curve in range(self.length()):
             c = self.curve(curve)
@@ -917,7 +907,7 @@ class GraphIO(Graph):
                 while len(val) > target:
                     del val[-1]
                 print('GraphIO._createSubplotsGridspec: corrected width_ratios to match ncols', ncols, ':', val)
-            gridspeckwargs.update({'width_ratios' : val})
+            gridspeckwargs.update({'width_ratios': val})
         val = list(self.getAttribute('subplotsheight_ratios', ''))
         if len(val) > 0:
             target = nrows if not transpose else ncols
@@ -943,19 +933,19 @@ class GraphIO(Graph):
                     gs = gridspec.GridSpec(ncols, nrows, **gridspeckwargs)
                 else:
                     gs = gridspec.GridSpec(nrows, ncols, **gridspeckwargs)
-        
+
         # coordinates of the plot id
         subplotsid = self.getAttribute('subplotsid', False)
         if (subplotsid is not False and
             (not isinstance(subplotsid, (list, tuple)) or len(subplotsid) != 2)):
             subplotsid = (-0.03, 0.00)
         # misc adjustments to self
-        if ngraphs > 1: # do not want default values if multiple subplots
+        if ngraphs > 1:  # do not want default values if multiple subplots
             self.update({'xlabel': '', 'ylabel': ''})
         # return
         return [fig, ax], gs, matrix, subplotsid, ngraphs
 
-        
+
 
     def _newaxis(self, curve, fig, gs, matrix, subplotsid, subplotscounter, subplotidkwargs):
         rowspan = int(curve.getAttribute('subplotrowspan', 1))
@@ -998,10 +988,11 @@ class GraphIO(Graph):
         ax.patch.set_alpha(0.0)
         return ax
 
-        
-        
+
+
     # creat graph from data with headers additional data
-    def plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave=True, ifExport=True, figAx=None, ifSubPlot=False, handles=None):
+    def plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave=True,
+                ifExport=True, figAx=None, ifSubPlot=False, handles=None):
         """
         Plot the content of the object.
         imgFormat: by default image will be .png. Possible format are the ones
@@ -1025,7 +1016,7 @@ class GraphIO(Graph):
         restore = {}
         for attr in ['text', 'textxy', 'textargs']:
             restore.update({attr: self.getAttribute(attr)})
-        
+
         # retrieve default axis positions subplotAdjustDefault
         subplotAdjustDefault = {}
         for key in ['bottom', 'left', 'right', 'top', 'hspace', 'wspace']:
@@ -1033,7 +1024,7 @@ class GraphIO(Graph):
         subplotColorbar = [0.90, subplotAdjustDefault['bottom'], 0.05, subplotAdjustDefault['top'] - subplotAdjustDefault['bottom']]
         # shift fdefault right if there is a colorbar defined in a Curve
         for c in self.iterCurves():
-            if c.getAttribute('colorbar') is not '':
+            if c.getAttribute('colorbar', None) is not None:
                 subplotAdjustDefault['right'] -= 0.1
                 break
 
@@ -1043,7 +1034,7 @@ class GraphIO(Graph):
         ignoreXLim = True if alter[0] != '' else False
         ignoreYLim = True if alter[1] != '' else False
         axTwinX, axTwinY, axTwinXY = None, None, None
-        
+
         # check
         if len(self.data) <= 0:
             if ifSubPlot:
@@ -1061,9 +1052,9 @@ class GraphIO(Graph):
         if figsize == (0, 0): # if figure size not imposed at function call, look for instructions in measurement data
             if 'figsize' in self.graphInfo:
                 figsize = self.graphInfo['figsize']
-            else: 
+            else:
                 figsize = self.FIGSIZE_DEFAULT
-        
+
         # create graph, initialize axes
         subplotscounter = 0
         [fig, ax], gs, matrix, subplotsid, subplotsngraphs = GraphIO._createSubplotsGridspec(self, figAx, ifSubPlot=ifSubPlot)
@@ -1077,10 +1068,10 @@ class GraphIO(Graph):
         if ax is not None:
             axes.append(ax)
         fig.patch.set_alpha(0.0)
-        if not ifSubPlot: # set figure size if fig is not a subplot
+        if not ifSubPlot:  # set figure size if fig is not a subplot
             fig.set_size_inches(*figsize, forward=True)
         colorbar_ax = []
-        
+
         # adjust positions of the axis within the graph (subplots_adjust)
         subplotAdjust = dict(subplotAdjustDefault)
         if 'subplots_adjust' in self.graphInfo:
@@ -1104,9 +1095,9 @@ class GraphIO(Graph):
         if gs is not None:
             gs.update(**subplotAdjust)
         # auxiliary graph, to be created when new axis, filled with curves and plotted when new axis is created
-        graphAux = None # auxiliary Graph, calling plot() when creating new axis
+        graphAux = None  # auxiliary Graph, calling plot() when creating new axis
         graphAuxKw = {'config': self._config.filename}
-        
+
         # plot data
         type_plot = self.getAttribute('typeplot')
         # set default graph scales (lin, log, etc.)
@@ -1121,11 +1112,11 @@ class GraphIO(Graph):
                 ax.set_yscale(yarg)
             except (ValueError, AttributeError):
                 print('Display error, try to go back to linear Transform?')
-        
+
         boxplot    = {'y':[], 'positions':[], 'labels':[], 'color':[], 'i':0}
         violinplot = {'y':[], 'positions':[], 'labels':[], 'color':[]}
         violinplotkwargs = {}
-        
+
         ignoreNext = 0
         if handles is None or not isinstance(handles, list):
             handles = []
@@ -1134,14 +1125,14 @@ class GraphIO(Graph):
             handle = None
             if ignoreNext > 0:
                 ignoreNext -= 1
-                continue # ignore this curve, go the next one...
+                continue  # ignore this curve, go the next one...
                 # for example if previous curve type was scatter
             curve = self.curve(curve_i)
             attr = curve.getAttributes()
             # if curve is hidden: ignore it
             if curve.isHidden():
                 continue
-            
+
             # Inset: if curve contains information for an inset in the Graph?
             if isinstance(curve, Curve_Inset):
                 val = curve.getAttribute('insetfile')
@@ -1152,7 +1143,7 @@ class GraphIO(Graph):
                 axInset = fig.add_axes(coords)
                 axInset.ticklabel_format(useOffset=False)
                 axInset.patch.set_alpha(0.0)
-                if curve.getAttribute('insetfile') in['', ' '] or inset.length() == 0:
+                if curve.getAttribute('insetfile') in ['', ' '] or inset.length() == 0:
                     # nothing in provided Graph -> created axis becomes active one
                     if graphAux is not None:
                         # if there was already auxiliary graph: display it, create anew
@@ -1167,9 +1158,9 @@ class GraphIO(Graph):
                     # axes. No change for graphAux
                     inset.plot(figAx=[fig, axInset], ifSave=False, ifExport=False,
                                ifSubPlot=True)
-                    continue # go to next Curve
-            
-            # Subplots: if more than 1 subplot is expected 
+                    continue  # go to next Curve
+
+            # Subplots: if more than 1 subplot is expected
             if gs is not None:
                 # if required, create the new axis
                 if ax is None or isinstance(curve, Curve_Subplot):
@@ -1178,11 +1169,14 @@ class GraphIO(Graph):
                                      figAx=[fig, ax], ifSubPlot=True)
                         graphAux = None
                     ax = GraphIO._newaxis(self, curve, fig, gs, matrix, subplotsid, subplotscounter, subplotidkwargs)
-                    plt.sca(ax)
+                    try:
+                        plt.sca(ax)
+                    except AttributeError as e:
+                        print('WARNING .plot() plt.sca(ax). AttributeError catched, cause to investigate...')
                     axTwinX, axTwinY, axTwinXY = None, None, None
                     subplotscounter += 1
                     axes.append(ax)
-                else: # we go on, not enough information to create subplot
+                else:  # we go on, not enough information to create subplot
                     pass
             # shall we plot a Graph object instead of a Curve in this new axis?
             if isinstance(curve, Curve_Subplot):
@@ -1197,9 +1191,9 @@ class GraphIO(Graph):
                     upd.update(curve.getAttribute('subplotupdate'))
                 graphAux.update(upd)
                 if val not in [' ', '', None]:
-                    continue # go to next Curve
+                    continue  # go to next Curve
                 # if no file then try to plot data of the Curve
-            
+
             if graphAux is not None:
                 # if active axis is not main one, place Curve in graphAux
                 if isinstance(curve, (Curve_Inset, Curve_Subplot)):
@@ -1207,7 +1201,7 @@ class GraphIO(Graph):
                 else:
                     graphAux.append(curve)
                 continue
-            
+
             # twin axis: look which axis to use
             ax_ = ax
             ifTwinX = (curve.getAttribute('ax_twinx') in [True, 1])
@@ -1224,7 +1218,7 @@ class GraphIO(Graph):
                 if axTwinY is None:
                     axTwinY = ax.twiny()
                 ax_ = axTwinY
-            
+
             # do the actual plotting
             try:
                 handle, ignoreNext = curve.plot(ax_, graph=self, graph_i=curve_i,
@@ -1236,7 +1230,7 @@ class GraphIO(Graph):
                 print(type(e).__name__, 'Exception occured in Curve.plot function, Curve no', curve_i,'. Error message:')
                 print(e)
                 print(sys.exc_info()[0].__name__, sys.exc_info()[-1].tb_lineno)
-            
+
             # Add colorbar if required
             if handle is not None and curve.getAttribute('colorbar', False):
                 kwargs = {}
@@ -1261,7 +1255,7 @@ class GraphIO(Graph):
                 if 'labelsize' in kwargs:
                     pass
 #                    modifier.append()
-                    # TODO: 
+                    # TODO:
                 colorbar_ax.append({'ax': fig.add_axes(adjust), 'adjusted': False})
                 colorbar_ax[-1]['cbar'] = fig.colorbar(handle, cax=colorbar_ax[-1]['ax'], **kwargs)
                 try:
@@ -1269,9 +1263,12 @@ class GraphIO(Graph):
                     colorbar_ax[-1]['cbar'].solids.set_edgecolor('face')
                 except Exception as e:
                     pass
-                subplotColorbar[0] -= 0.11 # default for next colorbar
+                subplotColorbar[0] -= 0.11  # default for next colorbar
                 # set again ax_ as the current plt active ax, not the colorbar axis
-                plt.sca(ax_)
+                try:
+                    plt.sca(ax_)
+                except AttributeError as e:
+                    print('WARNING .plot() plt.sca(ax_). AttributeError catched, cause to investigate...')
 
             # store handle in list
             if handle is not None:
@@ -1314,7 +1311,7 @@ class GraphIO(Graph):
                 xtklbl.append(violinplot['labels'][i])
                 ax_.set_xticks     (xticks)
                 ax_.set_xticklabels(xtklbl)
-        
+
         # final display of auxiliary axes/graph
         if graphAux is not None:
             GraphIO.plot(graphAux, ifSave=False, ifExport=False,
@@ -1322,11 +1319,15 @@ class GraphIO(Graph):
             graphAux = None
             # main graph: work on initial axis
             ax = axes[0]
-            plt.sca(ax)
-            
+            try:
+                plt.sca(ax)
+            except AttributeError as e:
+                print('WARNING .plot() plt.sca(ax) - 2. AttributeError catched, cause to investigate...')
+
         # usual graph cosmetics
         curvedummy = self.curve(-1) if self.length() > 0 else Curve([[0],[0]],{})
         fontsizeset = []
+
         def setAxisLabel(method, label):
             out = {'size': False}
             if isinstance(label, list) and len(label) == 2 and isinstance(label[1], dict):
@@ -1336,6 +1337,7 @@ class GraphIO(Graph):
             else:
                 method(label)
             return out
+
         if 'title' in self.graphInfo:
             out = setAxisLabel(ax.set_title, self.graphInfo['title'])
             if out['size']:
@@ -1469,9 +1471,9 @@ class GraphIO(Graph):
                 alterLim(axTwinX , deepcopy(self.graphInfo['twinx_ylim']), 'y')
         if 'twiny_xlim' in self.graphInfo:
             if axTwinXY is not None:
-                alterLim(axTwinXY, deepcopy(self.graphInfo['twiny_xlim']), 'y')
+                alterLim(axTwinXY, deepcopy(self.graphInfo['twiny_xlim']), 'x')
             if axTwinY is not None:
-                alterLim(axTwinY , deepcopy(self.graphInfo['twiny_xlim']), 'y')
+                alterLim(axTwinY , deepcopy(self.graphInfo['twiny_xlim']), 'x')
         if 'xticksstep' in self.graphInfo and not ignoreXLim:
             val = self.graphInfo['xticksstep']
             if isinstance(val, (list)):
@@ -1504,7 +1506,7 @@ class GraphIO(Graph):
                 arr = np.arange(start, end+end/1e10, self.graphInfo['yticksstep'])
             ax.yaxis.set_ticks(arr)
 
-        
+
         # text annotations
         if 'text' in self.graphInfo:
             textxyDefault = (0.05, 0.95)
@@ -1637,7 +1639,7 @@ class GraphIO(Graph):
                     except AttributeError as e:
                         print('error setlegendcolormap', e)
                         pass
-                
+
         # arbitrary functions
         if 'arbitraryfunctions' in self.graphInfo:
             for fun in self.graphInfo['arbitraryfunctions']:
@@ -1670,7 +1672,7 @@ class GraphIO(Graph):
                     print('Exception in function Graph.plot arbitrary functions')
                     print('Exception', type(e), e)
                     pass
-        
+
         # font sizes
         if gs is None:
             listLabels = [ax.title, ax.xaxis.label, ax.yaxis.label]
@@ -1687,13 +1689,13 @@ class GraphIO(Graph):
             for item in (listLabels):
                 if item not in fontsizeset:
                     item.set_fontsize(fontsize)
-        
+
         # before saving image: restore self to its initial state
         self.update(restore)
-                
+
         # DPI
         saveDPI = 300 if 'dpi' not in self.graphInfo else self.graphInfo['dpi']
-       
+
         # save the graph if an export format was provided
         exportFormat = ''
         if imgFormat in ['.txt', '.xml']:
@@ -1706,24 +1708,23 @@ class GraphIO(Graph):
                 imgFormat = [imgFormat]
             for imgForma_ in imgFormat:
                 imgFormatTarget = ''
-                if imgForma_ == '.emf': # special: we save svg and convert into emf using inkscape
+                if imgForma_ == '.emf':  # special: we save svg and convert into emf using inkscape
                     imgFormatTarget = '.emf'
                     imgForma_ = '.svg'
-                
+
                 filename_ = filename + imgForma_
                 if self.getAttribute('saveSilent') != True:
                     print('Graph saved as ' + filename_.replace('/', '\\'))
                 plt.savefig(filename_, transparent=True, dpi=saveDPI)
                 self.filename = filename_
-                
+
                 if imgFormatTarget == '.emf':
                     GraphIO.convertSVGtoEMF(self, filename_, imgFormat, imgFormatTarget)
-        
+
         if ifExport:
             self.export(filesave=(filename+exportFormat))
         return [fig, axes]
 
-            
     def convertSVGtoEMF(self, filename, imgFormat, imgFormatTarget):
         success = False
         inkscapepath = self.config('inkscape_path', [])
@@ -1733,7 +1734,7 @@ class GraphIO(Graph):
         import subprocess
         for p in inkscapepath:
             if not os.path.exists(p):
-                continue # cannot find inkscape executable
+                continue  # cannot find inkscape executable
             try:
                 fileemf = filename[:-len(imgFormat)]+imgFormatTarget
                 command = '"'+p+'" --without-gui --export-emf="'+fileemf+'" "'+filename+'"'
@@ -1751,8 +1752,4 @@ class GraphIO(Graph):
             print('Could not save image in .emf format. Please check the following:')
             print(' - A version of inkscape is available,')
             print(' - file config.txt in grapa directory,')
-            print(' - in file config.txt a line exists, similar as that, and indicate a valid inkscape executable: inkscape_path	["C:\Program Files\Inkscape\inkscape.exe"]')
-
-
-            
-            
+            print(' - in file config.txt a line exists, similar as that, and indicate a valid inkscape executable e.g.: inkscape_path ["C:\Program Files\Inkscape\inkscape.exe"]')

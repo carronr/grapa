@@ -12,6 +12,29 @@ WISH LIST
 KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
 
+
+Version 0.5.4.8
+Released 24.03.2021
+Modifications
+- TRPL: the data type TRPL was  modified to properly load files generated using scripts.
+- Modified loading of preference file. Hopefully a bit faster when opening many files.
+- CurveJV: added data transform 'Log10 abs (raw)' (abs0), to plot the log of JV curve without Jsc subtraction
+- scriptJV: also exports a file with a few statistical quantities of JV data (average, median, max)
+- scriptJV: reduced amount of generated files. The individual summary images are not generated anymore as already plotted in combined format. Also, the different cells are exported as images (3x) and only once as text file.
+- prepare future update of the GUI to support several graphs simultaneously
+- a bit of code cleaning for better compliance with guidelines
+BUGS:
+- Mitigated bugs with recent versions of python (aka winpython version 3.9: issues with matplotlib 3.3.9; hidden curves in grey due to changes in tk)
+
+
+Version 0.5.4.7
+Modifications
+- Adjusted width of GUI Curve action fields for CurveSIMS to prevent time-consuming redimensioning of the GUI interface.
+- The Colorize GUI function can now print its effect in the console
+Bugs
+- Solved an issue with twiny ylim values
+
+
 Version 0.5.4.6
 Released 08.01.2021
 Additions
@@ -99,7 +122,7 @@ Bugs
 - CurveJV: when creating a CurveJV object, an "area" parameter is set by default with value 1.
 - Script process JV: a cause for exception and script failure was corrected, in case of missing data.
 - Script process JV: script execution should be more robust with untypical data. Basic JV parameters should be extracted, and failures with JV fits should not affect script execution. Missing Rs, Jo and ideality values might result.
-- Prevents the data editor to crash when first Curve contains too many data. 
+- Prevents the data editor to crash when first Curve contains too many data.
 
 
 
@@ -126,7 +149,7 @@ Version 0.5.3.0
 Release 20.06.2018
 New features
 - A data editor was implemented, accessible immediately below the graph.
-- The Property edition tool was removed from the user interface. The 'New property' is now renamed 'Property editor' 
+- The Property edition tool was removed from the user interface. The 'New property' is now renamed 'Property editor'
 Additions
 - In the user interface, two buttons were added to reorder the stack and place the selected Curve at the top or at the bottom of the stack.
 - CurveEQE: a new anaysis tool is provided, the external radiative efficiency. This estimates is computed from the EQE and the cell Voc.
@@ -173,7 +196,7 @@ Additions
 - Actions specific can now be performed on several curves at the same time, provided The corresponding action is available on each selected curve. Example: bandgap from EQE curve, JV fit, fitted curve resample, etc.
 - When extracting Voc(T) from Jsc-Voc data, the data can now be fitted to a certain range and the fit extrapolated to 0 with a single clic.
   Moreover the Voc @ T=0 are printed in the console.
-- The determination of the optical bandgap from EQE curves can be restricted to a certain wavelength range, in the derivative method. 
+- The determination of the optical bandgap from EQE curves can be restricted to a certain wavelength range, in the derivative method.
 Modifications
 - Curves created from curves actions (fit, etc) are now placed just after the selected curve.
 - Improved the robustness of the JV curve fitting
@@ -268,7 +291,7 @@ Additions
 - New quick fields for capsize and ecolor (color of errorbars) for errorbar types of curves.
 - Added Combobox entries in the annotation popup, to suggest possibilities to the user. Also revised some details in the user interface.
 Modification
-- Improved handling of invalid syntax in text, textxy and textargs keywords when loading files 
+- Improved handling of invalid syntax in text, textxy and textargs keywords when loading files
 - Restore good performance when zooming when the crosshair is not active
 - Improved handling of unusual keywords
 - Improved handling of ylim for CurveCV types with Mott-Schottky plotting.
@@ -347,7 +370,7 @@ BUGS:
 
 
 Version 0.4.1.2
-Release 
+Release
 Modifications
 - Subplot -> subplots_adjust to customize subplot layout
 Bugs
@@ -369,7 +392,7 @@ Modifications
 - The keyword legendlocation has been renamed to legendproperties as to better reflect its use. Backward compatibility should be assured.
 Bugs
 - Improved imperfect behavior of the data picker.
-    
+
 
 
 Version 0.4.1.0
@@ -546,7 +569,7 @@ New features
   Cell area normalization, N & J0 fitting, and data splitting into different temperatures.
   The plots A vs T, J0 vs T and J0 vs A*T are generated, and the last one can readily be fitted with an Arrhenius relation.
 - Added a mode 'ExtrapolateTo0' to CurveArrhenius: it is actually not an Arrhenius relation, and does what it's name says it does (fit with 1st degree polynom)
-  The Vbi vs T graph of the script Curve CV is of this type per default. 
+  The Vbi vs T graph of the script Curve CV is of this type per default.
 Adjustments
 - Improved general software speed. (graph updates not initiated when moving in the property tree, updates are >2x faster)
 - Button "Save" offers a choice in the filename if the software thinks it's at risk to erase raw data.
@@ -731,7 +754,7 @@ General improvements
 - Improved detection of columns labels in generic (column-defined) files
 - Legendlocation can also be set with se, nw typed keywords
 - The selected curves now moves up/down together with the curve when changing the curves order
-- When opening a graph te buttons at the toggles at the top also 
+- When opening a graph te buttons at the toggles at the top also
 - The Save button now does not work if the meastype keywork is set to something else than graph.
 BUGS solved
 - Exceptions during plots, semilogx, etc. are now catched. Argument debugging should be easier.

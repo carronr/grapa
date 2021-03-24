@@ -26,13 +26,13 @@ from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, 
 
 
 class CurveJV(Curve):
-    
+
     q = 1.60217657E-19 # [C]
     k = 1.38E-23    # [J K-1]
     defaultIllumPower = 1000 # W/m2
-    
+
     CURVE = 'Curve JV'
-    
+
     # to retrieve info from filename: sample name, cell, measurement id
     FINDALLSTR = '^(I-V_)*(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt'
 
@@ -87,10 +87,11 @@ class CurveJV(Curve):
             out.append([self.fit_resampleX, 'Resample V', ['delta x, or [-0.3, 1, 0.01]'], [roundSignificant((self.V(1)-self.V(0))/10,5)]])
         out.append([self.printHelp, 'Help!', [], []])
         return out
-    
+
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
         out.append(['Log10 abs', ['', 'abs'], 'semilogy'])
+        out.append(['Log10 abs (raw)', ['', 'abs0'], 'semilogy'])
         out.append(['Differential R = dV/dJ [Ohm cm2]', ['', 'CurveJV.yDifferentialR'], 'semilogy'])
         return out
 
@@ -103,7 +104,7 @@ class CurveJV(Curve):
                 self.setArea(attributes[key])
             else:
                 Curve.update(self, {key: attributes[key]})
-    
+
 
     # OTHER
     def area (self) :
@@ -137,13 +138,13 @@ class CurveJV(Curve):
             # erase information about fitting
             self.update({'diodefit': ''})
         return True
-        
+
 
     def V (self, idx=np.nan) :
         return self.x(idx)
     def J (self, idx=np.nan) :
         return self.y(idx)
-    
+
     def yDifferentialR(self, index=np.nan, xyValue=None):
         """ Returns differential resistance of the J-V curve R = dV/dI"""
         if xyValue is not None:
@@ -153,8 +154,8 @@ class CurveJV(Curve):
         if np.isnan(index).any():
             return val[:]
         return val[index]
-        
-        
+
+
     def interpJ (self, V) :
         # returns values of a spline interpolation degree 3 at the V values
         f = interpolate.interp1d(self.V(), self.J()) # spline interpolation degree 3
@@ -183,7 +184,7 @@ class CurveJV(Curve):
             # old version, replaced on 19.08.2020
             # split = refindall('I-V_(.*)_[a-zA-Z][0-9]_', name); split[0].lower()})
         return self.getAttribute('sample')
-    
+
     def cell (self, forceCalc=False) :
         if self.getAttribute('cell') == '' or forceCalc :
             name = os.path.split(self.getAttribute('filename'))[1]
@@ -203,7 +204,7 @@ class CurveJV(Curve):
             # old version, replaced on 19.08.2020
             # split = refindall('_([0-9][0-9])[._]', name); split[0]})
         return self.getAttribute('measId')
-    
+
 
     def darkOrIllum (self, ifText=False, forceCalc=False, ifJscBelow=0.1) :
         if self.getAttribute('darkOrIllum') == '' or forceCalc :
@@ -216,7 +217,7 @@ class CurveJV(Curve):
             if not sure :
                 if is_number(ifJscBelow) :
                     if self.getAttribute('Jsc') != '' :
-                        if np.abs(self.getAttribute('Jsc')) < ifJscBelow : # 0.1 mA/cm2 is criterion for a dark JV curve 
+                        if np.abs(self.getAttribute('Jsc')) < ifJscBelow : # 0.1 mA/cm2 is criterion for a dark JV curve
                             ifDark = True
                         else :
                             ifDark = False
@@ -251,7 +252,7 @@ class CurveJV(Curve):
             print('CurveJV fit (n, Jl, J0, Rs, Rp):', ', '.join([str(num) for num in roundSignificant(p, 5)]))
             print('   units: n [ ], Jl, J0 [mA cm-2], Rs, Rp [Ohm cm2].')
         return out
-    
+
 
     def CurveJVFromFit_print(self, fitRange=None, fitDiodeWeight=None):
         if fitDiodeWeight is not None:
@@ -264,7 +265,7 @@ class CurveJV(Curve):
         except:
             pass
         return ans
-    
+
 
 
 
@@ -370,10 +371,10 @@ class CurveJV(Curve):
 
 
 #Ideal diode equation
-# J (V) = JL - J0 * ( exp( q / (n k T) * V ) - 1 )						
+# J (V) = JL - J0 * ( exp( q / (n k T) * V ) - 1 )
 
 #Equation with resistors
-# J (V) = JL - J0 * ( exp( q / (n k T) * (V + J Rs)) - 1 ) - ( V + J Rs) / Rp						
+# J (V) = JL - J0 * ( exp( q / (n k T) * (V + J Rs)) - 1 ) - ( V + J Rs) / Rp
 
 
     def func_diodeIdealAbsLog10 (self, V, n, Jl, J0) :
@@ -383,10 +384,10 @@ class CurveJV(Curve):
 
     def func_diodeIdeal (self, V, n, Jl, J0) :
         return - (Jl - J0 * (np.exp( self.q / (n * self.k * self.T) * V ) - 1 ))
-    
-    
-    
-    
+
+
+
+
     def fit_func_diodeResistors_AbsLog (self, V, logJ, n, Jl, J0, Rs, Rp, Vshift=0, sigma=[]) :
         if sigma == []:
             sigma = [1]*len(V)
@@ -411,14 +412,14 @@ class CurveJV(Curve):
         Jl = self.JlSuchAsJ0VJsc(Jsc, n, J0, Rs, Rp)
         popt = [n, Jl, J0, Rs, Rp]
         return popt, pcov
-        
-    
+
+
     def func_diodeResistorsAbsLog10_modParam (self, V, n, Jl, J0, Rs, Rp) :
         Vshift = self.fitFixPar['Vshift']
         J0 = J0 / (np.exp(self.q * Vshift / (n * self.k * self.T)))
         Rp = np.power(10, Rp)
         return np.log10(np.abs(self.func_diodeResistors (V, n, Jl, J0, Rs, Rp)))
-    
+
     def func_diodeResistorsAbsLog10_modParam_red (self, V, n, J0, Rs, Rp) :
         Vshift = self.fitFixPar['Vshift']
         Jl = self.fitFixPar['Jl']
@@ -474,7 +475,7 @@ class CurveJV(Curve):
             niter = niter + 2 * 3.322
             flow_ = f (Jlow_, V, n, Jl, J0, Rs, Rp, Jsc)
             fhigh = f (Jhigh, V, n, Jl, J0, Rs, Rp, Jsc)
-        
+
         # start iterating to find zero of the f function
 #        flow_ = f (Jlow_, V, n, Jl, J0, Rs, Rp)
 #        fhigh = f (Jhigh, V, n, Jl, J0, Rs, Rp)
@@ -534,7 +535,7 @@ class CurveJV(Curve):
         n = min (2 * maxV, max(1, n))
 #        Rs = dlogJdV[-1]*0.05  # Ohm/cm2 # rough approximetion, only temporary for I0 estimation! -> not close enough to reality
         Rs = 0.5 # start with a low value
-        # J0: assume Jsc=0, invert diode equation 
+        # J0: assume Jsc=0, invert diode equation
         i = idx_maxdlogJdV
         J0_init =  np.abs(Jl - J[i] - V[i]/(Rp/1000)) / (np.exp(self.q / (n * self.k * self.T) * (V[i] + J[i] * (-Rs/1000))) - 1)
         if J0_init == 0: # must prove a sensical starting value
@@ -579,7 +580,7 @@ class CurveJV(Curve):
         if diodeFitWeight != 0:
             for i in idx_DiodeRegion:
                 sigma[i] /= diodeFitWeight
-                
+
          # perform actual fit
         try:
             popt, pcov = self.fit_func_diodeResistors_AbsLog (V, JLogAbs, n, Jl, J0, Rs, Rp, Vshift=Vshift, sigma=sigma)
@@ -591,7 +592,7 @@ class CurveJV(Curve):
         JfitLogAbs = np.log10(np.abs(self.func_diodeResistors  (V, popt[0], popt[1], popt[2], popt[3], popt[4])))
         sqResiduals = (JfitLogAbs - JLogAbs) ** 2
         self.diodeFitCheckQuality(sqResiduals[idx_DiodeRegion])
-        
+
         if not silent :
             print ('fit diode + resistors')
             print ('   param, inital, fit')
@@ -601,16 +602,16 @@ class CurveJV(Curve):
             print ('   J0',J0/1000, popt[2]/1000, 'A/cm2')
             print ('   Rs',Rs,   popt[3], 'Ohmcm2')
             print ('   Rp',Rp,   popt[4], 'Ohmcm2')
-            
+
         if ifPlot :
             x = V
             guess = self.func_diodeResistors (V, n, Jl, J0, Rs, Rp)
             fit   =self.func_diodeResistors  (x, popt[0], popt[1], popt[2], popt[3], popt[4])
-            
+
             self.fitFixPar = {'Vshift': Vshift, 'Jl': popt[1], 'Rs': popt[3], 'Rp': popt[4]}
-            
+
             units = self.getAttribute('units')
-        
+
             fig,ax = plt.subplots ()
             ax.plot (V, np.log10(np.abs(J)), 'bx')
  #           ax.plot (V, self.func_diodeIdealAbsLog     (V, n, T, Jl, J0ideal), 'r')
@@ -621,7 +622,7 @@ class CurveJV(Curve):
 #            ax.plot (x, bestfi_, 'c')
             ax.set_xlabel ('Bias voltage ['+units[0]+']')
             ax.set_ylabel ('log(current density ['+units[1]+'])')
-            
+
             fig,ax = plt.subplots ()
             ax.plot (V, -Jsc + J, 'bx')
             ax.plot (V, -Jsc + guess, 'r')
@@ -650,7 +651,7 @@ class CurveJV(Curve):
             self.updateFitParam(*self.getAttribute('_popt'))
             return 1
         return 'Invalid input.'
-        
+
 
     def calcJsc(self, V=None, J=None):
         # idea: fit 1-degree polynom over 7 points close to V=0
@@ -670,7 +671,7 @@ class CurveJV(Curve):
         idx = [i for i in idx if i >= 0 and i < len(V)]
         z = np.polyfit(V[idx], J[idx], 1, full=True)[0]
         return -z[1]
-    
+
     def calcRp(self, V=None, J=None):
         if V is None:
             V = self.V()
@@ -755,7 +756,7 @@ class CurveJV(Curve):
         idx = self.idxRange(V, fitRange=fitRange)
         Jsc = self.calcJsc(V[idx], J[idx])
         return V[idx], J[idx], Jsc
-    
+
 
     def idxFitHighSensitivityNJ0(self, V, dJLogAbsdV, threshold=0.70, minWidth=None):
         """ threshold: criterion to select datapoint is that derivative is > threshold*max(deriv)
@@ -791,7 +792,7 @@ class CurveJV(Curve):
         regMaxDerivIdx = sorted(regMaxDerivIdx)
         return regMaxDerivIdx
 
-        
+
 
 
     def calcResiduals(self, diodeFit=None, ifPlot=False):
@@ -872,10 +873,10 @@ class CurveJV(Curve):
             ax3.legend(loc='best', fancybox=True, framealpha=0.5)
             ax2 = ax3.twinx()
             plt.plot(V, dJdV, 'r')
-        
+
         return regMaxDerivIdx
-    
-    
+
+
     def diodeFitCheckQuality(self, sqResiduals, threshold=2e-4):
         diodeFitWeight = self.getAttribute('_fitDiodeWeight') if self.getAttribute('_fitDiodeWeight') != '' else 0
         SqResMed = np.median(sqResiduals) if len(sqResiduals) > 0 else np.nan
@@ -907,4 +908,3 @@ class CurveJV(Curve):
         print('Further analysis:')
         print(' - J0 can also be computed from Jsc vs Voc couples with different light intensities.')
         return True
-

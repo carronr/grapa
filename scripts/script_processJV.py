@@ -85,7 +85,7 @@ class areaDB (Database) :
                 break # break if success
         if not self.flag :
             print ('areaDB: cannot find area database file.')
-    
+
     def getArea (self, cell):
         if not self.flag : # if database could not be opened
             if self.flagCheat:
@@ -99,7 +99,7 @@ class areaDB (Database) :
             print ('areaDB getArea: row "', cell, '"not found (', self.rowLabels,')')
 #        print ('area cell',cell,':', out, '(',self.sample,')')
         return out
-    
+
     def setArea (self, cell, value):
         if self.flag:
             self.setValue(self.colIdx, cell, value, silent=True)
@@ -108,7 +108,7 @@ class areaDB (Database) :
             if not hasattr(self, 'data'):
                 self.data = {}
             self.data.update({cell: value})
-        
+
 
 
 # main function
@@ -119,12 +119,12 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
     if figAx is not None:
         pltClose = False
     path = os.path.join(folder, '*.txt')
-    
+
     cellDict = {}
     sampleAreaDict = {}
     outFlag = True
     out0 = ''
-    
+
     graph = Graph('', **newGraphKwargs)
     graphAllJV = Graph('', **newGraphKwargs)
 
@@ -146,7 +146,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
             measId = graphTmp.curve(-1).measId()
         except Exception:
             continue # go to next file
-        
+
         print ('File', os.path.basename(file))
         if sample == '' or cell == '':
             print('WARNING: cannot identify sample (', sample, ') or cell (', cell, ').')
@@ -222,7 +222,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     #    msg = '.'.join([cellDict[s][c][d][m2] for m2 in cellDict[s][c][d]][1:])
                     #    print ('test WARNING: other files ignored (,',msg,')')
                     graphAllJV.append(graph.returnDataCurves())
-    
+
                 # can identify pair of dark-illum files
                 if len(listDarkIllum) == 2 :
                     listGraph = dictToListSorted (cellDict[s][c][listDarkIllum[0]])
@@ -245,7 +245,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     graphAllJV.append(graph.returnDataCurves())
         # graph with all JV curves area-corrected
         for c in graphAllJV:
-            c.update({'color':''})
+            c.update({'color': ''})
         filesave = os.path.join(folder, 'export_' + s + '_summary_allJV')
         graphAllJV.plot(filesave, figAx=figAx)
         if pltClose and figAx is None:
@@ -272,23 +272,24 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
             f.write(outIllum)
             f.close()
             processSampleCellsMap(filesave, figAx=figAx, pltClose=pltClose)
-            print(writeFileAvgMax(filesave))
+            print(writeFileAvgMax(filesave, filesave=True))
     print('Script processJV folder done.')
     return graph
 
 
-
-def writeFileAvgMax(fileOrContent, filesave=None, withHeader=True, colSample=True):
+def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True,
+                    colSample=True):
     colOfInterest = ['Voc', 'Jsc', 'FF', 'Eff']
     if isinstance(fileOrContent, Graph):
         content = fileOrContent
-        filename = content.getAttribute('sample').replace('\n','')
+        filename = content.getAttribute('sample').replace('\n', '')
         if filename == '':
             filename = content.getAttribute('label')
     else:
         content = Graph(fileOrContent)
         filename = fileOrContent
 #    print(content)
+    # identify columns of interest
     colLbl = content.getAttribute('collabels')
     cols = []
     idxs = []
@@ -299,16 +300,17 @@ def writeFileAvgMax(fileOrContent, filesave=None, withHeader=True, colSample=Tru
             if c in colLbl[i]:
                 cols[-1] = content.curve(i).y()
                 idxs[-1] = i
+    # start to compile output in variable out
     out = ''
     if withHeader:
         if not colSample:
-            out += 'filename\t' + filename + '\n' 
+            out += 'filename\t' + filename + '\n'
             out += 'Sample\t' + content.getAttribute('sample') + '\n'
         if colSample:
             out += '\t'
         # column headers
-        out += 'Parameter average' + '\t'*len(colOfInterest)
         out += 'Best cell (eff.)' + '\t'*len(colOfInterest)
+        out += 'Parameter average' + '\t'*len(colOfInterest)
         out += 'Parameter median' + '\t'*len(colOfInterest)
         out += '\n'
         # column name
@@ -318,7 +320,7 @@ def writeFileAvgMax(fileOrContent, filesave=None, withHeader=True, colSample=Tru
             for c in idxs:
                 out += (colLbl[c] if c is not np.isnan(c) else '') + '\t'
         out += '\n'
-    # averages
+    # sample name
     if colSample:
         samplename = 'SOMETHING'
         if 'sample' in content.headers:
@@ -328,8 +330,6 @@ def writeFileAvgMax(fileOrContent, filesave=None, withHeader=True, colSample=Tru
             if isinstance(samplename, list):
                 samplename = str(samplename[0])
         out += samplename + '\t'
-    for c in cols:
-        out += str(np.average(c)) + '\t'
     # best cell
     eff = None
     for i in range(len(colLbl)):
@@ -343,28 +343,29 @@ def writeFileAvgMax(fileOrContent, filesave=None, withHeader=True, colSample=Tru
         print('Could not find column Eff')
     # averages
     for c in cols:
+        out += str(np.average(c)) + '\t'
+    # averages
+    for c in cols:
         out += str(np.median(c)) + '\t'
+    # new line
     out += '\n'
     # maybe save result in a file
     if isinstance(filename, str) and filesave is True:
-        filesave = filename.replace('.txt', '_avgmax.txt')
-    if filesave is not None:
-        f = open(filesave, 'w')
+        fname = filename.replace('.txt', '_avgmax.txt')
+        f = open(fname, 'w')
         f.write(out)
         f.close()
     return out
-    
-    
-    
-    
-    
-def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newGraphKwargs={}):
+
+
+def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True,
+                          newGraphKwargs={}):
     newGraphKwargs = deepcopy(newGraphKwargs)
     newGraphKwargs.update({'silent': True})
-    
+
     content = Graph(file, **newGraphKwargs)
     colToPlot = ['Voc', 'Jsc', 'FF', 'Eff', 'Rp', 'Rs', 'n', 'J0']
-    inveScale = [False, False, False, False, False, True, True, True] # inverted color scale
+    inveScale = [False, False, False, False, False, True, True, True]  # inverted color scale
     cols = content.getAttribute('collabels')
     rows = content.getAttribute('rowlabels')
     if not isinstance(cols, list):
@@ -377,7 +378,7 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newG
     filelist = []
     # combined plot
     graphs = [Graph('', **newGraphKwargs), Graph('', **newGraphKwargs)]
-    axisheights = [[],[]]
+    axisheights = [[], []]
     # main loop
     for i in range(len(colToPlot)):
         look = colToPlot[i]
@@ -385,7 +386,7 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newG
         for j in range(len(cols)):
             c = cols[j]
             if c[:len(look)] == look and (len(c) <= len(look) or c[len(look)] in [' ','_','-','.','[',']','(',')']):
-                c = c.replace('_', ' [').replace('(','[')
+                c = c.replace('_', ' [').replace('(', '[')
                 if '[' in c and ']' not in c:
                     c += ']'
                 c = c.replace('[pc]', '[%]').replace('mApcm2', 'mA/cm2')
@@ -422,16 +423,17 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newG
             graphs[i].filename = filesave
             graphs[i].plot(filesave=filesave, figAx=figAx)
     return filelist
-            
-    
 
-def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx=None, inverseScale=False, pltClose=True, newGraphKwargs={}):
+
+def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='',
+                       figAx=None, inverseScale=False, pltClose=True,
+                       newGraphKwargs={}):
     sizeCell = np.array([0.6, 0.6])
     margin   = np.array([0.4, 0.4])
 
     newGraphKwargs = deepcopy(newGraphKwargs)
     newGraphKwargs.update({'silent': True})
-    
+
     if len(values) == 0:
         return False
 
@@ -442,7 +444,7 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
         if len(split[i]) == 2:
             x.append(float(ord(split[i][0].lower())-96))
             y.append(float(split[i][1]))
-            val.append(values[i]) # prefer to work on a copy and not modifying the list values
+            val.append(values[i])  # prefer to work on a copy and not modifying the list values
     x, y, val = np.array(x), np.array(y), np.array(val)
     if title == 'Voc [V]':
         title = 'Voc [mV]'
@@ -479,7 +481,7 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
         textarg.append({'xytext': list(txtCoords[i]), 'xycoords': 'axes fraction', 'horizontalalignment':'center', 'verticalalignment':'center'})
     graph.append(Curve([x-0.5, y-0.5], {'type': 'scatter', 'marker': 's', 'markersize': (sizeCell[0]*72)**2, 'markeredgewidth': 0, 'cmap': colorscale}))#cmapParam
     graph.append(Curve([x-0.5, valNorm], {'type': 'scatter_c'}))
-    
+
     graph.update({'subplots_adjust':[marg[0], marg[1], 1-marg[0], 1-marg[1]]})
     graph.update({'figSize': list(figSize)})
     graph.update({'text': texttxt, 'textargs': textarg})
@@ -500,7 +502,8 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
 
     if filesave is not None:
         graph.headers.update({'filesave': os.path.basename(filesave)})
-        graph.plot(filesave, figAx=figAx)
+        # graph.plot(filesave, figAx=figAx)  # plot
+        graph.export(filesave)  # export only txt file, and not the image
     else:
         graph.plot(figAx=figAx, ifSubPlot=True)
     if pltClose and figAx is None:
@@ -508,7 +511,7 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx
     return graph
 
 
-	
+
 
 if __name__ == "__main__":
     # go through files, store files content in order to later select pairs
@@ -520,4 +523,3 @@ if __name__ == "__main__":
     file = r'./../examples/JV\SAMPLE_B_3layerMo\export_sample_b_3layermo_summary_illum.txt'
 #    processSampleCellsMap(file, pltClose=False)
 #    writeFileAvgMax(file)
-

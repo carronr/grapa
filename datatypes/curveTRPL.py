@@ -18,21 +18,27 @@ from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
 
 
 class GraphTRPL(Graph):
-    
+
     FILEIO_GRAPHTYPE = 'TRPL decay'
-    
+
     AXISLABELS = [['Time', 't', 'time'], ['Intensity', '', 'counts']]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1='', line2='', line3='', **kwargs):
+    def isFileReadable(cls, fileName, fileExt, line1='', line2='', line3='',
+                       **kwargs):
         if fileExt == '.dat' and line1 == 'Time[ns]	crv[0] [Cnts.]':
             return True
-        elif (fileExt == '.dat' and line1 == 'Parameters:' and
-              line2.strip().startswith('Sample') and
-              line3.strip().startswith('Solvent')) :
+        elif (fileExt == '.dat'
+                and line1 == 'Parameters:'
+                and ((      line2.strip().startswith('Sample')
+                        and line3.strip().startswith('Solvent'))
+                     or (   line2.strip().split(' : ')[0] in ['Exc_Wavelength']
+                        and line3.strip().split(' : ')[0] in ['Exc_Bandpass'])
+                     )
+              ):
             return True
         return False
-        
+
     def readDataFromFile(self, attributes, **kwargs):
         """ Read a TRPL decay. """
         len0 = self.length()
@@ -42,22 +48,22 @@ class GraphTRPL(Graph):
         GraphIO.readDataFromFileGeneric(self, attributes, **kw)
         self.castCurve(CurveTRPL.CURVE, len0, silentSuccess=True)
         # label management
-        filenam_, fileext = ospath.splitext(self.filename) # , fileExt
+        filenam_, fileext = ospath.splitext(self.filename)  # , fileExt
         #self.curve(len0).update({'label': filenam_.split('/')[-1].split('\\')[-1]})
-        lbl = filenam_.split('/')[-1].split('\\')[-1].replace('_',' ').split(' ')
+        lbl = filenam_.split('/')[-1].split('\\')[-1].replace('_', ' ').split(' ')
         smp = str(self.curve(len0).attr('sample'))
         try:
             if float(int(float(smp))) == float(smp):
                 smp = str(int(float(smp)))
         except Exception:
             pass
-        smp = smp.replace('_',' ').split(' ')
+        smp = smp.replace('_', ' ').split(' ')
         new = lbl
         if len(smp) > 0:
             new = [l for l in lbl if l not in smp] + smp
-        print('label', self.attr('label'), [l for l in lbl if l not in smp], smp)
+        # print('label', self.attr('label'), [l for l in lbl if l not in smp], smp)
         self.curve(len0).update({'label': ' '.join(new)})
-        xlabel = self.getAttribute('xlabel').replace('[',' [').replace('  ',' ').capitalize() # ] ]
+        xlabel = self.getAttribute('xlabel').replace('[', ' [').replace('  ', ' ').capitalize() # ] ]
         if xlabel in ['', ' ']:
             xlabel = GraphTRPL.AXISLABELS[0]
         self.update({'typeplot': 'semilogy', 'alter': ['', 'idle'],
@@ -71,22 +77,19 @@ class GraphTRPL(Graph):
             for key in keys:
                 val = attr[key]
                 if isinstance(val, str) and val.startswith('\t'):
-                    self.curve(len0).update({key:''})
+                    self.curve(len0).update({key: ''})
 
-    
-    
 
 class CurveTRPL(Curve):
     """ Class handling TRPL decays. """
 
     CURVE = 'Curve TRPL'
     SMOOTH_WINDOW = ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']
-    
 
     def __init__(self, data, attributes, silent=False):
         # main constructor
         Curve.__init__(self, data, attributes, silent=silent)
-        self.update ({'Curve': self.CURVE})
+        self.update({'Curve': self.CURVE})
         # retrieve parameters required for normalization
         if self.attr('_repetfreq_Hz', None) is None:
             try:
@@ -111,19 +114,21 @@ class CurveTRPL(Curve):
                 binw = 1
             self.update({'_binwidth_s': binw})
         # backward compatibility
-        if self.attr('_spectrumOffset', None) is not None and self.attr('_TRPLOffset', None) is None:
+        if (self.attr('_spectrumOffset', None) is not None
+                and self.attr('_TRPLOffset', None) is None):
             self.update({'_TRPLOffset': self.attr('_spectrumOffset')})
-        
-
 
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
         xOffset = self.getXOffset()
-        out.append([self.addXOffset, 'Time offset', ['new horizontal offset (leave empty for autodetect)'], [xOffset if xOffset != 0 else '']]) # one line per function
+        out.append([self.addXOffset, 'Time offset',
+                    ['new horizontal offset (leave empty for autodetect)'],
+                    [xOffset if xOffset != 0 else '']])  # 1 line per function
         unit = self.attr('_unit', 'cts')
-        out.append([self.addOffset, 'Add offset', ['new vertical offset ('+unit+')'], [self.getOffset()]]) # one line per function
+        out.append([self.addOffset, 'Add offset',
+                    ['new vertical offset ('+unit+')'], [self.getOffset()]])
         # normalization
         unit = self.attr('_unit', None)
         revert = False if unit is None else True
@@ -132,11 +137,11 @@ class CurveTRPL(Curve):
                         ['pulse freq Hz', 'acquis time s', 'bin ps'],
                         [self.attr('_repetfreq_Hz', 1), self.attr('_acquistime_s', 1), self.attr('_binwidth_s', 1)*1e12],
                         {},
-                        [{'width':10}, {'width':7}, {'width':6}]]) # one line per function
+                        [{'width': 10}, {'width': 7}, {'width': 6}]])
         else: # get back cts data
             out.append([self.normalizerevert, 'Restore intensity cts',
                         ['Current intensity unit: '+str(unit)+'. factor'],
-                        [self.getFactor()], {}, [{'field':'Label'}]]) # one line per function
+                        [self.getFactor()], {}, [{'field': 'Label'}]])
         # fit
         if self.attr('_fitFunc', None) is None or self.attr('_popt', None) is None:
             ROI = roundSignificantRange([20, max(self.x())], 2)
@@ -145,8 +150,8 @@ class CurveTRPL(Curve):
                         ['Nb exp', 'ROI', 'Fixed values', 'show residuals'],
                         [2, ROI, [0, '', ''], False],
                         {},
-                        [{'field':'Combobox', 'values':['1','2','3']},
-                         {},{},{'field':'Combobox', 'values':['False', 'True']}]])
+                        [{'field': 'Combobox', 'values': ['1', '2', '3']},
+                         {}, {}, {'field': 'Combobox', 'values': ['False', 'True']}]])
         else:
             values = roundSignificant(self.getAttribute('_popt'), 5)
             params = ['BG']
@@ -158,28 +163,30 @@ class CurveTRPL(Curve):
                     ['width', 'convolution', 'binning'],
                     ['9', 'hanning', '1'],
                     {},
-                    [{},{'field':'Combobox', 'values':self.SMOOTH_WINDOW},{'field':'Combobox','values':['1','2','4','8','16']}]])
+                    [{}, {'field': 'Combobox', 'values': self.SMOOTH_WINDOW},
+                        {'field': 'Combobox', 'values': ['1','2','4','8','16']}]])
         # integration
         alter = str(kwargs['graph'].attr('alter')) if 'graph' in kwargs else "['', '']"
         ROI = roundSignificantRange([min(self.x()), max(self.x())], 2)
         out.append([self.integrate, 'Integrate',
                     ['ROI', 'data transform'], [ROI, alter], {},
-                    [{}, {'field':'Combobox','values': ['raw', alter]}]])
+                    [{}, {'field': 'Combobox', 'values': ['raw', alter]}]])
         # help
-        out.append([self.printHelp, 'Help!', [], []]) # one line per function
+        out.append([self.printHelp, 'Help!', [], []])
         return out
-    
+
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
         out += [['semilogy', ['', 'idle'], 'semilogy']]
         return out
 
-    
     # handling of offsets - same as Curve Spectrum, with same keyword
     def getOffset(self):
         return self.attr('_TRPLOffset', 0)
+
     def getFactor(self):
         return self.attr('_TRPLFactor', 1)
+
     def setIntensity(self, offsetnew=None, factornew=None):
         """ Data stored as (raw + offset) * factor """
         """
@@ -202,13 +209,13 @@ class CurveTRPL(Curve):
         if self.attr('_spectrumOffset', None) is not None:
             self.update({'_spectrumOffset': self.attr('_TRPLOffset')})
         return True
-    
+
     def addOffset(self, value):
         if is_number(value):
             self.setIntensity(offsetnew=value)
             return True
         return False
-    
+
     def normalize(self, repetfreq_Hz, duration_s, binwidth_ps):
         """
         Normalizes intensity of TRPL to account for repetition rate,
@@ -222,11 +229,11 @@ class CurveTRPL(Curve):
         if factor == 0 or np.isinf(factor):
             print('CurveTRPL.normlize: non-sensical normalization factor (0 or inf).')
             return False
-        if self.attr('_unit', None) is not None: # should not happen if using only the GUI
+        if self.attr('_unit', None) is not None:  # should not happen if using only the GUI
             print('CurveTRPL.normalize: data may have been already normalized (Curve labelled as "'+self.attr('_unit')+'", "'+self.attr('_unitfactor')+'").')
         self.setIntensity(factornew=factor)
         self.update({'_unit': 'cts/Hz/s/s'})
-        # overwrite acquisition parameters, if significant deviation from 
+        # overwrite acquisition parameters, if significant deviation from
         try:
             if np.abs(self.attr('_repetfreq_Hz',1) - repetfreq_Hz) / repetfreq_Hz > 1e-6:
                 self.update({'_repetfreq_Hz': repetfreq_Hz})
@@ -237,24 +244,25 @@ class CurveTRPL(Curve):
         except Exception:
             pass
         return True
+
     def normalizerevert(self, *args):
         self.setIntensity(factornew=1)
         self.update({'_unit': ''})
         return True
-    
-    
-    
-        # temporal offset
+
+    # temporal offset
     def getXOffset(self):
         return self.getAttribute('_TRPLxOffset', 0)
+
     def addXOffset(self, value):
         if is_number(value):
             self.setX(self.x() + value - self.getXOffset())
             self.update({'_TRPLxOffset': value})
             return True
         else:
-            return self.addXOffset( - self.findOnset())
+            return self.addXOffset(- self.findOnset())
         return False
+
     def findOnset(self):
         """ define onset as average between 25% and 95% percentile """
         y = self.y()
@@ -266,11 +274,9 @@ class CurveTRPL(Curve):
             if y[i] < target:
                 return self.x(i)
         return self.x(0)
-        
 
-    
-        
-    def CurveTRPL_fitExp(self, nbExp=2, ROI=None, fixed=None, showResiduals=False, silent=False):
+    def CurveTRPL_fitExp(self, nbExp=2, ROI=None, fixed=None,
+                         showResiduals=False, silent=False):
         """
         Fit exp: fits the data as a constant plus a sum of exponentials.
         Returns a Curve as the best fit to the TRPL decay.
@@ -306,7 +312,7 @@ class CurveTRPL(Curve):
         fitted = CurveTRPL([self.x(mask), self.func_fitExp(self.x(mask), *popt)], attr)
         if showResiduals:
             mask = self.ROItoMask(ROI)
-            attrresid = {'color': [0.5,0.5,0.5], 'label': 'Residuals'}
+            attrresid = {'color': [0.5, 0.5, 0.5], 'label': 'Residuals'}
             resid = CurveTRPL([self.x(mask), self.func_fitExp(self.x(mask), *popt)-self.y(mask)], attrresid)
             fitted = [fitted, resid]
         if not silent:
@@ -317,7 +323,7 @@ class CurveTRPL(Curve):
             print('Fitted with', int(nbExp), 'exponentials: tau', taus, '.')
             print('Params\t', '\t'.join([str(p) for p in popt]))
         return fitted
-    
+
     def fit_fitExp(self, ROI=None, fixed=None):
         # check for ROI
         mask = self.ROItoMask(ROI)
@@ -325,7 +331,7 @@ class CurveTRPL(Curve):
         datay = self.y()[mask]
         # check for fixed params, construct p0
         p0default = [0, 1e4, 30, 1000, 100]
-        p0default = [(p if p%2 or p==0  else np.log(p)) for p in p0default]
+        p0default = [(p if p % 2 or p == 0 else np.log(p)) for p in p0default]
         while len(p0default) < len(fixed):
             p0default += [p0default[-2] / 2, p0default[-1]*2]
         p0 = []
@@ -337,7 +343,8 @@ class CurveTRPL(Curve):
                 complementary.append(fixed[i])
             else:
                 p0.append(p0default[i])
-        # custom fit function handling fixed and free fit parameters 
+
+        # custom fit function handling fixed and free fit parameters
         def func(datax, *p0):
             j = 0
             params = []
@@ -347,8 +354,9 @@ class CurveTRPL(Curve):
                 else:
                     params.append(p0[j])
                     j += 1
-            params = [(p if p%2 or p==0  else np.exp(p)) for p in params]
+            params = [(p if p % 2 or p == 0 else np.exp(p)) for p in params]
             return self.func_fitExp(datax, *params)
+
         # actual fitting
         from scipy.optimize import curve_fit
         popt, pcov = curve_fit(func, datax, datay, p0=p0)
@@ -363,7 +371,7 @@ class CurveTRPL(Curve):
                 j += 1
         # sort exp by ascending tau: TODO
         return params
-        
+
     def func_fitExp(self, t, BG, A1, tau1, *args):
         """
         computes the sum of a cst plus an arbitrary number of exponentials
@@ -374,7 +382,6 @@ class CurveTRPL(Curve):
             out += args[i] * np.exp(- t / args[i+1])
             i += 2
         return out
-        
 
     def ROItoMask(self, ROI=None):
         x = self.x()
@@ -385,8 +392,7 @@ class CurveTRPL(Curve):
             if x[i] < ROI[0] or x[i] > ROI[1]:
                 mask[i] = False
         return mask
-        
-    
+
     def CurveTRPL_smoothBin(self, window_len=9, window='hanning', binning=4):
         """
         Smooth & bin: returns a copy of the Curve after smoothening and data
@@ -414,12 +420,12 @@ class CurveTRPL(Curve):
             x_[i] = np.average(  x[i*binning : min(le, (i+1)*binning)])
             y_[i] = np.average(smt[i*binning : min(le, (i+1)*binning)])
         attr = deepcopy(self.getAttributes())
-        attr.update({'comment':'Smoothed curve ('+str(self.getAttribute('label'))+
-                     ') smt '+str(window_len)+' '+str(window)+ ' bin '+str(binning)})
+        comment = ('Smoothed curve (' +str(self.getAttribute('label')) +
+                   ') smt ' +str(window_len) + ' ' + str(window) + ' bin ' +
+                   str(binning))
+        attr.update({'comment': comment})
         attr.update({'label': str(self.getAttribute('label'))+' '+'smooth'})
         return CurveTRPL([x_, y_], attr)
-        
-
 
     def integrate(self, ROI=None, alter=None, curve=None):
         """
@@ -428,10 +434,11 @@ class CurveTRPL(Curve):
         - data transform (alter): 'raw', or any Graph 'alter' value including
           (mul-)offsets.
         """
-        # curve: tweak to be able to integrate from the GUI a Curve not CurveTRPL
+        # curve and not self: tweak to be able to integrate a Curve not
+        # CurveTRPL (eg from GUI)
         if curve is None:
             curve = self
-        mask = CurveTRPL.ROItoMask(curve, ROI) # self may be not instance of CurveTRPL
+        mask = CurveTRPL.ROItoMask(curve, ROI)
         if alter is not None and alter not in ['raw']:
             if isinstance(alter, str):
                 alter = ['', alter]
@@ -443,7 +450,7 @@ class CurveTRPL(Curve):
         integral = np.trapz(datay, datax)
         return integral
 
-        
+
 
     def printHelp(self):
         print('*** *** ***')
@@ -462,5 +469,5 @@ class CurveTRPL(Curve):
         self.printHelpFunc(self.CurveTRPL_fitExp)
         self.printHelpFunc(self.CurveTRPL_smoothBin)
         self.printHelpFunc(self.integrate)
-        
+
         return True

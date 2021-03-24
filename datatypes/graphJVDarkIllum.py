@@ -87,7 +87,7 @@ class GraphJVDarkIllum(Graph):
             self.append(newCurve)
         else:
             pass
-        
+
         # apparent photocurrent: difference between dark and illum
         if self.length() > 2: # for this the opening of the 2 file must have been successful
             Jsc = self.curve(self.idxIllum).getAttribute('Jsc')
@@ -101,7 +101,7 @@ class GraphJVDarkIllum(Graph):
             self.curve(-1).update({'linestyle': 'none'}) # by default this curve is not shown
         else:
             pass
- 
+
 
 
 
@@ -122,8 +122,11 @@ class GraphJVDarkIllum(Graph):
             out = out + self.curve(self.idxIllum).printShort()
         return out
 
-
-    def plot(self, filesave='', ylim=None, figAx=None, ifSave=True, ifExport=True, alter=None, pltClose=False):
+    def plot(self, filesave='', ylim=None, figAx=None, ifSave=True,
+             ifExport='auto', alter=None, pltClose=False):
+        """
+        ifExport: Boolean. If 'auto': only exports the lin plot, not the log
+        """
         if figAx is not None:
             pltClose = False
         if pltClose:
@@ -143,16 +146,18 @@ class GraphJVDarkIllum(Graph):
             mM2 = np.array([np.min(self.curve(i).y(alter='log10abs')), np.max(self.curve(i).y(alter='log10abs'))] if i >= 0 else [np.inf, -np.inf])
             ylimLog = [np.floor(min(mM0[0], mM2[0])), np.ceil(max(mM0[1], mM2[1]))]
             ylimLog = list(np.power(10, np.array(ylimLog)))
-#            print ('    ylimlog', ylimLog,'(0',mM0,mM2,')')
-        #ylimInit = self.getAttribute('ylim')
-        self.plotStd   (filesave, ifSave=ifSave, ifExport=ifExport, figAx=figAx, ylim=ylim)
+        # print ('    ylimlog', ylimLog,'(0',mM0,mM2,')')
+        # ylimInit = self.getAttribute('ylim')
+        ex = True if ifExport == 'auto' else ifExport
+        self.plotStd(filesave, ifSave=ifSave, ifExport=ex, figAx=figAx, ylim=ylim)
         if pltClose:
             plt.close()
+        ex = False if ifExport == 'auto' else ifExport
         if self.length() > 2:
-            self.plotDiff  (filesave, ifSave=ifSave, ifExport=ifExport, figAx=figAx, ylim=ylim)
+            self.plotDiff(filesave, ifSave=ifSave, ifExport=ex, figAx=figAx, ylim=ylim)
             if pltClose:
                 plt.close()
-        self.plotLogAbs(filesave, ifSave=ifSave, ifExport=ifExport, figAx=figAx, ylim=ylimLog)
+        self.plotLogAbs(filesave, ifSave=ifSave, ifExport=ex, figAx=figAx, ylim=ylimLog)
         if pltClose:
             plt.close()
         #self.update({'ylim': ylimInit})
@@ -218,4 +223,3 @@ class GraphJVDarkIllum(Graph):
         if self.length() > 2: # scond curve, ignoring the fit which is in position 1
             out.append(self.curve(2))
         return out
-        

@@ -13,23 +13,24 @@ try:
 except ImportError:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 import matplotlib.pyplot as plt
-print ('Loading tkinter...')
+print('Loading tkinter...')
 import tkinter as tk
 from tkinter import ttk
 from tkinter import BOTH, X, Y
 import tkinter.filedialog
 
-print ('Loading os...')
+print('Loading os...')
 import os
-print ('Loading numpy...')
+print('Loading numpy...')
 import numpy as np
-print ('Loading copy')
+print('Loading copy')
 import copy
-print ('Loading sys...')
+print('Loading sys...')
 import sys
+import contextlib
 
-print ('Loading grapa...')
-path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+print('Loading grapa...')
+path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 if path not in sys.path:
     sys.path.append(path)
 from grapa.graph import Graph
@@ -43,12 +44,12 @@ from grapa.gui.GUImisc import FrameTitleContentHide, FrameTitleContentHideHorizo
 from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, CheckbuttonVar, ComboboxVar
 
 # WISHLIST:
-#- config autotemplate for boxplot
-#- B+W preview
-#Stackplot: transparency Alpha ?
+# - config autotemplate for boxplot
+# - B+W preview
+# Stackplot: transparency Alpha ?
 
 # BUG: fit JV, when unit in mV
-#- Add button reverse curve order
+# - Add button reverse curve order
 
 # TODO: Write workflow Cf
 # TODO: Write workflow CV
@@ -56,29 +57,47 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO: Write workflow Jsc Voc
 
 # TODO LIST PRIORITY
-#- colorbar: also shortcut for type image?
-#- update repository package
+# - colorbar: also shortcut for type image?
+
+# TODO: CurveSpectrum: order
+# TODO: test from grapa. impor t Curve, Graph
+# TODO graph handler, for multiple graph tabs
+# TODO: export: figugsize () into list
+
+# Version 0.5.4.8
+# Modifications
+# - TRPL: the data type TRPL was  modified to properly load files generated using scripts.
+# - Modified loading of preference file. Hopefully a bit faster when opening many files.
+# - CurveJV: added data transform 'Log10 abs (raw)' (abs0), to plot the log of JV curve without Jsc subtraction
+# - scriptJV: also exports a file with a few statistical quantities of JV data (average, mediam, max)
+# - scriptJV: reduced amount of generated files. The individual summary images are not generated anymore as already plotted in combined format. Also, the different cells are exported as images (3x) and only once as text file.
+# - prepare future update of the GUI to support several graphs simultaneously
+# BUGS:
+# - Mitigated bugs with Winpython version 3.9 (issues with matplotlib 3.3.9; hidden curves in grey due to changes in tk)
 
 
-# TRPL label
-# CV curve 0V error
 
-#Version 0.5.4.6
+# Version 0.5.4.7
+# Modifications
+# - Adjusted width of GUI Curve action fields for CurveSIMS to prevent time-consuming redimensioning of the GUI interface.
+# - The Colorize GUI function can now print its effect in the console
+# Bugs
+# - Solved an issue with twiny ylim values
+
+
+# Version 0.5.4.6
 # - Added Integration function to the CurveTRPL and CurveSpectrum
+# - Fixed a bug with Colorize function with curve selection where the order was not sorted under some conditions.
 
-
-#Version 0.5.4.5
-#Changes
-#- CurveTRPL: small changes in the handling of TRPL data label and normalization factors
-#- CurveCV: change in labeling for doping extracted at given voltage
-
-
-
+# Version 0.5.4.5
+# Changes
+# - CurveTRPL: small changes in the handling of TRPL data label and normalization factors
+# - CurveCV: change in labeling for doping extracted at given voltage
 
 """
 *** *** *** example of config.txt file *** *** ***
-# only keywords (first word) matters: comment line are loaded but never refered to
-# repeating keyword will overwrite content of first instance
+# only keywords (first word) matters: comment line are loaded but never refered
+# to repeating keyword will overwrite content of first instance
 # graph labels default unit presentation: [unit], (unit), / unit, or [], (), /
 graph_labels_units	[]
 # graph labels presence of symbols (ie: $C$ in 'Capacitance $C$ [nF]')
@@ -103,14 +122,16 @@ save_imgformat	.png
 *** *** *** end of example *** *** ***
 """
 
-# new texyt field class, with possibility for write (print in this field possible)
+
+# new texyt field class, with possibility for write (print in this field)
 # used for the console output
 class TextWriteable(tk.Text):
     def write(self, string):
         self.insert(tk.END, string)
         self.see(tk.END)
+
+
 # to be able to print in something else than default console
-import contextlib
 @contextlib.contextmanager
 def stdout_redirect(where):
     cp = sys.stdout
@@ -118,21 +139,20 @@ def stdout_redirect(where):
     try:
         yield where
     finally:
-        sys.stdout = cp #sys.stdout = sys.__stdout__ # does not work apparently
-
-
+        sys.stdout = cp  # sys.stdout = sys.__stdout__#does not work apparently
 
 
 class Application(tk.Frame):
-    
+
     def __init__(self, master=None):
         self.initiated = False
         # default graph creation arguments
         self.newGraphKwargs = {'silent': True}
         # retrieve arguments from command line
         try:
-            self.newGraphKwargs.update({'config': sys.argv[1]}) # argv[1] is intended to be the config.txt file to be used in this session
-        except:
+            self.newGraphKwargs.update({'config': sys.argv[1]})
+            # argv[1] is the config.txt file to be used in this session
+        except Exception:
             pass
         self.master = master
         tk.Frame.__init__(self, master)
@@ -142,16 +162,16 @@ class Application(tk.Frame):
         self.defaultScreenDpi = 100
         # start define GUI
         self.pack(fill=BOTH, expand=True)
-        self.observableCurve = Observable() # handles some of the changes in the GUI when changing the selected curve
-        self.observableDataPickerCurve = Observable() # handles some of the changes in the GUI when changing the active curve in the data picker
-        FrameMain = tk.Frame (self)
+        self.observableCurve = Observable()  # handles some of the changes in the GUI when changing the selected curve
+        self.observableDataPickerCurve = Observable()  # handles some of the changes in the GUI when changing the active curve in the data picker
+        FrameMain = tk.Frame(self)
         FrameMain.pack(fill=BOTH, expand=True)
         self.initFonts(FrameMain)
         self.createWidgets(FrameMain)
-        # optional
-        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'subplots_examples.txt'))
-#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'examples', 'JscVoc', 'JscVoc_SAMPLE_a3_Values.txt'))
-#        self.file_open_internal(os.path.join(os.path.dirname(os.path.abspath(__file__)), r'C:\Users\Romain\Desktop', 'dummy.txt'))
+        # open default Graph
+        filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'examples', 'subplots_examples.txt')
+        self.file_open_internal(filename)
 
         self.varScreenDpi.set(75)
         self.setScreenDpi()
@@ -164,7 +184,8 @@ class Application(tk.Frame):
         self.master.bind('<Control-Shift-S>', lambda e: self.saveDataAs())
         self.master.bind('<Control-o>', lambda e: self.file_open())
         self.master.bind('<Control-Shift-O>', lambda e: self.file_merge())
-#        self.master.bind('<Control-v>', lambda e: self.clipboardToGraphOpen()) # too larges chances to mess up with that one
+        # too larges chances to mess up with that one
+        # self.master.bind('<Control-v>', lambda e: self.clipboardToGraphOpen())
         self.master.bind('<Control-Shift-V>', lambda e: self.clipboardToGraphMerge())
         self.master.bind('<Control-Shift-N>', lambda e: self.newCurveMerge())
         self.master.bind('<Control-r>', lambda e: self.updateUI())
@@ -172,36 +193,35 @@ class Application(tk.Frame):
         self.master.bind('<Control-m>', lambda e: self.dataPickerSavePoint())
         self.master.bind('<Control-h>', lambda e: self.curveShowHideCurve())
         self.master.bind('<Control-Delete>', lambda e: self.curveDelete())
-        
-        
-    
-    def createFrame(self, frame, func, dictArgsInit, dictArgsPack, argsFunc=None, geometry='pack'):
+
+    def createFrame(self, frame, func, dictArgsInit, dictArgsPack,
+                    argsFunc=None, geometry='pack'):
         """
         All frames are generated according to this 3-line pattern
-        1/ creation inside a know frame, 2/ pack, 3/ fill frame by executing a function with frame name as parameter
+        1/ creation inside a know frame, 2/ pack, 3/ fill frame by executing a
+        function with frame name as parameter
         Possible extension is to handle a different geometry manager
         """
         newFrame = tk.Frame(frame, **dictArgsInit)
         if geometry == 'grid':
-            newFrame.grid(**dictArgsPack) # if manager=='place': newFrame.place(*dictArgsPack*) an so on
+            newFrame.grid(**dictArgsPack)
         else:
-            newFrame.pack(**dictArgsPack) # if manager=='place': newFrame.place(*dictArgsPack*) an so on
+            newFrame.pack(**dictArgsPack)
         if func is not None:
             func(newFrame) if argsFunc is None else func(newFrame, *argsFunc)
         return newFrame
-    
+
     def initFonts(self, frame):
         import tkinter.font as font
         a = tk.Label(frame, text='')
         self.fontBold = font.Font(font=a['font'])
         self.fontBold.configure(weight='bold')
 
-        
     def createWidgets(self, frame):
         # right frame
-        self.createFrame(frame, self.fillUIFrameRight, {'relief':'raised', 'borderwidth':2}, {'side':'right', 'fill': Y, 'pady': 2, 'expand': False})
+        self.createFrame(frame, self.fillUIFrameRight, {'relief': 'raised', 'borderwidth': 2}, {'side': 'right', 'fill': Y, 'pady': 2, 'expand': False})
         # frame left/graph/console
-        self.createFrame(frame, self.fillUIFrameMain, {}, {'side': 'left', 'anchor': 'n', 'fill': BOTH, 'expand': True})
+        self.createFrame(frame, self.fillUIFrameMain, {},{'side': 'left', 'anchor': 'n', 'fill': BOTH, 'expand': True})
 
     def fillUIFrameMain(self, frame):
         # create console, indicators
@@ -229,7 +249,6 @@ class Application(tk.Frame):
         self.Console = TextWriteable(frame, wrap='word', width=100, height=8)
         self.Console.pack(side='bottom', anchor='w')
 
-
     def fillUIFrameLeft(self, frame):
         # top inner frame
         self.createFrame(frame, self.fillUIFrameLeftTop,   {'relief': 'raised', 'borderwidth': 0}, {'side': 'top', 'fill': X})
@@ -239,7 +258,6 @@ class Application(tk.Frame):
         self.createFrame(frame, self.fillUIFrameLeftMiddle,    {'relief': 'raised', 'borderwidth': 0}, {'side': 'top', 'anchor':'n', 'fill': X, 'expand': True})
         self.createFrame(frame, self.fillUIFrameLeftQuitTitle, {}, {'side': 'top', 'fill': X})
         self.createFrame(frame, self.fillUIFrameLeftQuit,      {}, {'side': 'top', 'fill': X})
-
 
     def fillUIFrameLeftTop(self, frame):
         # button chooseFile
@@ -256,19 +274,20 @@ class Application(tk.Frame):
         self.ValCheckbuttonSaveCompactnot = tk.IntVar()
         self.ValCheckbuttonSaveCompactnot.set(0)
         tk.Checkbutton(frame, text='Screen data (better not)', variable=self.ValCheckbuttonSave          ).pack(side='top', anchor='w', padx=5)
-        tk.Checkbutton(frame, text='Keep separated x columns',      variable=self.ValCheckbuttonSaveCompactnot).pack(side='top', anchor='w', padx=5)
-    
+        tk.Checkbutton(frame, text='Keep separated x columns', variable=self.ValCheckbuttonSaveCompactnot).pack(side='top', anchor='w', padx=5)
+
     def fillUIFrameOpenTitle(self, frame):
         tk.Label(frame, text='Open or merge files', font=self.fontBold).pack(side='left', anchor='center')
         hline = FrameTitleContentHide.frameHline(frame)
         hline.pack(side='left', anchor='center', fill=X, expand=1, padx=5)
+
     def fillUIFrameOpen(self, frame):
-        tk.Label (frame, text='Open').grid(sticky='w', row=0, column=0)
+        tk.Label(frame, text='Open').grid(sticky='w', row=0, column=0)
         of = tk.Button(frame, text='File  ',  command=self.file_open)
         oc = tk.Button(frame, text='Clipboard', command=self.clipboardToGraphOpen)
         of.grid(sticky='w', row=0, column=1, padx=5)
         oc.grid(sticky='w', row=0, column=2)
-        tk.Label (frame, text='Merge with').grid(sticky='w', column=0, row=1)
+        tk.Label(frame, text='Merge with').grid(sticky='w', column=0, row=1)
         mf = tk.Button(frame, text='File  ',  command=self.file_merge)
         mc = tk.Button(frame, text='Clipboard', command=self.clipboardToGraphMerge)
         mf.grid(sticky='w', column=1, row=1, padx=5)
@@ -276,22 +295,23 @@ class Application(tk.Frame):
         CreateToolTip(of, "Ctrl+O")
         CreateToolTip(mf, "Ctrl+Shift+O")
         CreateToolTip(mc, "Ctrl+Shift+V")
+
     def fillUIFrameLeftOpenFolder(self, frame):
         self.varOpenFolderSubfolders = tk.BooleanVar()
         u = tk.Button(frame, text='Open all in folder', command=self.folder_plot_combined)
         u.grid(column=1, row=1, sticky='w')
         CreateToolTip(u, 'Open all files in a given folder')
         tk.Checkbutton(frame, text='subfolders', variable=self.varOpenFolderSubfolders).grid(column=2, row=1)
-        #tk.Button(frame, text='Plot all files', command=self.folder_plot_all).pack(side='top', anchor='w', padx=10)
+        # tk.Button(frame, text='Plot all files', command=self.folder_plot_all).pack(side='top', anchor='w', padx=10)
         u = tk.Button(frame, text='New empty Curve', command=self.appendNewEmptyCurve)
         u.grid(column=1, row=2, sticky='w', columnspan=2)
         CreateToolTip(u, 'for creating a new subplot, inset, image etc.')
-        
+
     def fillUIFrameSaveTitle(self, frame):
         tk.Label(frame, text='Save data & graph', font=self.fontBold).pack(side='left', anchor='center')
         hline = FrameTitleContentHide.frameHline(frame)
         hline.pack(side='left', anchor='center', fill=X, expand=1, padx=5)
-        
+
     def fillUIFrameLeftMiddleTitle(self, frame):
         tk.Label(frame, text='Data processing scripts', font=self.fontBold).pack(side='left', anchor='center')
         hline = FrameTitleContentHide.frameHline(frame)
@@ -339,13 +359,13 @@ class Application(tk.Frame):
         ent.pack(side='left', pady=2)
         CreateToolTip(lbl, "fit range of interest (min value or range), in mA/cm2")
         CreateToolTip(ent, "fit range of interest (min value or range), in mA/cm2")
-    
+
     def FrameLeftMiddleUpdateQuit(self, frame):
         #u = tk.Button(frame, text="Refresh GUI", command=self.updateUI)
         #u.pack(side='left', anchor='n', padx=5, pady=2)
         tk.Button(frame, text="QUIT", fg="red", command=self._quit).pack(side='right', anchor='n', pady=2, padx=5)
 
-    
+
     def fillUIFrameLeftMiddleFitDiodeWeight (self, frame):
         lbl = tk.Label(frame, text='Fit weight diode region')
         lbl.pack(side='left', anchor='n')
@@ -413,7 +433,7 @@ class Application(tk.Frame):
     def disableCanvasCallbacks(self):
         for cid in self.canvasEvents:
             self.canvas.mpl_disconnect(cid)
-        
+
     def fillUIFrameGraphBoxToolbar(self, frame):
         u = tk.Button(frame, text='Refresh GUI', command=self.updateUI)
         u.pack(side='left', anchor='center', padx=5, pady=2)
@@ -422,12 +442,12 @@ class Application(tk.Frame):
         tk.Label(frame, text="   ").pack(side='left')
         self.toolbar = NavigationToolbar2Tk(self.canvas, frame)
         self.toolbar.update()
-        
+
     def fillUIFrameGraphBelow(self, frame):
         self.createFrame(frame, self.fillUIFrameGraphQuickMods,  {}, {'side': 'top', 'anchor': 'w', 'fill': X})
         FrameTitleContentHideHorizontal(frame, self.fillUIFrameGraphDataPickerTitle, self.fillUIFrameGraphDataPicker,
                               default='hide', showHideTitle=True).pack(side='top', fill=X, anchor='w')
-        
+
     def fillUIFrameGraphDataPickerTitle(self, frame):
         tk.Label(frame, text='Data picker').pack(side='top')
     def fillUIFrameGraphDataPicker(self, frame):
@@ -474,8 +494,8 @@ class Application(tk.Frame):
         # the observer pattern is an overkill here, but it is slightly cleaner
         curve = self.varDataPickerCurve.get()
         self.observableDataPickerCurve.update_observers(self.back_graph.curve(curve) if curve > -1 else None)
-        
-        
+
+
     def fillUIFrameGraphQuickMods(self, frame):
         #tk.Label (frame, text='Quick modifs').pack(side='left', anchor='c')
         self.varQuickModsXlabel = EntryVar(frame, '', width=15)
@@ -506,7 +526,7 @@ class Application(tk.Frame):
         self.varQuickModsYlim0.bind ('<Return>', lambda event: self.quickMods())
         self.varQuickModsYlim1.bind ('<Return>', lambda event: self.quickMods())
         tk.Button(frame, text='Data editor', command=self.popupDataEditor).pack(side='right', anchor='c')
-        
+
     def fillUIFrameCenterTop(self, frame):
         tk.Label (frame, text='Data transform').pack(side='left', anchor='n', pady=7)
         self.alterListGUI = self.back_graph.alterListGUI()
@@ -535,8 +555,8 @@ class Application(tk.Frame):
         self.fieldScreenDPI.pack(side='left', anchor='n', pady=8, padx=5)
         tk.Button(frame, text='Save', command=self.setScreenDpi).pack(side='left', anchor='n', pady=5)
         self.fieldScreenDPI.bind('<Return>', lambda event: self.setScreenDpi())
-        
-        
+
+
     def fillUIFrameRight(self, frame):
         pady = 5
         # template actions
@@ -555,8 +575,8 @@ class Application(tk.Frame):
         #list of curves - Listbox choice to user
         self.ListBoxCurves = tk.Listbox(frame, width=30, height=4) # dont want to delete the object as corresponding code can be useful at some point
         #self.ListBoxCurves.pack(side='top', anchor='w')
-        
-        
+
+
     def fillUIFrameRightTreeTitle(self, frame):
         tk.Label(frame, text='List of properties', font=self.fontBold).pack(side='top', anchor='w')
     def fillUIFrameRightTreeContent(self, frame):
@@ -564,7 +584,19 @@ class Application(tk.Frame):
         # EDIT property
         fr = FrameTitleContentHide(frame, self.fillUIFrameRightEditTitle, self.fillUIFrameRightEdit, contentkwargs={'padx':10}, default='hide')
         #fr.pack(side='top', fill=X, anchor='w')
+
     def fillUIFrameRightTree(self, frame):
+        # START OF FIX: because of change in tk. Baseically added the following:
+        def fixed_map(option):
+            # Returns the style map for 'option' with any styles starting with
+            # ("!disabled", "!selected", ...) filtered out
+            # style.map() returns an empty list for missing options, so this should
+            # be future-safe
+            return [elm for elm in style.map("Treeview", query_opt=option)
+                    if elm[:2] != ("!disabled", "!selected")]
+        style = ttk.Style()
+        style.map("Treeview", foreground=fixed_map("foreground"), background=fixed_map("background"))
+        # END OF FIX
         self.Tree = ttk.Treeview(frame, columns=('#1'))
         self.Tree.pack(side='left', anchor='n')
         self.Treeysb = ttk.Scrollbar(frame, orient='vertical', command=self.Tree.yview)
@@ -587,25 +619,25 @@ class Application(tk.Frame):
         self.createFrame(frame, self.fillUIFrameRightAGDelete,    {}, {'side':'top', 'anchor':'w'})
         self.createFrame(frame, self.fillUIFrameRightAGDuplicate, {}, {'side':'top', 'anchor':'w'})
         self.createFrame(frame, self.fillUIFrameRightAGShowHide,  {}, {'side':'top', 'anchor':'w'})
-        
+
     def fillUIFrameRightAGRight(self, frame):
         self.createFrame(frame, self.fillUIFrameRightAGClipboard, {}, {'side':'top', 'anchor':'w'})
         self.createFrame(frame, self.fillUIFrameRightAGCast,      {}, {'side':'top', 'anchor':'w'})
         self.createFrame(frame, self.fillUIFrameRightAGQuickAttr, {}, {'side':'top', 'anchor':'w'})
         self.createFrame(frame, self.fillUIFrameRightAGLabelReplace,{},{'side':'top','anchor':'w'})
-        
+
     def fillUIFrameRightAGDelete(self, frame):
         tk.Label (frame, text='Delete Curve').pack(side='left')
         de = tk.Button(frame, text='Curve', command=self.curveDelete)
         de.pack(side='left', padx=3)
         tk.Button(frame, text='All hidden', command=self.curveDeleteAllHidden).pack(side='left')
-        CreateToolTip(de, "Ctrl+Delete")        
-        
-        
+        CreateToolTip(de, "Ctrl+Delete")
+
+
     def fillUIFrameRightAGDuplicate(self, frame):
         tk.Label (frame, text='Duplicate Curve').pack(side='left')
         tk.Button(frame, text='Duplicate', command=self.curveDuplicate).pack(side='left')
-        
+
     def fillUIFrameRightAGClipboard(self, frame):
         tk.Label (frame, text='Copy to clipboard').pack(side='left')
         tk.Button(frame, text='Curve', command=self.curveDataToClipboard).pack(side='left', padx='5')
@@ -617,7 +649,7 @@ class Application(tk.Frame):
 #        self.ChkBtnToClipboardAttr.pack(side='left')
 #        self.ChkBtnToClipboardAlter = CheckbuttonVar(frame, 'screen data', False)
 #        self.ChkBtnToClipboardAlter.pack(side='left')
-        
+
     def fillUIFrameRightAGShowHide(self, frame):
         ObsShowHideCurve = ObserverStringVarMethodOrKey(tk.StringVar(), 'Select Curve', 'isHidden', valuesDict={True: 'Show Curve', False: 'Hide Curve'})
         self.observableCurve.register(ObsShowHideCurve)
@@ -627,14 +659,14 @@ class Application(tk.Frame):
         tk.Button(frame, text='Invert', command=self.curveShowHideInvert).pack(side='left')
         CreateToolTip(sh, "Ctrl+H")
 
-        
+
     def fillUIFrameRightAGShift(self, frame):
         tk.Label (frame, text='Reorder').pack(side='left')
         tk.Button(frame, text=u"\u21E7",      command=self.curveShiftTop ).pack(side='left', padx=1)
         tk.Button(frame, text=u"\u21D1 Up",   command=self.curveShiftUp  ).pack(side='left', padx=1)
         tk.Button(frame, text=u"\u21D3 Down", command=self.curveShiftDown).pack(side='left', padx=1)
         tk.Button(frame, text=u"\u21E9",      command=self.curveShiftBott).pack(side='left', padx=1)
-        
+
     def fillUIFrameRightAGCast(self, frame):
         tk.Label(frame, text='Change Curve type').pack(side='left')
         self.castCurveList = []
@@ -695,7 +727,7 @@ class Application(tk.Frame):
 
     def fillUIFrameRightTemplateColTitle(self, frame):
         tk.Label(frame, text='Template & Colorize', font=self.fontBold).pack(side='left')
-        
+
     def fillUIFrameRightTemplateColorize(self, frame):
         self.createFrame(frame, self.fillUIFrameRightTemplate,         {}, {'side': 'top', 'anchor':'w', 'fill': X})
         self.createFrame(frame, self.fillUIFrameRightAGColorizeTop,    {}, {'side': 'top', 'anchor':'w'})
@@ -742,7 +774,7 @@ class Application(tk.Frame):
         tk.Button(frame, text='Load & apply template',    command=self.file_loadTemplate).pack(side='left',  anchor='n', pady='5')
         tk.Checkbutton(frame, text='also Curves properties', variable=self.varRTplCurves).pack(side='left')
         tk.Button(frame, text='Save template',            command=self.saveTemplate     ).pack(side='right', anchor='n', pady='5')
-        
+
     def fillUIFrameSave(self, frame):
         s_ = tk.Button(frame, text='Save', command=self.saveData)
         s_.pack(side='left', anchor='n')
@@ -758,14 +790,14 @@ class Application(tk.Frame):
         tk.Label(frame, text='Edit property', font=self.fontBold).pack(side='top', anchor='w')
     def fillUIFrameRightEdit(self, frame):
         self.createFrame(frame, self.fillUIFrameRightEditH,  {}, {'side':'top', 'anchor':'w', 'fill': X})
-        self.EditPropExample = tk.StringVar() 
+        self.EditPropExample = tk.StringVar()
         self.EditPropExample.set('')
         tk.Label(frame, text='\n').pack(side='left', anchor='n', padx=0)
         tk.Label(frame, textvariable=self.EditPropExample, justify='left').pack(side='left', anchor='n')
     def fillUIFrameRightEditH(self, frame):
-        self.varEditPropProp = tk.StringVar() 
+        self.varEditPropProp = tk.StringVar()
         self.varEditPropProp.set('Property')
-        self.varEditPropVal = tk.StringVar() 
+        self.varEditPropVal = tk.StringVar()
         self.varEditPropVal.set('')
         tk.Label(frame, textvariable=self.varEditPropProp).pack(side='left')
         entry = tk.Entry(frame, text=self.varEditPropVal, width=35)
@@ -777,7 +809,7 @@ class Application(tk.Frame):
         tk.Label(frame, text='Property editor', font=self.fontBold).pack(side='top', anchor='w')
     def fillUIFrameRightNew(self, frame):
         self.createFrame(frame, self.fillUIFrameRightNewH,  {}, {'side':'top', 'anchor':'w', 'fill': X})
-        self.NewPropExample = tk.StringVar() 
+        self.NewPropExample = tk.StringVar()
         self.NewPropExample.set('')
         tk.Label(frame, text='\n').pack(side='left', anchor='n', padx=0)
         tk.Label(frame, textvariable=self.NewPropExample, justify='left').pack(side='left', anchor='n')
@@ -785,7 +817,7 @@ class Application(tk.Frame):
         self.varNewPropProp = tk.StringVar()
         self.varNewPropProp.set('')
         self.varNewPropProp.trace('w', self.newPropertySelect)
-        self.varNewPropVal = tk.StringVar() 
+        self.varNewPropVal = tk.StringVar()
         self.varNewPropVal.set('')
         self.varNewPropValPrevious = self.varNewPropVal.get()
         tk.Label(frame, text='Property:').pack(side='left')
@@ -797,7 +829,7 @@ class Application(tk.Frame):
         self.EntryNewProp.pack(side='left')
         self.EntryNewProp.bind('<Return>', lambda event: self.newPropertySet())
         tk.Button(frame, text='Save', command=self.newPropertySet).pack(side='right')
-        
+
     def fillUIFrameRightActionTitle(self, frame):
         self.createFrame(frame, self.fillUIFrameRightActionTitle2,  {}, {'side':'top', 'anchor':'w', 'fill': X})
     def fillUIFrameRightActionTitle2(self, frame):
@@ -837,7 +869,7 @@ class Application(tk.Frame):
                 for i in range(len(act[2])):#                for field in act[2]:
                     tmp[-1][0].append(tk.StringVar())
                     tmp[-1][0][-1].set(act[3][i])
-                if len(act) >= 5:         # hidden variables 
+                if len(act) >= 5:         # hidden variables
                     tmp[-1][0].append(act[4])
                 tmp[-1].append(tk.Frame(frame))
                 tmp[-1][-1].pack(side='top', anchor='w', fill=X)
@@ -884,7 +916,7 @@ class Application(tk.Frame):
         if self.FrameRActionList == []:
             self.FrameRActionList.append([tk.Label(frame, text='No possible action.')])
             self.FrameRActionList[0][-1].pack(side='top', anchor='w')
-    
+
     def plotChangeView_identify(self):
         # retrieve current alter
         alter = self.back_graph.getAttribute('alter')
@@ -909,13 +941,13 @@ class Application(tk.Frame):
                 break
         if new is None:
             self.updateUI()
-        
+
     def plotTypePlot(self, new):
         self.OMTypePlot.set(new)
         self.back_graph.update({'typeplot': new})
         self.updateUI()
-        
-        
+
+
 
     def setScreenDpi(self):
         new = stringToVariable(self.varScreenDpi.get())
@@ -933,8 +965,8 @@ class Application(tk.Frame):
         self.Graph_fig.set_dpi(new)
         if self.initiated:
             self.updateUI()
-    
-    
+
+
     def curveAction(self, j):
         curve = self.getActiveCurve(multiple=False)
         args = self.FrameRActionList[j][0]
@@ -951,7 +983,7 @@ class Application(tk.Frame):
         # check if func is method of Graph object and not of the Curve
         if not hasattr(func, '__self__'):
             args = [self.back_graph] + args
-        
+
         def executeFunc(curve, func, args, kwargs):
             # execute curve action
             res = func(*args, **hidden)
@@ -993,7 +1025,7 @@ class Application(tk.Frame):
             else:
                 print ('Curve action output:')
                 print (res)
-        
+
         # handling actions on multiple Curves
         toExecute = {curve: func}
         curves = self.getActiveCurve(multiple=True)
@@ -1004,7 +1036,7 @@ class Application(tk.Frame):
                     funcListOth = self.back_graph.curve(c).funcListGUI(graph=self.back_graph, graph_i=c)
                     if len(funcListOth) > j:
                         if (funcListOth[j][0].__name__ == funcListRef[j][0].__name__ and
-                            funcListOth[j][1] == funcListRef[j][1] and 
+                            funcListOth[j][1] == funcListRef[j][1] and
                             funcListOth[j][2] == funcListRef[j][2]):
                             toExecute.update({c: funcListOth[j][0]})
         keys = list(toExecute.keys())
@@ -1029,7 +1061,7 @@ class Application(tk.Frame):
             else:
                 print ('castCurve impossible (', newType, curve, ')')
         self.updateUI()
-    
+
     def curveShift(self, upDown, relative=True):
         curves_ = self.getActiveCurve()
         curves = list(curves_)
@@ -1065,7 +1097,7 @@ class Application(tk.Frame):
         self.curveShift(0, relative=False)
     def curveShiftBott(self):
         self.curveShift(self.back_graph.length()-1, relative=False)
-    
+
     def curveShowHideCurve(self):
         curves = self.getActiveCurve()
         for curve in curves:
@@ -1108,8 +1140,11 @@ class Application(tk.Frame):
         except ValueError as e:
             # want error to be printed in GUI console, and not hidden in the python console
             print('ValueError:', e)
+        if self.varPrintCommands.get():
+            print('graph.colorize(Colorscale('+str(col)+', invert='+str(invert)+'), '+
+                   ', '.join(['{}={!r}'.format(k, v) for k, v in kwargs.items()])+')')
         self.updateUI()
-        
+
     def colorizeGraphSetScale(self, i):
         # reads variable (Colorscale object), extract colors (np.array), converts into string
         if isinstance(self.colList[i].getColorScale(), str):
@@ -1142,7 +1177,7 @@ class Application(tk.Frame):
                     # case for CurveCf at least
                     x, y, attrUpd = self.back_graph.curve(curve).getDataCustomPickerXY(idx, alter=alter)
         return x, y, attrUpd
-    
+
     def dataPickerSavePoint(self):
         attr = {'linespec': 'x', 'color': 'k', '_dataPicker': True}
         x, y, attrUpd = self.dataPickerGetPoint()
@@ -1173,7 +1208,7 @@ class Application(tk.Frame):
         self.updateUI()
 
 
-        
+
     # manager for text annotations
     def popupAnnotations(self):
         # opens manager
@@ -1192,7 +1227,7 @@ class Application(tk.Frame):
     def popupDataEditorCatch(self):
         # modification of the Curve are performed within popup. Nothing else to do
         self.updateUI()
-        
+
     def updateUI(self):
         self.updateUI_graph()
         try:
@@ -1201,6 +1236,8 @@ class Application(tk.Frame):
             print('Exception during update of the GUI Graph panel.')
             print('Exception', type(e), e)
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
+        # TODO DEBUG
+        self.updateUI_plot()
         try:
             self.updateUI_plot()
         except Exception as e:
@@ -1226,7 +1263,7 @@ class Application(tk.Frame):
             pass # handles FigureCanvasTkAgg has no attribute show in later versions of matplotlib
         self.canvas.draw()
 
-    
+
     def updateUI_graph_addTreeBranch(self, idx, attr, tree):
         keyList = []
         for key in attr:
@@ -1242,10 +1279,10 @@ class Application(tk.Frame):
                 val = '"'+str(val)+'"'
             val = val.replace('\n','\\\\n').replace('\\', '\\\\')
             try:
-                tree.insert(idx, 'end', text=key, values=val, tag=key) # idxLast = 
+                tree.insert(idx, 'end', text=key, values=val, tag=key) # idxLast =
             except Exception as e:
                 print('Exception AddTreeBranch key', key, ', val', val, type(e), e)
-    
+
     def updateUI_graph(self):
         graph = self.back_graph
         self.alterListGUI = graph.alterListGUI()
@@ -1266,6 +1303,7 @@ class Application(tk.Frame):
         # tree & list of curves
         toSelect = [idx0]
         toSelectDefault = True
+
         for i in range(graph.length()):
             # listBox
             orderLbl = ['label', 'sample', 'filename']
@@ -1318,7 +1356,7 @@ class Application(tk.Frame):
         self.back_file = val
         self.varLabelFile.set(val)
 
-    
+
     def updateUponResizeWindow(self, *args):
         # chekc if GUI is created for the first time, to avoid updates when windows is not ready
         if hasattr(self, 'initiated') and self.initiated:
@@ -1439,7 +1477,7 @@ class Application(tk.Frame):
             for cast in self.castCurveList:
                 self.MenuCastCurve['menu'].add_command(label=cast[0], command=tk._setit(self.varCastCurve, cast[0]))
             self.varCastCurve.set(self.back_graph.curve(curve).classNameGUI())
-        
+
 
     def newPropertySelect(self, *args):
         curve = self.getActiveCurve(multiple=False)
@@ -1470,8 +1508,8 @@ class Application(tk.Frame):
             self.EntryNewProp.configure(state='disabled')
         else:
             self.EntryNewProp.configure(state='normal')
-            
-    
+
+
     def getActiveCurve(self, multiple=True):
         if not multiple:
             out = self.treeActiveCurve(self.Tree.focus())
@@ -1480,8 +1518,8 @@ class Application(tk.Frame):
             out = self.treeActiveCurve(self.Tree.selection())
             self.previousSelectedCurve = out
         return out
-       
- 
+
+
     def updateProperty(self, curve, key, val, ifUpdate=True, varType='auto'):
         """
         perform curve(curve).update({key: stringToVariable(val)})
@@ -1550,7 +1588,7 @@ class Application(tk.Frame):
             p +=[(a+"='"+kwargs[a].replace('\n','\\n')+"'" if isinstance(kwargs[a], str) else a+"="+str(kwargs[a])) for a in kwargs]
             print('graph.curve('+str(curve)+').'+method+'('+', '.join(p)+')')
         return out
-    
+
     def quickMods(self):
         """ update the quick modifs, located below the graph """
         xlim = [stringToVariable(self.varQuickModsXlim0.get()),
@@ -1562,7 +1600,7 @@ class Application(tk.Frame):
         self.updateProperty(-1, 'xlim',   xlim, ifUpdate=False)
         self.updateProperty(-1, 'ylim',   ylim, ifUpdate=False)
         self.updateUI()
-        
+
 
     def editProperty(self):
         """ Edit current curve property: catch values, send to dedicated function. """
@@ -1599,7 +1637,7 @@ class Application(tk.Frame):
                 #self.back_graph.deleteCurve(curve)
         self.previousSelectedCurve = [self.previousSelectedCurve[0]]
         self.updateUI()
-    
+
     def curveDeleteAllHidden(self):
         """ deletes all the hidden curves. """
         toDel = []
@@ -1610,7 +1648,7 @@ class Application(tk.Frame):
         for c in toDel:
             self.executeGraphMethod('deleteCurve', c)
             #self.back_graph.deleteCurve(c)
-        self.updateUI() 
+        self.updateUI()
 
     def curveDuplicate(self):
         """ Duplicate the currently selected curve. """
@@ -1628,7 +1666,7 @@ class Application(tk.Frame):
                 selected.append(curve)
         self.previousSelectedCurve = selected
         self.updateUI()
-    
+
     def graphReplaceLabels(self):
         old = self.varReplaceLabelsOld.get()
         new = self.varReplaceLabelsNew.get()
@@ -1638,11 +1676,11 @@ class Application(tk.Frame):
         self.varReplaceLabelsNew.set('')
         self.updateUI()
 
-        
+
     def sendToClipboard(self, data):
         self.master.clipboard_clear()
         self.master.clipboard_append(data)
-        
+
     def curveDataToClipboard(self):
         curves = self.getActiveCurve()
         content = ''
@@ -1673,14 +1711,14 @@ class Application(tk.Frame):
                     tmp.append('\t'.join([''] * d.shape[0]))
             content += '\t\t'.join(tmp) + '\n'
         self.sendToClipboard(content)
-        
+
     def graphDataToClipboard(self):
         opts = self.OptMenuToClipboardAttr.get()
         ifAttrs = 'prop' in opts
         ifTrans = 'screen' in opts
         data = self.back_graph.export(ifClipboardExport=True, ifOnlyLabels=(not ifAttrs), saveAltered=ifTrans)
         self.sendToClipboard(data)
-        
+
     def clipboardToGraphMerge(self):
         tmp = self.master.clipboard_get()
         graph = Graph(tmp, {'isfilecontent': True})
@@ -1692,12 +1730,12 @@ class Application(tk.Frame):
         self.back_graph = Graph(tmp, {'isfilecontent': True}, **self.newGraphKwargs)
         print('Import data from clipboard ('+str(self.back_graph.length())+' Curves found).')
         self.updateUI()
-    
+
     def newCurveMerge(self):
         curve = Curve([[0],[np.nan]], {})
         self.back_graph.append(curve)
         self.updateUI()
-    
+
     def setAutoScreenDPI(self):
         wh = [self.canvas.get_tk_widget().winfo_width(),
               self.canvas.get_tk_widget().winfo_height()]
@@ -1713,7 +1751,7 @@ class Application(tk.Frame):
             self.varScreenDpi.set(new)
             self.setScreenDpi()
             self.blinkWidget(self.fieldScreenDPI, 5)
-    
+
     def setLimitsSubplotsToCurrent(self):
         xlim = self.Graph_ax.get_xlim()
         ylim = self.Graph_ax.get_ylim()
@@ -1723,11 +1761,11 @@ class Application(tk.Frame):
                                            'subplots_adjust': subplots})
         self.updateUI()
 
-        
+
     def folderSaveGet(self):
         folderSave = self.varLabelFolder.get()
         return folderSave if folderSave != '' else os.getcwd()
-    
+
     def saveData(self):
         if self.back_graph.getAttribute('meastype') not in ['', FILEIO_GRAPHTYPE_GRAPH]:
             print ('ERROR when saving data: are you sure you are not overwriting a graph file?')
@@ -1735,13 +1773,13 @@ class Application(tk.Frame):
             self.saveDataAs(filesave='')
         else:
             self.saveDataAs(self.back_file)
-    
+
     def saveDataAs(self, filesave=''):
         defext = ''
         if filesave == '':
             folderSave = self.folderSaveGet()
             defaultextension = self.back_graph.config('save_imgformat', '.png')
-            defext = defaultextension[0] if isinstance(defaultextension, list) else defaultextension 
+            defext = defaultextension[0] if isinstance(defaultextension, list) else defaultextension
             filesave = tk.filedialog.asksaveasfilename(defaultextension=defext, initialdir=folderSave)
         if filesave is None or filesave == '' : # asksaveasfile return `None` if dialog closed with "cancel".
             return
@@ -1781,31 +1819,31 @@ class Application(tk.Frame):
         f, fileext = os.path.splitext(f)
         fileext = fileext.replace('py', '')
         self.back_graph.export(filesave=f, ifTemplate=True)
-    
+
     def imageToClipboard(self):
         return imageToClipboard(self.back_graph)
-    
+
     def _quit(self):
-        plt.close(self.Graph_fig) #fig.canvas.get_tk_widget().focus_force() 
+        plt.close(self.Graph_fig) #fig.canvas.get_tk_widget().focus_force()
         self.master.quit()
         self.master.destroy()
-        
-        
+
+
     def file_loadTemplate(self):
         folder = ''
         if self.back_file != '':
             folder = os.path.dirname(os.path.abspath(self.back_file))
         file = tk.filedialog.askopenfilename(initialdir=folder)
         if file != '':
-            print ('Open template file:', file)
+            print('Open template file:', file)
             template = Graph(file, complement={'label': ''})
             alsoCurves = self.varRTplCurves.get()
             self.back_graph.applyTemplate(template, alsoCurves=alsoCurves)
         self.updateUI()
 
-        
+
     def file_open_internal(self, file):
-        print ('Open file:', file.replace('/','\\'))
+        print('Open file:', file.replace('/', '\\'))
         self.back_file = file
         self.varLabelFile.set(file)
         self.back_graph = Graph(file, **self.newGraphKwargs)
@@ -1819,7 +1857,7 @@ class Application(tk.Frame):
         if self.varPrintCommands.get():
             print("graph = Graph('"+file+"')")
 
-       
+
     def file_open(self):
         folder = ''
         if self.back_file != '':
@@ -1835,7 +1873,7 @@ class Application(tk.Frame):
             folder = os.path.dirname(os.path.abspath(self.back_file))
         file = tk.filedialog.askopenfilename(initialdir=folder)
         if file is not None or file != '':
-            print ('Merge with file:', file)
+            print('Merge with file:', file)
             self.varLabelFile.set(file)
             self.back_graph.merge(Graph(file))
             # change default save folder only if was empty
@@ -1848,11 +1886,11 @@ class Application(tk.Frame):
 
     def ask_folder(self, initialdir='.'):
         folder = tk.filedialog.askdirectory(initialdir=initialdir)
-        print ('Selected folder', folder)
+        print('Selected folder', folder)
         self.back_folder = folder
         self.varLabelFolder.set(folder)
 
-        
+
     def listFilesinFolder(self, folder):
         subfolders = self.varOpenFolderSubfolders.get()
         nMax = 1000
@@ -1860,21 +1898,21 @@ class Application(tk.Frame):
         if subfolders:
             for root, subdirs, files in os.walk(self.back_folder):
                 for file in files :
-                    fileName , fileExt = os.path.splitext(file)
+                    fileName, fileExt = os.path.splitext(file)
                     if len(filename) < nMax:
                         filename.append(str(os.path.join(root, file)))
         else:
             for file in os.listdir(self.back_folder):
-                fileName , fileExt = os.path.splitext(file)
-                if (os.path.isfile(os.path.join(self.back_folder, file)) and
-                        len(filename) < nMax):
+                fileName, fileExt = os.path.splitext(file)
+                if (os.path.isfile(os.path.join(self.back_folder, file))
+                   and len(filename) < nMax):
                     filename.append(str(os.path.join(self.back_folder, file)))
         return filename
-    
+
     def folder_plot_combined(self):
         self.ask_folder(self.back_folder)
         if self.back_folder != '':
-            print ('...processing folder...')
+            print('...processing folder...')
             filenames = self.listFilesinFolder(self.back_folder)
             self.back_graph = Graph(filenames, **self.newGraphKwargs)
         self.updateUI()
@@ -1882,9 +1920,9 @@ class Application(tk.Frame):
     def folder_plot_all(self):
         self.ask_folder(self.back_folder)
         if self.back_folder != '':
-            print ('...processing folder...')
+            print('...processing folder...')
             filenames = self.listFilesinFolder(self.back_folder)
-            for file in filenames :
+            for file in filenames:
                 self.back_graph = Graph(file, **self.newGraphKwargs)
                 self.back_graph.plot(ifExport=True, ifSave=True)
         self.updateUI()
@@ -1895,31 +1933,31 @@ class Application(tk.Frame):
         if self.back_folder != '':
             print('...processing folder...')
             fitDiodeWeight = stringToVariable(self.FolderFitDiodeWeight.get())
-            self.back_graph = processJVfolder (self.back_folder, ylim=(-np.inf, np.inf), groupCell=True, fitDiodeWeight=fitDiodeWeight, newGraphKwargs=self.newGraphKwargs) # for y axis adapted to data
+            self.back_graph = processJVfolder(self.back_folder, ylim=(-np.inf, np.inf), groupCell=True, fitDiodeWeight=fitDiodeWeight, newGraphKwargs=self.newGraphKwargs) # for y axis adapted to data
         self.updateUI()
-       
+
     def folder_JV_all(self):
         from grapa.scripts.script_processJV import processJVfolder
         self.ask_folder(self.back_folder)
         if self.back_folder != '':
             print('...processing folder...')
             fitDiodeWeight = stringToVariable(self.FolderFitDiodeWeight.get())
-            self.back_graph = processJVfolder (self.back_folder, ylim=(-np.inf, np.inf), groupCell=False, fitDiodeWeight=fitDiodeWeight, newGraphKwargs=self.newGraphKwargs) # for y axis adapted to data
+            self.back_graph = processJVfolder(self.back_folder, ylim=(-np.inf, np.inf), groupCell=False, fitDiodeWeight=fitDiodeWeight, newGraphKwargs=self.newGraphKwargs) # for y axis adapted to data
         self.updateUI()
- 
+
     def folder_JV_sampleMaps(self):
         from grapa.scripts.script_processJV import processSampleCellsMap
         folder = ''
         if self.back_file != '':
             folder = os.path.dirname(os.path.abspath(self.back_file))
         file = tk.filedialog.askopenfilename(initialdir=folder)
-        print ('...creating sample maps...')
+        print('...creating sample maps...')
         if file is not None and file != '':
             filelist = processSampleCellsMap(file, newGraphKwargs=self.newGraphKwargs)
             if len(filelist) > 0:
                 self.file_open_internal(filelist[-1])
         self.updateUI()
-        
+
     def file_JscVoc(self):
         from grapa.scripts.script_processJscVoc import script_processJscVoc
         folder = ''
@@ -1930,7 +1968,7 @@ class Application(tk.Frame):
         self.back_graph = script_processJscVoc(file, newGraphKwargs=self.newGraphKwargs,
                                                ROIJsclim=ROIJsclim)
         self.updateUI()
-        
+
     def folder_CV(self):
         from grapa.scripts.script_processCVCf import script_processCV
         ROIfit = stringToVariable(self.varProcessCVROI.get())
@@ -1938,14 +1976,14 @@ class Application(tk.Frame):
         if self.back_folder != '':
             self.back_graph = script_processCV(self.back_folder, ROIfit=ROIfit, newGraphKwargs=self.newGraphKwargs)
         self.updateUI()
-        
+
     def folder_Cf(self):
         from grapa.scripts.script_processCVCf import script_processCf
         self.ask_folder(self.back_folder)
         if self.back_folder != '':
             self.back_graph = script_processCf(self.back_folder, newGraphKwargs=self.newGraphKwargs)
         self.updateUI()
-        
+
     def folder_JV_boxplots(self):
         from grapa.scripts.script_JVSummaryToBoxPlots import JVSummaryToBoxPlots
         self.ask_folder(self.back_folder)
@@ -1954,32 +1992,32 @@ class Application(tk.Frame):
             tmp = JVSummaryToBoxPlots(folder=self.back_folder, exportPrefix='boxplots_', replace=[], silent=True, newGraphKwargs=self.newGraphKwargs)
             self.back_graph = tmp
         self.updateUI()
-    
+
     def appendNewEmptyCurve(self):
         self.back_graph.append('empty')
         self.updateUI()
-        
+
     def blinkWidget(self, field, niter,
-                    delay=500, property_='background', values=['white','red']):
+                    delay=500, property_='background', values=['white', 'red']):
         field.config(**{property_: values[niter % len(values)]})
         if niter > 0:
             kwargs = {'property_': property_, 'values': values, 'delay': delay}
             func = lambda: self.blinkWidget(field, niter-1, **kwargs)
             self.master.after(delay, func)
-        
-        
+
+
     def listToString(self, val):
         return '[' + ', '.join([str(element) if not isinstance(element, str) else '\''+element+'\'' for element in val]) + ']'
 
 
-                 
+
 
 def printLastRelease():
     file = 'versionNotes.txt'
     file = os.path.join(os.path.dirname(os.path.realpath(__file__)), file)
     try:
         f = open(file, 'r')
-    except Exception as e:
+    except Exception:
         # print('Exception file open', e)
         return
     out = ''
@@ -1994,10 +2032,10 @@ def printLastRelease():
     if line == '':
         print('Not found string "Release"')
         return # not found release
-    date = line[len('Release'):].replace(' ','')
+    date = line[len('Release'):].replace(' ', '')
     if date[0] == 'd':
         date = date[1:]
-    from dateutil import parser 
+    from dateutil import parser
     from datetime import datetime
     try:
         daysSinceLast = datetime.now() - parser.parse(date)
@@ -2016,6 +2054,7 @@ def printLastRelease():
         print(out)
     f.close()
     return
+
 
 def buildUI():
     root = tk.Tk()
@@ -2039,5 +2078,3 @@ def buildUI():
 
 if __name__ == "__main__":
     buildUI()
-
-    

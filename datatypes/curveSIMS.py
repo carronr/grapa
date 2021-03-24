@@ -7,11 +7,8 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 import numpy as np
 import copy
 
-
 from grapa.curve import Curve
 from grapa.mathModule import roundSignificant
-
-
 
 
 def findXAtValuePolynom(datax, datay, target, ifPlot=False):
@@ -26,7 +23,7 @@ def findXAtValuePolynom(datax, datay, target, ifPlot=False):
         rootsInROI = rootsReal
     if len(rootsInROI) == 0:
         print('Error findXAtValuePolynom cannot find suitable value.', target, datax, datay)
-    root = np.average(rootsInROI) # to handle cases where the polynom has several solutions
+    root = np.average(rootsInROI)  # to handle cases where the polynom has several solutions
     idx = np.argmin(np.abs(datax - root))
     if ifPlot:
         import matplotlib.pyplot as plt
@@ -34,9 +31,10 @@ def findXAtValuePolynom(datax, datay, target, ifPlot=False):
         plt.plot(datax, datay, '.-b')
         plt.plot(datax, np.polyval(z, datax), 'k')
     return [root, idx]
-    
+
 # identify transition from low to high level
-def selectDataEdge(curve, ROI, targetRel=None, threshRel=None, ifTrailingEdge=False):
+def selectDataEdge(curve, ROI, targetRel=None, threshRel=None,
+                    ifTrailingEdge=False):
     if targetRel is None:
         targetRel = 0.5
     if threshRel is None:
@@ -54,16 +52,14 @@ def selectDataEdge(curve, ROI, targetRel=None, threshRel=None, ifTrailingEdge=Fa
     rangeThres = range(rangeThres[0], rangeThres[1]+1)
     datax = curve.x(index=rangeThres)
     datay = curve.y(index=rangeThres)
-    idx = ROI[0] + iMax + (y[iMax:] < 0.5 * y[iMax]).argmax()
+    # idx = ROI[0] + iMax + (y[iMax:] < 0.5 * y[iMax]).argmax()
     return [datax, datay, targetAbs, rangeThres]
 
 
-
-
 class CurveSIMS(Curve):
-    
+
     CURVE = 'Curve SIMS'
-    
+
     def __init__(self, *args, **opts):
         Curve.__init__(self, *args, **opts)
         self.update({'Curve': CurveSIMS.CURVE})
@@ -71,7 +67,10 @@ class CurveSIMS(Curve):
         if self.getAttribute('label') == '' and self.getAttribute('empty0') != '':
             self.update({'label': self.getAttribute('empty0'), 'empty0': ''})
         # some additional attributes, which must not override data saved in the data file
-        add = {'_SIMSelement': self.getAttribute('label'), '_SIMSmsmt': ''.join(self.getAttribute('filename').split('/')[-1].split('\\')[-1].split('.')[:-1]).replace('_',''), '_SIMStotal': 0, '_SIMSYieldCoef': 1}
+        add = {'_SIMSelement': self.getAttribute('label'),
+                '_SIMSmsmt': ''.join(self.getAttribute('filename').split('/')[-1].split('\\')[-1].split('.')[:-1]).replace('_',''),
+                '_SIMStotal': 0,
+                '_SIMSYieldCoef': 1}
         for key in add:
             if self.getAttribute(key) == '':
                 self.update({key: add[key]})
@@ -84,15 +83,16 @@ class CurveSIMS(Curve):
     def funcListGUI(self, **kwargs):
         from grapa.datatypes.graphSIMS import GraphSIMS
         msmtIdDict = {'msmtId': self.getAttribute('_SIMSmsmt')}
-        ratios = [k for k in GraphSIMS.KEYWORDS.keys()] + ['other ratio']# + ['ratio as ["elem0"],["elem1","elem2"]']
+        ratios = [k for k in GraphSIMS.KEYWORDS.keys()] + ['other ratio'] #  + ['ratio as ["elem0"],["elem1","elem2"]']
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...] (, [default1, default2, ...], {'hiddenVar1':value1}) ]
-        out.append([self.localizeEdgeFromGUI, 
+        out.append([self.localizeEdgeFromGUI,
                     'Find edge',
                     ['ROI', 'target', 'threshold', 'edge'],
                     [[self.x(0), self.x(self.shape(1)-1)], 0.5, [0.3,0.7], 'leading'],
                     {},
-                    [{},{},{},{'field':'Combobox', 'values':['leading','trailing'], 'width':7}]])
+                    [{},{},{},
+                     {'field':'Combobox', 'values':['leading','trailing'], 'width':7}]])
         ROI = [self.x(0), self.x(self.shape(1)-1)] if self.getAttribute('_SIMSLayerBoundaries') == '' else self.getAttribute('_SIMSLayerBoundaries')
         depth = (ROI[1] - ROI[0]) * self.getAttribute('_SIMSdepth_mult') if self.getAttribute('_SIMSdepth_mult') != '' else 2
         out.append([GraphSIMS.setLayerBoundariesDepthParametersGUI, 'Calibrate depth', ['Depth', 'ROI'], [depth, roundSignificant(ROI,5)], msmtIdDict])
@@ -108,20 +108,22 @@ class CurveSIMS(Curve):
                     ['ROI', 'Ratio', 'Elem.', 'Compos.'],
                     [ROI, 'GGI', ('^113In+' if '^113In+' in labels else labels[0]), 0.35],
                     msmtIdDict,
-                    [{}, {'field':'Combobox', 'values':ratios, 'width':6}, {'field':'Combobox', 'values':labels}, {}]])
+                    [{}, {'field': 'Combobox', 'values': ratios, 'width': 6},
+                        {'field': 'Combobox', 'values': labels, 'width': 8},
+                        {'width': 6}]])
         out.append([GraphSIMS.getRatioGUI, 'Compute ratio', ['ROI', 'Ratio'],
                     [ROI, 'GGI'], msmtIdDict,
-                    [{}, {'field':'Combobox', 'values':ratios}]])
+                    [{}, {'field': 'Combobox', 'values': ratios}]])
         out.append([GraphSIMS.appendReplaceCurveRatioGUISmt,
                     'Create curve ratio',
                     ['Ratio', 'Curve name', 'Smooth S-G w', 'd'],
                     ['GGI', 'GGI', 1, 1],
                     msmtIdDict,
-                    [{'field':'Combobox', 'values':ratios, 'width':6}, {}, {}, {}]])
+                    [{'field': 'Combobox', 'values': ratios, 'width': 6},
+                        {}, {}, {}]])
         out.append([self.printHelp, 'Help!', [], []])
         return out
 
-        
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
         out += [['Semilogy', ['', 'idle'], 'semilogy']]
@@ -129,16 +131,13 @@ class CurveSIMS(Curve):
         return out
     # alter: s to z, normalized (in toggle switch?)
 
-
     def setDepthParameters(self, offset, mult):
         self.update({'_SIMSdepth_offset': offset, '_SIMSdepth_mult': mult})
-    
-
-
 
     # other methods
-    def localizeEdge(self, ROI, targetRel, threshRel=None, ifTrailingEdge=False, ROIrefinement=0):
-        #☺ check if ROI is a actual range or only extrema
+    def localizeEdge(self, ROI, targetRel, threshRel=None, ifTrailingEdge=False,
+                     ROIrefinement=0):
+        # check if ROI is a actual range or only extrema
         if isinstance(ROI, (list, tuple)) and len(ROI) == 2 and np.abs(ROI[1]-ROI[0]) > 1:
             ROI.sort()
             ROI = range(int(ROI[0]), int(ROI[1]))
@@ -157,7 +156,7 @@ class CurveSIMS(Curve):
             delta[0], delta[1] = max(min(ROI), delta[0]), min(delta[1], max(ROI)) # do not want a larger ROI than before
             [root, idx] = self.localizeEdge(range(delta[0], delta[1]), targetRel, threshRel=threshRel, ifTrailingEdge=ifTrailingEdge)
         return [root, idx]
-    
+
     def localizeEdgeFromGUI(self, ROI, targetRel, threshRel, ifTrailingEdge):
         # assumes ROI is in the form [sputterTimeMin, sputterTimeMax]
         if ifTrailingEdge == 'trailing':
@@ -169,13 +168,13 @@ class CurveSIMS(Curve):
         ROI = [np.argmin(np.abs(self.x() - ROI[0])), np.argmin(np.abs(self.x() - ROI[1]))]
         res = self.localizeEdge(ROI, targetRel, threshRel=threshRel, ifTrailingEdge=ifTrailingEdge)
         return 'Edge position for curve ' + self.getAttribute('_SIMSelement') + ' at: ' + str(roundSignificant(res[0],5))
-        
 
-    # find indices of 
-    def findLayerBorders(self, ROI=None, targetRel=0.5, threshRel=[0.3,0.7], ROIrefinement=0, returnIdx=True):
+    # find indices of
+    def findLayerBorders(self, ROI=None, targetRel=0.5, threshRel=[0.3,0.7],
+                         ROIrefinement=0, returnIdx=True):
         # targetRel = None#0.5
         # threshRel = None # [0.3, 0.7]
-        if ROI is None: # [range(0,10), range(10,20)]
+        if ROI is None:  # [range(0,10), range(10,20)]
             ROI = [range(0, int(self.shape(1)/2)), range(int(self.shape(1)/2), int(self.shape(1)))]
         posInterfGaIn = [np.nan, np.nan]
         for i in range(2):
@@ -183,7 +182,6 @@ class CurveSIMS(Curve):
             posInterfGaIn[i] = idx if returnIdx else root
         return posInterfGaIn
 
-        
     def printHelp(self):
         from grapa.datatypes.graphSIMS import GraphSIMS
         print('*** *** ***')

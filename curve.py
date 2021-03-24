@@ -15,7 +15,7 @@ from grapa.mathModule import is_number
 
 
 class Curve:
-    
+
     CURVE = 'Curve'
 
     NMTOEV = 1239.5
@@ -49,12 +49,12 @@ class Curve:
         else:
             print ('ERROR class Curve: attributes need to be of class dict.')
 
-    
+
     # methods related to GUI
     @classmethod
     def classNameGUI(cls): # can be overridden, see CurveArrhenius
         return cls.CURVE
-    
+
     def funcListGUI(self, **kwargs):
         """
         Fills in the Curve actions specific to the Curve type. Syntax:
@@ -100,7 +100,7 @@ class Curve:
                         {'keys': at},
                         [{'field':'Combobox','values':values[a]} for a in at]])
         return out
-    
+
     def funcListGUI_errorbar(self, graph, c):
         out = []
         types = []
@@ -119,7 +119,7 @@ class Curve:
         at = ['capsize', 'ecolor']
         out.append([self.updateValuesDictkeys, 'Save', at, [self.getAttribute(a) for a in at], {'keys': at}])
         return out
-        
+
     def funcListGUI_scatter(self, graph, c):
         out = []
         types = []
@@ -135,7 +135,7 @@ class Curve:
         keys = ['cmap', 'vminmax']
         out.append([self.updateValuesDictkeys, 'Save', keys, [self.getAttribute(k) for k in keys], {'keys': keys}])
         return out
-        
+
     def funcListGUI_fill(self, graph, c):
         out = []
         at = ['fill', 'hatch', 'fill_padto0']
@@ -147,7 +147,7 @@ class Curve:
                      {'field': 'Combobox', 'values': ['', '.', '+', '/', r'\\'], 'width': 7},
                      {'field': 'Combobox', 'values': ['', 'True', 'False']}]])
         return out
-        
+
     def funcListGUI_boxplot(self, graph, c):
         out = []
         at = ['boxplot_position']
@@ -163,7 +163,7 @@ class Curve:
                      {'field': 'Combobox', 'values': ['True', 'False']},
                      {'field': 'Combobox', 'values': ['True', 'False']}]])
         return out
-        
+
     def updateNextCurvesScatter(self, *values, **kwargs):
         try:
             graph = kwargs['graph']
@@ -174,8 +174,8 @@ class Curve:
             if c+i < graph.length():
                 graph.curve(c+1+i).update({'type': values[i]})
         return True
-        
-    
+
+
     def alterListGUI(self):
         """
         Determines the possible curve visualisations. Syntax:
@@ -185,8 +185,8 @@ class Curve:
         out = []
         out.append(['Linear', ['',''], ''])
         return out
-    
-    
+
+
     # Function related to Fits
     def updateFitParam(self, *param):
         f = self.getAttribute('_fitFunc', '')
@@ -207,12 +207,12 @@ class Curve:
     # more classical class methods
     def getData(self) :
         return self.data
-    
+
     def shape (self, idx=':') :
         if idx == ':' :
             return self.data.shape
         return self.data.shape[idx]
-    
+
     def _fractionToFloat(self, frac_str):
         try:
             return float(frac_str)
@@ -254,7 +254,7 @@ class Curve:
             elif special == '0max':
                 x = x / M
         return x
-    
+
     def x (self, index=np.nan, alter='', xyValue=None, errorIfxyMix=False, neutral=False):
         """
         Returns the x data.
@@ -310,7 +310,7 @@ class Curve:
                         print(e)
                 else:
                     print('Error Curve.x: cannot identify alter keyword ('+alter+').')
-            
+
         # alter might be used by subclasses
         val = self.data if xyValue is None else np.array(xyValue)
         if len(val.shape) > 1 :
@@ -318,7 +318,7 @@ class Curve:
                 return val[0,:]
             return val[0,index]
         return val[0]
-    
+
     def y_offsets(self, **kwargs):
         """
         Same as y(), including the effect of offset and muloffset on output.
@@ -353,7 +353,7 @@ class Curve:
             elif special == '0max':
                 y = y / M
         return y
-        
+
     def y (self, index=np.nan, alter='', xyValue=None, errorIfxyMix=False, neutral=False) :
         """
         Returns the y data.
@@ -371,6 +371,8 @@ class Curve:
             elif alter == 'abs':
                 jsc = self.getAttribute ('Jsc') if self.getAttribute ('Jsc') != '' and not neutral else 0
                 return np.abs(self.y(index, xyValue=xyValue) + jsc)
+            elif alter == 'abs0':
+                return np.abs(self.y(index, xyValue=xyValue))
             elif alter == 'tauc':
                 if errorIfxyMix:
                     return ValueError
@@ -422,7 +424,7 @@ class Curve:
             self.data[0,:] = x
         else :
             self.data[0,index] = x
-            
+
     def setY (self, y, index=np.nan):
         """ Set new value for the y data. Index can be provided (self.data[1,index] = y). """
         if len(self.shape()) > 1 :
@@ -432,7 +434,7 @@ class Curve:
                 self.data[1,index] = y
         else :
             self.data[1] = y
-    
+
     def appendPoints(self, xSeries, ySeries):
         xSeries, ySeries = np.array(xSeries), np.array(ySeries)
         if len(xSeries) == 0:
@@ -443,7 +445,7 @@ class Curve:
             return False
         self.data = np.append(self.data, np.array([xSeries, ySeries]), axis=1)
         return True
-        
+
     def attr(self, key, default=''):
         """ Shorter alias to getAttribute. """
         return self.getAttribute(key, default=default)
@@ -452,7 +454,7 @@ class Curve:
         if key.lower() in self.attributes :
             return self.attributes[key.lower()]
         return default
-    
+
     def getAttributes(self, keysList=None):
         """ Returns all attributes, or a subset with keys given in keyList """
         if isinstance(keysList, list):
@@ -461,7 +463,7 @@ class Curve:
                 out.update({key: self.getAttribute(key)})
             return out
         return self.attributes
-        
+
     def attributeEqual(self, key, value=''): # value='' must be same as the default parameter of method getAttribute
         """
         Check if attribute 'key' has a certain value
@@ -472,7 +474,7 @@ class Curve:
         if isinstance(val, type(value)) and val == value:
             return True
         return False
-        
+
     def update(self, attributes):
         for key in attributes :
             k = key.lower()
@@ -524,23 +526,23 @@ class Curve:
             if flag:
                 curve.updateValuesDictkeys(*args, keys=keys)
         return True
-            
 
-        
-        
+
+
+
     def delete (self, key) :
         out = {}
         if key.lower() in self.attributes :
             out.update({key: self.getAttribute('key')})
             del self.attributes[key.lower()]
         return out
-    
+
     def swapShowHide(self):
         self.update({'linestyle': '' if self.isHidden() else 'none'})
         return True
     def isHidden(self):
         return True if self.getAttribute('linestyle') in Curve.LINESTYLEHIDE else False
-        
+
 
 
     def castCurveListGUI(self, onlyDifferent=True):
@@ -578,8 +580,8 @@ class Curve:
                 break
         print('Curve.castCurve: Cannot understand new type:', newTypeGUI, '(possible types:', [key for key in curveTypes],')')
         return False
-        
-        
+
+
     def selectData(self, xlim=None, ylim=None, alter='', offsets=False, data=None):
         """
         Returns slices of the data self.x(), self.y() which satisfy
@@ -612,8 +614,8 @@ class Curve:
             if y[i] < ylim[0] or y[i] > ylim[1]:
                 mask[i] = False
         return x[mask], y[mask]
-        
-    
+
+
     def getPointClosestToXY(self, x, y, alter='', offsets=False):
         """
         Return the data point closest to the x,y values.
@@ -644,7 +646,7 @@ class Curve:
         if offsets:
             return self.x_offsets(index=idx)[0], self.y_offsets(index=idx)[0], idxOut # no alter, but offset for the return value
         return self.x(index=idx)[0], self.y(index=idx)[0], idxOut # no alter, no offsets for the return value
-        
+
     def getDataCustomPickerXY(self, idx, alter='', strDescription=False):
         """
         Given an index in the Curve data, returns a modified data which has
@@ -659,8 +661,8 @@ class Curve:
             alter = ['', alter]
         attr = {}
         return self.x_offsets(index=idx, alter=alter[0]), self.y_offsets(index=idx, alter=alter[1]), attr
- 
-    
+
+
     def printHelpFunc(self, func, leadingstrings=None):
         """ prints the docstring of a function """
         if leadingstrings is None:
@@ -675,9 +677,9 @@ class Curve:
                 continue
             print(leadingstrings[a] + line[idx:])
             a = 1
-        
-        
-        
+
+
+
     # some arithmetics
     def __add__(self, other, sub=False, interpolate=-1, offsets=False, operator='add'):
         """
@@ -704,7 +706,7 @@ class Curve:
             if operator != 'add':
                 print('WARNING Curve.__add__: unexpected operator argument(' + operator + ').')
             return x + y
-        
+
         if sub == True:
             operator = 'sub'
         selfx = self.x_offsets if offsets else self.x
@@ -758,7 +760,7 @@ class Curve:
                 out.update({'offset': '', 'muloffset': ''})
             out = out.castCurve(self.classNameGUI())
             return out
-            
+
     def __radd__(self, other, **kwargs):
         return self.__add__(other, **kwargs)
     def __sub__(self, other, **kwargs):
@@ -805,8 +807,8 @@ class Curve:
         out = Curve([self.x(), 1/self.y()], self.getAttributes())
         out = out.castCurve(self.classNameGUI())
         return out
-        
-        
+
+
 
 
     def plot(self, ax, graph=None, graph_i=None, type_plot='', ignoreNext=0, boxplot=None, violinplot=None, violinplotkwargs={}):
@@ -842,8 +844,8 @@ class Curve:
             if graph_i is None:
                 graph = None # self was not found in graph
                 print('Warning Curve.plot: Curve not found in provided Graph')
-                
-                
+
+
         # retrieve basic information
         alter = graph._getAlter() if graph is not None else ['', '']
         attr = self.getAttributes()
@@ -883,7 +885,7 @@ class Curve:
         if type_plot.endswith(' norm.'):
             type_graph = type_plot[:-6]
             y = y / max(y)
-        
+
         # add keyword arguments which are in the plot method prototypes
         try:
             sig = inspect.signature(getattr(ax, type_graph))
@@ -896,7 +898,7 @@ class Curve:
         except Exception as e:
             print('Exception in Curve.plot while identifying keyword arguments:')
             print(type(e), e)
-        
+
         if 'labelhide' in attr and attr['labelhide']:
             if 'label' in fmt:
                 del fmt['label']
@@ -908,7 +910,7 @@ class Curve:
         # Partial support for:
         #    imgshow
         attrIgnore = ['label', 'plot', 'linespec', 'type', 'ax_twinx', 'ax_twiny', 'offset', 'muloffset', 'labelhide', 'colorbar']
-         
+
         # "simple" plotting methods, with prototype similar to plot()
         if type_graph in ['semilogx', 'semilogy', 'loglog', 'plot_date', 'stem', 'step', 'triplot']:
             handle = getattr(ax, type_graph)(x, y, linespec, **fmt)
@@ -945,7 +947,7 @@ class Curve:
                         if not graph.curve(j).isHidden():
                             nexty.append(graph.curve(j).y_offsets(alter=alter[1]))
                             lbl = graph.curve(j).getAttribute('label')
-                            fmt['labels'].append('' if graph.curve(j).getAttribute('labelhide') else lbl)  
+                            fmt['labels'].append('' if graph.curve(j).getAttribute('labelhide') else lbl)
                             fmt['colors'].append(graph.curve(j).getAttribute('color'))
                             continue
                     else:
@@ -1048,7 +1050,7 @@ class Curve:
                 print(type(e), e)
         else: # default is plot (lin-lin) # also valid if no information is stored, aka returned ''
             handle = ax.plot(x, y, linespec, **fmt)
-    
+
         handles = handle if isinstance(handle, list) else [handle]
         for key in attr:
             if key not in fmt and key not in attrIgnore:
@@ -1059,7 +1061,5 @@ class Curve:
                         except Exception as e:
                             print('GraphIO Exception during plot kwargs adjustment for key', key, ':', type(e))
                             print(e)
-        
+
         return handle, ignoreNext
-        
-        

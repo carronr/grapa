@@ -6,8 +6,9 @@ Created on Sat Nov 18 15:00:36 2017
 Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-import tkinter as tk
+
 from tkinter import ttk
+import tkinter as tk
 from tkinter import X, BOTH
 
 
@@ -200,7 +201,7 @@ class FrameTitleContentHideHorizontal(FrameTitleContentHide):
         self._content.pack(side='top', anchor='w', fill=X)
 
   
-        
+
         
 def imageToClipboard(graph):
     """ copy the image output of a Graph to the clipboard - Windows only """
@@ -246,3 +247,6 @@ def imageToClipboard(graph):
     output.close()
     send_to_clipboard(win32clipboard.CF_DIB, data)
     return True
+
+
+
