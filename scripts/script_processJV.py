@@ -189,23 +189,23 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     listGraph = dictToListSorted(cellDict[s][c][d])
                     for m in listGraph:
                         filesave = 'export_' + s + '_' + c + '_' + m + ('_'+d).replace('_illum','')
-                        print ('Graph saved as', filesave)
-                        graph = GraphJVDarkIllum (cellDict[s][c][d][m], '', area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
+                        print('Graph saved as', filesave)
+                        graph = GraphJVDarkIllum(cellDict[s][c][d][m], '', area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
                         out = out + graph.printShort()
                         filesave = os.path.join(folder, filesave)
                         graph.plot(filesave, figAx=figAx, pltClose=pltClose)
                         graphAllJV.append(graph.returnDataCurves())
             else:
                 # if want to restrict 1 msmt dark + 1 illum per cell
-                if len(listDarkIllum) > 2 :
-                    print ('test WARNING sorting JV files.')
+                if len(listDarkIllum) > 2:
+                    print('test WARNING sorting JV files.')
                 # only dark on only illum measurement
-                if len(listDarkIllum) == 1 :
+                if len(listDarkIllum) == 1:
                     d = listDarkIllum[0]
-                    listGraph = dictToListSorted (cellDict[s][c][d])
+                    listGraph = dictToListSorted(cellDict[s][c][d])
                     m = listGraph[0]
-                    filesave = 'export_' + s + '_' + c + '_' + m + ('_'+d).replace('_illum','')
-                    print ('Graph saved as', filesave)
+                    filesave = 'export_' + s + '_' + c + '_' + m + ('_'+d).replace('_illum', '')
+                    print('Graph saved as', filesave)
                     fileDark = cellDict[s][c][d][m] if listDarkIllum[0] == 'dark'  else ''
                     fileIllum= cellDict[s][c][d][m] if listDarkIllum[0] == 'illum' else ''
                     # create Graph file
@@ -214,7 +214,7 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
                     graph.plot(filesave=filesave, figAx=figAx, pltClose=pltClose)
                     # prepare output summary files
                     out = out + graph.printShort()
-                    if listDarkIllum[0] == 'dark' :
+                    if listDarkIllum[0] == 'dark':
                         outDark  = outDark  + graph.printShort()
                     else :
                         outIllum = outIllum + graph.printShort()
@@ -225,17 +225,17 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
 
                 # can identify pair of dark-illum files
                 if len(listDarkIllum) == 2 :
-                    listGraph = dictToListSorted (cellDict[s][c][listDarkIllum[0]])
+                    listGraph = dictToListSorted(cellDict[s][c][listDarkIllum[0]])
                     filesave = 'export_' + s + '_' + c + '_' + listGraph[0]
                     fileDark = cellDict[s][c][listDarkIllum[0]][listGraph[0]]
 
-                    listGraph = dictToListSorted (cellDict[s][c][listDarkIllum[1]])
+                    listGraph = dictToListSorted(cellDict[s][c][listDarkIllum[1]])
                     filesave = filesave + '-' + listGraph[0]
-                    fileIllum= cellDict[s][c][listDarkIllum[1]][listGraph[0]]
+                    fileIllum = cellDict[s][c][listDarkIllum[1]][listGraph[0]]
 
-                    print ('Graph saved as', filesave)
+                    print('Graph saved as', filesave)
                     # create Graph file
-                    graph = GraphJVDarkIllum (fileDark, fileIllum, area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
+                    graph = GraphJVDarkIllum(fileDark, fileIllum, area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
                     filesave = os.path.join(folder, filesave)
                     graph.plot(filesave=filesave, figAx=figAx, pltClose=pltClose)
                     # prepare output summary files
@@ -253,8 +253,8 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
         # print sample summary
         filesave = 'export_' + s + '_summary' + '.txt'
         filesave = os.path.join(folder, filesave)
-        #print('End of JV curves processing, showing summary file...')
-        #print(out)
+        # print('End of JV curves processing, showing summary file...')
+        # print(out)
         print('Summary saved in file', filesave, '.')
         f = open(filesave, 'w')
         f.write(out)
@@ -272,13 +272,14 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
             f.write(outIllum)
             f.close()
             processSampleCellsMap(filesave, figAx=figAx, pltClose=pltClose)
-            print(writeFileAvgMax(filesave, filesave=True))
+            writeFileAvgMax(filesave, filesave=True, print=True)
     print('Script processJV folder done.')
+    # print(type(graph), graph)
+    # Graph.plot(graph, os.path.join(folder, 'export_test'))
     return graph
 
 
-def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True,
-                    colSample=True):
+def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True, colSample=True, print=True):
     colOfInterest = ['Voc', 'Jsc', 'FF', 'Eff']
     if isinstance(fileOrContent, Graph):
         content = fileOrContent
@@ -355,11 +356,10 @@ def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True,
         f = open(fname, 'w')
         f.write(out)
         f.close()
-    return out
+    print(out)
 
 
-def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True,
-                          newGraphKwargs={}):
+def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newGraphKwargs={}):
     newGraphKwargs = deepcopy(newGraphKwargs)
     newGraphKwargs.update({'silent': True})
 
@@ -414,7 +414,7 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True,
     for i in range(2):
         figsize = graphs[i].getAttribute('figsize', None)
         sadjust = graphs[i].getAttribute('subplots_adjust')
-        if figsize is not None: # if not already set means nothing to show
+        if figsize is not None:  # if not already set means nothing to show
             attr = {'figsize': [figsize[0], totalh[i]]}
             attr.update({'subplots_adjust': [sadjust[0], bottom/totalh[i], sadjust[2], 1-top/totalh[i], 0, hspace/axisheights[i][0]]})
             attr.update({'subplotsncols': 1, 'subplotsheight_ratios': axisheights[i]})
@@ -425,9 +425,7 @@ def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True,
     return filelist
 
 
-def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='',
-                       figAx=None, inverseScale=False, pltClose=True,
-                       newGraphKwargs={}):
+def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='', figAx=None, inverseScale=False, pltClose=True, newGraphKwargs={}):
     sizeCell = np.array([0.6, 0.6])
     margin   = np.array([0.4, 0.4])
 
@@ -462,8 +460,8 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='',
     if inverseScale and isinstance(colorscale, list):
         colorscale = colorscale[::-1]
 
-    xticks = np.arange(0,max(x)+1,1) # if max(x) > 6 else np.arange(0,max(x)+1,1)
-    yticks = np.arange(0,max(y)+1,1)
+    xticks = np.arange(0,max(x)+1, 1) # if max(x) > 6 else np.arange(0,max(x)+1,1)
+    yticks = np.arange(0,max(y)+1, 1)
     axSize = np.array([sizeCell[0]*(max(xticks)-min(xticks)), sizeCell[1]*(max(yticks)-min(yticks))])
     figSize = axSize + 2 * margin[1]
     marg = margin / figSize
@@ -502,22 +500,21 @@ def plotSampleCellsMap(cells, values, title, colorscale=None, filesave='',
 
     if filesave is not None:
         graph.headers.update({'filesave': os.path.basename(filesave)})
-        # graph.plot(filesave, figAx=figAx)  # plot
+        # graph.plot(filesave, figAx=figAx)  # plot -> would need to plt.close() accordingly
         graph.export(filesave)  # export only txt file, and not the image
     else:
         graph.plot(figAx=figAx, ifSubPlot=True)
-    if pltClose and figAx is None:
-        plt.close()
+        if pltClose and figAx is None:
+            plt.close()
     return graph
-
-
 
 
 if __name__ == "__main__":
     # go through files, store files content in order to later select pairs
     folder = './../examples/JV/SAMPLE_A/'
-    processJVfolder(folder, fitDiodeWeight=5, pltClose=True)
+    processJVfolder(folder, fitDiodeWeight=5, pltClose=True,  groupCell=True)
 #    processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
+
 
 
     file = r'./../examples/JV\SAMPLE_B_3layerMo\export_sample_b_3layermo_summary_illum.txt'

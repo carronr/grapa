@@ -64,6 +64,10 @@ from grapa.gui.GUImisc import imageToClipboard, EntryVar, OptionMenuVar, Checkbu
 # TODO graph handler, for multiple graph tabs
 # TODO: export: figugsize () into list
 
+
+# TODO: folder auto when fileis open
+
+
 # Version 0.5.4.8
 # Modifications
 # - TRPL: the data type TRPL was  modified to properly load files generated using scripts.
@@ -823,15 +827,16 @@ class Application(tk.Frame):
         tk.Label(frame, text='Property:').pack(side='left')
         self.OptionmenuNewProp = tk.OptionMenu(frame, self.varNewPropProp, '')
         self.OptionmenuNewProp.pack(side='left')
-#        self.EntryNewProp = tk.Entry (frame, text=self.varNewPropVal, width=30)
+        # self.EntryNewProp = tk.Entry (frame, text=self.varNewPropVal, width=30)
         self.EntryNewProp = ttk.Combobox(frame, textvariable=self.varNewPropVal,
-                                        values=[], width=30)
+                                         values=[], width=30)
         self.EntryNewProp.pack(side='left')
         self.EntryNewProp.bind('<Return>', lambda event: self.newPropertySet())
         tk.Button(frame, text='Save', command=self.newPropertySet).pack(side='right')
 
     def fillUIFrameRightActionTitle(self, frame):
         self.createFrame(frame, self.fillUIFrameRightActionTitle2,  {}, {'side':'top', 'anchor':'w', 'fill': X})
+
     def fillUIFrameRightActionTitle2(self, frame):
         tk.Label(frame, text='Actions specific to selected Curve', font=self.fontBold).pack(side='left', anchor='center')
         hline = FrameTitleContentHide.frameHline(frame)
@@ -847,7 +852,7 @@ class Application(tk.Frame):
                     field.destroy()
         self.FrameRActionList = []
         if curve != -1:
-            #print ('funcListGUI', self.back_graph.curve(curve).funcListGUI())
+            # print('funcListGUI', self.back_graph.curve(curve).funcListGUI())
             tmp = []
             funcList = self.back_graph.curve(curve).funcListGUI(graph=self.back_graph, graph_i=curve)
             for j in range(len(funcList)):
@@ -857,16 +862,16 @@ class Application(tk.Frame):
                     act.append([''] * len(act[2]))
                 try:
                     len(act[3])
-                except TypeError as e:
+                except TypeError:  # as e:
                     act[3] = [''] * len(act[2])
-                for i in range(len(act[3])): # default values
+                for i in range(len(act[3])):  # default values
                     if isinstance(act[3][i], (list, np.ndarray)):
                         act[3][i] = self.listToString(act[3][i])
-                    #act[3][i] = '"'+str(act[3][i])+'"'
+                    # act[3][i] = '"'+str(act[3][i])+'"'
                 tmp.append([])
-                tmp[-1].append([]) # index 0 is list
-                tmp[-1][0].append(act[0]) # Validation button
-                for i in range(len(act[2])):#                for field in act[2]:
+                tmp[-1].append([])  # index 0 is list
+                tmp[-1][0].append(act[0])  # Validation button
+                for i in range(len(act[2])):  # for field in act[2]:
                     tmp[-1][0].append(tk.StringVar())
                     tmp[-1][0][-1].set(act[3][i])
                 if len(act) >= 5:         # hidden variables
@@ -876,9 +881,9 @@ class Application(tk.Frame):
                 if funcList[j][0] is None:
                     tmp[-1].append(tk.Label(tmp[-1][1], text=act[1]))
                 else:
-                    tmp[-1].append(tk.Button(tmp[-1][1], text=act[1], command=lambda j_=j:self.curveAction(j_)))#self.curveAjction(curve, funcList[j][0], tmp[j][0], j))
+                    tmp[-1].append(tk.Button(tmp[-1][1], text=act[1], command=lambda j_=j:self.curveAction(j_)))  #self.curveAjction(curve, funcList[j][0], tmp[j][0], j))
                 tmp[-1][-1].pack(side='left', anchor='w')
-                for i in range(len(act[2])): # list of Entries
+                for i in range(len(act[2])):  # list of Entries
                     fieldprop = copy.deepcopy(act[5][i]) if len(act) > 5 else {}
                     fieldtype = tk.Entry
                     if 'field' in fieldprop:
@@ -928,10 +933,11 @@ class Application(tk.Frame):
                 return [i] + self.alterListGUI[i]
         typePlot = self.back_graph.getAttribute('typeplot')
         return [np.nan, 'File-defined', alter, typePlot]
+
     def plotChangeView2(self, new):
         [idx, display, alter, typePlot] = self.plotChangeView_identify()
         if display == new:
-            return # no change
+            return  # no change
         for a in self.alterListGUI:
             if new == a[0]:
                 self.OMAlter.set(new)
@@ -956,9 +962,9 @@ class Application(tk.Frame):
         if not is_number(new):
             return False
         figSize = np.array(self.Graph_fig.get_size_inches())
-        minMaxPx = np.array([[10,10], [1000,1000]])
+        minMaxPx = np.array([[10, 10], [1000, 1000]])
         newMinMax = np.array([max(minMaxPx[0] / figSize), min(2 * minMaxPx[1] / figSize)])
-        new = min(max(new,newMinMax[0]), newMinMax[1])
+        new = min(max(new, newMinMax[0]), newMinMax[1])
         new = roundSignificant(new, 2)
         self.varScreenDpi.set(new)
         print('Set screen DPI to '+str(new)+'.')
@@ -996,11 +1002,11 @@ class Application(tk.Frame):
                         subject = 'graph.curve('+str(curve)+')'
                     else:
                         print('WARNING curveAction print commands: subject not determined (', subject, func.__name__, j, ')')
-                    p = [("'"+a+"'" if isinstance(a, str) else str(a)) for a in args]
-                    p +=[(a+"='"+hidden[a]+"'" if isinstance(hidden[a], str) else a+"="+str(hidden[a])) for a in hidden]
-                    print('res = '+subject+'.'+func.__name__ +'('+ ', '.join(p)+')')
+                    p = [("'" + a + "'" if isinstance(a, str) else str(a)) for a in args]
+                    p +=[(a + "='" + hidden[a] + "'" if isinstance(hidden[a], str) else a + "=" + str(hidden[a])) for a in hidden]
+                    print('res = ' + subject + '.' + func.__name__ + '(' + ', '.join(p) + ')')
                 except Exception:
-                    pass # error while doing useless output does not really matter
+                    pass  # error while doing useless output does not really matter
             # where to place new Curves
             idx = curve + 1
             while idx < self.back_graph.length():
@@ -1008,23 +1014,23 @@ class Application(tk.Frame):
                 if not type_.startswith('scatter') and not type_.startswith('errorbar'):
                     break
                 idx += 1
-            if isinstance (res, Curve):
+            if isinstance(res, Curve):
                 self.back_graph.append(res, idx=idx)
                 if self.varPrintCommands.get():
-                    print("graph.append(res"+('' if idx == self.back_graph.length() else ', idx='+str(idx))+")")
+                    print("graph.append(res" + ('' if idx == self.back_graph.length() else ', idx=' + str(idx)) + ")")
             elif isinstance(res, list) and np.array([isinstance(c, Curve) for c in res]).all():
                 self.back_graph.append(res, idx=idx)
                 if self.varPrintCommands.get():
-                    print("graph.append(res"+('' if idx == self.back_graph.length() else ', idx='+str(idx))+")")
+                    print("graph.append(res" + ('' if idx == self.back_graph.length() else ', idx=' + str(idx)) + ")")
             elif res:
                 if res == True:
                     pass
                 else:
-    #                print ('Curve action output:')
-                    print (res)
+                    # print ('Curve action output:')
+                    print(res)
             else:
-                print ('Curve action output:')
-                print (res)
+                print('Curve action output:')
+                print(res)
 
         # handling actions on multiple Curves
         toExecute = {curve: func}
@@ -1044,7 +1050,7 @@ class Application(tk.Frame):
         for c in keys:
             if len(keys) > 1:
                 lbl = self.back_graph.curve(c).getAttribute('label', '')
-                print('Action on Curve', c, (('('+lbl+')') if len(lbl) > 0 else ''))
+                print('Action on Curve', c, (('(' + lbl + ')') if len(lbl) > 0 else ''))
             executeFunc(c, toExecute[c], args, hidden)
         # after execution
         self.updateUI()
@@ -1055,11 +1061,11 @@ class Application(tk.Frame):
         for curve in curves:
             if curve > -1 and curve < self.back_graph.length():
                 test = self.executeGraphMethod('castCurve', newType, curve)
-                #test = self.back_graph.castCurve(newType, curve)
+                # test = self.back_graph.castCurve(newType, curve)
                 if test != True:
-                    print ('castCurve impossible.')
+                    print('castCurve impossible.')
             else:
-                print ('castCurve impossible (', newType, curve, ')')
+                print('castCurve impossible (', newType, curve, ')')
         self.updateUI()
 
     def curveShift(self, upDown, relative=True):
@@ -1079,22 +1085,26 @@ class Application(tk.Frame):
             else:
                 self.executeGraphMethod('moveCurveToIndex', curve, idx2)
                 selected.append(idx2)
-                #print('moveCurve', curve, idx2, upDown)
+                # print('moveCurve', curve, idx2, upDown)
                 if idx2 < curve or (idx2 == curve and curve == 0):
                     upDown += 1
                 elif idx2 > curve or (idx2 == curve and curve >= self.back_graph.length()-1):
                     upDown -= 1
-            #self.back_graph.swapCurves(curve, upDown, relative=True)
+            # self.back_graph.swapCurves(curve, upDown, relative=True)
         for i in range(len(selected)):
             selected[i] = max(0, min(self.back_graph.length()-1, selected[i]))
         self.previousSelectedCurve = selected
         self.updateUI()
+
     def curveShiftDown(self):
         self.curveShift(1)
+
     def curveShiftUp(self):
         self.curveShift(-1)
+
     def curveShiftTop(self):
         self.curveShift(0, relative=False)
+
     def curveShiftBott(self):
         self.curveShift(self.back_graph.length()-1, relative=False)
 
@@ -1138,11 +1148,13 @@ class Application(tk.Frame):
         try:
             self.back_graph.colorize(Colorscale(col, invert=invert), **kwargs)
         except ValueError as e:
-            # want error to be printed in GUI console, and not hidden in the python console
+            # error to be printed in GUI console, and not hidden in terminal
             print('ValueError:', e)
         if self.varPrintCommands.get():
-            print('graph.colorize(Colorscale('+str(col)+', invert='+str(invert)+'), '+
-                   ', '.join(['{}={!r}'.format(k, v) for k, v in kwargs.items()])+')')
+            print('graph.colorize(Colorscale(' + str(col) + ', invert='
+                  + str(invert) + '), '
+                  + ', '.join(['{}={!r}'.format(k, v) for k, v in kwargs.items()])
+                  + ')')
         self.updateUI()
 
     def colorizeGraphSetScale(self, i):
@@ -1186,7 +1198,7 @@ class Application(tk.Frame):
         c = self.back_graph.curves('_dataPicker', True)
         if len(c) == 0:
             # must create datapicker Curve
-            curve = Curve(np.array([[x],[y]]), attr)
+            curve = Curve(np.array([[x], [y]]), attr)
             if curve.getAttribute('Curve', None) is not None:
                 casted = curve.castCurve(curve.getAttribute('Curve'))
                 if casted is not False:
@@ -1199,14 +1211,13 @@ class Application(tk.Frame):
 
     def dataPickerToTextbox(self):
         x, y, attrUpd = self.dataPickerGetPoint()
-        text = 'x: '+str(roundSignificant(x,5))+'\ny: '+str(roundSignificant(y,5))
+        text = 'x: ' + str(roundSignificant(x, 5)) + '\ny: ' + str(roundSignificant(y, 5))
         textxy = ''
-        textargs = {'textcoords': 'data', 'xytext': [x,y], 'fontsize': 8}
+        textargs = {'textcoords': 'data', 'xytext': [x, y], 'fontsize': 8}
         self.executeGraphMethod('addText', text, textxy, textargs=textargs)
         if not self.varPrintCommands.get():
             print('New text annotation:', text.replace('\n', '\\n'))
         self.updateUI()
-
 
 
     # manager for text annotations
@@ -1215,36 +1226,37 @@ class Application(tk.Frame):
         from gui.GUIpopup import GuiManagerAnnotations
         self.windowAnnotate = tk.Toplevel(self.master)
         self.test = GuiManagerAnnotations(self.windowAnnotate, self.back_graph, self.popupAnnotationsCatch)
+
     def popupAnnotationsCatch(self, dictupdate):
         self.back_graph.update(dictupdate)
         self.updateUI()
+
     # manager for data edition
     def popupDataEditor(self):
         # opens manager
         from gui.GUIdataEditor import GuiDataEditor
         self.windowDataEditor = tk.Toplevel(self.master)
         self.test = GuiDataEditor(self.windowDataEditor, self.back_graph, self.popupDataEditorCatch)
+
     def popupDataEditorCatch(self):
-        # modification of the Curve are performed within popup. Nothing else to do
+        # modification of the Curve are performed within popup. Little to do
         self.updateUI()
 
     def updateUI(self):
-        self.updateUI_graph()
+        # self.updateUI_graph()
         try:
             self.updateUI_graph()
         except Exception as e:
             print('Exception during update of the GUI Graph panel.')
             print('Exception', type(e), e)
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
-        # TODO DEBUG
-        self.updateUI_plot()
+        # self.updateUI_plot()
         try:
             self.updateUI_plot()
         except Exception as e:
             print('Exception during update of the GUI plot.')
             print('Exception', type(e), e)
             print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
-
 
     def updateUI_plot(self):
         try:
@@ -1260,7 +1272,8 @@ class Application(tk.Frame):
         try:
             self.canvas.show()
         except AttributeError:
-            pass # handles FigureCanvasTkAgg has no attribute show in later versions of matplotlib
+            pass # handles FigureCanvasTkAgg has no attribute show in later
+            # versions of matplotlib
         self.canvas.draw()
 
 
@@ -1272,14 +1285,14 @@ class Application(tk.Frame):
         for key in keyList:
             val = attr[key]
             if isinstance(val, list) or isinstance(val, np.ndarray):
-                val = '"'+self.listToString(val).replace('"','\\"')+'"'
+                val = '"' + self.listToString(val).replace('"', '\\"') + '"'
             elif isinstance(val, str):
-                val = '"'+val.replace('\\n','\\\\n').replace('\n','\\\\n').replace('"','\\"')+'"'
+                val = '"' + val.replace('\\n', '\\\\n').replace('\n', '\\\\n').replace('"', '\\"') + '"'
             else:
-                val = '"'+str(val)+'"'
-            val = val.replace('\n','\\\\n').replace('\\', '\\\\')
+                val = '"' + str(val) + '"'
+            val = val.replace('\n', '\\\\n').replace('\\', '\\\\')
             try:
-                tree.insert(idx, 'end', text=key, values=val, tag=key) # idxLast =
+                tree.insert(idx, 'end', text=key, values=val, tag=key)  # idxLast =
             except Exception as e:
                 print('Exception AddTreeBranch key', key, ', val', val, type(e), e)
 
@@ -1358,15 +1371,17 @@ class Application(tk.Frame):
 
 
     def updateUponResizeWindow(self, *args):
-        # chekc if GUI is created for the first time, to avoid updates when windows is not ready
+        # check if GUI is created for the first time, to avoid updates when
+        # windows is not ready
         if hasattr(self, 'initiated') and self.initiated:
-            #self.canvas.resize(*args) if event fired from canvas configure event
+            # self.canvas.resize(*args) if event fired from canvas configure event
             self.updateUI_plot()
 
     def callback_updateCrosshair(self, draw=True):
-        # normally draw the canvas, except if called from updateUI which handles draw() by itself
+        # normally draw the canvas, except if called from updateUI which
+        # handles draw() by itself
         if hasattr(self, 'crosshairx'):
-            try: # first delete existing crosshair
+            try:  # first delete existing crosshair
                 self.crosshairx.remove()
                 del self.crosshairx
             except ValueError:
@@ -1394,9 +1409,9 @@ class Application(tk.Frame):
             if restrict and curve >= 0 and not np.isnan(idx):
                 posx = self.back_graph.curve(curve).x_offsets(index=idx, alter=alter[0])
                 posy = self.back_graph.curve(curve).y_offsets(index=idx, alter=alter[1])
-                #print('crosshair', xdata, ydata, posx, posy)
-            self.crosshairx = self.Graph_ax.axvline(posx, 0, 1, color=[0.5,0.5,0.5])
-            self.crosshairy = self.Graph_ax.axhline(posy, 0, 1, color=[0.5,0.5,0.5])
+                # print('crosshair', xdata, ydata, posx, posy)
+            self.crosshairx = self.Graph_ax.axvline(posx, 0, 1, color=[0.5, 0.5, 0.5])
+            self.crosshairy = self.Graph_ax.axhline(posy, 0, 1, color=[0.5, 0.5, 0.5])
         else:
             self.disableCanvasCallbacks()
         if draw:
@@ -1406,14 +1421,14 @@ class Application(tk.Frame):
         # handle several selected items
         if isinstance(curItem, tuple):
             out = [self.treeActiveCurve(item) for item in curItem]
-            out = tuple(set(out)) # remove duplicates
+            out = tuple(set(out))  # remove duplicates
             out = tuple(sorted(list(out)))
             return out
         # handle single element
         itemP = self.Tree.parent(curItem)
         itemList = self.Tree.item(curItem)
         tags = itemList['tags']
-        if itemP != '' :
+        if itemP != '':
             it = self.Tree.item(itemP)
             tags = it['tags']
         if isinstance(tags, list):
@@ -1441,7 +1456,7 @@ class Application(tk.Frame):
             value = itemList['values'][0]
             self.varEditPropProp.set(prop)
             self.varEditPropVal.set(value)
-            try :
+            try:
                 i = keyList.index(prop)
                 self.EditPropExample.set(valList[i])
             except ValueError:
@@ -1449,7 +1464,7 @@ class Application(tk.Frame):
         # update GUI New property
         # do not want legend in the list
         new_choices = tuple(Graph.graphInfoKeys) if curve == -1 else tuple(Graph.dataInfoKeysGraph)
-        new_choices = tuple(x for x in new_choices if x not in ['legend',''])
+        new_choices = tuple(x for x in new_choices if x not in ['legend', ''])
         self.OptionmenuNewProp['menu'].delete(0, 'end')
         for choice in new_choices:
             self.OptionmenuNewProp['menu'].add_command(label=choice, command=tk._setit(self.varNewPropProp, choice))
@@ -1458,7 +1473,7 @@ class Application(tk.Frame):
             if self.Tree.parent(curItem) != '':
                 self.varNewPropProp.set(itemList['text'])
                 self.newPropertySelect()
-            else: # former case: selecting keywork in tree does not change new Property
+            else:  # former case: selecting keywork in tree does not change new Property
                 if self.varNewPropProp.get() not in new_choices:
                     self.varNewPropProp.set(new_choices[0])
                 self.newPropertySelect()
@@ -1490,7 +1505,8 @@ class Application(tk.Frame):
             keyList = Graph.dataInfoKeysGraph
             valList = Graph.dataInfoKeysGraphExample
             exaList = Graph.dataInfoKeysGraphExalist
-        # replace content of Entry/Combobox field if a) is empty, or b) match the previous automatically set value
+        # replace content of Entry/Combobox field if a) is empty, or
+        # b) match the previous automatically set value
         if self.varNewPropVal.get() == '' or (self.varNewPropVal.get() == self.varNewPropValPrevious):
             existingVal = self.back_graph.getAttribute(prop) if curve == -1 else self.back_graph.curve(curve).getAttribute(prop)
             self.varNewPropVal.set(str(existingVal))
@@ -1530,7 +1546,7 @@ class Application(tk.Frame):
         """
         if key == 'Property' or key.startswith('--'):
             return
-        #print ('Property edition: curve',curve,', key', key,', value', val, '(',type(val),')')
+        # print ('Property edition: curve',curve,', key', key,', value', val, '(',type(val),')')
         # possibly force variable type
         cases = [str, int, float, list, dict]
         if varType in cases:
@@ -1566,20 +1582,23 @@ class Application(tk.Frame):
                     print('graph.curve('+str(c)+').update({\''+key+'\': '+valstr+'})')
         if ifUpdate:
             self.updateUI()
+
     def executeGraphMethod(self, method, *args, **kwargs):
         out = getattr(self.back_graph, method)(*args, **kwargs)
+
         def toStr(a):
             if isinstance(a, str):
-                return "'"+a.replace('\n','\\n')+"'"
+                return "'" + a.replace('\n', '\\n') + "'"
             elif isinstance(a, Graph):
                 return 'graph'
             elif isinstance(a, Curve):
                 return 'curve'
             return str(a)
+
         if self.varPrintCommands.get():
             p = [toStr(a) for a in args]
-            p +=[(a+"='"+toStr(kwargs[a])) for a in kwargs]
-            print('graph.'+method+'('+', '.join(p)+')')
+            p += [(a + "='" + toStr(kwargs[a])) for a in kwargs]
+            print('graph.' + method + '(' + ', '.join(p) + ')')
         return out
     def executeGraphCurveMethod(self, curve, method, *args, **kwargs):
         out = getattr(self.back_graph.curve(curve), method)(*args, **kwargs)
@@ -1631,10 +1650,10 @@ class Application(tk.Frame):
         for curve in curves:
             if not is_number(curve):
                 break
-                # can happen if someone presses the delete button twice in a row
+                # can happen if someone presses the delete button twice in arow
             elif curve > -1:
                 self.executeGraphMethod('deleteCurve', curve)
-                #self.back_graph.deleteCurve(curve)
+                # self.back_graph.deleteCurve(curve)
         self.previousSelectedCurve = [self.previousSelectedCurve[0]]
         self.updateUI()
 
@@ -1647,7 +1666,7 @@ class Application(tk.Frame):
         toDel.sort(reverse=True)
         for c in toDel:
             self.executeGraphMethod('deleteCurve', c)
-            #self.back_graph.deleteCurve(c)
+            # self.back_graph.deleteCurve(c)
         self.updateUI()
 
     def curveDuplicate(self):
@@ -1657,11 +1676,11 @@ class Application(tk.Frame):
         selected = []
         for curve in curves:
             if not is_number(curve):
-                # can happen if someone presses the delete button twice in a row
+                # can happen if someone presses the delete button twice in arow
                 break
             if curve > -1:
                 self.executeGraphMethod('duplicateCurve', curve)
-                #self.back_graph.duplicateCurve(curve)
+                # self.back_graph.duplicateCurve(curve)
                 selected = [s+1 for s in selected]
                 selected.append(curve)
         self.previousSelectedCurve = selected
@@ -1743,9 +1762,9 @@ class Application(tk.Frame):
         dpimax = min([wh[i] / figsize[i] for i in range(2)])
         dpi = float(self.varScreenDpi.get())
         new = None
-        if dpi > dpimax * 1.02: # shall reduce  screen dpi
+        if dpi > dpimax * 1.02:  # shall reduce screen dpi
             new = np.max([10, np.round(2*(dpimax-3), -1)/2])
-        elif dpi < dpimax * 0.8 and dpi < 100: # maybe can zoom in
+        elif dpi < dpimax * 0.8 and dpi < 100:  # maybe can zoom in
             new = np.min([100, np.round(2*(dpimax-3), -1)/2])
         if new is not None and new != dpi:
             self.varScreenDpi.set(new)
@@ -1814,7 +1833,7 @@ class Application(tk.Frame):
     def saveTemplate(self):
         folder = self.folderSaveGet()
         f = tk.filedialog.asksaveasfilename(defaultextension='.txt', initialdir=folder)
-        if f is None or f == '' : # asksaveasfile return `None` if dialog closed with "cancel".
+        if f is None or f == '' :  # asksaveasfile return `None` if dialog closed with "cancel".
             return
         f, fileext = os.path.splitext(f)
         fileext = fileext.replace('py', '')

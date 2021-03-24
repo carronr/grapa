@@ -16,15 +16,22 @@ KNOWN BUGS
 Version 0.5.4.8
 Released 24.03.2021
 Modifications
-- TRPL: the data type TRPL was  modified to properly load files generated using scripts.
-- Modified loading of preference file. Hopefully a bit faster when opening many files.
-- CurveJV: added data transform 'Log10 abs (raw)' (abs0), to plot the log of JV curve without Jsc subtraction
-- scriptJV: also exports a file with a few statistical quantities of JV data (average, median, max)
-- scriptJV: reduced amount of generated files. The individual summary images are not generated anymore as already plotted in combined format. Also, the different cells are exported as images (3x) and only once as text file.
+- TRPL: the data type TRPL was  modified to properly load files generated using
+  scripts.
+- Modified loading of preference file. Hopefully a bit faster when opening many
+  files.
+- CurveJV: added data transform 'Log10 abs (raw)' (abs0), to plot the log of JV
+  curve without Jsc subtraction
+- scriptJV: also exports a file with a few statistical quantities of JV data
+  (average, median, max)
+- scriptJV: reduced amount of generated files. The individual summary images are
+  not generated anymore as already plotted in combined format. Also, the
+  different cells are exported as images (3x) and only once as text file.
 - prepare future update of the GUI to support several graphs simultaneously
 - a bit of code cleaning for better compliance with guidelines
 BUGS:
-- Mitigated bugs with recent versions of python (aka winpython version 3.9: issues with matplotlib 3.3.9; hidden curves in grey due to changes in tk)
+- Mitigated bugs with recent versions of python (aka winpython version 3.9:
+  issues with matplotlib 3.3.9; hidden curves in grey due to changes in tk)
 
 
 Version 0.5.4.7
