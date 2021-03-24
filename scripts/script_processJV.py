@@ -272,14 +272,14 @@ def processJVfolder (folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gr
             f.write(outIllum)
             f.close()
             processSampleCellsMap(filesave, figAx=figAx, pltClose=pltClose)
-            writeFileAvgMax(filesave, filesave=True, print=True)
+            writeFileAvgMax(filesave, filesave=True, ifPrint=True)
     print('Script processJV folder done.')
     # print(type(graph), graph)
     # Graph.plot(graph, os.path.join(folder, 'export_test'))
     return graph
 
 
-def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True, colSample=True, print=True):
+def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True, colSample=True, ifPrint=True):
     colOfInterest = ['Voc', 'Jsc', 'FF', 'Eff']
     if isinstance(fileOrContent, Graph):
         content = fileOrContent
@@ -356,7 +356,8 @@ def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True, colSample=Tr
         f = open(fname, 'w')
         f.write(out)
         f.close()
-    print(out)
+    if ifPrint:
+        print(out)
 
 
 def processSampleCellsMap(file, colorscale=None, figAx=None, pltClose=True, newGraphKwargs={}):
