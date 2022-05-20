@@ -3,7 +3,8 @@
 Created on Mon Jul 25 19:47:25 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
+Carron
 """
 
 import numpy as np
@@ -18,24 +19,22 @@ from grapa.mathModule import is_number, roundgraphlim
 from grapa.datatypes.curveJV import CurveJV
 
 
-
-
 class GraphJVDarkIllum(Graph):
 
     def __init__(self, fileDark, fileIllum, area=np.nan, temperature=273.15+25, complement={}, silent=True, ifPlot=False, **newGraphKwargs):
-        #print ('GraphJVDarkIllum area', area)
-# TODO: give Graph files in constructor. Currently only handle filename (str)
+        # print ('GraphJVDarkIllum area', area)
+        # TODO: give Graph files in constructor. Currently only handle filename (str)
         self.idxDark = -1
-        self.idxIllum= -1
+        self.idxIllum = -1
         # intervert fileIllum and fileDark if able to detect inversion
         swap = -1
         if isinstance(fileIllum, str) and fileIllum.find('dark') > -1:
             swap = 1
-        elif isinstance(fileIllum, Graph) and fileIllum.getAttribute('filename').find('dark') > -1:
+        elif isinstance(fileIllum, Graph) and fileIllum.attr('filename').find('dark') > -1:
             swap = 1
         if isinstance(fileDark, str) and fileDark.find('dark') > -1:
             swap = 0
-        elif isinstance(fileDark, Graph) and fileDark.getAttribute('filename').find('dark') > -1:
+        elif isinstance(fileDark, Graph) and fileDark.attr('filename').find('dark') > -1:
             swap = 0
         if swap == 1:
             swap = fileDark
@@ -47,7 +46,9 @@ class GraphJVDarkIllum(Graph):
         if is_number(area):
             complementArea = {'area': area}
         if 'area' in complement:
-            print('WARNING GraphJVDarkIllum: area defined in argument complement, beware that area correction might not function properly!')
+            print('WARNING GraphJVDarkIllum: area defined in argument',
+                  'complement, beware that area correction might not function',
+                  'properly!')
 
         # start opening files, supposedly the dark
         Graph.__init__(self, fileDark, complement=complement, silent=silent, **newGraphKwargs)
@@ -62,7 +63,7 @@ class GraphJVDarkIllum(Graph):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 newCurve = c.CurveJVFromFit(silent=silent)
-            if not isinstance(newCurve, Curve): # if fit failed
+            if not isinstance(newCurve, Curve):  # if fit failed
                 newCurve = Curve([[0], [np.nan]], {'diodeFit': [np.nan]*5, 'mpp': [np.nan]*3}, silent=True)
             self.append(newCurve)
         else:
@@ -82,14 +83,14 @@ class GraphJVDarkIllum(Graph):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 newCurve = c.CurveJVFromFit(silent=silent)
-            if not isinstance(newCurve, Curve): # if fit failed
+            if not isinstance(newCurve, Curve):  # if fit failed
                 newCurve = CurveJV([[0], [np.nan]], {'diodeFit': [np.nan]*5, 'mpp': [np.nan]*3}, silent=True)
             self.append(newCurve)
         else:
             pass
 
         # apparent photocurrent: difference between dark and illum
-        if self.length() > 2: # for this the opening of the 2 file must have been successful
+        if self.length() > 2:  # for this the opening of the 2 file must have been successful
             Jsc = self.curve(self.idxIllum).getAttribute('Jsc')
             idx = [self.idxIllum, self.idxDark]
             c = [self.curve(idx[0]), self.curve(idx[1])]
@@ -98,7 +99,7 @@ class GraphJVDarkIllum(Graph):
                 warnings.simplefilter("ignore")
                 J = c[0].interpJ(V) - c[1].interpJ(V)
             self.append(CurveJV([V, J], {'color': 'g', 'label': 'Apparent photocurrent', 'Jsc': Jsc, 'area': self.curve(self.idxIllum).area()}, ifCalc=False, silent=True))
-            self.curve(-1).update({'linestyle': 'none'}) # by default this curve is not shown
+            self[-1].update({'linestyle': 'none'})  # by default this curve is not shown
         else:
             pass
 
@@ -160,66 +161,70 @@ class GraphJVDarkIllum(Graph):
         self.plotLogAbs(filesave, ifSave=ifSave, ifExport=ex, figAx=figAx, ylim=ylimLog)
         if pltClose:
             plt.close()
-        #self.update({'ylim': ylimInit})
+        # self.update({'ylim': ylimInit})
 
 
     def plotStd(self, filesave='', ylim=None, figAx=None, ifSave=True, ifExport=True):
         # normal plot
-        temp = {}
+        restore = {}
         if ylim is not None:
-            temp = self.deleteAttr(['ylim', 'alter'])
+            restore.update(self.delete('ylim'))
             self.update({'ylim': ylim})
-        self.curve(1).update({'linestyle': 'None'})
-        if self.length() > 2:
-            self.curve(3).update({'linestyle': 'None'})
-        Graph.plot(self, filesave=GraphIO.filesave_default(self,filesave) +'lin', figAx=figAx, ifSave=ifSave, ifExport=ifExport)
-        self.curve(1).update({'linestyle': ''})
-        if self.length() > 2:
-            self.curve(3).update({'linestyle': ''})
+        self[1].update({'linestyle': 'None'})
+        if len(self) > 2:
+            self[3].update({'linestyle': 'None'})
+        Graph.plot(self, filesave=GraphIO.filesave_default(self, filesave) +'lin',
+                   figAx=figAx, ifSave=ifSave, ifExport=ifExport)
+        self[1].update({'linestyle': ''})
+        if len(self) > 2:
+            self[3].update({'linestyle': ''})
         # restore initial attributes
-        self.update(temp)
-
+        self.update(restore)
 
     def plotLogAbs(self, filesave='', ylim=None, figAx=None, ifSave=True, ifExport=True):
-        # unset xlim, ylim indications (could also uset the delete() function like for axhline and axvline)
+        # unset xlim, ylim indications
         # change ylabel of the graph
-        temp = self.deleteAttr(['ylim', 'xlim', 'ylabel', 'axhline', 'axvline', 'alter'])
+        keys = ['ylim', 'xlim', 'ylabel', 'axhline', 'axvline', 'alter']
+        restore = {}
+        for key in keys:
+            restore.update(self.delete(key))
         self.update({'ylabel': 'Log current density', 'alter': 'log10abs'})
         if ylim is not None:
             self.update({'ylim': ylim})
-        Graph.plot(self, filesave=GraphIO.filesave_default(self, filesave)+'log', figAx=figAx, ifSave=ifSave, ifExport=ifExport)
-        self.update(temp)
-
+        Graph.plot(self, filesave=GraphIO.filesave_default(self, filesave)+'log',
+                   figAx=figAx, ifSave=ifSave, ifExport=ifExport)
+        self.update(restore)
 
     def plotDiff(self, filesave='', ylim=None, figAx=None, ifSave=True, ifExport=True):
-        temp = self.deleteAttr(['axhline', 'alter'])
-        if self.length() > 2:
-            Jsc = self.curve(self.idxIllum).getAttribute('Jsc')
+        keys = ['axhline', 'alter']
+        restore = {}
+        for key in keys:
+            restore.update(self.delete(key))
+        if len(self) > 2:
+            Jsc = self[self.idxIllum].attr('Jsc')
             if self.idxDark >= 0 and self.idxIllum >= 0:
                 self.update({'axhline': [Jsc, -Jsc]})
             else:
                 self.update({'axhline': [-Jsc]})
-        linestIdx = [i for i in [1, 3, 4] if i < self.length()]
-        linestyle = [self.curve(i).getAttribute('linestyle') for i in linestIdx]
-        if self.length() > 2:
-            self.curve(4).update({'linestyle': ''})
+        linestIdx = [i for i in [1, 3, 4] if i < len(self)]
+        linestyle = [self[i].attr('linestyle') for i in linestIdx]
+        if len(self) > 2:
+            self[4].update({'linestyle': ''})
         if ylim is not None:
-            saveAttr = self.deleteAttr(['ylim'])
+            restore.update(self.delete('ylim'))
             self.update({'ylim': ylim})
 
         Graph.plot(self, filesave=GraphIO.filesave_default(self, filesave) +'diff', figAx=figAx, ifSave=ifSave, ifExport=ifExport)
 
         # restore curve properties
-        if ylim is not None:
-            self.update(saveAttr)
         for i in range(len(linestIdx)):
-            self.curve(linestIdx[i]).update({'linestyle': linestyle[i]})
-        self.update(temp)
+            self[linestIdx[i]].update({'linestyle': linestyle[i]})
+        self.update(restore)
 
     def returnDataCurves(self):
         out = []
-        if self.length() > 0: # first curve
+        if self.length() > 0:  # first curve
             out.append(self.curve(0))
-        if self.length() > 2: # scond curve, ignoring the fit which is in position 1
+        if self.length() > 2:  # scond curve, ignoring the fit which is in position 1
             out.append(self.curve(2))
         return out

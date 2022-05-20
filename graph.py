@@ -3,7 +3,8 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics,
+Romain Carron
 """
 import os
 import numpy as np
@@ -12,7 +13,7 @@ from re import findall as refindall
 import matplotlib as mpl
 
 from grapa.curve import Curve
-from grapa.mathModule import is_number, stringToVariable
+from grapa.mathModule import is_number, strToVar
 
 
 class Graph:
@@ -57,7 +58,7 @@ class Graph:
 
     update(self, attributes, ifAll=False)
     getAttribute(self, attr, default='')
-	replaceLabels(self, old, new)
+    replaceLabels(self, old, new)
     colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False)
     applyTemplate(self, graph)
 
@@ -65,8 +66,10 @@ class Graph:
 
     config(self, key, default='', astype='auto')
 
-    export(self, filesave='', saveAltered=False, ifTemplate=False, ifCompact=True, ifClipboardExport=False)
-    plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave=True, ifExport=True, figAx=None, ifSubPlot=False)
+    export(self, filesave='', saveAltered=False, ifTemplate=False,
+           ifCompact=True, ifClipboardExport=False)
+    plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave=True,
+         ifExport=True, figAx=None, ifSubPlot=False)
     """
     # some class constants
     FIGSIZE_DEFAULT = (6.0, 4.0)
@@ -83,10 +86,10 @@ class Graph:
     CONFIG_FILENAME = None
     CONFIG_GRAPH = None
 
-    headersKeys = ['meastype', 'sample', 'collabels'] + ['savesilent']
+    headersKeys = ['meastype', 'collabels'] + ['savesilent']
     graphInfoKeysData = []
     graphInfoKeysData.append(['== Figure ==', ''])
-    graphInfoKeysData.append(['figsize',         'Figure size (inch).\nExample: "(6.0, 4.0)"'])
+    graphInfoKeysData.append(['figsize',         'Figure size (inch).\nExample: "[6.0, 4.0]"'])
     graphInfoKeysData.append(['subplots_adjust', 'Margins (relative).\nExamples: "0.15" (bottom only), or "[0.125, 0.1, 0.9, 0.9]" left,b,r,top, or "[1,1,5,3.5,\'abs\']"'])
     graphInfoKeysData.append(['dpi',             'Resolution dots-per-inch.\nExample: "300"'])
     graphInfoKeysData.append(['fontsize',        'Font size of titles, annotations, etc.\nExample: "12"'])
@@ -96,18 +99,18 @@ class Graph:
     graphInfoKeysData.append(['ylim',            'Limits of y axis, based on ax.set_ylim().\nExamples: "[0,100]", or "[0,\'\']"'])
     graphInfoKeysData.append(['xlabel',          'Label of x axis, based on ax.set_xlabel().\nExample: "Axis x [unit]", "[\'My label\', {\'size\':6, \'color\':\'r\'}]"'])
     graphInfoKeysData.append(['ylabel',          'Label of y axis, based on ax.set_ylabel().\nExample: "Axis y [unit]", "[\'My label\', {\'size\':6, \'color\':\'r\'}]"'])
-    graphInfoKeysData.append(['xticksstep',      'Value difference between ticks on x axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"']) # ax.xaxis.set_ticks
-    graphInfoKeysData.append(['yticksstep',      'Value difference between ticks on y axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"']) # ax.yaxis.set_ticks
-    graphInfoKeysData.append(['xtickslabels',    'Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: "[[0,1],[\'some\',\'value\']]", or "[None, None, {\'rotation\':45, \'size\': 6, \'color\':\'r\'}]"']) # plt.xticks
-    graphInfoKeysData.append(['ytickslabels',    'Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: "[[0,1],[\'some\',\'value\']]", or "[None, None, {\'rotation\':45, \'size\': 6, \'color\':\'r\'}]"']) # plt.yticks
+    graphInfoKeysData.append(['xticksstep',      'Value difference between ticks on x axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"'])  # ax.xaxis.set_ticks
+    graphInfoKeysData.append(['yticksstep',      'Value difference between ticks on y axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"'])  # ax.yaxis.set_ticks
+    graphInfoKeysData.append(['xtickslabels',    'Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: "[[0,1],[\'some\',\'value\']]", or "[None, None, {\'rotation\':45, \'size\': 6, \'color\':\'r\'}]"'])  # plt.xticks
+    graphInfoKeysData.append(['ytickslabels',    'Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: "[[0,1],[\'some\',\'value\']]", or "[None, None, {\'rotation\':45, \'size\': 6, \'color\':\'r\'}]"'])  # plt.yticks
     graphInfoKeysData.append(['xlabel_coords',   'Position of xlabel, based on ax.xaxis.set_label_coords().\nExamples: "-0.1", or "[0.5,-0.15]"'])
     graphInfoKeysData.append(['ylabel_coords',   'Position of ylabel, based on ax.yaxis.set_label_coords().\nExamples: "-0.1", or "[-0.1,0.5]"'])
     graphInfoKeysData.append(['== Legends ==', ''])
-    graphInfoKeysData.append(['legendproperties','Position, or keywords to ax.legend(). Examples: "best", "sw", or\n"{\'bbox_to_anchor\':(0.2,0.8), \'ncol\':2, \'fontsize\':8}"'])
-    graphInfoKeysData.append(['legendtitle',     'Legend title. Example: "Some title", or "[\'Some title\', {\'size\':25}]"']) # messy implementation
+    graphInfoKeysData.append(['legendproperties', 'Position, or keywords to ax.legend(). Examples: "best", "sw", or\n"{\'bbox_to_anchor\':(0.2,0.8), \'ncol\':2, \'fontsize\':8}"'])
+    graphInfoKeysData.append(['legendtitle',     'Legend title. Example: "Some title", or "[\'Some title\', {\'size\':25}]"'])  # messy implementation
     graphInfoKeysData.append(['== Annotations ==', ''])
     graphInfoKeysData.append(['axhline',         'Horizontal line(s), based on ax.axhline().', ['0', "[1, 1.5, 2, {'color':'r'}]", "[[3, {'xmin':0.4}], [4, {'xmax': 0.6, 'linewidth':2}]]"]])
-    graphInfoKeysData.append(['axvline',         'Vertical line(s), based on ax.axvline().'  , ['0', "[1, 1.5, 2, {'color':'r'}]", "[[3, {'ymin':0.4}], [4, {'ymax': 0.6, 'linewidth':2}]]"]])
+    graphInfoKeysData.append(['axvline',         'Vertical line(s), based on ax.axvline().', ['0', "[1, 1.5, 2, {'color':'r'}]", "[[3, {'ymin':0.4}], [4, {'ymax': 0.6, 'linewidth':2}]]"]])
     graphInfoKeysData.append(['text',            'Annotations, use GUI window if possible. "Some text", or "[\'Here\', \'There\']"'])
     graphInfoKeysData.append(['textxy',          'Use GUI window if possible. "(0.05, 0.95)" , or "[(0.2, 0.3), (0.8, 0.9)]"'])
     graphInfoKeysData.append(['textargs',        'Use GUI window if possible. "{\'fontsize\':15}", or "[{\'horizontalalignment\': \'right\',\n\'xytext\': (0.4, 0.65), \'arrowprops\': {\'shrink\': 0.05}, \'xy\': (0.46, 0.32)}, {}]"'])
@@ -121,8 +124,8 @@ class Graph:
     graphInfoKeysData.append(['typeplot',        'General graph plotting instruction, based on ax.set_xscale() and ax.set_yscale().\nExamples: "plot", "semilogx", etc.'])
     graphInfoKeysData.append(['arbitraryfunctions', 'A list of instructions. Each instruction is a list as\n[method of ax, list of arguments, dict of keyword arguments]', ["[[\'xaxis.set_ticks\',[[1.5, 5.5]],{\'minor\':True}], [\'set_xticklabels\',[[\'a\',\'b\']],{\'minor\':True}]]", "[['set_axis_off', [], {}]]", "[['grid', [True], {'axis': 'both'}]]", "[['yaxis.set_major_formatter', ['StrMethodFormatter({x:.2f})'], {}]]", "[['xaxis.set_minor_locator', ['MultipleLocator(0.5)'], {}]]"]])
     graphInfoKeysData_ = np.array([d[0:2] for d in graphInfoKeysData])
-    graphInfoKeys = list(graphInfoKeysData_[:,0])
-    graphInfoKeysExample = list(graphInfoKeysData_[:,1])
+    graphInfoKeys = list(graphInfoKeysData_[:, 0])
+    graphInfoKeysExample = list(graphInfoKeysData_[:, 1])
     graphInfoKeysExalist = []
     for i in range(len(graphInfoKeysData)):
         if len(graphInfoKeysData[i]) < 3:
@@ -155,9 +158,9 @@ class Graph:
     dataInfoKeysGraphData.append(['linewidth',      'Linewidth in points. Example: "1.5"'])
     dataInfoKeysGraphData.append(['marker',         'Examples: "o", "s", "x"'])
     dataInfoKeysGraphData.append(['markersize',     'Size of marker, in points. Example: "2.5"'])
-    dataInfoKeysGraphData.append(['markerfacecolor','Marker inner color. Example: "r", "[0.5,0,0]"'])
-    dataInfoKeysGraphData.append(['markeredgecolor','Marker border color. Example: "r", "[0.5,0,0]"'])
-    dataInfoKeysGraphData.append(['markeredgewidth','Marker border width, in points. Example: "1.5"'])
+    dataInfoKeysGraphData.append(['markerfacecolor', 'Marker inner color. Example: "r", "[0.5,0,0]"'])
+    dataInfoKeysGraphData.append(['markeredgecolor', 'Marker border color. Example: "r", "[0.5,0,0]"'])
+    dataInfoKeysGraphData.append(['markeredgewidth', 'Marker border width, in points. Example: "1.5"'])
     dataInfoKeysGraphData.append(['zorder',         'Determines the drawing order (float), highest is drawn on top.\nExample: "2", "3"'])
     dataInfoKeysGraphData.append(['== Offsets ==',  ''])
     dataInfoKeysGraphData.append(['offset',         'Offset to data. Examples: "-10" (on y values), "[2,\'1/20\']" for (x,y) offset.\nSpecial keywords: "[\'minmax\', \'0max\']" and combinations.'])
@@ -175,10 +178,10 @@ class Graph:
     dataInfoKeysGraphData.append(['ax_twinx',       'Plot curve on secondary axis. Example: "True", or anything'])
     dataInfoKeysGraphData.append(['ax_twiny',       'Plot curve on secondary axis. Example: "True", or anything'])
     dataInfoKeysGraphData.append(['linestyle',      'Use "none" to hide a Curve'])
-    dataInfoKeysGraphData.append(["['key', value]", 'User-defined keyword-values pairs. Will be fed to the plotting method if possible.\nExamples: "[\'fillstyle\', \'top\']" for half-filled markers, "[\'comment\', \'a valuable info\']]'])
+    dataInfoKeysGraphData.append(["['key', value]", 'User-defined keyword-values pairs. Will be fed to the plotting method if possible.\nExamples: "[\'fillstyle\', \'top\']" for half-filled markers, "[\'comment\', \'a valuable info\']'])
     dataInfoKeysGraphData_ = np.array([d[0:2] for d in dataInfoKeysGraphData])
-    dataInfoKeysGraph = list(dataInfoKeysGraphData_[:,0])
-    dataInfoKeysGraphExample = list(dataInfoKeysGraphData_[:,1])
+    dataInfoKeysGraph = list(dataInfoKeysGraphData_[:, 0])
+    dataInfoKeysGraphExample = list(dataInfoKeysGraphData_[:, 1])
     dataInfoKeysGraphExalist = []
     for i in range(len(dataInfoKeysGraphData)):
         if len(dataInfoKeysGraphData[i]) < 3:
@@ -200,7 +203,8 @@ class Graph:
             if Graph.CONFIG_GRAPH is not None and Graph.CONFIG_FILENAME == config:
                 self._config = Graph.CONFIG_GRAPH
             else:
-                self._config = Graph(config, complement={'readas': 'database'}, config=None)
+                self._config = Graph(config, complement={'readas': 'database'},
+                                     config=None)
                 if self.CONFIG_FILENAME is None:
                     Graph.CONFIG_FILENAME = config
                     Graph.CONFIG_GRAPH = self._config
@@ -223,21 +227,25 @@ class Graph:
                 print('Empty Graph object created')
             return
         if isinstance(filename, str):
-            # if single file was provided - a string, or if filename is the content if the file - complement['isfilecontent'] must be true
+            # if single file was provided - a string, or if filename is the
+            # content if the file - complement['isfilecontent'] must be true
             GraphIO.readDataFile(self, complement=complement)
         else:
-            if len(filename) == 2 and len(filename[0]) == len(filename[1]) and is_number(filename[0][0]):
+            if (len(filename) == 2 and len(filename[0]) == len(filename[1])
+                    and is_number(filename[0][0])):
                 # filename is actually the data, filename is a list
                 if not self.silent:
                     print('Class Graph: interpret "filename" as data content')
                 self.filename = ''
                 GraphIO.dataFromVariable(self, filename, attributes=complement)
             else:
-                # if a list was provided - open first file, then merge the others one by one
+                # if a list was provided - open first file, then merge the
+                # others one by one
                 if not isinstance(complement, list):
                     if complement != '':
-                        print('WARNING class Graph: complement must be a list if filename is a list.')
-                        print('   filename:', len(filename), 'element, complement:', complement)
+                        print('WARNING class Graph: complement must be a list',
+                              'if filename is a list. Filename', len(filename),
+                              'elements, complement:', complement)
                     complement = [complement] * len(filename)
                 self.filename = filename[0]
                 GraphIO.readDataFile(self, complement[0])
@@ -254,15 +262,12 @@ class Graph:
 # RELATED TO GUI
     def alterListGUI(self):
         out = []
-        out.append(['Linear', ['', ''], '']) # do not want to leave this completely empty (if no curve left)
+        out.append(['no transform', ['', ''], ''])  # default: normal plot
         for c in range(self.length()):
             for j in self.curve(c).alterListGUI():
                 if j not in out:
                     out.append(j)
         return out
-
-
-
 
     # "USUAL" CLASS METHODS
     def __str__(self):
@@ -280,17 +285,17 @@ class Graph:
         # copy data
         for x in graph.data:
             self.data.append(x)
-        # copy headers, unless already exists (in this case information is forgotten)
+        # copy headers, unless already exists (is so, info is lost)
         for key in graph.headers:
-            if not key in self.headers:
+            if key not in self.headers:
                 self.headers.update({key: graph.headers[key]})
-        # copy graphInfo, unless already exists (in this case information is forgotten)
+        # copy graphInfo, unless already exists (is so, info is lost)
         for key in graph.graphInfo:
-            if not key in self.graphInfo:
+            if key not in self.graphInfo:
                 self.graphInfo.update({key: graph.graphInfo[key]})
-        # copy sampleInfo, unless already exists (in this case information is forgotten)
+        # copy sampleInfo, unless already exists (is so, info is lost)
         for key in graph.sampleInfo:
-            if not key in self.sampleInfo:
+            if key not in self.sampleInfo:
                 self.sampleInfo.update({key: graph.sampleInfo[key]})
 
     # methods handling the bunch of curves
@@ -312,8 +317,9 @@ class Graph:
 
     def curve(self, index):
         """ Returns the Curve object at index i in the list. """
-        if index >= self.length() or self.length() == 0:
-            print ('ERROR Class Graph method Curve: cannot find Curve (index',index,', max possible',self.length()-1,')')
+        if index >= len(self) or len(self) == 0:
+            print('ERROR Class Graph method Curve: cannot find Curve (index',
+                  index, ', max possible', len(self), ')')
             return
         return self.data[index]
 
@@ -336,7 +342,8 @@ class Graph:
                         value = value.lower()
                 if lbl == value:
                     out.append(c)
-                elif isinstance(lbl, str) and strStartWith and lbl[:len(value)] == value:
+                elif (isinstance(lbl, str) and strStartWith
+                        and lbl[:len(value)] == value):
                     out.append(c)
         return out
 
@@ -391,12 +398,14 @@ class Graph:
                 # delete data
                 del self.data[i]
                 # delete in headers
-                if 'collabels' in self.headers and i < len(self.headers['collabels']):
+                if ('collabels' in self.headers
+                        and i < len(self.headers['collabels'])):
                     if len(self.headers['collabels']) == 0:
                         del self.headers['collabels']
                     else:
                         del self.headers['collabels'][i]
-                if 'collabelsdetail' in self.headers: # certainly only useful for "databases"
+                if 'collabelsdetail' in self.headers:
+                    # certainly only useful for "databases"
                     for j in range(len(self.headers['collabelsdetail'])):
                         if i < len(self.headers['collabelsdetail'][j]):
                             del self.headers['collabelsdetail'][j][i]
@@ -410,9 +419,11 @@ class Graph:
                 self.data[idx] = newCurve
                 return True
             except Exception:
-                print ('Graph.replaceCurve: cannot add Curve at index', idx, '.')
+                print('Graph.replaceCurve: cannot add Curve at index', idx,
+                      '.')
         else:
-            print ('Graph.replaceCurve: newCurve is not a Curve (type', type(newCurve), ')')
+            print('Graph.replaceCurve: newCurve is not a Curve (type',
+                  type(newCurve), ')')
         return False
 
     def swapCurves(self, idx1, idx2, relative=False):
@@ -421,14 +432,14 @@ class Graph:
         For example useful to modify the plot order (and order in the legend)
         """
         if idx1 < -self.length() or idx1 >= self.length():
-            print ('Graph.swapCurves: idx1 not valid (value', idx1, ').')
+            print('Graph.swapCurves: idx1 not valid (value', idx1, ').')
             return False
         if relative:
             idx2 = idx1 + idx2
         if idx2 == idx1:  # swap with itself
             return True
         if idx2 < -self.length() or idx2 >= self.length():
-            print ('Graph.swapCurves: idx2 not valid (value', idx2, ').')
+            print('Graph.swapCurves: idx2 not valid (value', idx2, ').')
             return False
         swap = deepcopy(self.curve(idx1))
         self.data[idx1] = self.curve(idx2)
@@ -447,9 +458,11 @@ class Graph:
         return True
 
     def duplicateCurve(self, idx1):
-        """ Duplicate (clone) an existing curve and append it in the curves list."""
+        """
+        Duplicate (clone) an existing curve and append it in the curves list.
+        """
         if idx1 < -self.length() or idx1 >= self.length():
-            print ('Graph.duplicateCurve: idx1 not valid (value', idx1, ').')
+            print('Graph.duplicateCurve: idx1 not valid (value', idx1, ').')
             return False
         curve = deepcopy(self.curve(idx1))
         self.data.insert(idx1+1, curve)
@@ -477,17 +490,18 @@ class Graph:
         for key in attributes:
             k = key.lower().replace('ï»¿', '')
             try:
-                if   k in self.headersKeys:
+                if k in self.headersKeys:
                     if attributes[key] != '':
                         self.headers.update({k: attributes[key]})
                     elif k in self.headers:
                         del self.headers[k]
-                elif (k in self.graphInfoKeys or forceGraphInfo) or k.startswith('subplots'):
+                elif (k in self.graphInfoKeys or forceGraphInfo
+                        or k.startswith('subplots')):
                     if attributes[key] != '':
                         self.graphInfo.update({k: attributes[key]})
                     elif k in self.graphInfo:
                         del self.graphInfo[k]
-                    # by default nothing in sampleInfo, everything in the curves
+                    # by default nothing in sampleInfo, everything in curves
                 else:
                     if ifAll:
                         for i in range(self.length()):
@@ -495,7 +509,8 @@ class Graph:
                     else:
                         self.curve(-1).update({k: attributes[key]})
             except Exception as e:
-                print('Error Graph.update: key', key, ' attributes', attributes, 'exception', e)
+                print('Error Graph.update: key', key, ' attributes',
+                      attributes, 'exception', e)
 
     def updateValuesDictkeys(self, *args, **kwargs):
         """
@@ -504,10 +519,14 @@ class Graph:
         kwargument key=['key1', 'key2', ...]
         """
         if 'keys' not in kwargs:
-            print('Error Graph updateValuesDictkeys: "keys" key must be provided, must be a list of keys corresponding to the values provided in *args.')
+            print('Error Graph updateValuesDictkeys: "keys" key must be',
+                  'provided, must be a list of keys corresponding to the',
+                  'values provided in *args.')
             return False
         if len(kwargs['keys']) != len(args):
-            print('WARNING Graph updateValuesDictkeys: len of list "keys" argument must match the number of provided values (',len(args),' args provided, ',len(kwargs['keys']),' keys).')
+            print('WARNING Graph updateValuesDictkeys: len of list "keys"'
+                  'argument must match the number of provided values (',
+                  len(args), ' args provided, ', len(kwargs['keys']), ' keys)')
         lenmax = min(len(kwargs['keys']), len(args))
         for i in range(lenmax):
             self.update({kwargs['keys'][i]: args[i]})
@@ -515,32 +534,35 @@ class Graph:
 
     def delete(self, key, ifAll=False):
         """
-        Delete an attribute of the Graph if recognized as such, or of the curve.
-        Return the deleted attribute (except for attributes of curves if ifAll=True)
+        Delete an attribute of the Graph.
+        Return the deleted attribute as a dict
         """
         k = key.lower()
-        out = {}
-        if k in self.headersKeys:
-            if k in self.headers:
-                out.update({key: self.headers[k]})
-                del self.headers[k]
-        elif k in self.graphInfoKeys:
-            if k in self.graphInfo:
-                out.update({key: self.graphInfo[k]})
-                del self.graphInfo[k]
-        else:
-            if ifAll:
-                for i in range(self.length()):
-                    # cannot export in this case
-                    self.data[i].delete(key)
-            else:
-                out.update(self.curve(-1).delete(key))
+        out = {k: self.attr(k)}
+        self.update({k: ''})
         return out
+        # if k in self.headersKeys:
+        #     if k in self.headers:
+        #         out.update({key: self.headers[k]})
+        #         del self.headers[k]
+        # elif k in self.graphInfoKeys:
+        #     if k in self.graphInfo:
+        #         out.update({key: self.graphInfo[k]})
+        #         del self.graphInfo[k]
+        # else:
+        #     if ifAll:
+        #         for i in range(self.length()):
+        #             # cannot export in this case
+        #             self.data[i].delete(key)
+        #     else:
+        #         out.update(self.curve(-1).delete(key))
+        # return out
+
+    def getAttribute(self, key, default=''):
+        """ Legacy alias to attr. """
+        return self.attr(key, default=default)
 
     def attr(self, key, default=''):
-        """ Shorter alias to getAttribute. """
-        return self.getAttribute(key, default=default)
-    def getAttribute(self, key, default=''):
         k = key.lower()
         if k in self.headers:
             return self.headers[k]
@@ -548,35 +570,37 @@ class Graph:
             return self.graphInfo[k]
         if k in self.sampleInfo:
             return self.sampleInfo[k]
-        if self.length() > 0:
+        if len(self) > 0:
             return self[0].attr(k, default=default)
-#            return self.curve(0).getAttribute(k, default=default)
         return default
 
-    def deleteAttr(self, attrList):
-        out = {}
-        for key in attrList:
-            out.update({key: self.getAttribute(key)})
-            self.delete(key)
-        return out
+    # certainly useless
+    # def deleteAttr(self, attrList):
+    #     out = {}
+    #     for key in attrList:
+    #         out.update({key: self.attr(key)})
+    #         self.delete(key)
+    #     return out
 
     def castCurve(self, newtype, idx, silentSuccess=False):
         """
         Replace a Curve with another type of Curve with identical data and
         properties.
         """
-        if idx >= - self.length() and idx < self.length():
+        if idx >= - len(self) and idx < len(self):
             newCurve = self.curve(idx).castCurve(newtype)
             if isinstance(newCurve, Curve):
                 flag = self.replaceCurve(newCurve, idx)
                 if flag:
                     if not silentSuccess:
-                        print('Graph.castCurve: new Curve type:', self.curve(idx).classNameGUI() + '.')
+                        print('Graph.castCurve: new Curve type:',
+                              self.curve(idx).classNameGUI() + '.')
                 else:
                     print('Graph.castCurve')
                 return flag
         else:
-            print('Graph.castCurve: idx not in suitable range (', idx,', max', self.length(),').')
+            print('Graph.castCurve: idx not in suitable range (', idx, ', max',
+                  len(self), ').')
         return False
 
     def colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False, curvesselection=None):
@@ -592,28 +616,31 @@ class Graph:
             try:
                 curves = [int(c) for c in curvesselection]
             except Exception:
-                print('Graph.colorize Exception, please provide list of curves index to colorize')
+                print('Graph.colorize Exception, please provide list of',
+                      'curves index to colorize')
         # special cases
         if len(curves) < 1:
             return
         if len(curves) == 1:
-            self[curves[0]].update({'color': colorscale.valuesToColor(0.0, avoidWhite=avoidWhite)})
+            col = colorscale.valuesToColor(0.0, avoidWhite=avoidWhite)
+            self[curves[0]].update({'color': col})
             return
         # general case
         show = np.arange(len(curves))
-        if sameIfEmptyLabel: # if needs to have several curves with same color
+        if sameIfEmptyLabel:  # if needs to have several curves with same color
             show = np.array([0.0] * len(curves))
             val = 0.0
             for i in range(len(curves)):
                 show[i] = val
-                if self[curves[i]].attr('label') != '' and not self[curves[i]].isHidden():
+                if (self[curves[i]].attr('label') != ''
+                        and not self[curves[i]].isHidden()):
                     val += 1.0
                 elif i > 0:
                     show[i] = show[i-1]
-        cols = colorscale.valuesToColor(show/max(max(show),1.0), avoidWhite=avoidWhite)
+        cols = colorscale.valuesToColor(show/max(max(show), 1.0),
+                                        avoidWhite=avoidWhite)
         for i in range(len(curves)):
             self[curves[i]].update({'color': cols[i]})
-
 
     def applyTemplate(self, graph, alsoCurves=True):
         """
@@ -649,84 +676,94 @@ class Graph:
             c.update({'label': c.getAttribute('label').replace(old, new)})
 
     def checkValidText(self):
-        text = self.getAttribute('text', None)
-        texy = self.getAttribute('textxy', '')
-        targ = self.getAttribute('textargs', {})
+        text = self.attr('text', None)
+        texy = self.attr('textxy', '')
+        targ = self.attr('textargs', {})
         if text is None:
             self.update({'textxy': '', 'textargs': ''})
             return
         onlyfirst = False if isinstance(text, list) else True
         # transform everything into lists
+        text, texy, targ = self._checkValidTextInput(text, texy, targ)
+        if onlyfirst:
+            text, texy, targ = text[0], texy[0], targ[0]
+        if text != self.attr('text'):
+            print('Corrected attribute text', text, '(former',
+                  self.attr('text'), ')')
+        if texy != self.attr('textxy') and self.attr('textxy', None) is not None:
+            print('Corrected attribute textxy', texy, '(former',
+                  self.attr('textxy'), ')')
+        if targ != self.attr('textargs'):
+            print('Corrected attribute textargs', targ, '(former',
+                  self.attr('textargs'), ')')
+        self.update({'text': text, 'textxy': texy, 'textargs': targ})
+
+    def _checkValidTextInput(self, text, texy, targ):
         if not isinstance(text, list):
             text = [text]
         if not isinstance(targ, list):
             targ = [targ]
         if not isinstance(texy, list):
             texy = [texy]
-        if len(texy) == 2 and not isinstance(texy[0], (list, tuple)) and not texy in [['',''], ('','')]:
+        # print('_checkValidTextInput texy', texy, text[0])
+        if (len(texy) == 2 and not isinstance(texy[0], (list, tuple))
+                and texy[0] != '' and texy[1] != ''):
             texy = [texy]  # if texy was like (0.5,0.8)
         for i in range(len(targ)):
             if not isinstance(targ[i], dict):
-                # print('Graph.checkValidText targ set', i, '{} (previous', targ[i], ')')
                 targ[i] = {}
         for i in range(len(texy)):
             if not isinstance(texy[i], (tuple, list)):
-                # print('Graph.checkValidText texy set', i, '\'\' (previous', texy[i], ')')
                 texy[i] = ''
         while len(texy) < len(text):
             texy.append(texy[-1])
         while len(targ) < len(text):
             targ.append(targ[-1])
-        if onlyfirst:
-            text, texy, targ = text[0], texy[0], targ[0]
-        if text != self.getAttribute('text'):
-            print('Corrected attribute text', text, '(former', self.getAttribute('text'),')')
-        if texy != self.getAttribute('textxy') and self.getAttribute('textxy', None) is not None:
-            print('Corrected attribute textxy', texy, '(former', self.getAttribute('textxy'),')')
-        if targ != self.getAttribute('textargs'):
-            print('Corrected attribute textargs', targ, '(former', self.getAttribute('textargs'),')')
-        self.update({'text': text, 'textxy': texy, 'textargs': targ})
+        return text, texy, targ
 
     def addText(self, text, textxy, textargs=None):
         """
         Adds a text to be annotated in the plot, handling the not-so-nice
         internal implementation
+        text, textxy, textargs: as single elements, or as lists (1 item per
+        annotation)
         """
         if textargs is None:
             textargs = {}
         restore = []
-        restore.append({'text':     self.getAttribute('text'),
-                        'textxy':   self.getAttribute('textxy'),
-                        'textargs': self.getAttribute('textargs')})
+        restore.append({'text':     self.attr('text'),
+                        'textxy':   self.attr('textxy'),
+                        'textargs': self.attr('textargs')})
+        text, textxy, textargs = self._checkValidTextInput(text, textxy, textargs)
         attrs = {'text': text, 'textxy': textxy, 'textargs': textargs}
-        # TODO: ensure text, textxy and textargs if list have same length
-        if self.getAttribute('text', None) is None:
+        if self.attr('text', None) is None:
             self.update(attrs)
-        else:
-            if not isinstance(self.getAttribute('text'), list):
-                for key in attrs.keys(): # ensures attributes are list
-                    self.update({key: [self.getAttribute(key, '')]})
-            for key in attrs.keys():
-                self.update({key: self.getAttribute(key) + [attrs[key]]})
+        else:  # need to merge existing with new
+            self.checkValidText()  # makes sure existing info are as lists
+            for key in attrs:
+                self.update({key: self.attr(key) + attrs[key]})
+        self.checkValidText()
         return restore
 
-    def removeText(self):
+    def removeText(self, byId=-1):
+        """
+        By default, removes the last text annotation in the list
+        If byId is provided, removes the annotation with corresponding index
+        """
         restore = []
-        restore.append({'text':     self.getAttribute('text'),
-                        'textxy':   self.getAttribute('textxy'),
-                        'textargs': self.getAttribute('textargs')})
+        restore.append({'text':     self.attr('text'),
+                        'textxy':   self.attr('textxy'),
+                        'textargs': self.attr('textargs')})
         attrs = ['text', 'textxy', 'textargs']
-        if self.getAttribute('text', None) is None:
+        self.checkValidText()
+        if self.attr('text', None) is None:
             pass
         else:
-            if not isinstance(self.getAttribute('text'), list):
-                for key in attrs:  # ensures attributes are list
-                    self.update({key: [self.getAttribute(key, '')]})
             for key in attrs:
-                self.update({key: self.getAttribute(key)[:-1]})
+                tmp = self.attr(key)
+                del tmp[byId]
+                self.update({key: tmp})
         return restore
-
-
 
     # some mathemetical operation on curves
     def curvesAdd(self, idx0, idx1, interpolate=0, **kwargs):
@@ -754,7 +791,7 @@ class Graph:
 
     def _getAlter(self):
         """ returns the formatted alter instruction of self """
-        return self._getAlterToFormat(self.getAttribute('alter'))
+        return self._getAlterToFormat(self.attr('alter'))
 
     @classmethod
     def _getAlterToFormat(cls, alter):
@@ -765,8 +802,6 @@ class Graph:
             alter = ['', alter]
         return alter
 
-
-
     def formatAxisLabel(self, label):
         """
         Returns a string for label according to user preference.
@@ -774,20 +809,20 @@ class Graph:
         Other possible input is ['This is a Quantity', 'Q', 'unit']
         """
         # retrieve user preference
-        symbol= bool(self.config('graph_labels_symbols', False))
+        symbol = bool(self.config('graph_labels_symbols', False))
         units = self.config('graph_labels_units', default='[]', astype=str)
-        units = units.replace('unit', '').replace(' ','')
+        units = units.replace('unit', '').replace(' ', '')
         # format input
         if isinstance(label, str):
             if units != '[]':  # that is default, no need to do anything
-                expr = '^(.* )\[(.*)\](.*)$'
+                expr = r'^(.* )\[(.*)\](.*)$'  # [ ] as characters, not a set
                 if label != '':
                     f = refindall(expr, label)
                     if isinstance(f, list) and len(f) == 1 and len(f[0]) == 3:
                         if units in ['DIN', '/']:
-                            return f[0][0].strip(' ') + ' / ' + f[0][1] + '' + f[0][2]
+                            return f[0][0].strip(' ')+' / '+f[0][1]+''+f[0][2]
                         elif units == '()':
-                            return f[0][0].strip(' ') + '(' + f[0][1] + ')' + f[0][2]
+                            return f[0][0].strip(' ')+'('+f[0][1]+')'+f[0][2]
         elif isinstance(label, list):
             while len(label) < 3:
                 label += ['']
@@ -814,7 +849,7 @@ class Graph:
             if astype in [str, 'str']:
                 return str(out)
             else:
-                return stringToVariable(out)
+                return strToVar(out)
         return default
 
     def filenamewithpath(self, filename):
@@ -822,7 +857,8 @@ class Graph:
         if os.path.isabs(filename):
             return filename
         path = ''
-        if hasattr(self, 'filename') and isinstance(self.filename, str) and len(self.filename) > 0:
+        if (hasattr(self, 'filename') and isinstance(self.filename, str)
+                and len(self.filename) > 0):
             path = os.path.dirname(os.path.abspath(self.filename))
         return os.path.join(path, filename)
 
@@ -872,8 +908,8 @@ class Graph:
         if ifSubPlot not in [True, False]:
             ifSubPlot = False
             if (figAx is not None and isinstance(figAx, list)
-                and len(figAx) > 1 and figAx[1] is not None):
+                    and len(figAx) > 1 and figAx[1] is not None):
                 ifSubPlot = True
-        return GraphIO.plot(self, filesave=filesave, imgFormat=imgFormat, figsize=figsize,
-                            ifSave=ifSave, ifExport=ifExport, figAx=figAx,
-                            ifSubPlot=ifSubPlot)
+        return GraphIO.plot(self, filesave=filesave, imgFormat=imgFormat,
+                            figsize=figsize, ifSave=ifSave, ifExport=ifExport,
+                            figAx=figAx, ifSubPlot=ifSubPlot)

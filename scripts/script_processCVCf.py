@@ -11,6 +11,7 @@ import numpy as np
 import copy
 import matplotlib.pyplot as plt
 import sys
+import warnings
 
 path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 if path not in sys.path:
@@ -23,8 +24,9 @@ from grapa.colorscale import Colorscale
 from grapa.curve_image import Curve_Image
 from grapa.mathModule import roundSignificant
 
-from grapa.datatypes.curveCf import GraphCf
-from grapa.datatypes.curveCV import GraphCV, CurveCV
+from grapa.datatypes.graphCf import GraphCf
+from grapa.datatypes.graphCV import GraphCV
+from grapa.datatypes.curveCV import  CurveCV
 from grapa.datatypes.curveArrhenius import CurveArrheniusExtrapolToZero
 
 
@@ -37,11 +39,12 @@ def maskUndesiredLegends(graph, legend):
     if legend == 'all':
         pass
     elif legend == 'none':
-        for c in range(0, graph.length()):
-            graph.curve(c).update({'labelhide': 1})
-    else: # legend == 'minmax':
-        for c in range(1, graph.length()-1):
-            graph.curve(c).update({'labelhide': 1})
+        for c in range(0, len(graph)):
+            graph[c].update({'labelhide': 1})
+    else:  # legend == 'minmax':
+        for c in range(1, len(graph)-1):
+            graph[c].update({'labelhide': 1})
+
 
 def setXlim(graph, keyword='tight'):
     if keyword != 'tight':
@@ -51,20 +54,24 @@ def setXlim(graph, keyword='tight'):
         xlim = [min(xlim[0], min(c.x())), max(xlim[1], max(c.x()))]
     graph.update({'xlim': xlim})
 
-    
 
-def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClose=True, newGraphKwargs={}):
+
+def script_processCV(folder, legend='auto', ROIfit=None, ROIsmart=None, pltClose=True, newGraphKwargs={}):
     """
     """
+    DEFAULT_T = 300
+
+    WARNINGS = []
+
     newGraphKwargs = copy.deepcopy(newGraphKwargs)
     newGraphKwargs.update({'silent': True})
-    
+
     print('Script process C-V')
     if ROIfit is None:
         ROIfit = CurveCV.CST_MottSchottky_Vlim_def
     if ROIsmart is None:
         ROIsmart = CurveCV.CST_MottSchottky_Vlim_adaptative
-    
+
     graph      = Graph('', **newGraphKwargs)
     graphPhase = Graph('', **newGraphKwargs)
     graphVbi   = Graph('', **newGraphKwargs)
@@ -84,40 +91,55 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     # open all data files
     for file in listdir:
         print(file)
-        graphTmp = Graph(os.path.join(folder, file), complement={'_CVLoadPhase': True}, **newGraphKwargs)
-        if graph.length() == 0:
+#        with warnings.catch_warnings():
+        with warnings.catch_warnings(record=True) as w:
+            graphTmp = Graph(os.path.join(folder, file), complement={'_CVLoadPhase': True}, **newGraphKwargs)
+        if len(w) > 0:
+            for _ in w:
+                WARNINGS.append(str(_.message))
+        if len(graph) == 0:
             graph = graphTmp
-            while graph.length() > 1:
+            while len(graph) > 1:
                 graph.deleteCurve(1)
         else:
-            graph.append(graphTmp.curve(0))
-        if graphTmp.length() > 1:
-            graphPhase.append(graphTmp.curve(1))
-    graph.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
-    graphPhase.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
-    lbl = graph.curve(-1).getAttribute('label').replace(' K','K').split(' ')
+            graph.append(graphTmp[0])
+        if len(graphTmp) > 1:
+            graphPhase.append(graphTmp[1])
+        else:
+            graphPhase.append(Curve([[0], [0]], {}))
+    graph.colorize(Colorscale(np.array([[1, 0.43, 0], [0, 0, 1]]), invert=True))  # ThW admittance colorscale
+    graphPhase.colorize(Colorscale(np.array([[1, 0.43, 0], [0, 0, 1]]), invert=True))  # ThW admittance colorscale
+    lbl = graph[-1].attr('label').replace(' K','K').split(' ')
+    lb0 = graph[0].attr('label').replace(' K','K').split(' ')
+    joined = ' '.join(lbl[:-1])
+    joine0 = ' '.join(lb0[:-1])
+    legendifauto = 'all' if joined != joine0 else 'minmax'
     if len(lbl) > 1:
-        graph.update({'title': ' '.join(lbl[:-1])})
-        graph.replaceLabels(' '.join(lbl[:-1]), '')
-        graphPhase.update({'title': ' '.join(lbl[:-1])})
-        graphPhase.replaceLabels(' '.join(lbl[:-1]), '')
-    graphPhase.update({'xlabel': graph.getAttribute('xlabel'),
+        graph.update(     {'title': joined})
+        graphPhase.update({'title': joined})
+        if legendifauto == '':  # later, will also remove most text of legend
+            graph.replaceLabels(joined, '')
+            graphPhase.replaceLabels(joined, '')
+    graphPhase.update({'xlabel': graph.attr('xlabel'),
                        'ylabel': graph.formatAxisLabel('Impedance angle [°]')})
     # mask undesired legends
+    if legend == 'auto':
+        legend = legendifauto
     maskUndesiredLegends(graph, legend)
     maskUndesiredLegends(graphPhase, legend)
     # set xlim
     setXlim(graph, 'tight')
     setXlim(graphPhase, 'tight')
-    
-    labels = graph.getAttribute('xlabel'),  graph.getAttribute('ylabel')
+
+    labels = graph.attr('xlabel'),  graph.attr('ylabel')
     presets = {}
     presets.update({'default': {'ylim': [0, np.nan], 'alter': '',
                                 'typeplot': '',
-                                'xlabel': labels[0], 'ylabel': labels[1]}})
+                                'xlabel': labels[0], 'ylabel': labels[1],
+                                'subplots_adjust': [0.16, 0.15]}})
     presets.update({'MS': {'ylim': '', 'alter': ['', 'CurveCV.y_ym2'],
                            'typeplot': '',
-                           'ylabel': graph.formatAxisLabel(['1 / C^2', '', 'nF$^{-2}$ cm$^{4}$']),
+                           'ylabel': graph.formatAxisLabel(['1 / C$^2$', '', 'nF$^{-2}$ cm$^{4}$']),
                            'xlabel': labels[0]}})
     presets.update({'NV': {'ylim': [0, np.nan],
                            'typeplot': '',
@@ -126,7 +148,7 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
                            'xlabel': labels[0]}})
     presets.update({'NVlog': copy.deepcopy(presets['NV'])})
     presets['NVlog'].update({'ylim': '', 'typeplot': 'semilogy'})
-    presets.update({'Nx': {'ylim': [0, np.nan],
+    presets.update({'Nx': {'ylim': [0, np.nan], 'xlim': '',
                            'alter': ['CurveCV.x_CVdepth_nm', 'CurveCV.y_CV_Napparent'],
                            'typeplot': '',
                            'ylabel': graph.formatAxisLabel(['Apparent doping density', 'N_{CV}', 'cm$^{-3}$']),
@@ -134,10 +156,13 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     presets.update({'Nxlog': copy.deepcopy(presets['Nx'])})
     presets['Nxlog'].update({'ylim': '', 'typeplot': 'semilogy'})
 
+    graphVbi.update({'subplots_adjust': [0.16, 0.15]})
+    graphPhase.update({'subplots_adjust': [0.16, 0.15]})
+
     # save
-    filesave = os.path.join(folder, graph.getAttribute('title').replace(' ','_')+'_') # graphIO.filesave_default(self)
-    plotargs = {} # {'ifExport': False, 'ifSave': False}
-    #plotargs = {}
+    filesave = os.path.join(folder, graph.attr('title').replace(' ','_')+'_')  # graphIO.filesave_default(self)
+    plotargs = {}  # {'ifExport': False, 'ifSave': False}
+    # plotargs = {}
     # default graph: C vs log(f)
     graph.update(presets['default'])
     graph.plot(filesave=filesave+'CV', **plotargs)
@@ -162,6 +187,15 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     # add doping V=0
     curves = []
     for curve in graph:
+        # check that temperature is set
+        if curve.attr('temperature [k]') == '':
+            msg = ('WARNING processCV file '
+                   + os.path.basename(curve.attr('filename'))
+                   +' temperature [k] not found, set to '+str(DEFAULT_T)+' K.')
+            print(msg)
+            WARNINGS.append(msg)
+            curve.update({'temperature [k]': DEFAULT_T})
+        # do required stuff
         tmp = curve.CurveCV_0V()
         if tmp is not False:
             tmp.update({'label': tmp.attr('label')+' Ncv @ 0V'})
@@ -185,7 +219,7 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     for c in range(len(graph)-1, -1, -1): # remove unnecessary curves
         if graph[c] in curves:
             graph.deleteCurve(c)
-        
+
     # Fit Mott-Schottky curves
     Ncvminmax0 = [np.inf, -np.inf]
     Ncvminmax1 = [np.inf, -np.inf]
@@ -196,30 +230,30 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     graphVbi.append(N0V)
     graphSmart = Graph('', **newGraphKwargs)
     numCurves = graph.length()
-    for curve in range(numCurves):
+    for curve in range(numCurves): # number of Curves in graph will change
         c = graph.curve(curve)
         c.update({'linewidth': 0.25})
         new   = c.CurveCV_fitVbiN(ROIfit, silent=True)
         smart = c.CurveCV_fitVbiN(c.smartVlim_MottSchottky(Vlim=ROIsmart), silent=True)
         if isinstance(new, CurveCV):
             graph.append(new)
-            graph.curve(-1).update({'linespec': '--', 'color': c.getAttribute('color')})
-            Vbi, Ncv = new.getAttribute('_popt')[0], new.getAttribute('_popt')[1]
-            graphVbi.curve(0).appendPoints([c.getAttribute('temperature [k]')], [Vbi])
-            graphVbi.curve(1).appendPoints([c.getAttribute('temperature [k]')], [Ncv])
+            graph[-1].update({'linespec': '--', 'color': c.attr('color')})
+            Vbi, Ncv = new.attr('_popt')[0], new.attr('_popt')[1]
+            graphVbi[0].appendPoints([c.attr('temperature [k]')], [Vbi])
+            graphVbi[1].appendPoints([c.attr('temperature [k]')], [Ncv])
             Ncvminmax0 = [min(Ncvminmax0[0], Ncv), max(Ncvminmax0[1], Ncv)]
         if isinstance(smart, CurveCV):
             graphSmart.append(smart)
-            graphSmart.curve(-1).update({'linespec': '--', 'color': c.getAttribute('color')})
-            Vbi, Ncv = smart.getAttribute('_popt')[0], smart.getAttribute('_popt')[1]
-            graphVbi.curve(2).appendPoints([c.getAttribute('temperature [k]')], [Vbi])
-            graphVbi.curve(3).appendPoints([c.getAttribute('temperature [k]')], [Ncv])
+            graphSmart[-1].update({'linespec': '--', 'color': c.attr('color')})
+            Vbi, Ncv = smart.attr('_popt')[0], smart.attr('_popt')[1]
+            graphVbi[2].appendPoints([c.attr('temperature [k]')], [Vbi])
+            graphVbi[3].appendPoints([c.attr('temperature [k]')], [Ncv])
             Ncvminmax1 = [min(Ncvminmax1[0], Ncv), max(Ncvminmax1[1], Ncv)]
     graphVbi.update({'legendtitle': 'Mott-Schottky fit'})
-    graphVbi.curve(0).update({'linespec': 'o', 'color': 'k', 'label': 'Built-in voltage (same Vlim)', 'markeredgewidth': 0, })
-    graphVbi.curve(1).update({'linespec': 'x', 'color': 'k', 'label': 'N$_\mathrm{CV}$ (same Vlim)'})
-    graphVbi.curve(2).update({'linespec': 'o', 'color': 'r', 'label': 'Built-in voltage (adaptative Vlim)', 'markeredgewidth': 0})
-    graphVbi.curve(3).update({'linespec': 'x', 'color': 'r', 'label': 'N$_\mathrm{CV}$ (adaptative Vlim)'})
+    graphVbi[0].update({'linespec': 'o', 'color': 'k', 'label': 'Built-in voltage (same Vlim)', 'markeredgewidth': 0})
+    graphVbi[1].update({'linespec': 'x', 'color': 'k', 'label': 'N$_\mathrm{CV}$ (same Vlim)'})
+    graphVbi[2].update({'linespec': 'o', 'color': 'r', 'label': 'Built-in voltage (adaptative Vlim)', 'markeredgewidth': 0})
+    graphVbi[3].update({'linespec': 'x', 'color': 'r', 'label': 'N$_\mathrm{CV}$ (adaptative Vlim)'})
     graphVbi.update({'xlabel': graphVbi.formatAxisLabel(['Temperature', 'T', 'K']),
                      'ylabel': graphVbi.formatAxisLabel(['Built-in voltage', 'V_{bi}', 'V'])})
     graphVbi.plot(filesave=filesave+'VbiT', **plotargs)
@@ -264,16 +298,21 @@ def script_processCV(folder, legend='minmax', ROIfit=None, ROIsmart=None, pltClo
     # graph phase
     graphPhase.update({'alter': '', 'ylim': [0, 90]})
     f = graphPhase.curve(0).x()
-#    graphPhase.append(Curve([[min(f), max(f), max(f), min(f)], [0, 0, 20, 20]], {'type': 'fill', 'facecolor': [1,0,0,0.5], 'linewidth': 0}))
+    #    graphPhase.append(Curve([[min(f), max(f), max(f), min(f)], [0, 0, 20, 20]], {'type': 'fill', 'facecolor': [1,0,0,0.5], 'linewidth': 0}))
     graphPhase.append(Curve([[min(f), max(f)], [20, 20]], {'color': [1,0,0], 'linewidth': 2, 'linespec': '--'}))
     graphPhase.plot(filesave=filesave+'phase', **plotargs)
     if pltClose:
         plt.close()
-    
-    print('End of process C-V.')
+
+    if len(WARNINGS) > 0:
+        print('Enf of process C-V. Got some warnings along the way... see above or summary')
+        for msg in WARNINGS:
+            print(msg)
+    else:
+        print('End of process C-V, successful.')
     return graph
-    
-    
+
+
 def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     """
     legend: possible values: 'no', 'minmax', 'all'
@@ -305,14 +344,14 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
         graph.append(graphTmp.curve(0)) # append C-f
         if graphTmp.length() > 1:
             for c in graphTmp.iterCurves():
-                if c.getAttribute('_CfPhase', False):
+                if c.attr('_CfPhase', False):
                     graphPhase.append(c)
-                if c.getAttribute('_CfNyquist', False):
+                if c.attr('_CfNyquist', False):
                     graphNyqui.append(c)
     graph.colorize     (Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
     graphPhase.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
     graphNyqui.colorize(Colorscale(np.array([[1,0.43,0], [0,0,1]]), invert=True)) # ThW admittance colorscale
-    lbl = graph.curve(-1).getAttribute('label').replace(' K','K').split(' ')
+    lbl = graph.curve(-1).attr('label').replace(' K','K').split(' ')
     if len(lbl) > 1:
         graph.update     ({'title': ' '.join(lbl[:-1])})
         graphPhase.update({'title': ' '.join(lbl[:-1])})
@@ -320,9 +359,9 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
         graph.replaceLabels     (' '.join(lbl[:-1]), '')
         graphPhase.replaceLabels(' '.join(lbl[:-1]), '')
         graphNyqui.replaceLabels(' '.join(lbl[:-1]), '')
-    graphPhase.update({'xlabel': graph.getAttribute('xlabel'),
+    graphPhase.update({'xlabel': graph.attr('xlabel'),
                        'ylabel': graphPhase.formatAxisLabel('Impedance angle [°]')})
-    graphNyqui.update({'xlabel': graph.getAttribute('xlabel'),
+    graphNyqui.update({'xlabel': graph.attr('xlabel'),
                        'ylabel': graphNyqui.formatAxisLabel('Impedance angle [°]')})
     graphNyqui.update({'xlabel': graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[0]),
                        'ylabel': graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[1])})
@@ -334,13 +373,13 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     setXlim(graph, 'tight')
     setXlim(graphPhase, 'tight')
     setXlim(graphNyqui, 'tight')
-    
+
     # save
-    filesave = os.path.join(folder, graph.getAttribute('title').replace(' ','_')+'_') # graphIO.filesave_default(self)
+    filesave = os.path.join(folder, graph.attr('title').replace(' ','_')+'_') # graphIO.filesave_default(self)
     plotargs = {} # {'ifExport': False, 'ifSave': False}
     graphattr = {}
     for attr in ['alter', 'typeplot', 'xlim', 'ylim', 'xlabel', 'ylabel']:
-        graphattr.update({attr: graph.getAttribute(attr)})
+        graphattr.update({attr: graph.attr(attr)})
     # default graph: C vs log(f)
     graph.update({'ylim': [0, np.nan]})
     graph.plot(filesave=filesave+'Clogf', **plotargs)
@@ -381,17 +420,19 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     x = [0] + list(graph.curve(0).x())
     Tmin, Tmax = np.inf, -np.inf
     for c in graph.iterCurves():
-        T = c.getAttribute('temperature', None)
+        T = c.attr('temperature', None)
         if T is None:
-            T = c.getAttribute('temperature [k]', None)
+            T = c.attr('temperature [k]', None)
         if T is None:
-            print('Script Cf, image, cannot identify Temperature', c.getAttributes())
+            print('Script Cf, image, cannot identify Temperature',
+                  c.getAttributes())
             flag = False
         else:
             Tmin, Tmax = min(Tmin, T),  max(Tmax, T)
         y = [T] + list(c.y(alter='CurveCf.y_mdCdlnf'))
         if len(x) != len(y):
-            print('WARNING data curve', T, 'not consistent number of points throughout the input files!', c.getAttribute('filename'))
+            print('WARNING data curve', T, 'not consistent number of points',
+                  'throughout the input files!', c.attr('filename'))
             continue
         graphImage.append(Curve_Image([x, y], {}))
     if flag:
@@ -420,12 +461,12 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
         else:
             print('script Cf, image, Warning T delta <=0, cannot properly scale image.')
         graphImage.update({'typeplot': 'semilogx',
-                           'xlabel': graph.getAttribute('xlabel'),
+                           'xlabel': graph.attr('xlabel'),
                            'ylabel': graphImage.formatAxisLabel(['Temperature', '', 'K'])})
         graphImage.curve(0).update({'datafile_xy1rowcol': 1,
                                     'cmap': 'afmhot',
                                     'type': 'contourf',
-                                    'colorbar': {'label': graph.getAttribute('ylabel'),#'-dC / dln(f)',
+                                    'colorbar': {'label': graph.attr('ylabel'),  #'-dC / dln(f)',
                                                  'adjust': [1.05, 0, 0.05, 1, 'ax']},
                                     'vmin': 0,
                                     'levels': levels})
@@ -437,17 +478,17 @@ def script_processCf(folder, legend='minmax', pltClose=True, newGraphKwargs={}):
     graph.update({'alter': ['CurveCV.x_CVdepth_nm', 'x'], 'typeplot': 'semilogy'})
     graph.update({'xlabel': graph.formatAxisLabel(['Apparent depth', 'd', 'nm']),
                   'ylabel': graph.formatAxisLabel(['Frequency', 'f', 'Hz']),
-                  'xlim':'', 'ylim':''})
+                  'xlim': '', 'ylim': ''})
     graph.plot(filesave=filesave+'apparentDepth', **plotargs)
     if pltClose:
         plt.close()
-    
-    graph.update(graphattr) # restore initial graph
+
+    graph.update(graphattr)  # restore initial graph
     print('Tip for next step: pick inflection points for different T, then the fit activation energy.')
     print('End of process C-f.')
     return graph
 
-    
+
 if __name__ == "__main__":
 
     folder = './../examples/Cf/'
@@ -458,4 +499,3 @@ if __name__ == "__main__":
     graph = script_processCV(folder, ROIfit=[0.15,0.3], pltClose=True)
 
     plt.show()
-    

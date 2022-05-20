@@ -2,15 +2,32 @@ TFPV data reading software
 GRAPA: GRAphing and Photovoltaics Analysis
 
 
-WISH LIST
-
-- BB extract CdS thickness from EQE
-- RC set police fonts
-- RC create class for curve action, able to configure withs of individual fields and remove complexity from GUI
-- RC continue with documentation
-
 KNOWN BUGS
 - Conversion warning when opening HR2000 files -> does not seem to cause problem
+
+
+
+Version 0.6.0.0
+Released 20.05.2022
+Additions
+- Main GUI now handles several graphs at the same time, thanks to a tab mechanism. Hope this will be useful!
+- Change in handling of escape sequences: \n, \t, etc. Should be compatible with some special characters with different charsets (e.g. alt+230 "µ" in both ascii and utf-8 file encoding) and latex commands with 2 backslashes (e.g. "\\alpha"). "\alpha" would fail due to the escaped "\a" special character, but "\gamma" should succeed). Possible loss of compatiblity with previous graphs, esp. with latex symbols - hence, new major version number.
+- Axis limits: when axes limits cannot be computed with data transforms, the user input is used to set the axis limit. It is now possible to define axes limit values, when previously this could not be done. The default behavior remains that the user input for axis limits are transformed the same way as the plotted data.
+- Popup Annotations: added a vertical scrollbar, changed the order of displayed elements
+- scriptCV: The warnings are collected and reported at the end. Also, more robust processing of input files with slightly different formatting.
+- CurveSpectrum: added correction function instrumental response 800nm
+- CurveEQE: added an additional reference EQE spectrum (Empa PI 20.8%). The data loading mechanisms is modified and new reference spectra are now easy to add - see file datatypes/EQE_referenceSpectra.
+- CurveXRF: added an annotation function to place labels for peak intensities according to the database https://xdb.lbl.gov/Section1/Table_1-3.pdf.
+- CurveXRF: improved the loading of experiemntal parameters. The data are now stored inthe Curve where they belong
+- CurveSIMS: add function to crop data inside ROI
+- CurveTRPL: fitted curves can now be normalized with same parameters as the input data
+- CurveArrhenius: added possibility to fit using a power law
+- GUI: a major rework of the organisation of the GUI code. Possibilities to hide different panels. Little visible changes, but many possibilities for new bugs. Please let me know if you notice any!
+Bugs
+- Solved a certain number of those. Did not keep track.
+- scriptJV: solved a bug with _JVall when processing several samples simultaneously
+- Certainly added quite a few new bugs. Enjoy, my pleasure
+
 
 
 Version 0.5.4.8

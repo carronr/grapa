@@ -3,14 +3,14 @@
 Created on Sun Jun 11 15:10:29 2017
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
+Carron
 """
 
 import numpy as np
-from copy import deepcopy
 
 from grapa.curve import Curve
-from grapa.graph import Graph
+# from grapa.graph import Graph
 from grapa.mathModule import is_number
 
 
@@ -19,14 +19,13 @@ class CurveMath(Curve):
     Class handling optical spectra, with notably nm to eV conversion and
     background substraction.
     """
-    
+
     CURVE = 'Curve Math'
-    
+
     def __init__(self, data, attributes, silent=False):
         # main constructor
         Curve.__init__(self, data, attributes, silent=silent)
-        self.update ({'Curve': CurveMath.CURVE})
-
+        self.update({'Curve': CurveMath.CURVE})
 
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
@@ -36,31 +35,30 @@ class CurveMath(Curve):
         if graph is not None:
             for i in range(kwargs['graph'].length()):
                 listCurves.append(str(i) + ' ' + str(kwargs['graph'].curve(i).getAttribute('label'))[0:6])
-        fieldprops = {'field':'Combobox', 'width':10, 'values':listCurves, 'bind':'beforespace'}
+        fieldprops = {'field': 'Combobox', 'width': 10, 'values': listCurves,
+                      'bind': 'beforespace'}
         default = ''
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
 #        out.append([Graph._curveMethod_graphRef, 'Add', ['{this Curve} + cst', '+ Curve_idx'], [0, default], {'curve': self, 'method': 'add', 'operator': 'add'}, [{},fieldprops]]) # one line per function
 #        out.append([Graph._curveMethod_graphRef, 'Sub', ['{this Curve} - cst', '- Curve_idx'], [0, default], {'curve': self, 'method': 'add', 'operator': 'div'}, [{},fieldprops]]) # one line per function
 #        out.append([Graph._curveMethod_graphRef, 'Mul', ['{this Curve} * cst', '* Curve_idx'], [1, default], {'curve': self, 'method': 'add', 'operator': 'mul'}, [{},fieldprops]]) # one line per function
 #        out.append([Graph._curveMethod_graphRef, 'Div', ['{this Curve} / cst', '/ Curve_idx'], [1, default], {'curve': self, 'method': 'add', 'operator': 'div'}, [{},fieldprops]]) # one line per function
-        out.append([self.add, 'Add', ['{this Curve} + cst', '+ Curve_idx'], [0, default], {'graph': graph, 'operator': 'add'}, [{},fieldprops]]) # one line per function
-        out.append([self.add, 'Sub', ['{this Curve} - cst', '- Curve_idx'], [0, default], {'graph': graph, 'operator': 'sub'}, [{},fieldprops]]) # one line per function
-        out.append([self.add, 'Mul', ['{this Curve} * cst', '* Curve_idx'], [1, default], {'graph': graph, 'operator': 'mul'}, [{},fieldprops]]) # one line per function
-        out.append([self.add, 'Div', ['{this Curve} / cst', '/ Curve_idx'], [1, default], {'graph': graph, 'operator': 'div'}, [{},fieldprops]]) # one line per function
-        out.append([self.neg, '0 - {this Curve} ', [], []]) # one line per function
-        out.append([self.inv, '1 / {this Curve} ', [], []]) # one line per function
+        out.append([self.add, 'Add', ['{this Curve} + cst', '+ Curve_idx'], [0, default], {'graph': graph, 'operator': 'add'}, [{}, fieldprops]])
+        out.append([self.add, 'Sub', ['{this Curve} - cst', '- Curve_idx'], [0, default], {'graph': graph, 'operator': 'sub'}, [{}, fieldprops]])
+        out.append([self.add, 'Mul', ['{this Curve} * cst', '* Curve_idx'], [1, default], {'graph': graph, 'operator': 'mul'}, [{}, fieldprops]])
+        out.append([self.add, 'Div', ['{this Curve} / cst', '/ Curve_idx'], [1, default], {'graph': graph, 'operator': 'div'}, [{}, fieldprops]])
+        out.append([self.neg, '0 - {this Curve} ', [], []])
+        out.append([self.inv, '1 / {this Curve} ', [], []])
         out.append([self.swapXY, 'x <-> y', [], []])
-        out.append([self.printHelp, 'Help!', [], []]) # one line per function
+        out.append([self.printHelp, 'Help!', [], []])
         return out
-    
+
     @classmethod
     def classNameGUI(cls):
         return cls.CURVE.replace('Curve ', '') + ' operations'
 
-        
-    
     def add(self, cst, curves, graph=None, operator='add'):
-        
+
         def op(x, y, operator):
             if operator == 'sub':
                 return x - y
@@ -71,19 +69,21 @@ class CurveMath(Curve):
             if operator == 'pow':
                 return x ** y
             if operator != 'add':
-                print('WARNING CureMath.add: unexpected operator argument (' + operator + ').')
+                print('WARNING CureMath.add: unexpected operator argument',
+                      '(' + operator + ').')
             return x + y
-        strjoin_ = {'add': ' + ', 'sub': ' - ', 'mul': ' * ', 'div': ' / ', 'pow': ' ** '}
+        strjoin_ = {'add': ' + ', 'sub': ' - ', 'mul': ' * ', 'div': ' / ',
+                    'pow': ' ** '}
         strjoin = strjoin_[operator] if operator in strjoin_ else ' + '
-         # fabricate a copy of the curve
+        # fabricate a copy of the curve
         out = self + 0
-        lbl = self.getAttribute('label')
+        lbl = self.attr('label')
         idx = np.nan
-        for c in range(graph.length()):
-            if graph.curve(c) == self:
+        for c in range(len(graph)):
+            if graph[c] == self:
                 idx = c
                 break
-        lst = ['{Curve ' + str(int(idx)) + (': '+lbl if lbl != '' else '') + '}']
+        lst = ['{Curve '+str(int(idx)) + (': '+lbl if lbl != '' else '') + '}']
         # constants
         if not isinstance(cst, (list, tuple)):
             cst = [cst]
@@ -97,38 +97,38 @@ class CurveMath(Curve):
             for c in curves:
                 if is_number(c):
                     out = op(out, graph.curve(int(c)), operator)
-                    lbl = graph.curve(int(c)).getAttribute('label')
+                    lbl = graph.curve(int(c)).attr('label')
                     lst.append('{Curve ' + str(int(c)))
                     if lbl != '':
                         lst[-1] = lst[-1] + ': ' + str(lbl)
                     lst[-1] = lst[-1] + '}'
         txt = strjoin.join(lst)
-        math = self.getAttribute('math')
+        math = self.attr('math')
         out.update({'math': math + '; ' + txt if math != '' else txt})
         return out
-    
+
     def neg(self):
         out = 0 - self
-        lbl = self.getAttribute('label')
+        lbl = self.attr('label')
         txt = ' - {Curve' + (': '+lbl if lbl != '' else '') + '}'
-        math = self.getAttribute('math')
+        math = self.attr('math')
         out.update({'math': math + '; ' + txt if math != '' else txt})
         return out
-        
+
     def inv(self):
         out = 1 / self
-        lbl = self.getAttribute('label')
+        lbl = self.attr('label')
         txt = '1 / {Curve' + (': '+lbl if lbl != '' else '') + '}'
-        math = self.getAttribute('math')
+        math = self.attr('math')
         out.update({'math': math + '; ' + txt if math != '' else txt})
         return out
 
     def swapXY(self):
-        out = 0 + self # work on copy
+        out = 0 + self  # work on copy
         out.setX(self.y())
         out.setY(self.x())
         txt = 'swap x<->y'
-        math = self.getAttribute('math')
+        math = self.attr('math')
         out.update({'math': math + '; ' + txt if math != '' else txt})
         return out
 

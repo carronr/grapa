@@ -3,7 +3,8 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics,
+Romain Carron
 """
 
 import numpy as np
@@ -11,101 +12,29 @@ import os
 from scipy import interpolate
 from scipy.signal import medfilt
 
-
 from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.mathModule import roundSignificant, roundSignificantRange
 
 
-
-class GraphEQE(Graph):
-    
-    FILEIO_GRAPHTYPE = 'EQE curve'
-    FILEIO_GRAPHTYPE_OLD = 'EQE curve (old)'
-    
-    AXISLABELS = [['Wavelength', '\lambda', 'nm'], ['Cell EQE', '', '%']]
-    
-    @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1='', **kwargs):
-        # new QE files
-        if fileExt == '.sr' and line1 == 'This is a QE measurment':
-            return True
-        # old setup QE files (2013(?) or older)
-        if fileExt == '.sr' and line1[0:16] == 'Reference Cell: ':
-            return True
-        return False
-
-    def readDataFromFile(self, attributes, **kwargs):
-        ifOld = False
-        # retrieve sample name - code should work for old and new file format
-        f = open(self.filename, 'r')
-        line = f.readline() # retrieve sample, should be stored on the 2nd line
-        if line[0:16] == 'Reference Cell: ':
-            ifOld = True
-        line = list(filter(len,
-                f.readline().replace(': ', '\t').strip(' \r\n\t').split('\t')))
-        # look for acquisition attributes
-        attributesFile = {}
-        interests = [['Amplification settings', 'amplification'],
-                     ['Lockin settings', 'lockin']]
-        for l in f:
-            for interest in interests:
-                if l.startswith(interest[0]):
-                    for param in l.strip().split('\t'):
-                        if ': ' in param:
-                            tmp = param.split(': ')
-                            attributesFile.update({interest[1]+tmp[0].replace(' ',''): tmp[1]})
-            if len(l) == 1 and l[0] in ['\n']:
-                break
-        f.close()
-        data = np.array([np.nan, np.nan])
-        try:
-            kw = {'delimiter': '\t', 'invalid_raise': False}
-            if ifOld:
-                kw.update({'skip_header': 14, 'usecols': [0, 6]})
-            else:
-                kw.update({'skip_header': 15, 'usecols': [0, 5]})
-            data = np.transpose(np.genfromtxt(self.filename, **kw))
-        except Exception:
-            if not self.silent:
-                print('readDataFromFileEQE cannot read file', self.filename)
-        # normalize data
-        self.append(CurveEQE(data, attributes))
-        self.curve(-1).update(attributesFile)
-        if len(data.shape) > 1:
-            self.curve(-1).update({'mulOffset': 100})
-        # update label with information stored inside the file
-        self.update({'label': line[-1].replace('_', ' ')})
-        # some default settings
-        self.update({'xlabel': self.formatAxisLabel(GraphEQE.AXISLABELS[0]),
-                     'ylabel': self.formatAxisLabel(GraphEQE.AXISLABELS[1]),
-                     'ylim': [0, 100], 'xlim': [300, np.nan]})
-        self.headers.update({'collabels': ['Wavelength [nm]', 'EQE [%]']})
-        # newer versions of EQE include phase signal -> one more header line
-        self.update({'sample': self.curve(0).getAttribute('label')})
-        # default value in files old setup
-        if self.headers['sample'] == 'Ref':
-            filenam_, fileext = os.path.splitext(self.getAttribute('filename'))
-            self.curve(-1).update({'label':
-                                   (filenam_.split('/')[-1]).split('\\')[-1]})
-            self.headers.update({'sample': filenam_})
-        if ifOld:
-            self.headers.update({'meastype': GraphEQE.FILEIO_GRAPHTYPE_OLD})
-
-
-
-    
-
 class CurveEQE(Curve):
-    
+    """
+    CurveEQE offer basic treatment of (external) quantum efficiency curves of
+    solar cells.
+    Input units should be in [nm] and values within [0-1]. If needed,
+    CurveSpectrum can convert [eV] in [nm].
+    """
+
     CURVE = 'Curve EQE'
 
-    EQE_AM15_REFERENCE = 'AM1-5_Ed2-2008.txt'
-    EQE_AM0_REFERENCE = 'AM0_2000_ASTM_E-490-00.txt'
-    EQE_BEST_CELL_REF = 'EQE_20.4_cell.txt'
-    EQE_BEST_CELL_LABEL = 'Empa 20.4%'
-    
-    
+    EQE_AM15_REFERENCE = None
+    EQE_AM15_REFERENCE_FILE = 'AM1-5_Ed2-2008.txt'
+    EQE_AM0_REFERENCE = None
+    EQE_AM0_REFERENCE_FILE = 'AM0_2000_ASTM_E-490-00.txt'
+
+    EQE_REF_SPECTRA = None
+    EQE_REF_SPECTRA_FILE = 'EQE_referenceSpectra.txt'
+
     def __init__(self, data, attributes, silent=False):
         # modify default label
         if 'label' in attributes:
@@ -117,16 +46,19 @@ class CurveEQE(Curve):
             data = np.array(data)
         # detect possible empty lines at beginnning (some versions of EQE files
         # ahave different number of header lines)
-        flag = True if len(data.shape) > 1 else False # check if data loaded
-        while flag:
-            if data[0, 0] == 0:
-                data = data[:, 1:]
-            else:
-                flag = False
+        flag = True if len(data.shape) > 1 else False  # check if data loaded
+        try:
+            while flag:
+                if data[0, 0] == 0:
+                    data = data[:, 1:]
+                else:
+                    flag = False
+        except IndexError:
+            pass
         # main constructor
         Curve.__init__(self, data, attributes, silent=silent)
         # bandgap calculation
-        popt = self.getAttribute('_popt')
+        popt = self.attr('_popt')
         if isinstance(popt, str) and popt == '':
             bandgap = [np.nan, np.nan]
             try:
@@ -139,61 +71,85 @@ class CurveEQE(Curve):
             # compute bandgap
             self.update({'bandgap': bandgap[0], 'bandgapslope': bandgap[1]})
         # for saved files further re-reading
-        self.update ({'Curve': CurveEQE.CURVE})
-
-
+        self.update({'Curve': CurveEQE.CURVE})
 
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
+        mulOffset = self.attr('mulOffset', default=1)
+        if isinstance(mulOffset, list):
+            mulOffset = mulOffset[1]
+        try:
+            mulOffset = float(mulOffset)
+        except TypeError:
+            mulOffset = 1
+
         # tauc (E*EQE)**2
         if (not self.attributeEqual('_popt')
-            and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurve')):
+                and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurve')):
             out.append([self.updateFitParam, 'Update fit', ['Eg', 'slope'],
-                        roundSignificant(self.getAttribute('_popt'),5)])
+                        roundSignificant(self.attr('_popt'), 5)])
         elif self.attributeEqual('_popt'):
-            mulOffset = self.getAttribute('mulOffset', default=1)
             out.append([self.CurveEQE_bandgap_print,
                         'Bandgap fit Tauc (eV*EQE)^2', ['Range EQE'],
                        ['['+str(0.25*mulOffset)+', '+str(0.70*mulOffset)+']']])
+
         # Eg from derivative method
         if (not self.attributeEqual('_popt')
-            and self.attributeEqual('_fitfunc', 'bandgapDeriv_savgol')):
+                and self.attributeEqual('_fitfunc', 'bandgapDeriv_savgol')):
             out.append([None, 'Cannot update, must create a new one from '
-                        +'initial EQE curve', [], []])
+                        + 'initial EQE curve', [], []])
         elif self.attributeEqual('_popt'):
             xdata = self.x()
             try:
                 tmpmed = medfilt(self.y(), 5)
                 ROI = [xdata[np.argmax(tmpmed)], np.max(xdata)]
             except Exception:
-                ROI = [np.min(xdata), np.max(xdata)]
+                if len(xdata) > 0:
+                    ROI = [np.min(xdata), np.max(xdata)]
+                else:
+                    ROI = [0, 0]
             out.append([self.CurveEQE_bandgapDeriv_print, 'Bandgap derivative',
-                        ['Savitsky Golay width', 'degree', 'nm range'], [5,2, roundSignificantRange(ROI,3)]])
+                        ['Savitsky Golay width', 'degree', 'nm range'],
+                        [5, 2, roundSignificantRange(ROI, 3)]])
+
         # EQE current
         if self.attributeEqual('_popt'):
-            out.append([self.currentCalc, 'EQE current', ['ROI', 'interpolate', 'spectrum'],
-                        [[min(self.x()), max(self.x())], 'linear', self.EQE_AM15_REFERENCE.replace('.txt','')], {},
+            fnames = [self.EQE_AM15_REFERENCE_FILE.replace('.txt', ''),
+                      self.EQE_AM0_REFERENCE_FILE.replace('.txt', '')]
+            if len(self.x()) > 0:
+                mM = [min(self.x()), max(self.x())]
+            else:
+                mM = [0, 0]
+            out.append([self.currentCalc, 'EQE current',
+                        ['ROI', 'interpolate', 'spectrum'],
+                        [mM, 'linear', fnames[0]],
+                        {'ifGUI': True},
                         [{'width': 15},
-                         {'width': 8, 'field':'Combobox', 'values':['linear', 'quadratic', 'cubic']},
-                         {'width': 8, 'field':'Combobox', 'values':[self.EQE_AM15_REFERENCE.replace('.txt',''), self.EQE_AM0_REFERENCE.replace('.txt','')]}]])
-        # EQE 20.4%
-        if self.attributeEqual('_popt'):
-            out.append([self.CurveEQE_Empa20p4, self.EQE_BEST_CELL_LABEL, [], []])
+                         {'width': 8, 'field': 'Combobox', 'values': ['linear', 'quadratic', 'cubic']},
+                         {'width': 8, 'field': 'Combobox', 'values': fnames}]])
+
+        # reference spectra - 20.4%, 20.8%, etc.
+        refs = self._referenceEQESpectra()
+        lbls = [curve.attr('label') for curve in refs]
+        out.append([self.referenceEQESpectrum, 'Add', ['reference spectrum'],
+                   [lbls[0]], {},
+                   [{'field': 'Combobox', 'width': 25, 'values': lbls}]])
+
         # tauc (E*ln(1-EQE))**2
         if (not self.attributeEqual('_popt')
-            and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurveLog')):
+                and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurveLog')):
             out.append([self.updateFitParam, 'Update fit', ['Eg', 'slope'],
-                        roundSignificant(self.getAttribute('_popt'),5)])
+                        roundSignificant(self.attr('_popt'), 5)])
         elif self.attributeEqual('_popt'):
-            mulOffset = self.getAttribute('mulOffset', default=1)
             out.append([self.CurveEQE_bandgapLog_print,
                         'Bandgap fit Tauc (eV*ln(1-EQE))^2', ['Range EQE'],
-                    ['['+str(0.30*mulOffset)+', '+str(0.88*mulOffset)+']']])
+                        ['['+str(0.30*mulOffset)+', '+str(0.88*mulOffset)+']']])
+
         # Urbach fitting
         if self.attributeEqual('_popt'):
-            try: # Urbach fitting
+            try:  # Urbach fitting
                 from grapa.datatypes.curveArrhenius import CurveArrheniusExpDecay
                 try:
                     x0 = 1 + np.where(list(reversed(self.y() > 0.1)))[0][0]
@@ -204,16 +160,22 @@ class CurveEQE(Curve):
                 except IndexError:
                     x1 = len(self.x())
                 x0, x1 = self.shape()[1] - x0, self.shape()[1] - x1
-                ROI = [self.x(index=x0, alter='nmeV'), self.x(index=x1, alter='nmeV')]
+                if len(self.x()) > 0:
+                    ROI = [self.x(index=x0, alter='nmeV'),
+                           self.x(index=x1, alter='nmeV')]
+                else:
+                    ROI = [0, 0]
                 ROI.sort()
                 ROI = roundSignificantRange(ROI, 3)
-                mulOffset = self.getAttribute('mulOffset', 1)
+                mulOffset = self.attr('mulOffset', 1)
                 out.append([self.CurveUrbachEnergy,
                             CurveArrheniusExpDecay.BUTTONFitLabel(),
                             [CurveArrheniusExpDecay.BUTTONFitROI()], [ROI]])
             except ImportError as e:
-                print('WARNING CurveEQE: do not find grapa.datatypes.curveArrhenius.')
+                print('WARNING CurveEQE: do not find',
+                      'grapa.datatypes.curveArrhenius.')
                 print(type(e), e)
+
         # ERE external radiative efficiency
         if self.attributeEqual('_popt'):
             Emin, unit = self.ERE_EminAuto()
@@ -221,138 +183,140 @@ class CurveEQE(Curve):
                         ['cell Voc', 'T', 'cut data', ''],
                         ['0.700', 273.15+25, Emin, unit],
                         {},
-                        [{'width':6}, {'width':7}, {'width':7},
-                         {'field': 'Combobox', 'values': ['nm', 'eV'], 'width':4}]])
+                        [{'width': 6}, {'width': 7}, {'width': 7},
+                         {'field': 'Combobox', 'values': ['nm', 'eV'], 'width': 4}]])
+
         # Absortion edge (CdS, etc)
         if self.attributeEqual('_popt'):
-            out.append([self.CurveEQE_absorptionEdge, 'Quick & dirty CdS estimate',
+            out.append([self.CurveEQE_absorptionEdge,
+                        'Quick & dirty CdS estimate',
                         ['thickness [nm]', 'I0', 'material'],
-                        [50, 1.0, 'CdS'],
-                        {},
-                        [{'width':6}, {'width':7}, {'width':7}]])
+                        [50, 1.0, 'CdS'], {},
+                        [{'width': 6}, {'width': 7}, {'width': 7}]])
         if (not self.attributeEqual('_popt')
-            and self.attributeEqual('_fitfunc', 'func_absorptionedge')):
+                and self.attributeEqual('_fitfunc', 'func_absorptionedge')):
             out.append([self.updateFitParam, 'Update fit',
-                        ['thickness [nm]', 'I0', 'material'], self.attr('_popt')])
+                        ['thickness [nm]', 'I0', 'material'],
+                        self.attr('_popt')])
+
         # Help button!
         out.append([self.printHelp, 'Help!', [], []])
         return out
-    
+
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
         out.append(['nm <-> eV', ['nmeV', ''], ''])
         out.append(['Tauc plot', ['nmeV', 'tauc'], ''])
         if (not self.attributeEqual('_popt')
-            and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurveLog')):
-            out.append(['Tauc plot (E ln(1-EQE)^2)', 
+                and self.attributeEqual('_fitfunc', 'func_bandgapTaucCurveLog')):
+            out.append(['Tauc plot (E ln(1-EQE)^2)',
                         ['nmeV', 'taucln1-eqe'], ''])
         return out
-
-
 
     def updateFitParamFormatPopt(self, f, param):
         """ override, for func_absorptionedge """
         if f == 'func_absorptionedge':
-            return list(param) # not np.array: last parameter can be str
+            return list(param)  # not np.array: last parameter can be str
         return Curve.updateFitParamFormatPopt(self, f, param)
 
-
     # FUNCTIONS RELATED TO FIT
-
-    def bandgapFromTauc(self, nm, EQE, yLim=[.25, .70], xLim=[600, 1500],
-                        mode='EQE') :
+    def bandgapFromTauc(self, nm, EQE, yLim=[.25, .70], xLim=[600, 1500], mode='EQE'):
         """
         Performs fit of low-energy side of EQE and returns [bandgap, slope].
         Executed at initialization.
         mode: 'EQE', or 'ln1-EQE'
         """
-        if max(EQE) > 10 :
-            print ('Function bandgapFromTauc: max(EQE) > 1. Multiplied by 0.01'
-                   + ' for datapoint selection.')
+        if max(EQE) > 10:
+            print('Function bandgapFromTauc: max(EQE) > 1. Multiplied by',
+                  '0.01 for datapoint selection.')
             EQE = EQE * 0.01
         # select suitable data range
         mask = np.ones(len(nm), dtype=bool)
-        for i in reversed(range (len (mask))) :
+        for i in reversed(range(len(mask))):
             if (EQE[i] < yLim[0] or EQE[i] > yLim[1] or nm[i] < xLim[0]
-                or nm[i] > xLim[1]):
+                    or nm[i] > xLim[1]):
                 mask[i] = False
         nm = nm[mask]
         EQE = EQE[mask]
         # perform fit
         eV = Curve.NMTOEV / nm
         tauc = (eV * np.log(1-EQE))**2 if mode == 'log1-EQE' else (eV * EQE)**2
-        if len (tauc > 1):
+        if len(tauc > 1):
             z = np.polyfit(eV, tauc, 1, full=True)[0]
-            bandgap = -z[1]/z[0] #p = np.poly1d(z)
+            bandgap = -z[1]/z[0]  # p = np.poly1d(z)
             return [bandgap, z[0]]
-        #print ('Function bandgapFromTauc: not enough suitable datapoints.')
+        # print ('Function bandgapFromTauc: not enough suitable datapoints.')
         return [np.nan, np.nan]
-    
+
     def CurveEQE_bandgap_print(self, yLim=None):
         out = self.CurveEQE_bandgap(yLim=yLim)
-        print ('Bandgap (Tauc (E*EQE)^2):',
-               roundSignificant(out.getAttribute('_popt')[0],4), 'eV')
+        print('Bandgap (Tauc (E*EQE)^2):',
+              roundSignificant(out.attr('_popt')[0], 4), 'eV')
         return out
+
     def CurveEQE_bandgap(self, yLim=None):
         if yLim is None:
             yLim = [.25, .70]
         try:
-            yLim = np.array(yLim) / self.getAttribute('mulOffset', default=1)
+            yLim = np.array(yLim) / self.attr('mulOffset', default=1)
             bandgap = self.bandgapFromTauc(self.x(), self.y(), yLim=yLim)
-        except:
+        except Exception:
             pass
         x = self.x()
         nm = np.arange(min(x), max(x), (max(x)-min(x))/1000)
         fit = self.func_bandgapTaucCurve(nm, *bandgap)
         return CurveEQE([nm, fit],
-                {'_popt': bandgap, '_fitFunc': 'func_bandgapTaucCurve',
-                 'color': 'k', 'data filename': self.getAttribute('filename'), 
-                 'muloffset': self.getAttribute('mulOffset', default=1)})
+                        {'_popt': bandgap, '_fitFunc': 'func_bandgapTaucCurve',
+                         'color': 'k', 'data filename': self.attr('filename'),
+                         'muloffset': self.attr('mulOffset', 1)})
+
     def func_bandgapTaucCurve(self, nm, *bandgap):
         z = [bandgap[1], -bandgap[0]*bandgap[1]]
         p = np.poly1d(z)
         fit = p(Curve.NMTOEV / nm)
         for i in range(len(fit)):
-            if fit[i] >=0:
+            if fit[i] >= 0:
                 fit[i] = np.sqrt(fit[i]) / (Curve.NMTOEV / nm[i])
             else:
                 fit[i] = np.nan
         return fit
-  
+
     def CurveEQE_bandgapLog_print(self, yLim=None):
         out = self.CurveEQE_bandgapLog(yLim=yLim)
-        print ('Bandgap (Tauc (E*ln(1-EQE))^2):',
-               roundSignificant(out.getAttribute('_popt')[0],4), 'eV')
+        print('Bandgap (Tauc (E*ln(1-EQE))^2):',
+              roundSignificant(out.attr('_popt')[0], 4), 'eV')
         return out
+
     def CurveEQE_bandgapLog(self, yLim=None):
         if yLim is None:
             yLim = [.25, .70]
         try:
-            yLim = np.array(yLim) / self.getAttribute('mulOffset', default=1)
+            yLim = np.array(yLim) / self.attr('mulOffset', default=1)
             bandgap = self.bandgapFromTauc(self.x(), self.y(), yLim=yLim,
                                            mode='log1-EQE')
-        except:
+        except Exception:
             pass
         x = self.x()
         nm = np.arange(min(x), max(x), (max(x)-min(x))/1000)
         fit = self.func_bandgapTaucCurveLog(nm, *bandgap)
         return CurveEQE([nm, fit],
                         {'_popt': bandgap,
-                        '_fitFunc': 'func_bandgapTaucCurveLog', 'color': 'k',
-                        'data filename': self.getAttribute('filename'),
-                       'muloffset': self.getAttribute('mulOffset', default=1)})
+                         '_fitFunc': 'func_bandgapTaucCurveLog', 'color': 'k',
+                         'data filename': self.attr('filename'),
+                         'muloffset': self.attr('mulOffset', default=1)})
+
     def func_bandgapTaucCurveLog(self, nm, *bandgap):
         z = [bandgap[1], -bandgap[0]*bandgap[1]]
         p = np.poly1d(z)
         fit = p(Curve.NMTOEV / nm)
         for i in range(len(fit)):
-            if fit[i] >=0:
+            if fit[i] >= 0:
                 fit[i] = 1 - np.exp(- np.sqrt(fit[i]) / (Curve.NMTOEV/nm[i]))
             else:
                 fit[i] = np.nan
         return fit
 
-
+    # bandgap derivative
     def bandgapDeriv(self, SGwidth=None, SGdegree=None, x_y_savgol=None, ROI=None):
         """
         Computes the bandgap based on the savitsky golay derivative,
@@ -365,7 +329,8 @@ class CurveEQE(Curve):
         # need dummy x argument to use the updateFitParam method
         from scipy.optimize import curve_fit
         if x_y_savgol is None:
-            x_, y_, savgol = self.bandgapDeriv_savgol(SGwidth, SGdegree, ROI=ROI)
+            x_, y_, savgol = self.bandgapDeriv_savgol(SGwidth, SGdegree,
+                                                      ROI=ROI)
         else:
             x_, y_, savgol = x_y_savgol
         order = True if x_[1] > x_[0] else False
@@ -375,11 +340,20 @@ class CurveEQE(Curve):
                        min(len(savgol), iMax_+2 + int(order)))
         datax, datay = x_[ROIfit], savgol[ROIfit]
         p0 = [savgol[iMax_], x_[iMax_], 2*(datax[1]-datax[0])]
+
         def func_gaussSimple(x, a, x0, sigma):
-            return a * np.exp( - (x-x0)**2 / (2*sigma**2))
-        popt, pcov = curve_fit(func_gaussSimple, datax, datay, p0=p0)
+            return a * np.exp(- (x - x0)**2 / (2 * sigma**2))
+
+        try:
+            popt, pcov = curve_fit(func_gaussSimple, datax, datay, p0=p0)
+        except Exception as e:
+            print('Exception CurveEQE.bandgapDeriv. Provided to curve_fit',
+                  'length x', len(datax), 'length y', len(datay), ', p0', p0)
+            print(type(e), e)
+            popt = [np.nan, np.nan, np.nan]
         self.update({'bandgapDeriv': Curve.NMTOEV/popt[1]})
         return popt
+
     def bandgapDeriv_savgol(self, SGwidth=None, SGdegree=None, ROI=None):
         """ returns a reduced x,y range and the savitsky golay derivative """
         from scipy.signal import savgol_filter
@@ -390,12 +364,14 @@ class CurveEQE(Curve):
         SGdegree = int(SGdegree)
         SGwidth = int(SGwidth)
         if SGdegree >= SGwidth:
-            print('Curve EQE bandgap derivative: degree must be lower than width for Savitsky-Golay filtering.')
+            print('Curve EQE bandgap derivative: degree must be lower than',
+                  'width for Savitsky-Golay filtering.')
             return None, None, None
         if SGwidth % 2 == 0:
-            print('Curve EQE bandgap derivative: width must be odd for Savitsky-Golay filtering.')
+            print('Curve EQE bandgap derivative: width must be odd for',
+                  'Savitsky-Golay filtering.')
             return None, None, None
-        #compute derivative
+        # compute derivative
         x, y = self.x(), self.y()
         if len(x) < 5:
             print('Not enough datapoints, cannot continue with processing.')
@@ -406,123 +382,127 @@ class CurveEQE(Curve):
         iMax = np.argmax(y)
         if ROI is None:
             if order:
-                ROI_ = range(max(0,iMax-2), len(y))
+                ROI_ = range(max(0, iMax - 2), len(y))
             else:
-                ROI_ = range(0, min(iMax+2, len(y)))
+                ROI_ = range(0, min(iMax + 2, len(y)))
         else:
             ROI_ = (x >= min(ROI)) * (x <= max(ROI))
         x_, y_, eV = x[ROI_], y[ROI_], Curve.NMTOEV / x[ROI_]
         # locate peak using Savitsky Golay filtering; then correct for possible
         # uneven data point spacing
         savgol = savgol_filter(y_, SGwidth, SGdegree, deriv=1)
-        savgol /= np.append(np.append(eV[1]-eV[0], (eV[2:]-eV[:-2])/2),
-                                      eV[-1]-eV[-2])
+        savgol /= np.append(np.append(eV[1] - eV[0], (eV[2:] - eV[:-2]) / 2),
+                            eV[-1] - eV[-2])
         return x_, y_, savgol
+
     def CurveEQE_bandgapDeriv_print(self, SGwidth=None, SGdegree=None, ROI=None):
-        out = self.CurveEQE_bandgapDeriv(SGwidth=SGwidth, SGdegree=SGdegree, ROI=ROI)
-        print ('Bandgap (derivative):',
-               roundSignificant(out.getAttribute('bandgapDeriv'), 4), 'eV')
+        out = self.CurveEQE_bandgapDeriv(SGwidth=SGwidth, SGdegree=SGdegree,
+                                         ROI=ROI)
+        print('Bandgap (derivative):',
+              roundSignificant(out.attr('bandgapDeriv'), 4), 'eV')
         return out
+
     def CurveEQE_bandgapDeriv(self, SGwidth=None, SGdegree=None, ROI=None):
         """ returns the curve, with correspoding bandgap in the attributes """
         x_, y_, savgol = self.bandgapDeriv_savgol(SGwidth=SGwidth,
                                                   SGdegree=SGdegree, ROI=ROI)
         popt = self.bandgapDeriv(SGwidth=SGwidth, SGdegree=SGdegree,
-                                 x_y_savgol=[x_,y_,savgol])
+                                 x_y_savgol=[x_, y_, savgol])
         out = CurveEQE([x_, savgol],
                        {'color': 'k', '_popt': [SGwidth, SGdegree],
-                       'bandgapDeriv': Curve.NMTOEV/popt[1],
-                       '_fitFunc': 'bandgapDeriv_savgol',
-                       'data filename': self.getAttribute('filename')})
-        out.update({'muloffset': self.getAttribute('mulOffset', 1)*0.1})# , 'offset':-max(out.y())})
+                        'bandgapDeriv': Curve.NMTOEV/popt[1],
+                        '_fitFunc': 'bandgapDeriv_savgol',
+                        'data filename': self.attr('filename')})
+        out.update({'muloffset': self.attr('mulOffset', 1)*0.1})
+        # , 'offset':-max(out.y())})
         return out
 
+    # reference spectra
+    def referenceEQESpectrum(self, label=''):
+        """
+        label: the label of the reference spectrum to return
+        """
+        refs = self._referenceEQESpectra()
+        for curve in refs:
+            if curve.attr('label') == label:
+                return curve
+        print('CurveEQE referenceEQESpectrum: cannot find curve "', label, '"')
+        print('Labels available:', [curve.attr('label') for curve in refs])
+        return False
 
+    @classmethod
+    def _referenceEQESpectra(cls):
+        """ returns the reference EQE spectra """
+        if CurveEQE.EQE_REF_SPECTRA is None:
+            path = os.path.dirname(os.path.abspath(__file__))
+            refs = Graph(os.path.join(path, CurveEQE.EQE_REF_SPECTRA_FILE))
+            CurveEQE.EQE_REF_SPECTRA = refs
+        return CurveEQE.EQE_REF_SPECTRA
 
-    def CurveEQE_Empa20p4(self):
-        """ Returns the 20.4% Empa cell EQE. """
-        import os.path
-        from grapa.graph import Graph
-        path = os.path.dirname(os.path.abspath(__file__))
-        graph = Graph(os.path.join(path, self.EQE_BEST_CELL_REF), silent=True)
-        if graph.length() > 0:
-            return graph.curve(-1)
-        graph = Graph(self.EQE_BEST_CELL_REF, silent=True)
-        if graph.length() > 0:
-            return graph.curve(-1)
-        graph = Graph('_modules/'+self.EQE_BEST_CELL_REF, silent=True)
-        if graph.length() > 0:
-            return graph.curve(-1)
-        print ('Data file EQE Empa 20.4% not found!')
-
-
-
-    # other functions
     def CurveEQE_returnAM15referenceCurve(self):
-        """ returns AM1.5 reference spectrum """
-        import os.path
-        from grapa.graph import Graph
-        path = os.path.dirname(os.path.abspath(__file__))
-        ref = Graph(os.path.join(path, self.EQE_AM15_REFERENCE), silent=True)
-        if ref.length() > 0:
-            return ref.curve(1)
-        ref = Graph(self.EQE_AM15_REFERENCE, silent=True)
-        if ref.length() > 0:
-            return ref.curve(1)
-        ref = Graph('_modules/'+self.EQE_AM15_REFERENCE, silent=True)
-        if ref.length() > 0:
-            return ref.curve(1)
-        print('ERROR CurveEQE_returnAM15reference: cannot find reference file',
-              self.EQE_AM15_REFERENCE)
-        return 0
+        # mechanisms to load file only once and store output as class variable
+        if CurveEQE.EQE_AM15_REFERENCE is None:
+            path = os.path.dirname(os.path.abspath(__file__))
+            refs = Graph(os.path.join(path, CurveEQE.EQE_AM15_REFERENCE_FILE))
+            if len(refs) <= 1:
+                print('ERROR CurveEQE_returnAM15referenceCurve: cannot find',
+                      'reference file', self.EQE_AM15_REFERENCE_FILE)
+                return 0
+            CurveEQE.EQE_AM15_REFERENCE = refs[1]
+        return CurveEQE.EQE_AM15_REFERENCE
+
     def CurveEQE_returnAM0referenceCurve(self):
         """
         Returns AM0 reference spectrum.
         Data are in W/m2/um, returns spectral photon irradiance
         """
-        from grapa.graph import Graph
-        path = os.path.dirname(os.path.abspath(__file__))
-        ref = Graph(os.path.join(path, self.EQE_AM0_REFERENCE))
-        if ref.length() > 0:
-            # h * c / wavelength -> energy WL conversion in vacuum for AM0
-            energy = 6.62607004E-34 * 299792458 / (1e-9 * ref.curve(0).x())
-            irrad = ref.curve(0).y() / energy / 1000
-            return Curve([ref.curve(0).x(), irrad], {})
-        return False
-    
-    
-    
-    # other functions
+        if CurveEQE.EQE_AM0_REFERENCE is None:
+            path = os.path.dirname(os.path.abspath(__file__))
+            refs = Graph(os.path.join(path, CurveEQE.EQE_AM0_REFERENCE_FILE))
+            if refs.length() == 0:
+                print('ERROR CurveEQE_returnAM0referenceCurve: cannot find',
+                      'reference file', self.EQE_AM0_REFERENCE_FILE)
+                return 0
+            CurveEQE.EQE_AM0_REFERENCE = refs[0]
+        curve = CurveEQE.EQE_AM0_REFERENCE
+        # h * c / wavelength -> energy WL conversion in vacuum for AM0
+        energy = 6.62607004E-34 * 299792458 / (1e-9 * curve.x())
+        irrad = curve.y() / energy / 1000
+        return Curve([curve.x(), irrad], {})
+
     def _curveReference(self, file):
-        """ returns some reference spectrum """
+        """
+        Returns some reference spectrum (spectral photon irradiance)
+        file: the user can specify its own file
+        """
         if file.endswith('.txt'):
             file = file[:-4]
-        if file == 'AM1-5_Ed2-2008':
+        if file == self.EQE_AM15_REFERENCE_FILE[:-4]:
             return self.CurveEQE_returnAM15referenceCurve()
-        if file == 'AM0_2000_ASTM_E-490-00':
+        if file == self.EQE_AM0_REFERENCE_FILE[:-4]:
             return self.CurveEQE_returnAM0referenceCurve()
-        import os.path
-        from grapa.graph import Graph
+        # maybe a custom input ?
         path = os.path.dirname(os.path.abspath(__file__))
         ref = Graph(os.path.join(path, file), silent=True)
         if ref.length() > 0:
             return ref.curve(0)
-        print('ERROR CurveEQE._curveReference: cannot find reference file', file)
+        print('ERROR CurveEQE._curveReference: cannot find reference file',
+              file)
         return False
-    
-    
-    
-    def currentCalc(self, ROI=None, interpolatekind='linear',
-                    spectralPhotonIrrad=None, silent=False):
+
+    # current calc
+    def currentCalc(self, ROI=None, interpolatekind='linear', spectralPhotonIrrad=None, silent=False, ifGUI=False):
         """
         Computes the current EQE current using AM1.5 spectrum.
         Assumes the EQE vales are in range [0,1] and NOT [0,100].
         ROI: [nm_min, nm_max]
         interpolatekind: order for interpolation of EQE data. default 'linear'.
-        refSpectrum: by default AM1.5G; otherwise filename in folder datatypes
+        spectralPhotonIrrad: filename in folder datatypes.
+            By default will use AM1.5G.
+        ifGUI: True will print the value, False will return the value.
         """
         if spectralPhotonIrrad is None:
-            spectralPhotonIrrad = CurveEQE.EQE_AM15_REFERENCE
+            spectralPhotonIrrad = CurveEQE.EQE_AM15_REFERENCE_FILE
         refIrrad = self._curveReference(spectralPhotonIrrad)
         if not refIrrad:
             print('Error CurveEQE currentCalc, cannot find reference spectrum',
@@ -546,13 +526,14 @@ class CurveEQE(Curve):
         # integriere QE*spektrum (auf gewähltem range)
         Jo = np.trapz(finalSpectrum, refDataX)
         EQEcurrent = Jo*1.602176487E-19/10
-        if not silent:
-            print('Curve', self.getAttribute('label'), 'EQE current:', 
+        if not silent or ifGUI:
+            print('Curve', self.attr('label'), 'EQE current:',
                   EQEcurrent, 'mA/cm2')
+        if ifGUI:
+            return True
         return EQEcurrent
-        
-    
-        
+
+    # Urbach energy
     def CurveUrbachEnergy(self, ROIeV):
         """ Return fit in a Curve object, giving Urbach energy decay """
         from grapa.datatypes.curveArrhenius import CurveArrhenius, CurveArrheniusExpDecay
@@ -561,13 +542,12 @@ class CurveEQE(Curve):
         out = curve.CurveArrhenius_fit(ROIeV)
         out.update(self.getAttributes(['offset', 'muloffset']))
         return out
-        
-        
-    
+
+    # ERE
     def ERE(self, Voc, T, Emin='auto', EminUnit='nm'):
         """
-        Computes the External Radiative Efficiency from the EQE curve and the cell
-        Voc.
+        Computes the External Radiative Efficiency from the EQE curve and the
+        cell Voc.
         Returns ERE, and a Curve with the integrand
         Parameters:
         - Voc: cell Voc voltage in [V]
@@ -576,46 +556,50 @@ class CurveEQE(Curve):
             Can be given in eV or in nm, see Eminunit.
         - Eminunit: 'eV' if Emin is given in eV, 'nm' otherwise. Default 'nm'
         """
-        # does not matter if EQE is [0,1] or [0,100], this is corrected by the 
+        # does not matter if EQE is [0,1] or [0,100], this is corrected by the
         # calculation of Jsc (beware the day Jsc is patched!)
         import scipy.integrate as integrate
-        CST_q = 1.602176634e-19 # elemental charge [C]
-        CST_h = 6.62606979e-34 # Planck [J s]
-        CST_c = 299792458 # speed of light [m s-1]
-        CST_kb= 1.38064852e-23 # [J K-1]
+        CST_q = 1.602176634e-19  # elemental charge [C]
+        CST_h = 6.62606979e-34  # Planck [J s]
+        CST_c = 299792458  # speed of light [m s-1]
+        CST_kb = 1.38064852e-23  # [J K-1]
         # variables check
         if Emin == 'auto':
             Emin, EminUnit = self.ERE_EminAuto()
         if EminUnit != 'eV':
             EminUnit = 'nm'
         if Emin != 'auto' and EminUnit == 'nm':
-            Emin = Curve.NMTOEV / Emin # convert nm into eV
-       # retrieve data
+            Emin = Curve.NMTOEV / Emin  # convert nm into eV
+        # retrieve data
         nm, EQE = self.x(), self.y()
-        E = Curve.NMTOEV / nm * CST_q # photon energy [J]
-        Jsc = self.currentCalc(silent=True) * 10 # [A m-2] instead of [mA cm-2]
+        E = Curve.NMTOEV / nm * CST_q  # photon energy [J]
+        Jsc = self.currentCalc(silent=True) * 10  # [A m-2] instead of [mAcm-2]
         # mask for integration
         mask = (E >= Emin * CST_q) if Emin != 'auto' else (E > 0)
         # start computing the expression
-        integrand = EQE * E**2 / (np.exp(E / (CST_kb * T)) - 1) # [J2]
-        integral = np.abs(integrate.trapz(integrand[mask], x=E[mask])) # [J3]
-        ERE  = 2 * np.pi * CST_q / CST_h**3 / CST_c**2 / Jsc # [J-3]
-        ERE *= np.exp(CST_q * Voc / CST_kb / T) # new term unitless
-        ERE *= integral # output [unitless]
-        lbl = ['ERE integrand to '+self.getAttribute('label'), '', 'eV$^2$']
+        integrand = EQE * E**2 / (np.exp(E / (CST_kb * T)) - 1)  # [J2]
+        integral = np.abs(integrate.trapz(integrand[mask], x=E[mask]))  # [J3]
+        ERE = 2 * np.pi * CST_q / CST_h**3 / CST_c**2 / Jsc  # [J-3]
+        ERE *= np.exp(CST_q * Voc / CST_kb / T)  # new term unitless
+        ERE *= integral  # output [unitless]
+        lbl = ['ERE integrand to '+self.attr('label'), '', 'eV$^2$']
         return ERE, Curve([nm[mask], integrand[mask]/(CST_q)**2],
                           {'label': Graph().formatAxisLabel(lbl)})
+
     def ERE_GUI(self, Voc, T, Emin='auto', EminUnit='nm'):
         ERE, curve = self.ERE(Voc, T, Emin=Emin, EminUnit=EminUnit)
-        print('External radiative efficiency estimate:', "{:.2E}".format(ERE), '(input Voc:', Voc, ')')
-        curve.update({'ax_twinx':1, 'color': 'k'})
+        print('External radiative efficiency estimate:',
+              "{:.2E}".format(ERE), '(input Voc:', Voc, ')')
+        curve.update({'ax_twinx': 1, 'color': 'k'})
         return curve
+
     def ERE_EminAuto(self):
         # smart Emin autodetect
         nm, EQE = self.x(), self.y()
         try:
-            nmMax = np.max(nm[(EQE > 0.5*np.max(EQE))]) # identify nm where EQE = 0.5
-        except: # no suitable point
+            # identify nm where EQE = 0.5
+            nmMax = np.max(nm[(EQE > 0.5*np.max(EQE))])
+        except Exception:  # no suitable point
             return [0, 'nm']
         mask = (nm > nmMax) * (EQE > 0)
         nm_, EQElog = nm[mask], np.log10(EQE[mask])
@@ -623,12 +607,12 @@ class CurveEQE(Curve):
         # sort nm & EQE in ascending nm order
         EQElog = EQElog[nm_.argsort()]
         nm_.sort()
-        diff = (EQElog[1:] - EQElog[:-1]) / (E[1:] - E[:-1]) # d/dE log(EQE)
+        diff = (EQElog[1:] - EQElog[:-1]) / (E[1:] - E[:-1])  # d/dE log(EQE)
         nfault = 0
-        Emin = np.max(nm) + 1 # by default, just below lowest point
+        Emin = np.max(nm) + 1  # by default, just below lowest point
         for i in range(1, len(diff)):
-            if diff[i] < np.min(diff[:i]) * 0.5: # 0.5 can be adjusted
-                nfault += 1 # or another algorithm implemented
+            if diff[i] < np.min(diff[:i]) * 0.5:  # 0.5 can be adjusted
+                nfault += 1  # or another algorithm implemented
             if nfault > 1 or diff[i] < 0:
                 Emin = roundSignificantRange([np.mean(nm_[i:i+2]), nm_[i]], 2)[0]
     #    graph2 = Graph([(0.5*(nm_[:-1]+nm_[1:])), diff])
@@ -636,17 +620,15 @@ class CurveEQE(Curve):
     #    graph2.plot()
         return [Emin, 'nm']
 
-
-
-    # Layer thickness estiamte (e.g. CdS)
+    # Quick & dirty calculation Layer thickness estiamte (e.g. CdS)
     def _materialRefractivek(self, material):
         """
-        Returns imaginary part of refractive index of CdS, k 
+        Returns imaginary part of refractive index of CdS, k
         Energy to be given in nm
         """
         from grapa.graph import Graph
         path = os.path.dirname(os.path.abspath(__file__))
-        matclean = 'EQE_absorption_' + material.replace('/','').replace('\\','') + '.txt'
+        matclean = 'EQE_absorption_' + material.replace('/', '').replace('\\', '') + '.txt'
         pathtest = os.path.join(path, matclean)
         if os.path.exists(pathtest):
             return Graph(pathtest)[0]
@@ -654,29 +636,33 @@ class CurveEQE(Curve):
             # try open the file, and return first Curve assumed to be (nm, k)
             return Graph(material)[0]
         except Exception as e:
-            print('CurveEQE._materialRefractivek: please choose a material, or')
-            print('a file with (nm,k) data as 2-column. Input:', material)
+            print('CurveEQE._materialRefractivek: please choose a material, ',
+                  'or a file with (nm,k) data as 2-column. Input:', material)
             print('Exception', type(e), e)
             return False
         return False
+
     def func_absorptionedge(self, nm, thickness, I0, material='CdS'):
-        try: # check parameters are numeric
+        try:  # check parameters are numeric
             thickness, I0 = float(thickness), float(I0)
         except ValueError:
-            print('CurveEQE.func_absorptionedge: Did you really enter thickness and I0 as float?')
+            print('CurveEQE.func_absorptionedge: Did you really enter',
+                  'thickness and I0 as float?')
             return False
         k = self._materialRefractivek(material)
         if not k:
             return False
-        alpha = 4 * np.pi * k.y() / (k.x() * 1e-7) # in cm-1
+        alpha = 4 * np.pi * k.y() / (k.x() * 1e-7)  # in cm-1
         transmitted = I0 * np.exp(-alpha * thickness * 1e-7)
-        f = interpolate.interp1d(k.x(), transmitted, kind='linear', bounds_error=False)
+        f = interpolate.interp1d(k.x(), transmitted, kind='linear',
+                                 bounds_error=False)
         return f(nm)
+
     def CurveEQE_absorptionEdge(self, thickness, I0, material='CdS'):
         """
         Returns a Curve for quick-and-dirty estimate layer thickness, e.g. CdS.
-        Curve represents the light transmitted through the layer and is computed
-        from Beer-Lambert law as I0 * exp(-alpha * thickness),
+        Curve represents the light transmitted through the layer and is
+        computed from Beer-Lambert law as I0 * exp(-alpha * thickness),
         with alpha computed from k imaginary refractive index of material.
         thickness: layer thickness, in nm
         I0: amount of light entering the layer. Default: 1
@@ -685,12 +671,11 @@ class CurveEQE(Curve):
         """
         values = self.func_absorptionedge(self.x(), thickness, I0, material)
         return CurveEQE([self.x(), values],
-                         {'_fitfunc': 'func_absorptionedge',
-                          '_popt':[thickness, I0, material],
-                          'muloffset': self.attr('muloffset')})
-        
-    
-    
+                        {'_fitfunc': 'func_absorptionedge',
+                         '_popt': [thickness, I0, material],
+                         'muloffset': self.attr('muloffset')})
+
+    # Help
     def printHelp(self):
         print('*** *** ***')
         print('CurveEQE offer basic treatment of (external) quantum')
@@ -702,7 +687,7 @@ class CurveEQE(Curve):
         print(' - Tauc plot: displays (eV*EQE)^2 vs eV. The corresponding')
         print('   Tauc fit is a straight line.')
         print(' - (optional) Tauc plot (E ln(1-EQE)^2): only appears if a ')
-        print( '  Curve was fitted with the corresponding formula.')
+        print('   Curve was fitted with the corresponding formula.')
         print('Analysis functions:')
         print(' - Bandgap fit Tauc (eV*EQE)^2: fit the bandgap with the')
         print(' indicated formula. Parameters:')
@@ -717,7 +702,7 @@ class CurveEQE(Curve):
         print('      With parameters 3, 1 ones retrieves the symmetrical')
         print('      discrete difference (y_1+1 - y_i-1)  / (x_i+1 - x_i-1).')
         print(' - EQE current: integration of the product of the EQE with the')
-        print('   reference AM1.5 solar spectrum '+self.EQE_AM15_REFERENCE+'.')
+        print('   reference AM1.5 solar spectrum '+self.EQE_AM15_REFERENCE_FILE+'.')
         print('   The code is similar to that of CurrentCalc matlab code.')
         print(' - Bandgap fit Tauc (eV*ln(1-EQE))^2: fits the bandgap with')
         print('   the indicated formula. In principle more exact, however')
@@ -742,5 +727,3 @@ class CurveEQE(Curve):
         print('   material: data provided for "CdS". Custom 2-column files')
         print('      might be provided (nm, k).')
         return True
-
-        

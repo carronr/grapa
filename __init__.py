@@ -7,7 +7,7 @@ Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics,
 Romain Carron
 """
 
-__version__ = '0.5.4.8'
+__version__ = '0.6.0.0'
 
 
 def grapa():

@@ -24,17 +24,34 @@ class GraphSIMS(Graph):
     not a GraphSIMS. Cannot call a method of GraphSIMS as method of self.
     """
 
-    KEYWORDS = {'ggi':    [['^71Ga+'],['^71Ga+', '^113In+']],
-                'cgi':    [['Cu+'],   ['^71Ga+', '^113In+']],
-                'gi':     [['^71Ga+', '^113In+'],[]],
-                'cusn':   [['Cu+'],   ['Sn+']],
-                'cuzn':   [['Cu+'],   ['Zn+']],
-                'znsn':   [['Zn+'],   ['Sn+']],
-                'cuznsn': [['Cu+'],   ['Zn+', 'Sn+']],
-                'cgt':    [['Cu+'],   ['^70Ge+', 'Sn+']],
-                'ggt':    [['^72Ge+'],['^72Ge+', 'Sn+']]
+    """
+    KEYWORDS = {'ggi':    [['^71Ga+'], ['^71Ga+', '^113In+']],
+                'cgi':    [['Cu+'],    ['^71Ga+', '^113In+']],
+                'gi':     [['^71Ga+', '^113In+'], []],
+                'aac':    [['^109Ag+'], ['^109Ag+', 'Cu+']],
+                'i/iii':  [['^109Ag+', 'Cu+'], ['^71Ga+', '^113In+']],
+                'cusn':   [['Cu+'],    ['Sn+']],
+                'cuzn':   [['Cu+'],    ['Zn+']],
+                'znsn':   [['Zn+'],    ['Sn+']],
+                'cuznsn': [['Cu+'],    ['Zn+', 'Sn+']],
+                'cgt':    [['Cu+'],    ['^70Ge+', 'Sn+']],
+                'ggt':    [['^72Ge+'], ['^72Ge+', 'Sn+']]
                 }
-    
+    """
+
+    SHORTCUTS = [{'aliases': ['GGI', 'ggi'],    'short': [['^71Ga+'], ['^71Ga+', '^113In+']]},
+                 {'aliases': ['CGI', 'cgi'],    'short': [['Cu+'],    ['^71Ga+', '^113In+']]},
+                 {'aliases': ['GI', 'gi'],      'short': [['^71Ga+', '^113In+'], []]},
+                 {'aliases': ['AAC', 'aac'],    'short': [['^109Ag+'], ['^109Ag+', 'Cu+']]},
+                 {'aliases': ['I/III', 'i/iii'],'short': [['^109Ag+', 'Cu+'], ['^71Ga+', '^113In+']]},
+                 {'aliases': ['CuSn', 'cusn'],  'short': [['Cu+'],    ['Sn+']]},
+                 {'aliases': ['CuZn', 'cuzn'],  'short': [['Cu+'],    ['Zn+']]},
+                 {'aliases': ['ZnSn', 'znsn'],  'short': [['Zn+'],    ['Sn+']]},
+                 {'aliases': ['CuZnSn', 'cuznsn'], 'short': [['Cu+'],    ['Zn+', 'Sn+']]},
+                 {'aliases': ['CGT', 'cgt'],    'short': [['Cu+'],    ['^70Ge+', 'Sn+']]},
+                 {'aliases': ['GGS', 'ggt'],    'short': [['^72Ge+'], ['^72Ge+', 'Sn+']]}
+                ]
+
     TOHIDE = ['F+', 'Mg+', 'Al+', '^41K+', 'Fe+', '^65Cu+', '^66Zn+', 'Ga+',
               'Se+', '^94Mo+', 'In+', '^118Sn+', '^119Sn+',
               '^110Cd+', '^Cd112+', '^113Cd+', '^92Mo+', '^96Mo+', 'Cs+']
@@ -42,42 +59,53 @@ class GraphSIMS(Graph):
     YIELDS = {'^71Ga+': 1, '^113In+': 5.5, 'Cu+': 300,
               '^70Ge+': 4500, 'Sn+': 480, 'Zn+': 6000}
 
-              
     FILEIO_GRAPHTYPE = 'SIMS data'
-    
+
     AXISLABELS = [['Sputter time', 't', 's'], ['Intensity', '', 'counts']]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1='', line3='', **kwargs):
-        if (fileExt == '.txt'  and
-            (line1[0:7] == '\ttotal\t' or line3[0:16] == 'Sputter Time (s)')):
+    def isFileReadable(cls, fileName, fileExt, line1='', line2='', line3='', **kwargs):
+        if (fileExt == '.txt'
+            and (line1.startswith('\ttotal\t') or line3.startswith('Sputter Time (s)'))):
+            return True
+        line1 = line1.strip(" #")
+        line2 = line2.strip(" #")
+        line3 = line3.strip(" #")
+        if line2.startswith('\ttotal\t') and line3.startswith('\tN/A\t'):
             return True
         return False
-    
-        
+
     def readDataFromFile(self, attributes, **kwargs):
         # open using fileGeneric
         GraphIO.readDataFromFileGeneric(self, attributes)
-        if self.length() == 0:
-            GraphIO.readDataFromFileGeneric(self, attributes, ifReplaceCommaByPoint=True)
+        tot, nan = 0, 0
+        for curve in self:
+            tot += len(curve.y())
+            nan += np.sum(np.isnan(curve.y()))
+        if len(self) == 0 or nan > tot / 10:
+            GraphIO.readDataFromFileGeneric(self, attributes,
+                                            ifReplaceCommaByPoint=True,
+                                            lstrip=' #')
+        print(self[1].getAttributes())
+        print(self[2].getAttributes())
         self.update({'typeplot': 'semilogy'})
-        ylabel = self.curve(-1).getAttribute('sputter time (s)')
+        ylabel = self.curve(-1).attr('sputter time (s)')
         if ylabel == '':
             ylabel = GraphSIMS.AXISLABELS[1]
-        if self.curve(-1).getAttribute('sputter time (s)') != '':
+        if self.curve(-1).attr('sputter time (s)') != '':
             self.update({'xlabel': self.formatAxisLabel(GraphSIMS.AXISLABELS[0])})
             self.update({'ylabel': self.formatAxisLabel(ylabel)})
         # set correct labels
         for c in range(self.length()):
-            self.curve(c).update({'label': self.curve(c).getAttribute('total')})
+            self.curve(c).update({'label': self.curve(c).attr('total')})
             self.castCurve('CurveSIMS', c, silentSuccess=True)
         # prints default keywords
-        print('SIMS available ratio keywords:', ', '.join(key for key in GraphSIMS.KEYWORDS))
+        print('SIMS available ratio keywords:', ', '.join(key['aliases'][0] for key in GraphSIMS.SHORTCUTS))
         # set default SIMS relative yields
-        msmtId = self.curve(-1).getAttribute('_SIMSmsmt')
+        msmtId = self.curve(-1).attr('_SIMSmsmt')
         GraphSIMS.setYieldCoefs(self, msmtId, ifAuto=True)
         # add temporary Ga+In curve
-        ok = GraphSIMS.appendReplaceCurveRatio(self, msmtId, 'gi', 'Ga+In')
+        ok = GraphSIMS.appendReplaceCurveRatio(self, msmtId, 'GI', 'Ga+In')
         if ok:
             # find edges of Ga+In curve
             c = GraphSIMS.getCurve(self, msmtId, 'Ga+In', silent=True)
@@ -94,19 +122,19 @@ class GraphSIMS(Graph):
         if len(hidden) > 0:
             print('SIMS curves hidden automatically:', ', '.join(hidden)+'.')
 
-                    
-                    
-    
+
+
+
     def getLayerBoundaries(self, msmtId):
         for c in range(self.length()):
-            if self.curve(c).getAttribute('_SIMSmsmt') == msmtId:
-                return self.curve(c).getAttribute('_SIMSLayerBoundaries')
+            if self.curve(c).attr('_SIMSmsmt') == msmtId:
+                return self.curve(c).attr('_SIMSLayerBoundaries')
         print('ERROR graphSIMS getLayerBoundaries cannot find curve with desired msmtId (',msmtId,')')
         return False
-    
+
     def setLayerBoundaries(self, msmtId, ROI):
         for c in range(self.length()):
-            if self.curve(c).getAttribute('_SIMSmsmt') == msmtId:
+            if self.curve(c).attr('_SIMSmsmt') == msmtId:
                 self.curve(c).update({'_SIMSLayerBoundaries': [min(ROI), max(ROI)]})
         self.update({'axvline': [min(ROI), max(ROI)]})
         return GraphSIMS.getLayerBoundaries(self, msmtId)
@@ -115,7 +143,7 @@ class GraphSIMS(Graph):
         ROI = GraphSIMS.setLayerBoundaries(self, msmtId, ROI)
         offset, mult = None, None
         for c in range(self.length()):
-            if self.curve(c).getAttribute('_SIMSmsmt') == msmtId:
+            if self.curve(c).attr('_SIMSmsmt') == msmtId:
                 if offset is None:
                     ROI = np.argmin(np.abs(self.curve(c).x() - ROI[0])), np.argmin(np.abs(self.curve(c).x() - ROI[1]))
                     x = self.curve(c).x(index=ROI)
@@ -128,9 +156,9 @@ class GraphSIMS(Graph):
     def setLayerBoundariesDepthParametersGUI(self, depth, ROI, msmtId=None):
         return GraphSIMS.setLayerBoundariesDepthParameters(self, msmtId, ROI, depth)
 
-        
-                
-        
+
+
+
 
     def getCurve(self, msmtId, element, silent=False, returnIdx=False):
         for c in range(self.length()):
@@ -158,7 +186,7 @@ class GraphSIMS(Graph):
                 c.update({'_SIMSYieldCoef': elementYield[key]})
                 print('Graph SIMS setYields', key, elementYield[key])
 
-    
+
     def appendReplaceCurveRatio(self, msmtId, ratioCurves, curveId, attributes={}, savgol=None):
         """
         savgol: 2-element list width and degree for Savistky-Golay smoothening
@@ -227,32 +255,37 @@ class GraphSIMS(Graph):
         return GraphSIMS.appendReplaceCurveRatio(self, msmtId, ratioCurves, curveId)
     def appendReplaceCurveRatioGUISmt(self, ratioCurves, curveId, SGw, SGd, msmtId=None):
         return GraphSIMS.appendReplaceCurveRatio(self, msmtId, ratioCurves, curveId, savgol=[SGw, SGd])
-        
- 
+
+
 
 
     def getRatioProcessRatiocurves(self, ratioCurves):
         # handle keywords for ratiocurves
         if isinstance(ratioCurves, str):
-            ratioCurves=ratioCurves.lower()
-            if ratioCurves not in GraphSIMS.KEYWORDS:
-                print('WARNING: SIMS setYieldsFromExternalData unknown key (',ratioCurves,'). Used GGI instead.')
-                ratioCurves = 'ggi'
-            for key in GraphSIMS.KEYWORDS:
-                if ratioCurves == key:
-                    ratioCurves = GraphSIMS.KEYWORDS[key]
-                    print('Replaced keyword', key, 'with ratio', str(GraphSIMS.KEYWORDS[key])+'.')
+            flag = False
+            for short in GraphSIMS.SHORTCUTS:
+                if ratioCurves in short['aliases']:
+                    print('Replaced keyword', ratioCurves, 'with ratio',
+                          str(short['short']) + '.')
+                    ratioCurves = short['short']
+                    flag = True
                     break
+            if not flag:
+                print('WARNING: SIMS setYieldsFromExternalData unknown key (',
+                      ratioCurves, '). Used',
+                      GraphSIMS.SHORTCUTS[0]['aliases'][0], 'instead.')
+                ratioCurves = GraphSIMS.SHORTCUTS[0]['short']
         return ratioCurves
-    
+
     def getRatio(self, msmtId, ROI, ratioCurves, ifReturnAvg=False, ifReturnCoefs=False):
         # output: [ratioOfAveragesOverROI, AverageOverROIofLocalRatio]
         ratioCurves = GraphSIMS.getRatioProcessRatiocurves(self, ratioCurves)
         # compute ratio
         avgOfRatio = np.array([ROI * 0.0, ROI * 0.0])
         ratioOfAvg = np.array([0.0, 0.0])
-        retAvg = np.array([[0.0]*len(r) for r in ratioCurves])
-        retCoefs = np.array([[1.0]*len(r) for r in ratioCurves])
+        lenmax = np.max([len(r) for r in ratioCurves])
+        retAvg = np.zeros((len(ratioCurves), lenmax))
+        retCoefs = np.ones((len(ratioCurves), lenmax))
         for i in range(len(ratioCurves)):
             for j in range(len(ratioCurves[i])):
                 key = ratioCurves[i][j]
@@ -273,7 +306,7 @@ class GraphSIMS(Graph):
         if ifReturnCoefs:
             out = out + [retCoefs]
         return out
-    
+
     def targetRatioSetYield(self, msmtId, ROI, ratioCurves, element, target, silent=False):
         ratioInit = ratioCurves
         ratioCurves = GraphSIMS.getRatioProcessRatiocurves(self, ratioCurves)
@@ -326,6 +359,3 @@ class GraphSIMS(Graph):
         if ROI == '':
             return np.arange(0, self.curve(c).shape(1)-1)
         return np.arange(np.argmin(np.abs(self.curve(c).x() - min(ROI))), np.argmin(np.abs(self.curve(c).x() - max(ROI))))
-        
-        
-

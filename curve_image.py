@@ -21,10 +21,10 @@ class Curve_Image(Curve):
     def __init__(self, *args, **kwargs):
         Curve.__init__(self, *args, **kwargs)
         # define default values for important parameters
-        if self.getAttribute('type') not in ['imshow', 'contour', 'contourf']:
+        if self.attr('type') not in ['imshow', 'contour', 'contourf']:
             self.update ({'type': 'imshow'})
         # legacy keyword
-        imagefile = deepcopy(self.getAttribute('imagefile', None))
+        imagefile = deepcopy(self.attr('imagefile', None))
         if imagefile is not None:
             self.update({'datafile': imagefile, 'imagefile': ''})
         self.update({'Curve': Curve_Image.CURVE})
@@ -32,7 +32,7 @@ class Curve_Image(Curve):
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
-        texttype, default = "keyword 'type'", self.getAttribute('type')
+        texttype, default = "keyword 'type'", self.attr('type')
         if default not in ['imshow', 'contour', 'contourf']:
             texttype = "issue: keyword 'type' should be:"
             default = 'imshow'
@@ -44,21 +44,21 @@ class Curve_Image(Curve):
             'quadric', 'catrom', 'gaussian', 'bessel', 'mitchell', 'sinc',
             'lanczos']
         aspect = ['', '1 scalar', 'auto', 'equal']
-        datafile_XY1rowcol = bool(self.getAttribute('datafile_XY1rowcol'))
+        datafile_XY1rowcol = bool(self.attr('datafile_XY1rowcol'))
         # file; X,Y 1st row column
         out.append([self.updateValuesDictkeys, 'Set',
                     ['data file', 'first row, column as coordinates'],
-                    [self.getAttribute('datafile'), datafile_XY1rowcol],
+                    [self.attr('datafile'), datafile_XY1rowcol],
                     {'keys': ['datafile', 'datafile_XY1rowcol']},
                     [{'width':25},{'field':'Checkbutton'}]])
         # transpose, rotate
         at = ['transpose', 'rotate']
         out.append([self.updateValuesDictkeys, 'Set', at,
-                    [self.getAttribute(a) for a in at], {'keys': at},
+                    [self.attr(a) for a in at], {'keys': at},
                     [{'field':'Combobox', 'values':['','True','False']},{}]])
         # extent
         if not datafile_XY1rowcol:
-            extent = list(self.getAttribute('extent'))
+            extent = list(self.attr('extent'))
             while len(extent) < 4:
                 extent.append('')
             out.append([self.updateExtent, 'Set', ['extent left', 'right', 'bottom', 'top'], extent])
@@ -67,20 +67,20 @@ class Curve_Image(Curve):
         # colormap
         attxt = ['cmap (ignored if color image)', 'vmin', 'vmax']
         at = [a.split(' ')[0] for a in attxt]
-        out.append([self.updateValuesDictkeys, 'Set', attxt, [self.getAttribute(a) for a in at], {'keys': at}])
-        if self.getAttribute('type') == 'imshow':
+        out.append([self.updateValuesDictkeys, 'Set', attxt, [self.attr(a) for a in at], {'keys': at}])
+        if self.attr('type') == 'imshow':
             at = ['aspect', 'interpolation']
             out.append([self.updateValuesDictkeys, 'Set',
                         ['aspect ratio', 'interpolation'],
-                        [self.getAttribute(a) for a in at], {'keys': at},
+                        [self.attr(a) for a in at], {'keys': at},
                         [{'field':'Combobox', 'values':aspect, 'bind':'beforespace'},
                          {'field':'Combobox', 'values':interpolation}]])
         else: # contour, contourf
             at = ['levels']
             out.append([self.updateValuesDictkeys, 'Set',
                         ['levels (list of values)'],
-                        [self.getAttribute(a) for a in at], {'keys': at}])
-        
+                        [self.attr(a) for a in at], {'keys': at}])
+
         return out
 
     def updateExtent(self, *args):
@@ -89,7 +89,7 @@ class Curve_Image(Curve):
             if a != '':
                 flag = True
         self.update({'extent': (list(args) if flag else '')})
-    
+
     def printHelp(self):
         print('*** *** ***')
         print('Class Curve_Image facilitates the creation and customization of insets inside a Graph')
@@ -101,17 +101,17 @@ class Curve_Image(Curve):
         print("  Examples: {'fontsize':8}, or {'xlabel': 'An updated label'}")
         return True
 
-    
+
     def getImageData(self, graph, graph_i, alter, ignoreNext=0):
         """
         graph: the Graph the Curve is in
         graph_i: index of Curve in graph
         alter: 2-elements list for alter
         """
-        transpose = self.getAttribute('transpose', False)
-        rotate    = self.getAttribute('rotate', False)
-        datafile  = self.getAttribute('datafile', None)
-        
+        transpose = self.attr('transpose', False)
+        rotate    = self.attr('rotate', False)
+        datafile  = self.attr('datafile', None)
+
         data = np.zeros((2,2))
         X, Y = None, None
         if datafile is not None:
@@ -138,7 +138,7 @@ class Curve_Image(Curve):
                     data = graphtmp.curve(0).getData()
                     if transpose:
                         data = np.transpose(data)
-                    if self.getAttribute('datafile_XY1rowcol', False):
+                    if self.attr('datafile_XY1rowcol', False):
                         try:
                             X = data[0,1:]
                             Y = data[1:,0]
@@ -162,7 +162,7 @@ class Curve_Image(Curve):
                     else:
                         break
             data = np.array(data)
-            if self.getAttribute('datafile_XY1rowcol', False):
+            if self.attr('datafile_XY1rowcol', False):
                 try:
                     X = data[0,1:]
                     Y = data[1:,0]
@@ -173,4 +173,3 @@ class Curve_Image(Curve):
             if rotate:
                 data = np.rot90(data, k=int(rotate)) # only by 90°
         return data, ignoreNext, X, Y
-    

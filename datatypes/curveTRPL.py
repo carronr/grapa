@@ -1,83 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar 20 18:08:32 2017
-
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
+Carron
 """
 
 import numpy as np
-from os import path as ospath
 from copy import deepcopy
 
-from grapa.graph import Graph
-from grapa.graphIO import GraphIO
 from grapa.curve import Curve
 from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
-
-
-
-class GraphTRPL(Graph):
-
-    FILEIO_GRAPHTYPE = 'TRPL decay'
-
-    AXISLABELS = [['Time', 't', 'time'], ['Intensity', '', 'counts']]
-
-    @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1='', line2='', line3='',
-                       **kwargs):
-        if fileExt == '.dat' and line1 == 'Time[ns]	crv[0] [Cnts.]':
-            return True
-        elif (fileExt == '.dat'
-                and line1 == 'Parameters:'
-                and ((      line2.strip().startswith('Sample')
-                        and line3.strip().startswith('Solvent'))
-                     or (   line2.strip().split(' : ')[0] in ['Exc_Wavelength']
-                        and line3.strip().split(' : ')[0] in ['Exc_Bandpass'])
-                     )
-              ):
-            return True
-        return False
-
-    def readDataFromFile(self, attributes, **kwargs):
-        """ Read a TRPL decay. """
-        len0 = self.length()
-        kw = {}
-        if 'line1' in kwargs and kwargs['line1'] == 'Parameters:':
-            kw.update({'delimiterHeaders': ':'})
-        GraphIO.readDataFromFileGeneric(self, attributes, **kw)
-        self.castCurve(CurveTRPL.CURVE, len0, silentSuccess=True)
-        # label management
-        filenam_, fileext = ospath.splitext(self.filename)  # , fileExt
-        #self.curve(len0).update({'label': filenam_.split('/')[-1].split('\\')[-1]})
-        lbl = filenam_.split('/')[-1].split('\\')[-1].replace('_', ' ').split(' ')
-        smp = str(self.curve(len0).attr('sample'))
-        try:
-            if float(int(float(smp))) == float(smp):
-                smp = str(int(float(smp)))
-        except Exception:
-            pass
-        smp = smp.replace('_', ' ').split(' ')
-        new = lbl
-        if len(smp) > 0:
-            new = [l for l in lbl if l not in smp] + smp
-        # print('label', self.attr('label'), [l for l in lbl if l not in smp], smp)
-        self.curve(len0).update({'label': ' '.join(new)})
-        xlabel = self.getAttribute('xlabel').replace('[', ' [').replace('  ', ' ').capitalize() # ] ]
-        if xlabel in ['', ' ']:
-            xlabel = GraphTRPL.AXISLABELS[0]
-        self.update({'typeplot': 'semilogy', 'alter': ['', 'idle'],
-                     'xlabel': self.formatAxisLabel(xlabel),
-                     'ylabel': self.formatAxisLabel(GraphTRPL.AXISLABELS[1])})
-        self.update({'subplots_adjust': [0.2, 0.15]})
-        # cleaning
-        if 'line1' in kwargs and kwargs['line1'] == 'Parameters:':
-            attr = self.curve(len0).getAttributes()
-            keys = list(attr.keys())
-            for key in keys:
-                val = attr[key]
-                if isinstance(val, str) and val.startswith('\t'):
-                    self.curve(len0).update({key: ''})
 
 
 class CurveTRPL(Curve):
@@ -138,7 +70,7 @@ class CurveTRPL(Curve):
                         [self.attr('_repetfreq_Hz', 1), self.attr('_acquistime_s', 1), self.attr('_binwidth_s', 1)*1e12],
                         {},
                         [{'width': 10}, {'width': 7}, {'width': 6}]])
-        else: # get back cts data
+        else:  # get back cts data
             out.append([self.normalizerevert, 'Restore intensity cts',
                         ['Current intensity unit: '+str(unit)+'. factor'],
                         [self.getFactor()], {}, [{'field': 'Label'}]])
@@ -153,7 +85,7 @@ class CurveTRPL(Curve):
                         [{'field': 'Combobox', 'values': ['1', '2', '3']},
                          {}, {}, {'field': 'Combobox', 'values': ['False', 'True']}]])
         else:
-            values = roundSignificant(self.getAttribute('_popt'), 5)
+            values = roundSignificant(self.attr('_popt'), 5)
             params = ['BG']
             while len(values) > len(params)+1:
                 n = '{:1.0f}'.format((len(params)+1)/2)
@@ -164,7 +96,7 @@ class CurveTRPL(Curve):
                     ['9', 'hanning', '1'],
                     {},
                     [{}, {'field': 'Combobox', 'values': self.SMOOTH_WINDOW},
-                        {'field': 'Combobox', 'values': ['1','2','4','8','16']}]])
+                        {'field': 'Combobox', 'values': ['1', '2', '4', '8', '16']}]])
         # integration
         alter = str(kwargs['graph'].attr('alter')) if 'graph' in kwargs else "['', '']"
         ROI = roundSignificantRange([min(self.x()), max(self.x())], 2)
@@ -227,22 +159,28 @@ class CurveTRPL(Curve):
         except Exception:
             return False
         if factor == 0 or np.isinf(factor):
-            print('CurveTRPL.normlize: non-sensical normalization factor (0 or inf).')
+            print('CurveTRPL.normlize: non-sensical normalization factor (0',
+                  'or inf).')
             return False
-        if self.attr('_unit', None) is not None:  # should not happen if using only the GUI
-            print('CurveTRPL.normalize: data may have been already normalized (Curve labelled as "'+self.attr('_unit')+'", "'+self.attr('_unitfactor')+'").')
+        # should not happen if using only the GUI
+        if self.attr('_unit', None) is not None:
+            print('CurveTRPL.normalize: data may have been already normalized',
+                  '(Curve labelled as "'+self.attr('_unit')+'","',
+                  self.attr('_unitfactor')+'").')
         self.setIntensity(factornew=factor)
         self.update({'_unit': 'cts/Hz/s/s'})
         # overwrite acquisition parameters, if significant deviation from
-        try:
-            if np.abs(self.attr('_repetfreq_Hz',1) - repetfreq_Hz) / repetfreq_Hz > 1e-6:
-                self.update({'_repetfreq_Hz': repetfreq_Hz})
-            if np.abs(self.attr('_acquistime_s') - duration_s) / duration_s > 1e-6:
-                self.update({'_acquistime_s': duration_s})
-            if np.abs(self.attr('_binwidth_s') - (1e-12*binwidth_ps)) / (1e-12*binwidth_ps) > 1e-6:
-                self.update({'_binwidth_s': (1e-12*binwidth_ps)})
-        except Exception:
-            pass
+        # Actually, not. We keep default parameters. User need to change them
+        # manually if he wishes
+        # try:
+        #     if np.abs(self.attr('_repetfreq_Hz', 1) - repetfreq_Hz) / repetfreq_Hz > 1e-6:
+        #         self.update({'_repetfreq_Hz': repetfreq_Hz})
+        #     if np.abs(self.attr('_acquistime_s') - duration_s) / duration_s > 1e-6:
+        #         self.update({'_acquistime_s': duration_s})
+        #     if np.abs(self.attr('_binwidth_s') - (1e-12*binwidth_ps)) / (1e-12*binwidth_ps) > 1e-6:
+        #         self.update({'_binwidth_s': (1e-12*binwidth_ps)})
+        # except Exception:
+        #     pass
         return True
 
     def normalizerevert(self, *args):
@@ -252,7 +190,7 @@ class CurveTRPL(Curve):
 
     # temporal offset
     def getXOffset(self):
-        return self.getAttribute('_TRPLxOffset', 0)
+        return self.attr('_TRPLxOffset', 0)
 
     def addXOffset(self, value):
         if is_number(value):
@@ -275,8 +213,7 @@ class CurveTRPL(Curve):
                 return self.x(i)
         return self.x(0)
 
-    def CurveTRPL_fitExp(self, nbExp=2, ROI=None, fixed=None,
-                         showResiduals=False, silent=False):
+    def CurveTRPL_fitExp(self, nbExp=2, ROI=None, fixed=None, showResiduals=False, silent=False):
         """
         Fit exp: fits the data as a constant plus a sum of exponentials.
         Returns a Curve as the best fit to the TRPL decay.
@@ -305,9 +242,10 @@ class CurveTRPL(Curve):
         popt = self.fit_fitExp(ROI=ROI, fixed=fixed)
         attr = {'color': 'k', '_ROI': ROI,
                 '_popt': popt, '_fitFunc': 'func_fitExp',
-                'filename': 'fit to '+self.getAttribute('filename').split('/')[-1].split('\\')[-1],
-                'label': 'fit to '+self.getAttribute('label')}
-        attr.update(self.getAttributes(['offset', 'muloffset']))
+                'filename': 'fit to '+self.attr('filename').split('/')[-1].split('\\')[-1],
+                'label': 'fit to '+self.attr('label')}
+        attr.update(self.getAttributes(['offset', 'muloffset', '_repetfreq_Hz',
+                                        '_acquistime_s', '_binwidth_s']))
         mask = self.ROItoMask([0, max(self.x())])
         fitted = CurveTRPL([self.x(mask), self.func_fitExp(self.x(mask), *popt)], attr)
         if showResiduals:
@@ -403,11 +341,15 @@ class CurveTRPL(Curve):
         - binning: how many points are merged.
         """
         if not is_number(window_len) or window_len < 1:
-            print('Warning CurveTRPL smoothBin: cannot interpret window_len value (got',window_len,', request int larger than 0.) Set 1.')
+            print('Warning CurveTRPL smoothBin: cannot interpret window_len',
+                  'value (got', window_len, ', request int larger than 0.)',
+                  'Set 1.')
             window_len = 1
         window_len = int(window_len)
         if not is_number(binning) or binning < 1:
-            print('Warning CurveTRPL smoothBin: cannot interpret binning value (got',binning,', request int larger than 0.) Set 1.')
+            print('Warning CurveTRPL smoothBin: cannot interpret binning',
+                  'value (got', binning, ', request int larger than 0.)',
+                  'Set 1.')
             binning = 1
         binning = int(binning)
         from mathModule import smooth
@@ -417,14 +359,14 @@ class CurveTRPL(Curve):
         x_ = np.zeros(int(np.ceil(len(x) / binning)))
         y_ = np.zeros(int(np.ceil(len(x) / binning)))
         for i in range(len(x_)):
-            x_[i] = np.average(  x[i*binning : min(le, (i+1)*binning)])
-            y_[i] = np.average(smt[i*binning : min(le, (i+1)*binning)])
+            x_[i] = np.average(  x[i*binning:min(le, (i+1)*binning)])
+            y_[i] = np.average(smt[i*binning:min(le, (i+1)*binning)])
         attr = deepcopy(self.getAttributes())
-        comment = ('Smoothed curve (' +str(self.getAttribute('label')) +
-                   ') smt ' +str(window_len) + ' ' + str(window) + ' bin ' +
-                   str(binning))
+        comment = ('Smoothed curve (' + str(self.attr('label')) + ') smt '
+                   + str(window_len) + ' ' + str(window) + ' bin '
+                   + str(binning))
         attr.update({'comment': comment})
-        attr.update({'label': str(self.getAttribute('label'))+' '+'smooth'})
+        attr.update({'label': str(self.attr('label'))+' '+'smooth'})
         return CurveTRPL([x_, y_], attr)
 
     def integrate(self, ROI=None, alter=None, curve=None):
@@ -450,11 +392,10 @@ class CurveTRPL(Curve):
         integral = np.trapz(datay, datax)
         return integral
 
-
-
     def printHelp(self):
         print('*** *** ***')
-        print('CurveTRPL offers some support to fit time-resolved photoluminence (TRPL) spectra.')
+        print('CurveTRPL offers some support to fit time-resolved',
+              'photoluminence (TRPL) spectra.')
         print('The associated functions are:')
         print(' - Add offset: can adjust the background level. Data are\n',
               '   modified. The previous adjustment is shown, and the original\n',
@@ -469,5 +410,4 @@ class CurveTRPL(Curve):
         self.printHelpFunc(self.CurveTRPL_fitExp)
         self.printHelpFunc(self.CurveTRPL_smoothBin)
         self.printHelpFunc(self.integrate)
-
         return True

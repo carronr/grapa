@@ -15,13 +15,12 @@ from grapa.graph import Graph
 from grapa.curve import Curve
 
 
-
 class GraphMCAfit(Graph):
-    
+
     FILEIO_GRAPHTYPE = 'XRF fit areas'
-    
+
     AXISLABELS = [['Data', '', None], ['Value', '', None]]
-    
+
     @classmethod
     def isFileReadable(cls, fileName, fileExt, line1='', **kwargs):
         if fileExt == '.html' and line1[0:24] == '<HTML><HEAD><TITLE>PyMCA':
@@ -37,28 +36,40 @@ class GraphMCAfit(Graph):
         tmp = np.array([])
         content = content.replace(' align="left"', '').replace(' align="right"', '').replace(' bgcolor=#E6F0F9', '').replace(' bgcolor=#E6F0F9', '').replace(' bgcolor=#FFFFFF', '').replace(' bgcolor=#FFFACD', '').replace('  ', ' ').replace('<td >', '<td>').replace('<tr', '\n<tr').replace('<TR', '\n<TR').replace('<table', '\n<table').replace('\n\n', '\n')
         split = refindall('<tr><td>Cu</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>', content)
-        tmp = np.append(tmp, float(split[0][0]))
+        try:
+            tmp = np.append(tmp, float(split[0][0]))
+        except IndexError:
+            tmp = np.append(tmp, np.nan)
         split = refindall('<tr><td>In</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>', content)
-        tmp = np.append(tmp, float(split[0][0]))
+        try:
+            tmp = np.append(tmp, float(split[0][0]))
+        except IndexError:
+            tmp = np.append(tmp, np.nan)
         split = refindall('<tr><td>Ga</td><td>Ka</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>', content)
-        tmp = np.append(tmp, float(split[0][0]))
+        try:
+            tmp = np.append(tmp, float(split[0][0]))
+        except IndexError:
+            tmp = np.append(tmp, np.nan)
         split = refindall('<tr><td>Se</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>', content)
-        tmp = np.append(tmp, float(split[0][0]))
-        tmp = np.append(tmp, 180) # time - assumed here, no value reading
-    ## XRF calibration: MIGHT WANT TO UPDATE THAT!!!
+        try:
+            tmp = np.append(tmp, float(split[0][0]))
+        except IndexError:
+            tmp = np.append(tmp, np.nan)
+        tmp = np.append(tmp, 180)  # time - assumed here, no value reading
+        ##  XRF calibration: MIGHT WANT TO UPDATE THAT!!!
         val_Cu = tmp[0] / 43434 * 22.56
         val_In = tmp[1] / 10992 * 13.66
         val_Ga = tmp[2] / 29578 * 11.41
         val_Se = tmp[3] /195460 * 52.40
-    ## END OF XRF calibration: MIGHT WANT TO UPDATE THAT!!!
+        ##  END OF XRF calibration: MIGHT WANT TO UPDATE THAT!!!
         val_sum = val_Cu + val_In + val_Ga + val_Se
         val_Cu /= val_sum
         val_In /= val_sum
         val_Ga /= val_sum
         val_Se /= val_sum
-        tmp = np.append(tmp, val_Ga / (val_Ga + val_In)) # x calculation
-        tmp = np.append(tmp, val_Cu / (val_Ga + val_In)) # y calculation
-        tmp = np.append(tmp, tmp[0] * 450 / 10000000) # D calculation
+        tmp = np.append(tmp, val_Ga / (val_Ga + val_In))  # x calculation
+        tmp = np.append(tmp, val_Cu / (val_Ga + val_In))  # y calculation
+        tmp = np.append(tmp, tmp[0] * 450 / 10000000)  # D calculation
         self.data.append(Curve(np.append(np.arange(tmp.size), tmp).reshape((2, tmp.size)), {}))
         c = self.curve(-1)
         c.update(attributes)
