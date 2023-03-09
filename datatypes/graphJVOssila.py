@@ -18,9 +18,6 @@ class GraphJVOssila(Graph):
 
     FILEIO_GRAPHTYPE = 'J-V curve'
 
-    AXISLABELS = [['XRF detector channel', '', ' '],
-                  ['Counts', '', 'cts']]
-
     @classmethod
     def isFileReadable(cls, fileName, fileExt, line1='', line2='', line3='', **kwargs):
         if fileExt == '.csv' and line1.startswith('Pixel ') and line1.endswith(',') and line2.startswith('V (V),J (A/cm^2)'):
