@@ -1,0 +1,26 @@
+xlabel	x
+subplots_adjust	[0.1, 0.12, 0.9, 0.9]
+xlim	[-8.0, 8.0]
+fontsize	12.0
+textargs	[{'horizontalalignment': 'center', 'textcoords': 'axes fraction', 'visible': 1.0, 'verticalalignment': 'center', 'xytext': (0.5, 0.75), 'fontsize': 14.0, 'color': 'w'}, {'horizontalalignment': 'center', 'textcoords': 'axes fraction', 'visible': 1.0, 'verticalalignment': 'center', 'xytext': (0.5, 0.13), 'fontsize': 10.0, 'color': 'w'}]
+ylabel	y
+legendproperties	{'loc': 'best'}
+text	['$0.01 x^2+sin(y)$', 'loaded from external file']
+typeplot	plot
+subplotsncols	2.0
+textxy	['', '']
+ylim	[-3.0, 7.0]
+meastype	Graph
+alpha	0.75
+cmap	[[0, 0, 1], [1, 0.43, 0]]
+curve	image
+datafile	example_datafile.txt
+extent	[-10.0, 10.0, -10.0, 10.0]
+filename	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datafile.txt
+interpolation	bilinear
+label	image
+rotate	0.0
+type	contourf
+vmax	1.2
+vmin	-1.0
+0.0	0.0

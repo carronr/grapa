@@ -1,0 +1,28 @@
+# only keywords (first word) matters: comment line are read, maybe stored with corresponding keyword (e.g. '#'), but never refered to
+# repeating a keyword will overwrite the content of first instance
+
+# graph labels default unit presentation: [unit], (unit), / unit, or [], (), /
+graph_labels_units	[]
+# graph labels presence of symbols (ie: $C$ in 'Capacitance $C$ [nF]')
+graph_labels_symbols	False
+
+# path to inkscape executable, to export in .emf image format. Can be a string, or a list of strings
+inkscape_path	["C:\Program Files\Inkscape\inkscape.exe", "G:\__CommonData\Software\_inkscape_standalone\32bits\App\Inkscape\inkscape.exe"]
+
+# GUI default colorscales. Each colorscale is represented as a string (matplotlib colorscales), or a list of colors.
+# Each color can be a [r,g,b] triplet, a [r,g,b,a] quadruplet, or a [h,l,s,'hls'] quadruplet. rgb, rgba, hls, hsv colorscape are supported.
+GUI_colorscale00	[[1,0,0], [1,1,0.5], [0,1,0]]
+GUI_colorscale01	[[1,0.3,0], [0.7,0,0.7], [0,0.3,1]]
+GUI_colorscale02	[[1,0.43,0], [0,0,1]]
+GUI_colorscale03	[[0.91,0.25,1], [1.09,0.75,1], 'hls']
+GUI_colorscale04	[[0.70,0.25,1], [0.50,0.75,1], 'hls']
+GUI_colorscale05	[[1,0,1], [1,0.5,1], [0.5,0.75,1], 'hls']
+GUI_colorscale07	'inferno'
+GUI_colorscale10	'gnuplot2'
+GUI_colorscale11	'viridis'
+GUI_colorscale12	'afmhot'
+GUI_colorscale13	'YlGn'
+
+# default saving image format
+save_imgformat	.png
+

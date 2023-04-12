@@ -1,0 +1,47 @@
+xtickslabels	[[], []]
+fontsize	12.0
+xlim	[0.0, 300.0]
+arbitraryfunctions	[['set_axis_off', [], {}]]
+subplots_adjust	0.15
+ytickslabels	[[], []]
+typeplot	plot
+ylim	[300.0, 0.0]
+meastype	Graph
+_datapicker				True
+alpha	0.85
+color				[0.4, 0.8, 0.3, 0.3]
+curve	image
+filename	D:/D/Programmation/python/packages/grapa/examples/test2.txt
+imagefile	turtle.jpg
+label	image			Created with data picker
+linespec				x
+type	imshow			fill
+0.0	0.0		118.5	194.0
+			135.5	189.0
+			150.5	187.0
+			161.5	185.0
+			172.5	177.0
+			181.5	170.0
+			193.5	167.0
+			202.5	165.0
+			208.5	159.0
+			214.5	148.0
+			224.5	151.0
+			231.5	155.0
+			230.5	149.0
+			222.5	143.0
+			213.5	136.0
+			202.5	132.0
+			190.5	130.0
+			176.5	129.0
+			158.5	131.0
+			141.5	135.0
+			124.5	140.0
+			108.5	147.0
+			95.5	155.0
+			82.5	163.0
+			74.5	174.0
+			72.5	183.0
+			78.5	191.0
+			93.5	194.0
+			106.5	194.0

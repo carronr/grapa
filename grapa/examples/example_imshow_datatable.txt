@@ -1,0 +1,28 @@
+textxy	['', '']
+legendproperties	{'loc': 'best'}
+ylabel	y
+text	['$x^2 - y^2$', 'data stored in file as matrix']
+xlabel	x
+textargs	[{'visible': 1.0, 'horizontalalignment': 'center', 'xytext': (0, 2.8), 'textcoords': 'data', 'fontsize': 20.0, 'verticalalignment': 'top', 'color': 'w'}, {'visible': 1.0, 'horizontalalignment': 'center', 'xytext': (0.5, 0.05), 'textcoords': 'axes fraction', 'fontsize': 10.0, 'color': 'w'}]
+subplots_adjust	[0.125, 0.2, 0.9, 0.9, 0.1, 0.1]
+fontsize	12.0
+meastype	Graph
+aspect	1.3
+cmap	hot
+colorbar	{'adjust': [0.97, 0, 0.03, 1, 'ax']}
+curve	image
+empty0									green
+extent	(-6.0, 6.0, -3.0, 3.0)
+filename	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datatable.txt	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datatable.txt	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datatable.txt	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datatable.txt	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datatable.txt	D:/D/Programmation/python/packages/grapa/examples/example_imshow_datatable.txt			From clipboard
+label	x**2-y**2
+muloffset									[0.3, 0.3]
+offset									[10, -9]
+type	imshow
+27.0	32.0	35.0	36.0	35.0	32.0	27.0		1.0	5.0
+7.0	12.0	15.0	16.0	15.0	12.0	7.0		2.0	6.0
+-5.0	0.0	3.0	4.0	3.0	0.0	-5.0		3.0	1.0
+-9.0	-4.0	-1.0	0.0	-1.0	-4.0	-9.0		4.0	3.0
+-5.0	0.0	3.0	4.0	3.0	0.0	-5.0		5.0	8.0
+7.0	12.0	15.0	16.0	15.0	12.0	7.0		6.0	9.0
+27.0	32.0	35.0	36.0	35.0	32.0	27.0		7.0	3.0
+								8.0	5.0

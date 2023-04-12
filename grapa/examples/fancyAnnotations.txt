@@ -1,0 +1,28 @@
+title	['Customized title', {'loc': 'right', 'fontsize': 20.0, 'color': 'c'}]
+legendproperties	{'numpoints': 2, 'loc': 'nw', 'handletextpad': 0.1, 'ncol': 2, 'columnspacing': 0.5, 'bbox_to_anchor': (0.05, 1), 'color': 'curve', 'fontsize': 9.0, 'frameon': True}
+xlim	[0.5, 8.5]
+subplots_adjust	0.15
+arbitraryfunctions	[['yaxis.set_minor_locator', ['MultipleLocator(0.5)'], {}]]
+xtickslabels	[[2, 7, 10], ['here', 'there', 'further'], {'rotation': 45, 'color': [0, 0, 0, 0.5]}]
+ylim	['', '']
+legendtitle	['Useless dataset', {'fontsize': 14.0, 'align': 'left', 'color': [0.5, 0, 0]}]
+textargs	[{'horizontalalignment': 'center', 'xytext': (0.64, 0.18), 'visible': 1.0, 'textcoords': 'axes fraction', 'rotation': 15, 'color': 'm'}, {'textcoords': 'figure fraction', 'fontsize': 16.0, 'visible': 0.0, 'xytext': [0.01, 0.9]}, {'arrowprops': {'shrink': 0.05, 'facecolor': [0, 0, 0, 0.25]}, 'xy': [4.05, 1.7], 'textcoords': 'data', 'xytext': (4.5, 4.8), 'visible': 1.0}]
+textxy	['', '', '']
+text	['Smar$\\tau$\ncomm$\\epsilon$nt', '(a)', 'mind blowing!']
+fontsize	12.0
+meastype	Graph
+color	b	g	r
+filename	D:\D\Programmation\python\packages\grapa\examples\fancyAnnotations.txt	D:\D\Programmation\python\packages\grapa\examples\fancyAnnotations.txt	D:\D\Programmation\python\packages\grapa\examples\fancyAnnotations.txt
+label	green	blue	confused
+linespec			o
+muloffset		1/2	0.4
+type	errorbar
+yerr	0.5
+1.0	5.0	5.0	5.0
+2.0	6.0	6.0	6.0
+3.0	1.0	1.0	1.0
+4.0	3.0	3.0	3.0
+5.0	8.0	8.0	8.0
+6.0	9.0	9.0	9.0
+7.0	3.0	3.0	3.0
+8.0	5.0	5.0	5.0
