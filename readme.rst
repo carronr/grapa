@@ -32,7 +32,7 @@ Grapa stands for "GRAphing and Photovoltaics Analysis".
 Cheers!
 
 
-**Features overlook**
+**Features overview**
 
 -  Open and merge a wide range of experimental data. Data import
    possible from clipboard.

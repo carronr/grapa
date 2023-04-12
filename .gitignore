@@ -1,5 +1,6 @@
 
 *.pyc
+.idea
 .idea/grapa.iml
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/modules.xml
