@@ -221,9 +221,8 @@ class CurveMath(Curve):
         data_x = curve_x.x() if xory_x == "x" else curve_x.y()
         data_y = curve_y.x() if xory_y == "x" else curve_y.y()
         if len(data_x) != len(data_y):
-            print(
-                "ERROR CurveMath assembleCurveXY: selected data series do not have same length! Abort."
-            )
+            print("ERROR CurveMath assembleCurveXY: selected data series do not have"
+                  + "same length! Abort.")
             print("input parameters:", idx_x, xory_x, idx_y, xory_y)
             return False
         attr = {}
@@ -256,7 +255,6 @@ class CurveMath(Curve):
         print(" - Div. Division as Add.")
         print(" - Neg. 0 - Curve.")
         print(" - Inv. 1 / Curve.")
-        print(
-            " - Assemble a new Curve from data series of same length available in the Graph object."
-        )
+        print(" - Assemble a new Curve from data series of same length available in"
+              + "the current Graph.")
         return True

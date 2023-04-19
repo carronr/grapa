@@ -7,18 +7,18 @@ KNOWND BUGS
 
 
 Version 0.6.1.0 (current development)
-Released XX.XX.2023
+Released 19.04.2023
 Features
 - GUI: it is not possible to open several files at once (finally!)
 - Axis labels and graph title can now be entered as ['Quantity', 'symbol', 'unit'], with optional formatting additional dict element
+- File format: grapa can now open JV files from Ossila sofware, rather primitive data parser.
+- File format: grapa can now extract data from a certain .spe file format containing XRF data. The data parser is very primitive.
 - Curve EQE current integration: added a checkbox to show the cumulative current sum.
+- Curve Math: can now assemble a new Curve based on user-selected x and y data series of same length available within current Graph object.
 - Curve JV: the code should now be insensitive to sorting of input data (extraction of parameters is done on a sorted copy of the data)
 - Curve TRPL fit procedure: recondition the fitting problem, the fitting should be more robust and less prone to reaching max iterations
 - Curve XRF MCA: retro-compatiblity of element labelling features
 - Curve XRF: does not anymore overwrite spectral calibration if already set
-- Curve Math: can now assemble a new Curve based on user-selected x and y data series of same length available within current Graph object.
-- File format: grapa can now open JV files from Ossila sofware, rather primitive data parser.
-- File format: grapa can now extract data from a certain .spe file format containing XRF data. The data parser is very primitive.
 General
 - Ensured forward compatibility up to Winpython 3.10.40
 Bugs correction
