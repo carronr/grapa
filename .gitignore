@@ -6,7 +6,7 @@
 .idea/modules.xml
 .idea/vcs.xml
 .idea/workspace.xml
-/dist/grapa-0.6.1.0.tar.gz
+/dist/*.*
 /grapa.egg-info/dependency_links.txt
 /grapa.egg-info/PKG-INFO
 /grapa.egg-info/requires.txt

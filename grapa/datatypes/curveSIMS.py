@@ -62,6 +62,8 @@ def selectDataEdge(curve, ROI, targetRel=None, threshRel=None, ifTrailingEdge=Fa
 class CurveSIMS(Curve):
 
     CURVE = 'Curve SIMS'
+    
+    FORMAT_LABEL = ["${_simselement}", "${sample} ${_simselement}"]
 
     def __init__(self, *args, **opts):
         Curve.__init__(self, *args, **opts)
@@ -71,9 +73,9 @@ class CurveSIMS(Curve):
             self.update({'label': self.attr('empty0'), 'empty0': ''})
         # some additional attributes, which must not override data saved in the data file
         add = {'_SIMSelement': self.attr('label'),
-                '_SIMSmsmt': ''.join(self.attr('filename').split('/')[-1].split('\\')[-1].split('.')[:-1]).replace('_',''),
-                '_SIMStotal': 0,
-                '_SIMSYieldCoef': 1}
+               '_SIMSmsmt': ''.join(self.attr('filename').split('/')[-1].split('\\')[-1].split('.')[:-1]).replace('_',''),
+               '_SIMStotal': 0,
+               '_SIMSYieldCoef': 1}
         for key in add:
             if self.attr(key) == '':
                 self.update({key: add[key]})
@@ -85,7 +87,7 @@ class CurveSIMS(Curve):
     # RELATED TO GUI
     def funcListGUI(self, **kwargs):
         from grapa.datatypes.graphSIMS import GraphSIMS
-        msmtIdDict = {'msmtId': self.attr('_SIMSmsmt')}
+        msmtidDict = {'msmtid': self.attr('_SIMSmsmt')}
         ratios = [k['aliases'][0] for k in GraphSIMS.SHORTCUTS] + ['other ratio'] #  + ['ratio as ["elem0"],["elem1","elem2"]']
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...] (, [default1, default2, ...], {'hiddenVar1':value1}) ]
@@ -98,11 +100,11 @@ class CurveSIMS(Curve):
                      {'field': 'Combobox', 'values': ['leading', 'trailing'], 'width': 7}]])
         ROI = [self.x(0), self.x(self.shape(1)-1)] if self.attr('_SIMSLayerBoundaries') == '' else self.attr('_SIMSLayerBoundaries')
         depth = (ROI[1] - ROI[0]) * self.attr('_SIMSdepth_mult') if self.attr('_SIMSdepth_mult') != '' else 2
-        out.append([GraphSIMS.setLayerBoundariesDepthParametersGUI, 'Calibrate depth', ['Depth', 'ROI'], [depth, roundSignificant(ROI,5)], msmtIdDict])
+        out.append([GraphSIMS.setLayerBoundariesDepthParametersGUI, 'Calibrate depth', ['Depth', 'ROI'], [depth, roundSignificant(ROI,5)], msmtidDict])
         labels = ['^113In+']
         if 'graph' in kwargs:
             labels = []
-            for c in kwargs['graph'].curves('_SIMSmsmt', msmtIdDict['msmtId']):
+            for c in kwargs['graph'].curves('_SIMSmsmt', msmtidDict['msmtid']):
                 labels.append(c.attr('_SIMSelement'))
             if len(labels) == 0:
                 labels = ['^113In+']
@@ -110,21 +112,27 @@ class CurveSIMS(Curve):
                     'Adjust compos.',
                     ['ROI', 'Ratio', 'Elem.', 'Compos.'],
                     [ROI, 'GGI', ('^113In+' if '^113In+' in labels else labels[0]), 0.35],
-                    msmtIdDict,
+                    msmtidDict,
                     [{}, {'field': 'Combobox', 'values': ratios, 'width': 6},
                         {'field': 'Combobox', 'values': labels, 'width': 8},
                         {'width': 6}]])
         out.append([GraphSIMS.getRatioGUI, 'Compute ratio', ['ROI', 'Ratio'],
-                    [ROI, 'GGI'], msmtIdDict,
+                    [ROI, 'GGI'], msmtidDict,
                     [{}, {'field': 'Combobox', 'values': ratios}]])
         out.append([GraphSIMS.appendReplaceCurveRatioGUISmt,
                     'Create curve ratio',
                     ['Ratio', 'Curve name', 'Smooth S-G w', 'd'],
                     ['GGI', 'GGI', 1, 1],
-                    msmtIdDict,
+                    msmtidDict,
                     [{'field': 'Combobox', 'values': ratios, 'width': 6},
                         {}, {}, {}]])
         out.append([self.cropDataROI, 'Crop trace inside ROI', ['ROI'], [ROI]])
+        out.append([self.autoLabel,
+                    "Auto label",
+                    ["template"],
+                    [self.FORMAT_LABEL[0]],
+                    {},
+                    [{'field': 'Combobox', 'values': self.FORMAT_LABEL}]])
         out.append([self.printHelp, 'Help!', [], []])
         return out
 
@@ -202,6 +210,29 @@ class CurveSIMS(Curve):
         mask = (x >= np.min(ROI)) * (x <= np.max(ROI))
         self.data = np.array([x[mask], y[mask]])
 
+    def autoLabel(self, form):
+        """
+        Update the curve label according to formatting using python string template,
+        with curve attributes as variables
+        e.g. "$sample $_simselement"
+        """
+        # if modify implementation: beware GraphSIMS, autoLabel(...)
+        from string import Template
+        t = Template(form)
+        try:
+            identifiers = t.get_identifiers()
+        except AttributeError:  # python < 3.11
+            # identifiers must be surrounded by {}
+            from string import Formatter
+            identifiers = ([ele[1] for ele in Formatter().parse(form) if ele[1]])
+        attrs = {}
+        for key in identifiers:
+            attrs[key] = str(self.attr(key))
+        label = t.safe_substitute(attrs)
+        self.update({"label": label})
+        return True
+
+
     def printHelp(self):
         from grapa.datatypes.graphSIMS import GraphSIMS
         print('*** *** ***')
@@ -238,5 +269,6 @@ class CurveSIMS(Curve):
         print('  Smooth S-G w, d: a Savitsky-Golay smoothening can be applied to the elemental traces')
         print('  prior to combination, using window and degree. No effect if w 1 d 1, possibly w 21 d 3.')
         self.printHelpFunc(self.cropDataROI, leadingstrings=None)
+        self.printHelpFunc(self.autoLabel)
         print('   ')
         return True

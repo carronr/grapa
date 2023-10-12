@@ -27,6 +27,7 @@ from grapa.curve import Curve
 from grapa.curve_subplot import Curve_Subplot
 
 from grapa.datatypes.graphJV import GraphJV
+from grapa.datatypes.curveJV import CurveJV
 from grapa.datatypes.graphJVDarkIllum import GraphJVDarkIllum
 
 
@@ -62,10 +63,9 @@ class areaDBHandler:
 
 #  auxiliary class - add some useful tools to the database class
 class areaDB(Database):
-
-    _NOTEXIST = []
-
+    
     def __init__(self, folder, sample):
+        
         self.colIdx = 0
         self.folder = folder
         self.sample = sample
@@ -81,12 +81,9 @@ class areaDB(Database):
         self.flag = False
         self.flagCheat = False
         for t in test:
-            if t[0] in self._NOTEXIST:
-                continue
-            print('Area database: look in file ', t[0])
+            print('Area database: look for file ', t[0])
             graph = Graph(t[0], complement=t[1], silent=True, config=None)
             if len(graph) == 0:
-                self._NOTEXIST.append(t[0])
                 continue
             else:
                 try:
@@ -97,11 +94,9 @@ class areaDB(Database):
                         if col.find('area') > -1:
                             self.colIdx = col
                     self.flag = True
-                    print('   database file parsed and area identified.')
+                    print('Database of cell area parsed and area identified.')
                 except Exception:
-                    print('   database file data could not be interpreted',
-                          'correctly.')
-                    self._NOTEXIST.append(t[0])
+                    print('-> database file data could not be interpreted correctly.')
                     continue
                 break  # break if success
         if not self.flag:
@@ -117,8 +112,8 @@ class areaDB(Database):
         if np.isnan(out):
             out = self.value(self.colIdx, self.sample+' '+cell)
         if np.isnan(out):
-            print('areaDB getArea: row "', cell, '"not found (',
-                  self.rowLabels, ')')
+            msg = "areaDB getArea: row {} not found ({})"
+            print(msg.format(cell, self.rowLabels))
 #        print ('area cell',cell,':', out, '(',self.sample,')')
         return out
 
@@ -134,8 +129,8 @@ class areaDB(Database):
 
 # main function
 def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, groupCell=True, figAx=None, pltClose=True, newGraphKwargs={}):
-    print('Script processJV folder initiated. Data processing can last a few',
-          'seconds.')
+    msg = 'Script processJV folder initiated. Data processing can last a few seconds.'
+    print(msg)
     newGraphKwargs = deepcopy(newGraphKwargs)
     newGraphKwargs.update({'silent': True})
     if figAx is not None:
@@ -172,7 +167,6 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
             print('WARNING: cannot identify sample (', sample, ') or cell (',
                   cell, ').')
 
-        areaHandler = areaDBHandler()
         if sample != '' and cell != '':
             if sample not in cellDict:
                 cellDict.update({sample: {}})
@@ -181,6 +175,7 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
             if dark not in cellDict[sample][cell]:
                 cellDict[sample][cell].update({dark: {}})
             if sample not in sampleAreaDict:
+                areaHandler = areaDBHandler()
                 sampleAreaDict.update({sample: areaHandler.get(folder, sample)})
             # open JV file again to correct for cell area
             area = sampleAreaDict[sample].getArea(cell)
@@ -188,8 +183,10 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
                 sampleAreaDict[sample].setArea(cell, graphTmp[0].attr('Acquis soft Cell area'))
                 area = sampleAreaDict[sample].getArea(cell)
             cellDict[sample][cell][dark].update({measId: file})
-            print('   ', sample, 'cell', cell, 'area', area, 'cm2 (acquired',
-                  'as', graphTmp[0].attr('Acquis soft Cell area'), ')')
+            
+            areaformer = graphTmp[0].attr('Acquis soft Cell area')
+            msg = "  Sample {}, cell {}, area {} cm2 (acquired as {})"
+            print(msg.format(sample, cell, area, areaformer))
 
         if outFlag:
             out0 = out0 + graphTmp[-1].printShort(header=True)
@@ -197,6 +194,7 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
 
     # sweep through files, identify pairs
     listSample = dictToListSorted(cellDict)
+    graphAllJV = Graph('', **newGraphKwargs)  # in case listSample is empty
     for s in listSample:
         graphAllJV = Graph('', **newGraphKwargs)
 
@@ -212,7 +210,7 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
                 for d in listDarkIllum:
                     listGraph = dictToListSorted(cellDict[s][c][d])
                     for m in listGraph:
-                        filesave = 'export_'+s+'_'+c+'_'+m+('_'+d).replace('_illum','')
+                        filesave = 'export_'+s+'_'+c+'_'+m+('_'+d).replace("_"+CurveJV.ILLUM, "")
                         print('Graph saved as', filesave)
                         graph = GraphJVDarkIllum(cellDict[s][c][d][m], '', area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
                         out = out + graph.printShort()
@@ -228,10 +226,10 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
                     d = listDarkIllum[0]
                     listGraph = dictToListSorted(cellDict[s][c][d])
                     m = listGraph[0]
-                    filesave = 'export_'+s+'_'+c+'_'+m+('_'+d).replace('_illum', '')
+                    filesave = 'export_'+s+'_'+c+'_'+m+('_'+d).replace("_"+CurveJV.ILLUM, "").replace("_"+CurveJV.DARK, "")
                     print('Graph saved as', filesave)
-                    fileDark = cellDict[s][c][d][m] if listDarkIllum[0] == 'dark'  else ''
-                    fileIllum = cellDict[s][c][d][m] if listDarkIllum[0] == 'illum' else ''
+                    fileDark = cellDict[s][c][d][m] if listDarkIllum[0] == CurveJV.DARK  else ''
+                    fileIllum = cellDict[s][c][d][m] if listDarkIllum[0] == CurveJV.ILLUM else ''
                     # create Graph file
                     graph = GraphJVDarkIllum(fileDark, fileIllum, area=sampleAreaDict[s].getArea(c), complement={'ylim':ylim, 'saveSilent': True, '_fitDiodeWeight': fitDiodeWeight}, **newGraphKwargs)
                     filesave = os.path.join(folder, filesave)
@@ -239,7 +237,7 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
                                pltClose=pltClose)
                     # prepare output summary files
                     out = out + graph.printShort()
-                    if listDarkIllum[0] == 'dark':
+                    if listDarkIllum[0] == CurveJV.DARK:
                         outDark = outDark  + graph.printShort()
                     else:
                         outIllum = outIllum + graph.printShort()
@@ -268,13 +266,25 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
                     outIllum = outIllum + graph.printShort(onlyIllum=True)
                     outDark  = outDark  + graph.printShort(onlyDark =True)
                     graphAllJV.append(graph.returnDataCurves())
+
         # graph with all JV curves area-corrected
         for c in graphAllJV:
             c.update({'color': ''})
+        if len(cellDict[s].keys()) > 0:  # retrieve consistent xlabel, ylabel
+            cds = cellDict[s]
+            try:
+                cdsc = cds[list(cds.keys())[0]]
+                cdscd = cdsc[list(cdsc.keys())[0]]
+                randomfile = cdscd[list(cdscd.keys())[0]]
+                graphtmp = Graph(randomfile)
+                graphAllJV.update({"xlabel": graphtmp.attr("xlabel"), "ylabel":  graphtmp.attr("ylabel")})
+            except IndexError:
+                pass
         filesave = os.path.join(folder, 'export_' + s + '_summary_allJV')
         graphAllJV.plot(filesave, figAx=figAx)
         if pltClose and figAx is None:
             plt.close()
+
         # print sample summary
         filesave = 'export_' + s + '_summary' + '.txt'
         filesave = os.path.join(folder, filesave)
@@ -298,7 +308,7 @@ def processJVfolder(folder, ylim=[-50,150], sampleName='', fitDiodeWeight=0, gro
     print('Script processJV folder done.')
     # print('return graph', type(graph), graph)
     # Graph.plot(graph, os.path.join(folder, 'export_test'))
-    return graph
+    return graphAllJV
 
 
 def writeFileAvgMax(fileOrContent, filesave=False, withHeader=True, colSample=True, ifPrint=True):

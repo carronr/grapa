@@ -19,6 +19,7 @@ from grapa.graph import Graph
 from grapa.graphIO import GraphIO
 from grapa.curve import Curve
 from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, smooth
+from grapa.gui.GUIFuncGUI import FuncGUI
 
 
 class CurveJV(Curve):
@@ -26,6 +27,11 @@ class CurveJV(Curve):
     q = 1.60217657E-19  # [C]
     k = 1.38E-23    # [J K-1]
     defaultIllumPower = 1000  # W/m2
+
+    DARK = "dark"
+    ILLUM = "illuminated"
+    DARK_ILLUM = {True: DARK, False: ILLUM}
+    DARK_ILLUM_VALUESLIST = list(DARK_ILLUM.values())
 
     CURVE = 'Curve JV'
 
@@ -35,6 +41,8 @@ class CurveJV(Curve):
     def __init__(self, dataJV, attributes, units=['V', 'mAcm-2'], illumPower=defaultIllumPower, ifCalc=True, silent=False) :
         # delete area from attributes, to avoid normalization during
         # initialization
+        
+        # area
         tempArea = {}
         if 'area' in attributes:
             tempArea = {'area': attributes['area']}
@@ -44,9 +52,11 @@ class CurveJV(Curve):
             Curve.update(self, tempArea)
         if self.area() == 0:  # set 1 if no input
             Curve.update(self, {'area': 1})  # to allow later changes
-            print('Cell area was set to 1.')
+            if not silent:
+                print('Cell area was set to 1.')
         elif self.attr('area', None) is None:
             Curve.update(self, {'area': self.area()})  # to allow later changes
+        
         # internally all units are treated as V and mA/cm2
         if units[0] == 'mV':
             self.setX(self.x() / 1000)
@@ -54,9 +64,11 @@ class CurveJV(Curve):
         if units[1] == 'Am-2':  # converts in mAcm-2
             self.setY(self.y() * 1000 / (100*100))
             print('class CurveJV: J axis rescaling into mA/cm2.')
+        
         # illumPower default 1000 W/m2
         illumPower = illumPower if is_number(illumPower) else float(illumPower)
         self.update({'units': units, 'illumPower': illumPower})
+        
         # temperature. self.T for convenience. See also update() override
         self.T = 273.15 + 25
         if is_number(self.attr('Temperature')):
@@ -70,10 +82,14 @@ class CurveJV(Curve):
             print('Warning CurveJV: max voltage > 10 detected. Voltage input',
                   'expected in V, please correct if possible. Fitting is',
                   'likely to fail on provided input.')
-        self.sample(forceCalc=True)
+        # sample, cell
+        self.sample()
+        self.cell()
+
         if ifCalc:
             try:
                 self.calcVocJscFFEffMPP()
+                self.darkOrIllum()
             except Exception as e:
                 print('WARNING CurveJV init: Exception', type(e))
                 print(e)
@@ -82,6 +98,18 @@ class CurveJV(Curve):
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...] (, [default1, default2, ...]) ]
+        # sample, cell
+        keys = ["Sample", "Cell", "darkorillum"]
+        item = FuncGUI(self.updateValuesDictkeys, "Save", {"keys": keys})
+        item.append("Sample", self.attr("sample"), options={"width": 20})
+        item.append("Cell", self.attr("cell"), options={"width": 10})
+        darkillum = str(self.darkOrIllum(ifText=True))
+        item.append(" ", darkillum, widgetclass="Combobox", options={"state": "readonly", "values": self.DARK_ILLUM_VALUESLIST})
+        out.append(item)
+
+        #keys = ["Sample", "Cell"]
+        #out.append([self.updateFitParam, "Save", keys, [self.attr(k) for k in keys], {"keys": keys}])
+        # area
         lbl = 'Area [cm2] (old value ' + "{:4.3f}".format(self.area()) + ')'
         out.append([self.setArea, 'Area correction', [lbl],
                     ["{:6.5f}".format(self.area())]])
@@ -120,15 +148,29 @@ class CurveJV(Curve):
         Override default update method, to handle the case where a new area
         or temperature would be set.
         """
-        for key in attributes:
+        for key, value in attributes.items():
+            # area: bypass default behavior
             if key.lower() == 'area':
-                self.setArea(attributes[key])  # bypass default behavior
+                self.setArea(value)
+            # temperature: behavior in addition to default
             elif key.lower() == 'temperature':
-                if is_number(attributes[key]):
-                    self.T = attributes[key]  # behavior in addition to default
-                Curve.update(self, {key: attributes[key]})
+                if is_number(value):
+                    self.T = value
+                Curve.update(self, {key: value})
+            # darkillum: force boolean, dict for human-friendly interaction
+            elif key.lower() == "darkorillum" and value not in [""]:
+                if value in self.DARK_ILLUM.values():
+                    for k, val in self.DARK_ILLUM.items():
+                        if value == val:
+                            Curve.update(self, {key: k})
+                elif isinstance(value, bool):
+                    Curve.update(self, {key: value})
+                else:
+                    msg = "CurveJV update darkorillum, bad input ({}: {})."
+                    print(msg.format(key, attributes[key]))
+                    Curve.update(self, {key: value})
             else:
-                Curve.update(self, {key: attributes[key]})
+                Curve.update(self, {key: value})
 
     # OTHER
     def area(self):
@@ -231,7 +273,7 @@ class CurveJV(Curve):
         return self.attr('measId')
 
     def darkOrIllum(self, ifText=False, forceCalc=False, ifJscBelow=0.1):
-        if self.attr('darkOrIllum') == '' or forceCalc :
+        if self.attr('darkOrIllum', "") == "" or forceCalc :
             sure = False
             name = self.attr('filename').split('/')[-1]
             split = refindall('([dD][aA][rR][kK])', name)
@@ -240,7 +282,7 @@ class CurveJV(Curve):
                 sure = True
             if not sure:
                 if is_number(ifJscBelow):
-                    if self.attr('Jsc') != '':
+                    if self.attr('Jsc') != "":
                         if np.abs(self.attr('Jsc')) < ifJscBelow:
                             # 0.1 mA/cm2 is criterion for a dark JV curve
                             ifDark = True
@@ -250,11 +292,14 @@ class CurveJV(Curve):
             if not sure:
                 ifDark = False
             self.update({'darkOrIllum': ifDark})
+        out = self.attr('darkOrIllum')
         if not ifText:
-            return self.getAttribute('darkOrIllum')
-        else:
-            out = 'dark' if self.getAttribute('darkOrIllum') else 'illum'
             return out
+        if out in self.DARK_ILLUM.keys():
+            return self.DARK_ILLUM[out]
+        return out  # should not happen
+            #else, out = self.DARK if self.attr('darkOrIllum') else self.ILLUM
+            #return out
 
 
     def CurveJVFromFit (self, fitRange=None, diodeFitWeight=None, V=None, silent=False):

@@ -6,10 +6,54 @@ KNOWND BUGS
 
 
 
-Version 0.6.1.0 (current development)
+
+Version 0.6.2.2
+Released 12.10.2023
+New data file format supported:
+- PLQY file Abt207
+- GraphJV_Wavelabs: new file format to parse JV as well as MPP data files
+New features
+- Curve TRPL: new data processing function, Curve_differential_lifetime_vs_signal
+- CurveSIMS: formatted for the Label, using python string template mechanisms and curve properties as variables. Maybe more useful than CurveSIMS..
+Bug corrections
+- CurveSIMS, bug recently introduced that prevented opening files under some conditions.
+
+
+
+Version 06.2.1
+Released 11.09.2023
+BUGS
+- Solved a bug in CurveJV that was preventing proper recognition of dark and illuminated curves in some cases, e.g. for scripts.
+
+
+Version 0.6.2.0
+Released 30.08.2023
+- New file format: grapa can extract part of the data contained in a set of SCAPS software output data (.iv, .cv, .cf, .qe).
+- New script: show correlation graphs between quantities taken from da tables, excel files. For Scaps simulation batches, shows the simulated curves as well as correlations between sweep variables and PV parameters.
+- Curve Images: added conversion function, to convert matrix data into 3-column xyz format and conversely. The data is displayed in a new Graph.
+- Curve Images: contour, contourf: revised the code for column/row extraction, transposition and rotation.
+- GUI: Copy Image to clipboard now should preserve transparency
+- GUI: "New empty Curve" nows inserts, and not append the new empty Curve.
+- Curve TRPL: added function to calculate tau_effective, by 2 methods. A warning is issued if a tau value may risk to artifact the result.
+- Curve TRPL: added functions to send fit parameters to clipboard. Also reports the weighted averages if no risk of artifact.
+- Curve TRPL: fit should be more robust and have less convergence issues.
+- Curve EQE: now parse the reference filename from the raw data file
+- Curve JV: axvline and axhline are created with with thinner lines
+- Curve JV: identification of sample and cell performed at opening; fields to edit available. Goal: identify challenging cases with new setup.
+- Script JV: the "_allJV" now has axis labels
+BUGS
+- SIMS: solved a bug that was failing to perform quantification of SIMS relative yield. There was no indication that the normalization failed on the GUI, only in the command line window. As a result, curve ratios (e.g. GGI) ma have beed calculated in an erroneous manner
+- A bug with Curve actions with widgets of type Checkbox. They values were always displayed as False.
+- Script JV: returns a different graph (JVall). The other graphs could not be "saved" due to a technicality.
+- Script JV: solved a bug that prevented parsing a datafile that was created after a first execution of the JV script which did not find that file.
+and a few minor bugs here and there
+
+
+
+Version 0.6.1.0
 Released 19.04.2023
 Features
-- GUI: it is not possible to open several files at once (finally!)
+- GUI: it is now possible to open several files at once (finally!)
 - Axis labels and graph title can now be entered as ['Quantity', 'symbol', 'unit'], with optional formatting additional dict element
 - File format: grapa can now open JV files from Ossila sofware, rather primitive data parser.
 - File format: grapa can now extract data from a certain .spe file format containing XRF data. The data parser is very primitive.

@@ -7,7 +7,7 @@ import numpy as np
 from grapa.mathModule import listToString
 
 
-class FuncGUI():
+class FuncGUI:
     """
     A class to rationalize the following:
     out.append([self.currentCalc, 'EQE current',
@@ -40,8 +40,11 @@ class FuncGUI():
         if isinstance(hiddenvars, dict):
             self.hiddenvars = hiddenvars
         elif hiddenvars is not None:
-            print('WARNING FuncGUIParams, hiddenvars must be a dict, will be ',
-                  'ignored,', hiddenvars)
+            print(
+                "WARNING FuncGUIParams, hiddenvars must be a dict, will be ",
+                "ignored,",
+                hiddenvars,
+            )
         self.fields = []
 
     def initLegacy(self, input):
@@ -51,20 +54,24 @@ class FuncGUI():
             self.hiddenvars = input[4]
         for i in range(len(input[2])):
             label = input[2][i]
-            value = input[3][i] if len(input) > 3 else ''
+            value = input[3][i] if len(input) > 3 else ""
             if isinstance(value, (list, np.ndarray)):
                 value = listToString(value)
             options = input[5][i] if len(input) > 5 else {}
             self.append(label, value, options=options)
         return self
 
-    def append(self, label, value, widgetclass='Entry', bind=None, keyword=None, options=None):
+    def append(
+        self, label, value, widgetclass="Entry", bind=None, keyword=None, options=None
+    ):
         """
         Example
         label: 'my choice'
         value: 'b'
         widgetclass: 'Entry', 'Combobox'... a tk widget (or other library if
             implemented)
+            Frame: new line
+            None: to not show the field and not provide value (use case: display label)
         keyword: for the parameter to be submitted as keyword variable
         bind: a (validation) function on the widget value
         options: {'width': 8, 'values': ['a', 'b', 'c']}
@@ -74,27 +81,37 @@ class FuncGUI():
         options = dict(options)  # work on a copy as would modify the content
         # _propsFromOptions can modify options
         cls, bind, kw = self._optsToProps(options, widgetclass, bind, keyword)
-        self.fields.append({'label': label, 'value': value, 'options': options,
-                            'widgetclass': cls, 'bind': bind, 'keyword': kw})
+        if isinstance(value, np.ndarray):
+            value = list(value)
+        self.fields.append(
+            {
+                "label": label,
+                "value": value,
+                "options": options,
+                "widgetclass": cls,
+                "bind": bind,
+                "keyword": kw,
+            }
+        )
 
     def _optsToProps(self, options, widgetclass, bind, keyword):
         # to be called as
         # widgetclass, bind, keyword = self._optsToProps(options, widgetclass,
         #                                                bind, keyword)
-        if 'field' in options:  # overrides provided value
-            widgetclass = options['field']
-            del options['field']
-        if 'bind' in options:
-            bind = options['bind']
-            del options['bind']
-        if 'keyword' in options:
-            keyword = options['keyword']
-            del options['keyword']
+        if "field" in options:  # overrides provided value
+            widgetclass = options["field"]
+            del options["field"]
+        if "bind" in options:
+            bind = options["bind"]
+            del options["bind"]
+        if "keyword" in options:
+            keyword = options["keyword"]
+            del options["keyword"]
         # some futerh checks
-        if widgetclass == 'Combobox':
-            if 'width' not in options:
-                width = int(1.1 * max([len(v) for v in options['values']]))
-                options.update({'width': width})
+        if widgetclass == "Combobox":
+            if "width" not in options:
+                width = int(1.1 * max([len(v) for v in options["values"]]))
+                options.update({"width": width})
         return widgetclass, bind, keyword
 
     def isSimilar(self, other):
@@ -103,13 +120,15 @@ class FuncGUI():
         Checks for function name, textsave, hidden vars, fields labels
         Does NOT check for field values - user force same value for all
         """
-        if (isinstance(other, FuncGUI)
-                and self.func.__name__ == other.func.__name__
-                and self.textsave == other.textsave
-                and len(self.fields) == len(other.fields)
-                and len(self.hiddenvars) == len(other.hiddenvars)):
+        if (
+            isinstance(other, FuncGUI)
+            and self.func.__name__ == other.func.__name__
+            and self.textsave == other.textsave
+            and len(self.fields) == len(other.fields)
+            and len(self.hiddenvars) == len(other.hiddenvars)
+        ):
             for i in range(len(self.fields)):
-                if self.fields[i]['label'] != other.fields[i]['label']:
+                if self.fields[i]["label"] != other.fields[i]["label"]:
                     return False
             return True
         return False
@@ -125,80 +144,102 @@ class FuncGUI():
         """
         import tkinter as tk
         from tkinter import ttk
-        callinfo = {'func': self.func, 'args': [],
-                    'kwargs': dict(self.hiddenvars)}
+
+        callinfo = {"func": self.func, "args": [], "kwargs": dict(self.hiddenvars)}
         widgets = []  # list of widgets, to be able to destroy later
         # create inner frame
         fr = tk.Frame(frame)
-        fr.pack(side='top', anchor='w', fill=tk.X)
+        fr.pack(side="top", anchor="w", fill=tk.X)
         widgets.append(fr)
         # validation button
         if self.func is None:
             widget = tk.Label(fr, text=self.textsave)
         else:
-            widget = tk.Button(fr, text=self.textsave,
-                               command=lambda j_=callbackarg: callback(j_))
-        widget.pack(side='left', anchor='w')
+            widget = tk.Button(
+                fr, text=self.textsave, command=lambda j_=callbackarg: callback(j_)
+            )
+        widget.pack(side="left", anchor="w")
         widgets.append(widget)
         # list of widgets
         for field in self.fields:
-            bind = field['bind']
-            options = dict(field['options'])
-            widgetclass = field['widgetclass']
+            bind = field["bind"]
+            options = dict(field["options"])
+            widgetclass = field["widgetclass"]
+
+            # first, a Label widget for to help the user
+            widget = tk.Label(fr, text=field["label"])
+            widget.pack(side="left", anchor="w", fill=tk.X)
+            widgets.append(widget)
+
+            if widgetclass is None:
+                # do not create any widget; purpose: show the label
+                continue
             # widgetname: tranform into reference to class
             try:
-                if widgetclass in ['Combobox']:  # Combobox
+                if widgetclass in ["Combobox"]:  # Combobox
                     widgetclass = getattr(ttk, widgetclass)
                 else:
                     widgetclass = getattr(tk, widgetclass)
             except Exception as e:
-                print('ERROR FuncGUI.create_widgets, cannot create widget of',
-                      'class', widgetclass, 'Exception', type(e), e)
+                msg =  "ERROR FuncGUI.create_widgets, cannot create widget of class {}. Exception {} {}"
+                print(msg.format(widgetclass, type(e), e))
                 continue
+
             # Frame: interpreted as to create a new line
             if widgetclass == tk.Frame:
                 fr = tk.Frame(frame)
-                fr.pack(side='top', anchor='w', fill=tk.X)
+                fr.pack(side="top", anchor="w", fill=tk.X)
                 widgets.append(fr)  # inner Frame
                 continue  # stop there, go to next widget
-            # first, a Label widget for to help the user
-            widget = tk.Label(fr, text=field['label'])
-            widget.pack(side='left', anchor='w')
-            widgets.append(widget)
+
             # create stringvar
-            stringvar = tk.StringVar()
-            stringvar.set(str(field['value']))
-            if field['keyword'] is None:
-                callinfo['args'].append(stringvar)
+            if widgetclass == tk.Checkbutton:
+                stringvar = tk.BooleanVar()
+                stringvar.set(bool(field["value"]))
             else:
-                callinfo['kwargs'].update({field['keyword']: stringvar})
+                stringvar = tk.StringVar()
+                stringvar.set(str(field["value"]))
+
+            if field["keyword"] is None:
+                callinfo["args"].append(stringvar)
+            else:
+                callinfo["kwargs"].update({field["keyword"]: stringvar})
             # default size if widgetclass is Entry
-            if widgetclass == tk.Entry and 'width' not in options:
-                width = int(max(8, (40 - len(field['label'])/3 - len(self.textsave)/2)/len(self.fields)))
+            if widgetclass == tk.Entry and "width" not in options:
+                widthtest = (
+                    40 - len(field["label"]) / 3 - len(self.textsave) / 2
+                ) / len(self.fields)
+                width = int(max(8, widthtest))
                 if len(stringvar.get()) < 2:
                     width = int(0.3 * width + 0.7)
-                options.update({'width': width})
+                options.update({"width": width})
             # link to StringVar
             if widgetclass == tk.Checkbutton:
-                options.update({'variable': stringvar})
+                options.update({"variable": stringvar})
             else:
-                options.update({'textvariable': stringvar})
+                options.update({"textvariable": stringvar})
             # create widget
             try:
                 widget = widgetclass(fr, **options)
             except Exception as e:
-                print('Exception', type(e), e)
-                print('Could not create widget', field['label'],
-                      widgetclass.__name__, options)
+                print("Exception", type(e), e)
+                print(
+                    "Could not create widget",
+                    field["label"],
+                    widgetclass.__name__,
+                    options,
+                )
                 continue
-            widget.pack(side='left', anchor='w')
+            widget.pack(side="left", anchor="w")
             widgets.append(widget)
             # bind
-            bind = field['bind']
+            bind = field["bind"]
             if bind is not None:
-                if bind == 'beforespace':
-                    bind = lambda event: event.widget.set(event.widget.get().split(' ')[0])
-                widget.bind('<<ComboboxSelected>>', bind)
-            widget.bind('<Return>', lambda event, j_=callbackarg: callback(j_))
+                if bind == "beforespace":
+                    bind = lambda event: event.widget.set(
+                        event.widget.get().split(" ")[0]
+                    )
+                widget.bind("<<ComboboxSelected>>", bind)
+            widget.bind("<Return>", lambda event, j_=callbackarg: callback(j_))
         # end of loop, return
         return callinfo, widgets

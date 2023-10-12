@@ -42,17 +42,58 @@ from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFram
 # TODO: Write workflow JV
 # TODO: Write workflow Jsc Voc
 
-# TODO LIST PRIORITY
+# TODO: progressively remove all uses of pyplot, does not miy well with tkagg and stuff
 # - colorbar: also shortcut for type image?
 # TODO: check import .graph instead of grapa. Look at standard python packages. Check from GUI, with spyder various versions, and when calling script from external python script
-# TODO: TRPL lifetime estimate (!not grapa)
-
 # TODO: open config file in OS default editor
 
-# TODO:_ EXPORT SCREEN DATA -grapj - to test with CV
+# TO EVALUATE: GraphJV, identify cell already in GraphJV instead of CurveJV. Empty if fails. Identification in CurveJV: as default, fall back on GraphJV mechanisms. Also: measId.
+# TO EVALUATE: scatter, add text values for each point. [clear all annotations] [text formatting "{.2g}". Remove only] [kwargs: centered both]
 
 
-# Version 0.6.1.0 (current development)
+
+
+# Version 0.6.2.2
+# Released 12.10.2023
+# New data file format supported:
+# - PLQY file Abt207
+# - GraphJV_Wavelabs: new file format to parse JV as well as MPP data files
+# New features
+# - Curve TRPL: new data processing function, Curve_differential_lifetime_vs_signal
+# - CurveSIMS: formatted for the Label, using python string template mechanisms and curve properties as variables. Maybe more useful than CurveSIMS..
+# Bug corrections
+# - CurveSIMS, bug recently introduced that prevented opening files under some conditions.
+
+
+#Version 0.6.2.1
+#Released 11.09.2023
+#BUGS
+#- Solved a bug in CurveJV that was preventing proper recognition of dark and illuminated curves in some cases, e.g. for scripts.
+
+# Version 0.6.2.0
+# - New file format: grapa can extract part of the data contained in a set of SCAPS software output data (.iv, .cv, .cf, .qe).
+# - New script: show correlation graphs between quantities taken from da tables, excel files. For Scaps simulation batches, shows the simulated curves as well as correlations between sweep variables and PV parameters.
+# - Curve Images: added conversion function, to convert matrix data into 3-column xyz format and conversely. The data is displayed in a new Graph.
+# - Curve Images: contour, contourf: revised the code for column/row extraction, transposition and rotation.
+# - GUI: Copy Image to clipboard now should preserve transparency
+# - GUI: "New empty Curve" nows inserts, and not append the new empty Curve.
+# - Curve EQE: now parse the reference filename from the raw data file
+# - Curve TRPL: fit should be more robust and have less convergence issues.
+# - Curve TRPL: added function to calculate tau_effective, by 2 methods. A warning is issued if a tau value may risk to artifact the result.
+# - Curve TRPL: added functions to send fit parameters to clipboard. Also reports the weighted averages if no risk of artifact.
+# , and calculate tau_effective
+# - Curve JV: axvline and axhline are created with with thinner lines
+# - Curve JV: identification of sample and cell performed at opening; fields to edit available. Goal: identify challenging cases with new setup.
+# - Script JV: the "_allJV" now has axis labels
+# BUGS
+# - SIMS: solved a bug that was failing to perform quantification of SIMS relative yield. There was no indication that the normalization failed on the GUI, only in the command line window. As a result, curve ratios (e.g. GGI) ma have beed calculated in an erroneous manner
+# - A bug with Curve actions with widgets of type Checkbox. They values were always displayed as False.
+# - Script JV: returns a different graph (JVall). The other graphs could not be "saved" due to a technicality.
+# - Script JV: solved a bug that prevented parsing a datafile that was created after a first execution of the JV script which did not find that file.
+# and a few minor bugs here and there
+
+
+# Version 0.6.1.0
 # - GUI: it is not possible to open several files at once (finally!)
 # - Axis labels and graph title can now be entered as ['Quantity', 'symbol', 'unit'], with optional formatting additional dict element
 # - Curve EQE current integration: added a checkbox to show the cumulative current sum.
@@ -65,54 +106,6 @@ from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFram
 # - Bug: Curve JV, can read date time.
 # - Ensured forward compatibility up to Winpython 3.10.40
 
-
-
-
-
-
-
-# Version 0.6.0.0
-# Additions
-# - Main GUI now handles several graphs at the same time, thanks to a tab mechanism. Hope this will be useful!
-# - Change in handling of escape sequences: \n, \t, etc. Should be compatible with some special characters with different charsets (e.g. alt+230 "µ" in both ascii and utf-8 file encoding) and latex commands with 2 backslashes (e.g. "\\alpha"). "\alpha" would fail due to the escaped "\a" special character, but "\gamma" should succeed). Possible loss of compatiblity with previous graphs, esp. with latex symbols - hence, new major version number.
-# - Axis limits: when axes limits cannot be computed with data transforms, the user input is used to set the axis limit. It is now possible to define axes limit values, when previously this could not be done. The default behavior remains that the user input for axis limits are transformed the same way as the plotted data.
-# - Popup Annotations: added a vertical scrollbar, changed the order of displayed elements
-# - scriptCV: The warnings are collected and reported at the end. Also, more robust processing of input files with slightly different formatting.
-# - CurveSpectrum: added correction function instrumental response 800nm
-# - CurveEQE: added an additional reference EQE spectrum (Empa PI 20.8%). The data loading mechanisms is modified and new reference spectra are now easy to add - see file datatypes/EQE_referenceSpectra.
-# - CurveXRF: added an annotation function to place labels for peak intensities according to the database https://xdb.lbl.gov/Section1/Table_1-3.pdf.
-# - CurveXRF: improved the loading of experiemntal parameters. The data are now stored inthe Curve where they belong
-# - CurveSIMS: add function to crop data inside ROI
-# - CurveSIMS: revised the handling of shortcuts keywords. Now can upport capitalized
-# - CurveTRPL: fitted curves can now be normalized with same parameters as the input data
-# - CurveJV: Added a function to extract Jsc-Voc and temperature data.
-# - CurveArrhenius: added possibility to fit using a power law
-# - New data file recognized, PAIOS. Likely, only specific data (JV) can be opened properly - if at all
-# - GUI: a major rework of the organisation of the GUI code. Possibilities to hide different panels. Little visible changes, but many possibilities for new bugs. Please let me know if you notice any!
-# Bugs
-# - Solved a certain number of those. Did not keep track.
-# - scriptJV: solved a bug with _JVall when processing several samples simultaneously
-# - Certainly I added quite a few new bugs. Enjoy, my pleasure
-
-
-# Version 0.5.4.8
-# Modifications
-# - TRPL: the data type TRPL was  modified to properly load files generated using scripts.
-# - Modified loading of preference file. Hopefully a bit faster when opening many files.
-# - CurveJV: added data transform 'Log10 abs (raw)' (abs0), to plot the log of JV curve without Jsc subtraction
-# - scriptJV: also exports a file with a few statistical quantities of JV data (average, mediam, max)
-# - scriptJV: reduced amount of generated files. The individual summary images are not generated anymore as already plotted in combined format. Also, the different cells are exported as images (3x) and only once as text file.
-# - prepare future update of the GUI to support several graphs simultaneously
-# BUGS:
-# - Mitigated bugs with Winpython version 3.9 (issues with matplotlib 3.3.9; hidden curves in grey due to changes in tk)
-
-
-# Version 0.5.4.7
-# Modifications
-# - Adjusted width of GUI Curve action fields for CurveSIMS to prevent time-consuming redimensioning of the GUI interface.
-# - The Colorize GUI function can now print its effect in the console
-# Bugs
-# - Solved an issue with twiny ylim values
 
 
 """
@@ -505,15 +498,19 @@ class Application(tk.Frame):
                   + str(saveAltered) + "', ifCompact='" + str(ifCompact)+"')")
         self.updateUI()
 
-    def appendCurveToGraph(self, curve, updateUI=True):
+    def insertCurveToGraph(self, curve, updateUI=True):
         """ Appends 1 Crve, or a list of Curves to the active graph """
         if updateUI:
             self.storeSelectedCurves()
         if isinstance(curve, list):
             for c in curve:
-                self.graphAppendCurve(c, updateUI=False)
+                self.insertCurveToGraph(c, updateUI=False)
         elif isinstance(curve, Curve):
-            self.graph().append(curve)
+            kw = {}
+            selected = self.getSelectedCurves(multiple=False)
+            if len(selected) > 0 and selected[0] >= 0:
+                kw.update({'idx': selected[0] + 1})
+            self.graph().append(curve, **kw)
         else:
             print('ERROR GUI graphAppendCurve, could not handle class of',
                   '"curve"', type(curve), '.')
@@ -555,6 +552,7 @@ class Application(tk.Frame):
         try:
             daysSinceLast = datetime.now() - parser.parse(date)
         except ValueError as e:
+            daysSinceLast = ""
             print('Exception in PrintLastRelease, date', date, type(e), e)
         line = ''
         if daysSinceLast.days < 5:
@@ -585,7 +583,7 @@ def buildUI():
         pass
     app = Application(master=root)
     from grapa import __version__
-    app.master.title('Grapa software v'+__version__)
+    app.master.title('Grapa software v' + __version__)
     # starts runnning programm
     with stdout_redirect(app.frameConsole.console):
         # retrieve content of last release

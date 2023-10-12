@@ -80,7 +80,8 @@ class GraphJV(Graph):
         self.update({'xlabel': self.formatAxisLabel(['Bias voltage', 'V', 'V']),
                      'ylabel': self.formatAxisLabel(['Current density', 'J', 'mA cm$^{-2}$'])})
         # some cosmetic information
-        self.update({'axhline': [0], 'axvline': [0]})
+        self.update({'axhline': [0, {'linewidth': 0.5}],
+                     'axvline': [0, {'linewidth': 0.5}]})
 
     def readDataFromFileTIV(self, attributes):
         GraphIO.readDataFromFileGeneric(self, attributes)

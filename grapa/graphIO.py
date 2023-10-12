@@ -1048,13 +1048,14 @@ class GraphIO(Graph):
         def sca_errorhandled(ax, txt=''):
             try:
                 plt.sca(ax)
+                # actually, show aoid using pyplot together with tkagg !!!
             except AttributeError:
                 if not self._PLOT_PRINTEDERROR_ATTRIBUTE:
-                    print('WARNING sca(ax)', txt, '. AttributeError catched, cause to investigate...')
+                    # print('WARNING sca(ax)', txt, '. AttributeError catched, cause to investigate...')
                     self._PLOT_PRINTEDERROR_ATTRIBUTE = True
             except ValueError:
                 if not self._PLOT_PRINTEDERROR_VALUE:
-                    print('WARNING sca(ax)', txt, '. ValueError catched, cause to investigate...')
+                    # print('WARNING sca(ax)', txt, '. ValueError catched, cause to investigate...')
                     self._PLOT_PRINTEDERROR_VALUE = True
 
         # treat filesave, and store info if not already done. required for
@@ -1432,6 +1433,7 @@ class GraphIO(Graph):
                 out = setAxisLabel(axTwinXY.set_xlabel, self.graphInfo['twiny_xlabel'])
                 if out['size']:
                     fontsizeset.append(axTwinXY.xaxis.label)
+
         # lcoation of labels
         if 'xlabel_coords' in self.graphInfo:
             val = self.graphInfo['xlabel_coords']
@@ -1445,6 +1447,7 @@ class GraphIO(Graph):
                 ax.yaxis.set_label_coords(val[0], val[1])
             else:
                 ax.yaxis.set_label_coords(val, 0.5)
+
         # other
         if 'axhline' in self.graphInfo:
             lst = ParserAxhline(self.graphInfo['axhline'])
@@ -1452,6 +1455,7 @@ class GraphIO(Graph):
         if 'axvline' in self.graphInfo:
             lst = ParserAxvline(self.graphInfo['axvline'])
             lst.plot(ax.axvline, curvedummy, alter, type_plot)
+
         # xlim, ylim. Start with xtickslabels as this guy would override xlim
         if 'xtickslabels' in self.graphInfo and not ignoreXLim:
             val = self.graphInfo['xtickslabels']
@@ -1460,12 +1464,17 @@ class GraphIO(Graph):
             ticksloc = val[0]
             if not isinstance(ticksloc, list):
                 ticksloc = ax.xaxis.get_ticklocs()
-            ar = [val[1]] if len(val) > 1 and val[1] is not None else []
+            ar = val[1] if len(val) > 1 and val[1] is not None else []
 #                ticksvals = [a.get_text() for a in ax.xaxis.get_ticklabels()] # don't need to retrieve if do not change them
             kw = val[2] if len(val) > 2 and isinstance(val[2], dict) else {}
             if 'size' in kw:
                 fontsizeset.append('ax.get_xticklabels()')
-            plt.xticks(ticksloc, *ar, **kw)
+            # implementation based on plt.xticks of matplotlib 3.3
+            ### plt.xticks(ticksloc, ar, **kw)
+            locs = ax.set_xticks(ticksloc)
+            labels = ax.set_xticklabels(ar, **kw)
+            for l in labels:
+                l.update(kw)
         if 'ytickslabels' in self.graphInfo and not ignoreYLim:
             val = self.graphInfo['ytickslabels']
             if not isinstance(val, list):
@@ -1473,12 +1482,17 @@ class GraphIO(Graph):
             ticksloc = val[0]
             if not isinstance(ticksloc, list):
                 ticksloc = ax.yaxis.get_ticklocs()
-            ar = [val[1]] if len(val) > 1 and val[1] is not None else []
+            ar = val[1] if len(val) > 1 and val[1] is not None else []
 #                ticksvals = [a.get_text() for a in ax.yaxis.get_ticklabels()] # don't need to retrieve if do not change them
             kw = val[2] if len(val) > 2 and isinstance(val[2], dict) else {}
             if 'size' in kw:
                 fontsizeset.append('ax.get_yticklabels()')
-            plt.yticks(ticksloc, *ar, **kw)
+            # implementation based on plt.xticks of matplotlib 3.3
+            ### plt.yticks(ticksloc, ar, **kw)
+            locs = ax.set_yticks(ticksloc)
+            labels = ax.set_yticklabels(ar, **kw)
+            for l in labels:
+                l.update(kw)
 
         def alterLim(ax, lim, xory):
             limAuto = ax.get_xlim() if xory == 'x' else ax.get_ylim()

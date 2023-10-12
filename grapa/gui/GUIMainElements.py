@@ -764,7 +764,7 @@ class GUIFrameMenuMain():
         # too larges chances to mess up with that one
         # self.master.bind('<Control-v>', lambda e: self.openClipboard())
         frame.bind('<Control-Shift-V>', lambda e: self.mergeClipboard())
-        frame.bind('<Control-Shift-N>', lambda e: self.appendCurveEmpty())
+        frame.bind('<Control-Shift-N>', lambda e: self.insertCurveEmpty())
 
     def createWidgets(self, frame):
         self.showHide = FrameTitleContentHide(frame, None, None,
@@ -835,10 +835,11 @@ class GUIFrameMenuMain():
         # new curve, close
         fr = tk.Frame(frame)
         fr.pack(side='top', fill=tk.X, padx=10)
-        v = tk.Button(fr, text='New empty Curve',
-                      command=self.appendCurveEmpty)
+        v = tk.Button(fr, text='Insert',
+                      command=self.insertCurveEmpty)
         # v.grid(column=1, row=2, sticky='w')
         v.pack(side='left')
+        tk.Label(fr, text="new empty Curve").pack(side='left')
         explain = 'For creating a new subplot, inset, image etc. Ctrl+Shift+N'
         CreateToolTip(u, 'Open all files in a given folder')
         CreateToolTip(v, explain)
@@ -939,6 +940,15 @@ class GUIFrameMenuMain():
         tooltiplbl = "fit range of interest (min value or range), in mA/cm2"
         CreateToolTip(lbl, tooltiplbl)
         CreateToolTip(self.varJscVocROI, tooltiplbl)
+        # Correlation plots - e.g. SCAPS
+        lbl = tk.Label(frame, text='Correlations')
+        lbl.pack(side='top', anchor='w', padx=0, pady=2)
+        fr = tk.Frame(frame)
+        fr.pack(side='top', fill=tk.X, padx=10)
+        btn = tk.Button(fr, text='(1 file)', command=self.scriptCorrelations)
+        btn.pack(side='left', pady=2)
+        tk.Label(fr, text='e.g. SCAPS batch result').pack(side='left')
+
 
     def cw_bottom(self, frame):
         fr0 = tk.Frame(frame)
@@ -1047,10 +1057,10 @@ class GUIFrameMenuMain():
                     out.append(str(os.path.join(folder, file)))
         return out
 
-    def appendCurveEmpty(self):
+    def insertCurveEmpty(self):
         """ Append an empty Curve in current Graph """
         curve = Curve([[0], [np.nan]], {})
-        self.app.appendCurveToGraph(curve)
+        self.app.insertCurveToGraph(curve)
 
     def saveImageToClipboard(self):
         """ Copy an image of current graph into the clipboard """
@@ -1128,6 +1138,15 @@ class GUIFrameMenuMain():
         if folder is not None and folder != '':
             ngkw = self.app.newGraphKwargs
             graph = script_processCf(folder, newGraphKwargs=ngkw)
+            self.app.openFile(graph)
+
+    def scriptCorrelations(self):
+        """ Script processing of SCAPS output IV, CV, Cf QE files """
+        from grapa.scripts.script_correlations import process_file as corr_process_file
+        file = self.app.promptFile()
+        if file is not None and file != '':
+            ngkw = self.app.newGraphKwargs
+            graph = corr_process_file(file, newGraphKwargs=ngkw)
             self.app.openFile(graph)
 
     def quitMain(self):
@@ -1474,7 +1493,7 @@ class GUIFrameActionsGeneric():
             keys = [''] * len(sel)
             self.app.getTabProperties(selectionCurvesKeys=(sel, keys),
                                       focusCurvesKeys=([sel[0]], ['']))
-        print(self.app.getTabProperties())
+        # print(self.app.getTabProperties())
         self.app.updateUI()
 
     def shiftCurveDown(self):
@@ -1569,7 +1588,7 @@ class GUIFrameActionsGeneric():
         opts = self.varClipboardOpts.get()
         ifAttrs = ('prop' in opts)
         ifTrans = ('screen' in opts)
-        print('opts', opts, ifAttrs, ifTrans)
+        # print("opts", opts, ifAttrs, ifTrans)
         if not ifAttrs:
             labels = [varToStr(graph[c].attr('label')) for c in curves]
             content += ('\t' + '\t\t\t'.join(labels) + '\n')
@@ -2161,12 +2180,16 @@ class GUIFrameActionsCurves():
                         and not type_.startswith('errorbar')):
                     break
                 idx += 1
-            # TODO: USE self.app.callGraphMethod
+            # insert newly created Curves
             if isinstance(res, Curve):
                 self.app.callGraphMethod('append', res, idx=idx)
             elif (isinstance(res, list)  # if list of Curves
                     and np.array([isinstance(c, Curve) for c in res]).all()):
                 self.app.callGraphMethod('append', res, idx=idx)
+            elif isinstance(res, Graph):  # if returns a Graph, create a new one
+                folder = self.app.getFolder()
+                dpi = self.app.getTabProperties()['dpi']
+                self.app.graph(res, title='Curve action output', folder=folder, dpi=dpi)
             elif res != True:
                 print('Curve action output:')
                 print(res)

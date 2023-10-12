@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import X, BOTH
 
 
-def bind_tree(widget, event, callback, add=''):
+def bind_tree(widget, event, callback, add=""):
     "Binds an event to a widget and all its descendants."
     widget.bind(event, callback, add)
     for child in widget.children.values():
@@ -36,7 +36,7 @@ class OptionMenuVar(tk.OptionMenu):
     varType: alternative to tk.Stringvar
     """
 
-    def __init__(self, frame, values, default='', func=None, width=None, varType=None):
+    def __init__(self, frame, values, default="", func=None, width=None, varType=None):
         self.values = values
         if varType is None:
             self.var = tk.StringVar()
@@ -54,32 +54,30 @@ class OptionMenuVar(tk.OptionMenu):
         if val in self.values or force:
             self.var.set(val)
 
-    def resetValues(self, values, labels=None, func=None, default=''):
+    def resetValues(self, values, labels=None, func=None, default=""):
         """
         - labels: if labels different from values
         """
         self.values = values
         if labels is None or len(values) != len(labels):
             if labels is not None and len(labels) != len(values):
-                print('OptionMenuVar resetValues wrong len', values, labels)
+                print("OptionMenuVar resetValues wrong len", values, labels)
             labels = values
-        self['menu'].delete(0, 'end')
+        self["menu"].delete(0, "end")
         for i in range(len(values)):
             val, lbl = values[i], labels[i]
             if func is not None:
-                self['menu'].add_command(label=lbl,
-                                         command=lambda v=val: func(v))
+                self["menu"].add_command(label=lbl, command=lambda v=val: func(v))
             else:
-                self['menu'].add_command(label=lbl,
-                                         command=tk._setit(self.var, val))
+                self["menu"].add_command(label=lbl, command=tk._setit(self.var, val))
         if len(values) > 0:
             # does not change value if default '' and '' not in values
-            if default != '' or (default == '' and default in values):
+            if default != "" or (default == "" and default in values):
                 self.var.set(default if default in values else values[0])
 
 
 class EntryVar(tk.Entry):
-    """ replacement for tk.Entry, with embedded tk.Stringvar """
+    """replacement for tk.Entry, with embedded tk.Stringvar"""
 
     def __init__(self, frame, value, varType=None, **kwargs):
         if varType is None:
@@ -97,7 +95,7 @@ class EntryVar(tk.Entry):
 
 
 class LabelVar(tk.Label):
-    """ replacement for tk.Label, with embedded tk.Stringvar """
+    """replacement for tk.Label, with embedded tk.Stringvar"""
 
     def __init__(self, frame, value, **kwargs):
         self.var = tk.StringVar()
@@ -112,14 +110,15 @@ class LabelVar(tk.Label):
 
 
 class ComboboxVar(ttk.Combobox):
-    """ replacement for tk.Combobbox, with embedded tk.Stringvar """
+    """replacement for tk.Combobbox, with embedded tk.Stringvar"""
 
-    def __init__(self, frame, values, default='', **kwargs):
+    def __init__(self, frame, values, default="", **kwargs):
         self.values = values
         self.var = tk.StringVar()
         self.var.set(default)
-        ttk.Combobox.__init__(self, frame, values=self.values,
-                              textvariable=self.var, **kwargs)
+        ttk.Combobox.__init__(
+            self, frame, values=self.values, textvariable=self.var, **kwargs
+        )
 
     def get(self):
         return self.var.get()
@@ -129,13 +128,12 @@ class ComboboxVar(ttk.Combobox):
 
 
 class CheckbuttonVar(tk.Checkbutton):
-    """ replacement for tk.Checkbutton, with embedded tk.BooleanVar """
+    """replacement for tk.Checkbutton, with embedded tk.BooleanVar"""
 
     def __init__(self, frame, text, default, **kwargs):
         self.var = tk.BooleanVar()
         self.var.set(default)
-        tk.Checkbutton.__init__(self, frame, text=text, variable=self.var,
-                                **kwargs)
+        tk.Checkbutton.__init__(self, frame, text=text, variable=self.var, **kwargs)
 
     def get(self):
         return self.var.get()
@@ -145,7 +143,7 @@ class CheckbuttonVar(tk.Checkbutton):
 
 
 class ButtonSmall(tk.Frame):
-    """ fabricate a Button with a tunable size """
+    """fabricate a Button with a tunable size"""
 
     def __init__(self, frame, text, command, width=16, height=16, **kwargs):
         tk.Frame.__init__(self, frame, width=width, height=height)
@@ -165,23 +163,22 @@ class FrameScrollable(tk.Frame):
     def __init__(self, parent, **kwargs):
         tk.Frame.__init__(self, parent, **kwargs)
         # elements
-        self.scrollbary = tk.Scrollbar(self, command=self.scrolly,
-                                       orient=tk.VERTICAL)
+        self.scrollbary = tk.Scrollbar(self, command=self.scrolly, orient=tk.VERTICAL)
         self.canvas = tk.Canvas(self)
         self.child = tk.Frame(self)
         # geometry
-        self.scrollbary.grid(row=0, column=1, sticky=tk.N+tk.S+tk.E)
-        self.canvas.grid(row=0, column=0, sticky=tk.N+tk.S+tk.W)
-        self.canvas.create_window(0, 0, window=self.child, anchor='nw')
+        self.scrollbary.grid(row=0, column=1, sticky=tk.N + tk.S + tk.E)
+        self.canvas.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W)
+        self.canvas.create_window(0, 0, window=self.child, anchor="nw")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         # behavior
         self.canvas.configure(yscrollcommand=self.scrollbary.set)
-        self.canvas.bind('<Configure>', self.on_configure)
+        self.canvas.bind("<Configure>", self.on_configure)
         self.child.bind("<MouseWheel>", self.on_mousewheel)
         self.bind("<MouseWheel>", self.on_mousewheel)
         # assign ref to be able to uncind if necessary
-        self._upd_idle = self.child.bind('<Configure>', self.update_idletasks)
+        self._upd_idle = self.child.bind("<Configure>", self.update_idletasks)
 
     def update_idletasks(self, event=None):
         """
@@ -194,13 +191,13 @@ class FrameScrollable(tk.Frame):
         self.canvas.config(width=w, height=h)
 
     def on_configure(self, event):
-        self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def scrolly(self, *args):
         self.canvas.yview(*args)
 
     def on_mousewheel(self, event):
-        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
 
 class FrameTitleContentHide(tk.Frame):
@@ -211,14 +208,24 @@ class FrameTitleContentHide(tk.Frame):
       _title and _content. Up to the user to do that. Buttons can be created
       by calling createButtonShow() and createButtonHide()
     """
+
     # some hack. ideally would need to write a simpler version of
     # FrameTitleContentHide without buttons and make other versions derive
     # from it
 
-    def __init__(self, master, funcFillTitle, funcFillContent,
-                 contentkwargs={}, default='show', layout='horizontal',
-                 showHideTitle=False, createButtons=True, horizLineFrame=True,
-                 **kwargs):
+    def __init__(
+        self,
+        master,
+        funcFillTitle,
+        funcFillContent,
+        contentkwargs={},
+        default="show",
+        layout="horizontal",
+        showHideTitle=False,
+        createButtons=True,
+        horizLineFrame=True,
+        **kwargs
+    ):
         tk.Frame.__init__(self, master, **kwargs)
         self.setButtonLabels()
         self._visiblecontent = True
@@ -237,25 +244,25 @@ class FrameTitleContentHide(tk.Frame):
             if funcFillContent is not None:
                 funcFillContent(self._content)
         if self._title is not None:
-            bind_tree(self._title, '<Button-1>', self.showHide)
-        if default == 'hide':
+            bind_tree(self._title, "<Button-1>", self.showHide)
+        if default == "hide":
             self.showHide()
 
     @classmethod
     def frameHline(cls, frame):
-        return tk.Frame(frame, height=3, background='gainsboro')
+        return tk.Frame(frame, height=3, background="gainsboro")
 
     def setButtonLabels(self):
-        self.btnlbl_in = u"\u25B3"
-        self.btnlbl_out = u"\u25BC"
+        self.btnlbl_in = "\u25B3"
+        self.btnlbl_out = "\u25BC"
 
-    def createButton(self, frame, symbol='auto', size=None):
+    def createButton(self, frame, symbol="auto", size=None):
         """
         size: None: return Button. 'auto': [20, 20]. Or size [x, y]
         """
-        if symbol == 'auto':
+        if symbol == "auto":
             symbol = self.btnlbl_in
-        if size == 'auto':
+        if size == "auto":
             size = [20, 20]
         if size is None:
             return tk.Button(frame, text=symbol, command=self.showHide)
@@ -263,25 +270,25 @@ class FrameTitleContentHide(tk.Frame):
             fr = tk.Frame(frame, width=size[0], height=size[1])
             fr.propagate(0)
             btn = tk.Button(fr, text=symbol, command=self.showHide)
-            btn.pack(side='left', anchor='n', fill=tk.BOTH, expand=1)
+            btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=1)
             return fr, btn
 
     def createWidgets(self):
         side, anchor, fill = self.sideAnchorFill()
         self._up = tk.Frame(self)
         dwn = tk.Frame(self)
-        self._up.pack(side='top', anchor='w', fill=X)
-        dwn.pack(side='top', anchor='w', fill=X)
+        self._up.pack(side="top", anchor="w", fill=X)
+        dwn.pack(side="top", anchor="w", fill=X)
         self._title = tk.Frame(self._up)
         self._title.pack(side=side, anchor=anchor, fill=fill)
         if self.createButtons:
-            self._buttonFrame, self._button = self.createButton(self._up,
-                                                                size='auto')
-            self._buttonFrame.pack(side='left', anchor='center', padx=5)
+            self._buttonFrame, self._button = self.createButton(self._up, size="auto")
+            self._buttonFrame.pack(side="left", anchor="center", padx=5)
         if self.horizLineFrame:
             self._horizLineFrame = self.frameHline(self._up)
-            self._horizLineFrame.pack(side='left', anchor='center', fill=X,
-                                      expand=1, padx=5)
+            self._horizLineFrame.pack(
+                side="left", anchor="center", fill=X, expand=1, padx=5
+            )
         self._content = tk.Frame(dwn, **self._contentkwargs)
         self._content.pack(side=side, anchor=anchor, fill=fill)
         self._dummy = tk.Frame(dwn)
@@ -300,9 +307,9 @@ class FrameTitleContentHide(tk.Frame):
         return self._visiblecontent
 
     def sideAnchorFill(self):
-        side = 'left' if self._layout == 'horizontal' else 'top'
-        anchor = 'center' if self._layout == 'horizontal' else 'w'
-        fill = tk.X if self._layout == 'horizontal' else tk.Y
+        side = "left" if self._layout == "horizontal" else "top"
+        anchor = "center" if self._layout == "horizontal" else "w"
+        fill = tk.X if self._layout == "horizontal" else tk.Y
         return side, anchor, fill
 
     def showHide(self, *args):
@@ -314,7 +321,7 @@ class FrameTitleContentHide(tk.Frame):
                     self._up.pack(side=side, anchor=anchor, fill=fill)
             self._content.pack_forget()
             if self.createButtons:
-                self._button.configure({'text': self.btnlbl_out})
+                self._button.configure({"text": self.btnlbl_out})
         else:
             self._content.pack(side=side, anchor=anchor, fill=fill)
             if self.showHideTitle:
@@ -322,63 +329,77 @@ class FrameTitleContentHide(tk.Frame):
                 if not self.createButtons and not self.horizLineFrame:
                     self._up.pack_forget()
             if self.createButtons:
-                self._button.configure({'text': self.btnlbl_in})
+                self._button.configure({"text": self.btnlbl_in})
         self._visiblecontent = not self._visiblecontent
 
 
 class FrameTitleContentHideHorizontal(FrameTitleContentHide):
     def setButtonLabels(self):
-        self.btnlbl_in = u"\u25C1"
-        self.btnlbl_out = u"\u25B6"
+        self.btnlbl_in = "\u25C1"
+        self.btnlbl_out = "\u25B6"
 
     def createWidgets(self):
         if self.createButtons:
             left = tk.Frame(self, width=30)  # height=60,
-            left.pack(side='left', anchor='w')
-            self._buttonFrame, self._button = self.createButton(left,
-                                                                size='auto')
-            self._buttonFrame.pack(side='left', anchor='center', padx=5)
+            left.pack(side="left", anchor="w")
+            self._buttonFrame, self._button = self.createButton(left, size="auto")
+            self._buttonFrame.pack(side="left", anchor="center", padx=5)
             # left.propagate(0)  # to reserve space also when hidden
         righ = tk.Frame(self)
-        righ.pack(side='left', anchor='w', fill=X)
+        righ.pack(side="left", anchor="w", fill=X)
         self._title = tk.Frame(righ)
-        self._title.pack(side='left', anchor='center')
+        self._title.pack(side="left", anchor="center")
         self._dummy = tk.Frame(righ)
-        self._dummy.pack(side='left', anchor='n', fill=X)
+        self._dummy.pack(side="left", anchor="n", fill=X)
         self._content = tk.Frame(righ, **self._contentkwargs)
-        self._content.pack(side='top', anchor='w', fill=X)
+        self._content.pack(side="top", anchor="w", fill=X)
 
 
 def imageToClipboard(graph):
-    """ copy the image output of a Graph to the clipboard - Windows only """
+    """copy the image output of a Graph to the clipboard - Windows only"""
     # save image, because we don't have pixel map at the moment
-    print('Copying graph image to clipboard')
-    selffilename = graph.filename if hasattr(graph, 'filename') else None
-    fileClipboard = '_grapatoclipboard'
-    tmp = graph.getAttribute('saveSilent')
-    graph.update({'saveSilent': True})
+    print("Copying graph image to clipboard")
+    selffilename = graph.filename if hasattr(graph, "filename") else None
+    fileClipboard = "_grapatoclipboard"
+    tmp = graph.getAttribute("saveSilent")
+    graph.update({"saveSilent": True})
     graph.plot(ifSave=True, ifExport=False, filesave=fileClipboard)
-    graph.update({'saveSilent': tmp})
+    graph.update({"saveSilent": tmp})
     if selffilename is not None:  # restore self.filename
         graph.filename = selffilename
     from io import BytesIO
     from PIL import Image
+
     try:
         import win32clipboard
     except ImportError as e:
-        print('Module win32clipboard not found, cannot copy to clipboard.',
-              'Image was created.')
+        print(
+            "Module win32clipboard not found, cannot copy to clipboard.",
+            "Image was created.",
+        )
         print(e)
         return False
 
-    def send_to_clipboard(clip_type, data):
+    def send_to_clipboard(clip_type, content):
         win32clipboard.OpenClipboard()
         win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardData(clip_type, data)
+        win32clipboard.SetClipboardData(clip_type, content)
         win32clipboard.CloseClipboard()
+
     # read image -> get pixel map, convert into clipbaord-readable format
     output = BytesIO()
-    img = Image.open(fileClipboard+'.png')
+    img = Image.open(fileClipboard + ".png")
+
+    # new version, try to copy png into clipboard.
+    # Maybe people would complain, then revert to legacy
+    img.save(output, "PNG")
+    data = output.getvalue()
+    output.close()
+    send_to_clipboard(win32clipboard.RegisterClipboardFormat("PNG"), data)
+    return True
+
+    """
+    # LEGACY. Through BMP format, transparency was lost. Keep the code in case of
     try:
         img = img.convert('RGBA')
     except KeyError:
@@ -398,3 +419,4 @@ def imageToClipboard(graph):
     output.close()
     send_to_clipboard(win32clipboard.CF_DIB, data)
     return True
+    """

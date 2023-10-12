@@ -7,7 +7,7 @@ Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics,
 Romain Carron
 """
 
-__version__ = '0.6.1.0'
+__version__ = '0.6.2.2'
 
 from grapa.graph import Graph
 from grapa.curve import Curve

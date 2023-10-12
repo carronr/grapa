@@ -24,12 +24,17 @@ class GraphXLS(Graph):
 
     def readDataFromFile(self, attributes, **kwargs):
         try:
-            from xlrd import open_workbook
+            from xlrd import open_workbook, biffh
         except ImportError as e:
             print('ImportError: cannot import xlrd. GraphXLS aborted.', e)
             return False
 
-        wb = open_workbook(self.filename)
+        try:
+            wb = open_workbook(self.filename)
+        except biffh.XLRDError as e:
+            print(type(e), e)
+            print("Abort reading the file")
+            return
         sheet_id = attributes['complement'] if 'complement' in attributes else 0
         if not isinstance(sheet_id, str) and not is_number(sheet_id):
             sheet_id = attributes['sheetid'] if 'sheetid' in attributes else 0
