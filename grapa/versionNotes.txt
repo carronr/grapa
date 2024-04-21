@@ -6,6 +6,25 @@ KNOWND BUGS
 
 
 
+Version 0.6.3.0
+Released 21.04.2024
+- New type of file supported, TinyTusker
+- Can now open files directly from Openbis. This require the external library pybis, and access to the Empa-developped code openbis uploader 207.
+- Added Curve action Autolabel: Curve labels can be generated based on a template, using the attributes values. Example: ${sample} ${cell}". Curve types: SIMS, Cf, CV, EQE, JV
+- Boxplot: new possibility to add seaborn stripplot and swarmplot on top of boxplot
+- Boxplot: GUI, added option to select the value of showfliers
+- Boxplot: Added support for the whole list of parameters for ax.boxplot. Hopefully, not that many problems with unintentional keywords.
+- Curve CV: added display and retrieval of carrier density and apparent depth, after using the function "Show doping at"
+- Curve EQE: revised caculation of the bandgap by derivative method (choice of datapoints for fitting of maximum value)
+- Curve JV: added data transform Sites' method, dV/dJ vs 1/(J-Jsc)
+- Curve Subplot: added Curve Actions for easier modification of axis limits and labels
+- Curve TRPL: revised parsing of acquisition time values. Should work with spectroscopic dataset as well.
+Bugs & code cleaning
+- Solved issue with leftovers on the canvas when changing figure e.g. size.
+- Improved auto screen dpi. When opening a file, the graph should be displayed witih a size close to the maximum displayable value
+- Refactored code for boxplot and violinplot
+- Solved small bugs here and there, likely added a few new ones...
+
 
 Version 0.6.2.2
 Released 12.10.2023

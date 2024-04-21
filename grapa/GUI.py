@@ -1,32 +1,41 @@
 ﻿# -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics,
-Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-print('Loading numpy...')
+print("Loading numpy...")
 import os
 import numpy as np
 import sys
 import contextlib
 
-print('Loading matplotlib...')
+print("Loading matplotlib...")
 import matplotlib.pyplot as plt
-print('Loading tkinter...')
+
+print("Loading tkinter...")
 import tkinter as tk
 from tkinter import BOTH, X, Y
 import tkinter.filedialog
 
-print('Loading grapa...')
-path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+print("Loading grapa...")
+path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 if path not in sys.path:
     sys.path.append(path)
 from grapa.graph import Graph
 from grapa.graphIO import FILEIO_GRAPHTYPE_GRAPH
 from grapa.curve import Curve
 from grapa.observable import Observable
-from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFrameCentral, GUIFrameTemplateColorize, GUIFrameActionsGeneric, GUIFrameTree, GUIFramePropertyEditor, GUIFrameActionsCurves
+from grapa.gui.GUIMainElements import (
+    GUIFrameMenuMain,
+    GUIFrameConsole,
+    GUIFrameCentral,
+    GUIFrameTemplateColorize,
+    GUIFrameActionsGeneric,
+    GUIFrameTree,
+    GUIFramePropertyEditor,
+    GUIFrameActionsCurves,
+)
 
 # WISHLIST:
 # - config autotemplate for boxplot
@@ -52,6 +61,30 @@ from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFram
 
 
 
+# DONE
+# - GraphPLQY: when opening a file, added PLQY(time) as curve hidden by default
+# - TinyTusker: various improvements
+
+
+
+# Version 0.6.3.0 21.04.2024
+# - New type of file supported, TinyTusker
+# - Can now open files directly from Openbis. This require the external library pybis, and access to the Empa-developped code openbis uploader 207.
+# - Added Curve action Autolabel: Curve labels can be generated based on a template, using the attributes values. Example: ${sample} ${cell}". Curve types: SIMS, Cf, CV, EQE, JV
+# - Boxplot: new possibility to add seaborn stripplot and swarmplot on top of boxplot
+# - Boxplot: GUI, added option to select the value of showfliers
+# - Boxplot: Added support for the whole list of parameters for ax.boxplot. Hopefully, not that many problems with unintentional keywords.
+# - Curve CV: added display and retrieval of carrier density and apparent depth, after using the function "Show doping at"
+# - Curve EQE: revised caculation of the bandgap by derivative method (choice of datapoints for fitting of maximum value)
+# - Curve JV: added data transform Sites' method, dV/dJ vs 1/(J-Jsc)
+# - Curve Subplot: added Curve Actions for easier modification of axis limits and labels
+# - Curve TRPL: revised parsing of acquisition time values. Should work with spectroscopic dataset as well.
+# Bugs & code cleaning
+# - Solved issue with leftovers on the canvas when changing figure e.g. size.
+# - Improved auto screen dpi. When opening a file, the graph should be displayed witih a size close to the maximum displayable value
+# - Refactored code for boxplot and violinplot
+# - Solved small bugs here and there, likely added a few new ones...
+
 
 # Version 0.6.2.2
 # Released 12.10.2023
@@ -60,15 +93,15 @@ from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFram
 # - GraphJV_Wavelabs: new file format to parse JV as well as MPP data files
 # New features
 # - Curve TRPL: new data processing function, Curve_differential_lifetime_vs_signal
-# - CurveSIMS: formatted for the Label, using python string template mechanisms and curve properties as variables. Maybe more useful than CurveSIMS..
+# - CurveSIMS: formatted for the Label, using python string template mechanisms and curve properties as variables. Maybe more useful than CurveSIMS.
 # Bug corrections
 # - CurveSIMS, bug recently introduced that prevented opening files under some conditions.
 
 
-#Version 0.6.2.1
-#Released 11.09.2023
-#BUGS
-#- Solved a bug in CurveJV that was preventing proper recognition of dark and illuminated curves in some cases, e.g. for scripts.
+# Version 0.6.2.1
+# Released 11.09.2023
+# BUGS
+# - Solved a bug in CurveJV that was preventing proper recognition of dark and illuminated curves in some cases, e.g. for scripts.
 
 # Version 0.6.2.0
 # - New file format: grapa can extract part of the data contained in a set of SCAPS software output data (.iv, .cv, .cf, .qe).
@@ -82,7 +115,7 @@ from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFram
 # - Curve TRPL: added function to calculate tau_effective, by 2 methods. A warning is issued if a tau value may risk to artifact the result.
 # - Curve TRPL: added functions to send fit parameters to clipboard. Also reports the weighted averages if no risk of artifact.
 # , and calculate tau_effective
-# - Curve JV: axvline and axhline are created with with thinner lines
+# - Curve JV: axvline and axhline are created with thinner lines
 # - Curve JV: identification of sample and cell performed at opening; fields to edit available. Goal: identify challenging cases with new setup.
 # - Script JV: the "_allJV" now has axis labels
 # BUGS
@@ -105,7 +138,6 @@ from grapa.gui.GUIMainElements import GUIFrameMenuMain, GUIFrameConsole, GUIFram
 # - File format: grapa can now extract data from a certain .spe file format containing XRF data. The data parser is very primitive.
 # - Bug: Curve JV, can read date time.
 # - Ensured forward compatibility up to Winpython 3.10.40
-
 
 
 """
@@ -149,32 +181,36 @@ def stdout_redirect(where):
 
 
 class Application(tk.Frame):
-
     DEFAULT_SCREENDPI = 72
 
     def __init__(self, master=None):
         self.master = master
         tk.Frame.__init__(self, master)
         self.initiated = False
-        self.newGraphKwargs = {'silent': True}
+        self.newGraphKwargs = {"silent": True}
         try:  # possibly retrieve arguments from command line
-            self.newGraphKwargs.update({'config': sys.argv[1]})
+            self.newGraphKwargs.update({"config": sys.argv[1]})
             # argv[1] is the config.txt file to be used in this session
         except Exception:
             pass
         # create observable before UI -> element can register at initialization
         self.observables = {}
         # handles some GUI changes when changing the selected curve
-        self.observables['focusTree'] = Observable()
+        self.observables["focusTree"] = Observable()
         # there is 1 other observable, buried in the tabs. See below.
         # start define GUI
         self.pack(fill=BOTH, expand=True)
+        self.fonts = {}
         self.initFonts(self)
         self.createWidgets(self)
         self.getCanvas().draw()  # to resize canvas, for autoDPI to work
+        self.master.update()
         # open default Graph
-        filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                'examples', 'subplots_examples.txt')
+        filename = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "examples",
+            "subplots_examples.txt",
+        )
         self.openFile(filename)
         self.updateUI()
         # register updates of UI when user changes tabs
@@ -182,79 +218,82 @@ class Application(tk.Frame):
         # .initiated is a flag to allow update of UI, set True after init of UI
         self.initiated = True
         # other keys are bound to master within menuLeft or elsewhere
-        self.master.bind('<Control-r>', lambda e: self.updateUI())
+        self.master.bind("<Control-r>", lambda e: self.updateUI())
         # TODO
         # print('GraphSIMS: check ratios are ok, also when not same number of traces above and below fraction')
 
+
     def initFonts(self, frame):
         import tkinter.font as font
-        a = tk.Label(frame, text='')
-        self.fonts = {}
-        self.fonts['bold'] = font.Font(font=a['font'])
-        self.fonts['bold'].configure(weight='bold')
+
+        a = tk.Label(frame, text="")
+        self.fonts["bold"] = font.Font(font=a["font"])
+        self.fonts["bold"].configure(weight="bold")
+        self.fonts["fg_default"] = a.cget("fg")
 
     def createWidgets(self, frame):
         # right frame
         fr = tk.Frame(frame)
-        fr.pack(side='right', fill=Y, pady=2, expand=False)
+        fr.pack(side="right", fill=Y, pady=2, expand=False)
         self.fillUIFrameRight(fr)
         # frame left/graph/console
         fr = tk.Frame(frame)
-        fr.pack(side='left', anchor='n', fill=BOTH, expand=True)
+        fr.pack(side="left", anchor="n", fill=BOTH, expand=True)
         self.fillUIFrameMain(fr)
 
     def fillUIFrameMain(self, frame):
         # create console, indicators
         self.frameConsole = GUIFrameConsole(frame, self)
-        self.frameConsole.frame.pack(side='bottom', fill=X)
+        self.frameConsole.frame.pack(side="bottom", fill=X)
         # create graph and left menu
         fr = tk.Frame(frame)
-        fr.pack(side='top', fill=BOTH, expand=True)
+        fr.pack(side="top", fill=BOTH, expand=True)
         self.menuLeft = GUIFrameMenuMain(fr, self)
-        self.menuLeft.frame.pack(side='left', anchor='n', fill=Y, pady=2)
-        self.frameCentral = GUIFrameCentral(fr, self, relief='raised',
-                                            borderwidth=2)
-        self.frameCentral.frame.pack(side='left', anchor='n', fill=BOTH,
-                                     pady=2, expand=True)
+        self.menuLeft.frame.pack(side="left", anchor="n", fill=Y, pady=2)
+        self.frameCentral = GUIFrameCentral(fr, self, relief="raised", borderwidth=2)
+        self.frameCentral.frame.pack(
+            side="left", anchor="n", fill=BOTH, pady=2, expand=True
+        )
 
     def fillUIFrameRight(self, frame):
         pady = 5
         # template actions
         self.frameTplCol = GUIFrameTemplateColorize(frame, self)
-        self.frameTplCol.frame.pack(side='top', fill=X, anchor='w', pady=pady)
+        self.frameTplCol.frame.pack(side="top", fill=X, anchor="w", pady=pady)
         # properties
         self.frameTree = GUIFrameTree(frame, self)
-        self.frameTree.frame.pack(side='top', fill=X, anchor='w', pady=pady)
+        self.frameTree.frame.pack(side="top", fill=X, anchor="w", pady=pady)
         # NEW property
         self.frameProp = GUIFramePropertyEditor(frame, self)
-        self.frameProp.frame.pack(side='top', fill=X, anchor='w', pady=pady)
+        self.frameProp.frame.pack(side="top", fill=X, anchor="w", pady=pady)
         # actions on Curves
         self.frameActGen = GUIFrameActionsGeneric(frame, self)
-        self.frameActGen.frame.pack(side='top', fill=X, anchor='w', pady=pady)
+        self.frameActGen.frame.pack(side="top", fill=X, anchor="w", pady=pady)
         # Actions on curves
         self.frameActCrv = GUIFrameActionsCurves(frame, self)
-        self.frameActCrv.frame.pack(side='top', fill=X, anchor='w', pady=pady)
+        self.frameActCrv.frame.pack(side="top", fill=X, anchor="w", pady=pady)
 
     # updateUI function
     def updateUI(self):
         # print('updateUI main')
         # import time
-        toUpd = []
-        toUpd.append([self.frameTplCol, 'section Template & Colorize'])
-        toUpd.append([self.frameTree, 'Treeview property box'])
-        toUpd.append([self.frameProp, 'Property editor'])
-        toUpd.append([self.frameActGen, 'section Actions of Curves '])
-        toUpd.append([self.frameActCrv, 'section Actions specific'])
-        toUpd.append([self.frameCentral, 'central section (plot and editor)'])
-        toUpd.append([self.frameConsole, 'section Console'])
-        for section in toUpd:
+        sectionstoupdate = [
+            [self.frameTplCol, "section Template & Colorize"],
+            [self.frameTree, "Treeview property box"],
+            [self.frameProp, "Property editor"],
+            [self.frameActGen, "section Actions of Curves "],
+            [self.frameActCrv, "section Actions specific"],
+            [self.frameCentral, "central section (plot and editor)"],
+            [self.frameConsole, "section Console"],
+        ]
+        for section in sectionstoupdate:
             # t0 = time.perf_counter()
             try:
                 section[0].updateUI()
             except Exception as e:
-                print('Exception during update of', section[1], '.')
-                print('Exception', type(e), e)
-                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
+                print("Exception during update of", section[1], ".")
+                print("Exception", type(e), e)
+                print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
             # t1 = time.perf_counter()
             # print('updateUI elapsed time:', t1-t0, section[1])
 
@@ -277,13 +316,13 @@ class Application(tk.Frame):
         if newgraph is not None:
             if isinstance(newgraph, Graph):
                 # by default, give same dpi for new plot as for previous
-                if 'dpi' not in kwargs:
-                    kwargs['dpi'] = self.DEFAULT_SCREENDPI  # initial value
+                if "dpi" not in kwargs:
+                    kwargs["dpi"] = self.DEFAULT_SCREENDPI  # initial value
                 tabs.appendNew(newgraph, **kwargs)
                 tabs.select(-1)
                 self.setAutoScreenDPI()
             else:
-                print('WARNING: GUI.graph(), newgraph must be a Graph.')
+                print("WARNING: GUI.graph(), newgraph must be a Graph.")
         # return self.back_graph
         return tabs.getGraph()
 
@@ -317,16 +356,16 @@ class Application(tk.Frame):
         return self.frameCentral.frameGraph.tabs.getProperties()
 
     def getSelectedCurves(self, multiple=False):
-        """ Returns a list of unique, sorted indices [idx0, idx1, ...] """
+        """Returns a list of unique, sorted indices [idx0, idx1, ...]"""
         curves, keys = self.frameTree.getTreeActiveCurve(multiple=multiple)
         return sorted(list(set(curves)))
 
     def getClipboard(self):
-        """ returns content of clipboard """
+        """returns content of clipboard"""
         return self.master.clipboard_get()
 
     def setClipboard(self, data):
-        """ place new data in the clipboard """
+        """place new data in the clipboard"""
         self.master.clipboard_clear()
         self.master.clipboard_append(data)
 
@@ -339,7 +378,7 @@ class Application(tk.Frame):
 
     # callbacks
     def callback_tabChanged(self, *args, **kwargs):
-        """ react to change in tab selection """
+        """react to change in tab selection"""
         # print('Tab changed triggers updateUI')
         if self.initiated:
             self.updateUI()
@@ -360,45 +399,53 @@ class Application(tk.Frame):
         """
         self.frameTree.storeSelectedCurves()
 
-    def argsToStr(self, *args, **kwargs):
-        """ Format args and kwargs for printing commands in the console """
+    @staticmethod
+    def argsToStr(*args, **kwargs):
+        """Format args and kwargs for printing commands in the console"""
+
         def toStr(a):
             if isinstance(a, str):
-                return "'" + a.replace('\n', '\\n') + "'"
+                return "'" + a.replace("\n", "\\n") + "'"
             elif isinstance(a, Graph):
-                return 'graph'
+                return "graph"
             elif isinstance(a, Curve):
-                return 'curve'
+                return "curve"
             return str(a)
+
         p = [toStr(a) for a in args]
         p += [(key + "=" + toStr(kwargs[key])) for key in kwargs]
-        return ', '.join(p)
+        return ", ".join(p)
 
     def callGraphMethod(self, method, *args, **kwargs):
-        """ Execute 'method' on graph, with *args and **kwargs """
+        """Execute 'method' on graph, with *args and **kwargs"""
         out = getattr(self.graph(), method)(*args, **kwargs)
         if self.ifPrintCommands():
-            print('graph.'+method+'('+self.argsToStr(*args, **kwargs)+')')
+            print("graph." + method + "(" + self.argsToStr(*args, **kwargs) + ")")
         return out
 
     def callCurveMethod(self, curve, method, *args, **kwargs):
-        """ Execute 'method' on graph[curve], with *args and **kwargs """
+        """Execute 'method' on graph[curve], with *args and **kwargs"""
         out = getattr(self.graph()[curve], method)(*args, **kwargs)
         if self.ifPrintCommands():
-            print('graph[' + str(curve) + '].' + method
-                  + '(' + self.argsToStr(*args, **kwargs) + ')')
+            print(
+                "graph["
+                + str(curve)
+                + "]."
+                + method
+                + "("
+                + self.argsToStr(*args, **kwargs)
+                + ")"
+            )
         return out
 
-    def promptFile(self, initialdir='', type='open', multiple=False, **kwargs):
-        """ Prompts for file open/save """
-        if initialdir == '':
+    def promptFile(self, initialdir="", type="open", multiple=False, **kwargs):
+        """Prompts for file open/save"""
+        if initialdir == "":
             initialdir = self.getFolder()
-        if type == 'save':
-            return tk.filedialog.asksaveasfilename(initialdir=initialdir,
-                                                   **kwargs)
+        if type == "save":
+            return tk.filedialog.asksaveasfilename(initialdir=initialdir, **kwargs)
         if multiple:
-            out = list(tk.filedialog.askopenfilenames(initialdir=initialdir,
-                                                      **kwargs))
+            out = list(tk.filedialog.askopenfilenames(initialdir=initialdir, **kwargs))
             if len(out) == 0:
                 return None
             elif len(out) == 1:
@@ -407,9 +454,9 @@ class Application(tk.Frame):
         # if not multiple
         return tk.filedialog.askopenfilename(initialdir=initialdir, **kwargs)
 
-    def promptFolder(self, initialdir=''):
-        """ Prompts for folder open """
-        if initialdir == '':
+    def promptFolder(self, initialdir=""):
+        """Prompts for folder open"""
+        if initialdir == "":
             initialdir = self.getFolder()
         return tk.filedialog.askdirectory(initialdir=initialdir)
 
@@ -425,19 +472,19 @@ class Application(tk.Frame):
         if isinstance(file, Graph):
             # do not print anything
             graph = file
-            lbl = ''
-            if hasattr(graph, 'fileexport'):
+            lbl = ""
+            if hasattr(graph, "fileexport"):
                 lbl = graph.fileexport
-            elif hasattr(graph, 'filename'):
+            elif hasattr(graph, "filename"):
                 lbl = graph.filename
         elif isinstance(file, list):
-            print('Open multiple files (first:', lbl[0], ')')
+            print("Open multiple files (first:", lbl[0], ")")
             lbl = file[0]
             graph = Graph(file, **self.newGraphKwargs)
         else:
-            print('Open file:', lbl.replace('/', '\\'))
+            print("Open file:", lbl.replace("/", "\\"))
             graph = Graph(file, **self.newGraphKwargs)
-        if lbl == '':
+        if lbl == "":
             lbl = None
         self.graph(newgraph=graph, filename=lbl)
         if self.ifPrintCommands():
@@ -446,60 +493,63 @@ class Application(tk.Frame):
         pass
 
     def mergeGraph(self, graph):
-        """ graph can be a str (filename), or a Graph """
-        file = ''
+        """graph can be a str (filename), or a Graph"""
+        file = ""
         if not isinstance(graph, Graph):
             file = graph
-            print('Merge with file:', file)
+            print("Merge with file:", file)
             graph = Graph(graph)
         else:
             pass  # stays silent
             # print('Merge with graph', file)
         self.graph().merge(graph)
         # change default save folder only if was empty
-        if self.getFolder() == '' and file != '':
+        if self.getFolder() == "" and file != "":
             self.getFolder(file)
         if self.ifPrintCommands():
-            print("graph.merge(Graph('"+file+"'))")
+            print("graph.merge(Graph('" + file + "'))")
         self.updateUI()
 
     # def closeTab(self):  # should not be required anymore
     #     """ Closes current graph tab """
     #     self.frameCentral.frameGraph.tabs.pop()
 
-    def saveGraph(self, filesave, fileext='', saveAltered=False, ifCompact=True):
+    def saveGraph(self, filesave, fileext="", saveAltered=False, ifCompact=True):
         """
         Saves Graph into a file. Separated plot() and export() calls.
         filename: str, filename to save gr graph
-        fileext: str, image data format (eg. .png). If '', retrieve preference.
+        fileext: str, image data format (e.g. .png). If '', retrieve preference.
         saveAltered: as per Graph.export(). Default False.
         ifCompact: as per Graph.export(). Default True.
         """
         graph = self.graph()
-        if graph.attr('meastype') == '':
-            graph.update({'meastype': FILEIO_GRAPHTYPE_GRAPH})
+        if graph.attr("meastype") == "":
+            graph.update({"meastype": FILEIO_GRAPHTYPE_GRAPH})
         try:
-            fig, ax = graph.plot(filesave=filesave, imgFormat=fileext,
-                                 ifExport=False, figAx=[self.getFig(), None])
+            fig, ax = graph.plot(
+                filesave=filesave,
+                imgFormat=fileext,
+                ifExport=False,
+                figAx=[self.getFig(), None],
+            )
             while isinstance(ax, (list, np.ndarray)) and len(ax) > 0:
                 ax = ax[0]
         except Exception as e:
-            print('ERROR: Exception during plotting of the Graph.')
+            print("ERROR: Exception during plotting of the Graph.")
             print(type(e), e)
-        if fileext in ['.xml']:
+        if fileext in [".xml"]:
             filesave += fileext
-        graph.export(filesave=filesave, saveAltered=saveAltered,
-                     ifCompact=ifCompact)
+        graph.export(filesave=filesave, saveAltered=saveAltered, ifCompact=ifCompact)
         self.getFile(filesave)  # updates file, folder and tab title
         if self.ifPrintCommands():
-            print("graph.plot(filesave='" + filesave + "', imgFormat='"
-                  + fileext + "', ifExport=False))")
-            print("graph.export(filesave='" + filesave + "', saveAltered='"
-                  + str(saveAltered) + "', ifCompact='" + str(ifCompact)+"')")
+            msg = "graph.plot(filesave='{}', imgFormat='{}', ifExport=False))"
+            print(msg.format(filesave, fileext))
+            msg = "graph.export(filesave='{}', saveAltered='{}', ifCompact='{}')"
+            print(msg.format(filesave, str(saveAltered), str(ifCompact)))
         self.updateUI()
 
     def insertCurveToGraph(self, curve, updateUI=True):
-        """ Appends 1 Crve, or a list of Curves to the active graph """
+        """Appends 1 Curve, or a list of Curves to the active graph"""
         if updateUI:
             self.storeSelectedCurves()
         if isinstance(curve, list):
@@ -509,31 +559,34 @@ class Application(tk.Frame):
             kw = {}
             selected = self.getSelectedCurves(multiple=False)
             if len(selected) > 0 and selected[0] >= 0:
-                kw.update({'idx': selected[0] + 1})
+                kw.update({"idx": selected[0] + 1})
             self.graph().append(curve, **kw)
         else:
-            print('ERROR GUI graphAppendCurve, could not handle class of',
-                  '"curve"', type(curve), '.')
+            msg = "ERROR GUI graphAppendCurve, could not handle class of curve {}."
+            print(msg.format(type(curve)))
         if updateUI:
             self.updateUI()
 
-    def blinkWidget(self, field, niter, delay=500, property_='background', values=['white', 'red']):
+    def blinkWidget(
+        self, field, niter, delay=500, property_="background", values=["white", "red"]
+    ):
         field.config(**{property_: values[niter % len(values)]})
         if niter > 0:
-            kwargs = {'property_': property_, 'values': values, 'delay': delay}
-            self.master.after(delay, lambda: self.blinkWidget(field, niter-1,
-                                                              **kwargs))
+            kwargs = {"property_": property_, "values": values, "delay": delay}
+            self.master.after(
+                delay, lambda: self.blinkWidget(field, niter - 1, **kwargs)
+            )
 
     def printLastRelease(self):
-        file = 'versionNotes.txt'
+        file = "versionNotes.txt"
         file = os.path.join(os.path.dirname(os.path.realpath(__file__)), file)
         try:
-            f = open(file, 'r')
+            f = open(file, "r")
         except Exception:
             # print('Exception file open', e)
             return
-        out = ''
-        line = ''
+        out = ""
+        line = ""
         flag = True
         while flag:
             last = line
@@ -541,35 +594,36 @@ class Application(tk.Frame):
             if "Release" in line:
                 out = last + line
                 flag = False
-        if line == '':
+        if line == "":
             print('Not found string "Release"')
             return  # not found release
-        date = line[len('Release'):].replace(' ', '')
-        if date[0] == 'd':
+        date = line[len("Release") :].replace(" ", "")
+        if date[0] == "d":
             date = date[1:]
         from dateutil import parser
         from datetime import datetime
+
         try:
-            daysSinceLast = datetime.now() - parser.parse(date)
+            dayssincelast = datetime.now() - parser.parse(date)
         except ValueError as e:
-            daysSinceLast = ""
-            print('Exception in PrintLastRelease, date', date, type(e), e)
-        line = ''
-        if daysSinceLast.days < 5:
+            dayssincelast = ""
+            print("Exception in PrintLastRelease, date", date, type(e), e)
+        line = ""
+        if dayssincelast.days < 5:
             flag = True
             while flag:
                 last = line
                 line = f.readline()
-                if "Release" in line or 'Version' in line:
+                if "Release" in line or "Version" in line:
                     flag = False
-                if flag and last.strip() != '':
+                if flag and last.strip() != "":
                     out += last
             print(out)
         f.close()
         return
 
     def quit(self):
-        """ Quits application """
+        """Quits application"""
         plt.close(self.getFig())
         self.master.quit()
         self.master.destroy()
@@ -578,12 +632,13 @@ class Application(tk.Frame):
 def buildUI():
     root = tk.Tk()
     try:
-        root.iconbitmap('datareading.ico')
+        root.iconbitmap("datareading.ico")
     except Exception:
         pass
     app = Application(master=root)
     from grapa import __version__
-    app.master.title('Grapa software v' + __version__)
+
+    app.master.title("Grapa software v" + __version__)
     # starts runnning programm
     with stdout_redirect(app.frameConsole.console):
         # retrieve content of last release

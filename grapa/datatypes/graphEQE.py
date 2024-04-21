@@ -4,13 +4,13 @@ Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 import os
 import numpy as np
+import re
 
 from grapa.graph import Graph
 from grapa.datatypes.curveEQE import CurveEQE
 
 
 class GraphEQE(Graph):
-
     FILEIO_GRAPHTYPE = "EQE curve"
     FILEIO_GRAPHTYPE_OLD = "EQE curve (old)"
 
@@ -83,7 +83,14 @@ class GraphEQE(Graph):
         if lbl == "Ref":
             filenam_, fileext = os.path.splitext(self.attr("filename"))
             lbl = (filenam_.split("/")[-1]).split("\\")[-1]
-        self[-1].update({"label": lbl, "sample": lbl})
+        self[-1].update({"label": lbl, "label_initial": lbl})
+        # guess sample id and cell id
+        sample, cell = lbl, ""
+        expr = "^(.+) ([a-zA-Z][0-9]*)$"
+        findall = re.findall(expr, sample)
+        if findall is not None and len(findall) > 0:
+            sample, cell = findall[0][0], findall[0][1]
+        self[-1].update({"sample": sample, "cell": cell})
         # some default settings
         self.update(
             {

@@ -9,6 +9,7 @@ import numpy as np
 
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
+from grapa.curve import Curve
 
 
 class GraphPLQY(Graph):
@@ -41,6 +42,18 @@ class GraphPLQY(Graph):
         # read data
         le = len(self)
         GraphIO.readDataFromFileGeneric(self, attributes, **kwargs)
+        # add R vs time (not R average) - before modifying other curves
+        curve_time_r = None
+        if len(self) > le + 1:
+            convert_i_plqy = np.nan
+            try:
+                convert_i_plqy = float(self[le].attr("Sample factor I to PLQY"))
+            except ValueError:
+                pass
+            time = self[le].x()
+            r = np.sqrt(self[le].y() ** 2 + self[le + 1].y() ** 2)
+            plqy = r * convert_i_plqy
+            curve_time_r = Curve([time, plqy], {})
         # tune X vs time into Y vs X
         self[le].setX(self[le].y())
         self[le].setY(self[le + 1].y())
@@ -62,9 +75,15 @@ class GraphPLQY(Graph):
             self[le].update({GraphPLQY.KEY_AVGPHASE: self[le + 3].y()[-1]})
         if len(self) > le + 4:
             self[le].update({GraphPLQY.KEY_AVGPLQY: self[le + 4].y()[-1]})
+        # delete unneeded
         while len(self) > le + 1:
             del self[le + 1]
-
+        #
+        if curve_time_r is not None:
+            curve_time_r.update(self[le].getAttributes())
+            curve_time_r.update({"label": label + " PLQY vs time"})
+            curve_time_r.swapShowHide()
+            self.append(curve_time_r)
         # graph cosmetics
         self.update(
             {

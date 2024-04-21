@@ -37,13 +37,18 @@ class CurveTRPL(Curve):
                 rep = 1
             self.update({"_repetfreq_Hz": rep})
         if self.attr("_acquistime_s", None) is None:
+            time = 1
             try:
-                time0 = float(self.attr("meas_time", None).split(" ")[0])
-                time1 = float(self.attr("meas_stop", None).split(" ")[0])
-                time = time1 - time0
-                if time == 0 or np.isnan(time):
-                    time = 1
-            except Exception:
+                time0 = float(self.attr("meas_time", "").split(" ")[0])
+                time1 = 0
+                try:
+                    time1 = float(self.attr("meas_stop", "").split(" ")[0])
+                except ValueError:
+                    pass
+                time = np.abs(time1 - time0)
+            except ValueError:
+                pass
+            if time == 0 or np.isnan(time):
                 time = 1
             self.update({"_acquistime_s": time})
         if self.attr("_binwidth_s", None) is None:
@@ -113,7 +118,7 @@ class CurveTRPL(Curve):
             )
         # fit
         if self.attr("_fitFunc", None) is None or self.attr("_popt", None) is None:
-            ROI = roundSignificantRange([20, max(self.x())], 2)
+            ROI = roundSignificantRange([5, max(self.x())], 2)
             out.append(
                 [
                     self.CurveTRPL_fitExp,
@@ -160,7 +165,10 @@ class CurveTRPL(Curve):
         item.append(msg, None, widgetclass=None)
         out.append(item)
         msg = "See above."
-        item = FuncGUI(self.Curve_differential_lifetime_vs_signal, "Differential lifetime vs signal")
+        item = FuncGUI(
+            self.Curve_differential_lifetime_vs_signal,
+            "Differential lifetime vs signal",
+        )
         item.append(msg, None, widgetclass=None)
         out.append(item)
         # smooth & bin
@@ -575,7 +583,8 @@ class CurveTRPL(Curve):
         """
         curve = self.Curve_differential_lifetime()
         curve.setX(self.y())
-        curve.update({"label": "{} Differential lifetime vs signal".format(self.attr("label"))})
+        msg = "{} Differential lifetime vs signal"
+        curve.update({"label": msg.format(self.attr("label"))})
         return curve
 
     def fitparams_to_clipboard(self):
@@ -596,7 +605,7 @@ class CurveTRPL(Curve):
         a.clipboard_append(text)
         a.destroy()
 
-    def fitparams_weightedaverage(self):
+    def fitparams_weightedaverage(self, silent=False):
         """
         Weighted averages of decays: returns tau_effective with tau_i weighted by A_i,
         and by A_i * tau_i (i.e. integral of exponential). Formulas:
@@ -612,6 +621,9 @@ class CurveTRPL(Curve):
         time = self.x()
         if np.max(np.abs(atau[1::2])) > (np.max(time) - np.min(time)):
             print("WARNING CurveTRPL, long tau value, weighted average may be artifact")
+        if not silent:
+            print("Sum (A tau) / Sum (A): {}".format(pow1 / pow0))
+            print("Sum (A tau**2) / Sum (A tau): {}".format(pow2 / pow1))
         return pow1 / pow0, pow2 / pow1
 
     def printHelp(self):

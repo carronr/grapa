@@ -104,13 +104,14 @@ class GraphJV(Graph):
         filebasename, fileExt = os.path.splitext(os.path.basename(self.filename))
         self[0].update({'label': filebasename.replace('_', ' ')})
         # rename attributes to match these of JV setup
-        key = ['sample name', 'cell name', 'voc (v)', 'jsc (ma/cm2)', 'ff (%)', 'eff (%)', 'cell area [cm2]', 'vmpp (v)', 'jmpp (ma/cm2)', 'pmpp (mw/cm2)', 'rp (ohmcm2)', 'rs (ohmcm2)', 'temperature [k]', 'Acquis soft Illumination factor'] #, 'Acquis soft datatime'
-        new = ['sample', 'cell', 'Acquis soft Voc', 'Acquis soft Jsc', 'Acquis soft FF', 'Acquis soft Eff', 'Acquis soft Cell area', 'Acquis soft Vmpp', 'Acquis soft Jmpp', 'Acquis soft Pmpp', 'Acquis soft Rp', 'Acquis soft Rs', 'Acquis soft Temperature', 'Acquis soft Illumination factor'] #,  'Acquis soft datatime'
+        key = ['sample name', 'cell name', 'voc (v)', 'jsc (ma/cm2)', 'ff (%)', 'eff (%)', 'cell area [cm2]', 'vmpp (v)', 'jmpp (ma/cm2)', 'pmpp (mw/cm2)', 'rp (ohmcm2)', 'rs (ohmcm2)', 'temperature [k]','temperature', 'Acquis soft Illumination factor'] #, 'Acquis soft datatime'
+        new = ['sample', 'cell', 'Acquis soft Voc', 'Acquis soft Jsc', 'Acquis soft FF', 'Acquis soft Eff', 'Acquis soft Cell area', 'Acquis soft Vmpp', 'Acquis soft Jmpp', 'Acquis soft Pmpp', 'Acquis soft Rp', 'Acquis soft Rs', 'Acquis soft Temperature', 'Acquis soft Temperature', 'Acquis soft Illumination factor'] #,  'Acquis soft datatime'
         c = self[0]
         for i in range(len(key)):
-            c.update({new[i]: c.attr(key[i])})
-            c.update({key[i]: ''})
-        # we believe this information is trustable
+            if c.attr(key[i]) != "":  # risk of duplicates in list above...
+                c.update({new[i]: c.attr(key[i])})
+                c.update({key[i]: ''})
+        # we believe this information is reliable
         c.update({'temperature': c.attr('Acquis soft Temperature')})
         c.update({'measId': str(c.attr('temperature'))})
         # recreate curve as a CurveJV
