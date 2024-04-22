@@ -61,7 +61,7 @@ from grapa.gui.GUIMainElements import (
 
 
 # DONE
-# Small adjustments against MacOS dark mode 
+# Small adjustments against MacOS dark mode
 # - GraphPLQY: when opening a file, added PLQY(time) as curve hidden by default
 # - TinyTusker: various improvements
 
