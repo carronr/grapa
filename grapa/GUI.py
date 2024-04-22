@@ -227,7 +227,7 @@ class Application(tk.Frame):
         a = tk.Label(frame, text="")
         self.fonts["bold"] = font.Font(font=a["font"])
         self.fonts["bold"].configure(weight="bold")
-        # self.fonts["fg_default"] = a.cget("fg")
+        self.fonts["fg_default"] = a.cget("fg")
 
     def createWidgets(self, frame):
         # right frame

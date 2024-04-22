@@ -2007,9 +2007,8 @@ class GUIFrameTree:
             tx = "Curve " + str(i) + " " + lbl
             idx = self.Tree.insert("", "end", tag=str(i), values=(""), text=tx)
             self._updateUI_checkSelect(idx, curve, "", select)
-            if curve.isHidden():
-                color = "grey"  # if curve.isHidden() else self.app.fonts["fg_default"]
-                self.Tree.tag_configure(str(i), foreground=color)
+            color = "grey" if curve.isHidden() else self.app.fonts["fg_default"]
+            self.Tree.tag_configure(str(i), foreground=color)
             # attributes
             attr = curve.getAttributes()
             self._updateUI_addTreeBranch(idx, attr, curve, select)
