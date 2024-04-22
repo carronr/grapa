@@ -2,7 +2,7 @@
 """
 @author: Romain Carron
 Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics,
-Romain Carron
+Romain Carron 
 """
 import sys
 import os
