@@ -60,11 +60,10 @@ from grapa.gui.GUIMainElements import (
 # TO EVALUATE: scatter, add text values for each point. [clear all annotations] [text formatting "{.2g}". Remove only] [kwargs: centered both]
 
 
-
 # DONE
+# Small adjustments against MacOS dark mode
 # - GraphPLQY: when opening a file, added PLQY(time) as curve hidden by default
 # - TinyTusker: various improvements
-
 
 
 # Version 0.6.3.0 21.04.2024
@@ -222,14 +221,13 @@ class Application(tk.Frame):
         # TODO
         # print('GraphSIMS: check ratios are ok, also when not same number of traces above and below fraction')
 
-
     def initFonts(self, frame):
         import tkinter.font as font
 
         a = tk.Label(frame, text="")
         self.fonts["bold"] = font.Font(font=a["font"])
         self.fonts["bold"].configure(weight="bold")
-        self.fonts["fg_default"] = a.cget("fg")
+        # self.fonts["fg_default"] = a.cget("fg")
 
     def createWidgets(self, frame):
         # right frame
@@ -568,8 +566,14 @@ class Application(tk.Frame):
             self.updateUI()
 
     def blinkWidget(
-        self, field, niter, delay=500, property_="background", values=["white", "red"]
+        self, field, niter, delay=500, property_="background", values=["", "red"]
     ):
+        if "" in values:  # if default value - retrieve current setting
+            values = list(values)  # work on duplicate
+            for i in range(len(values)):
+                if values[i] == "":
+                    values[i] = field.cget(property_)
+
         field.config(**{property_: values[niter % len(values)]})
         if niter > 0:
             kwargs = {"property_": property_, "values": values, "delay": delay}
