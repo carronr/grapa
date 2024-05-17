@@ -3,7 +3,7 @@
 Created on Thu Feb 23 20:37:38 2017
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain
 Carron
 """
 
@@ -76,12 +76,8 @@ class GraphCf(Graph):
             if isinstance(f, list) and len(f) == 1 and len(f[0]) == 2:
                 ylabel = [f[0][0], GraphCf.AXISLABELS[1][1], f[0][1]]
             if f[0][1] != "nF":
-                print(
-                    "CurveCf read, detected capacitance unit",
-                    f[0][1],
-                    ".",
-                    "Cannot proceed further with phase and Nyquist.",
-                )
+                msg = "GraphCf read, detected capacitance unit: {}. Cannot proceed further with phase and Nyquist..."
+                print(msg.format(f[0][1]))
                 convertToF = None
             # TODO: add warning if not nF
         # identify Rp curve
@@ -91,7 +87,11 @@ class GraphCf(Graph):
             if lbl is None:
                 lbl = self[c].attr("label")
             # print('scan curves label', c, lbl)
-            if lbl.endswith("R") or lbl.endswith("Rp") or lbl.endswith("Rp [Ohm]"):
+            if (
+                lbl.endswith("R")
+                or lbl.endswith("Rp")
+                or lbl in ["Rp [Ohm]", "Parameter2"]
+            ):
                 idxRp = c
                 break
         # normalize with area C, R
@@ -115,12 +115,10 @@ class GraphCf(Graph):
             # C input assumed to be [nF], need [F] for calculation
             C = self[len0].y() * convertToF
             if idxRp is None:
-                print(
-                    "Warning CurveCf read file",
-                    self.filename,
-                    ": cannot",
-                    "find R. Cannot compute phase.",
+                msg = (
+                    "Warning GraphCf read file {}: cannot find R. Cannot compute phase."
                 )
+                print(msg.format(self.filename))
             else:
                 conductance = 1 / self[idxRp].y()
                 phase_angle = np.arctan(f * 2 * np.pi * C / conductance) * 180.0 / np.pi
@@ -132,12 +130,8 @@ class GraphCf(Graph):
 
         if self.attr("_CfLoadNyquist", False) is not False:
             if idxRp is None:
-                print(
-                    "ERROR CurveCf read file",
-                    self.filename,
-                    ": cannot",
-                    "find Rp. Cannot compute Nyquist plot.",
-                )
+                msg = "ERROR GraphCf read file {}: cannot find Rp. Cannot compute Nyquist plot."
+                print(msg.format(self.filename))
             else:
                 # C input assumed to be [nF], need [F] for calculation
                 C = self[len0].y() * convertToF
@@ -155,15 +149,11 @@ class GraphCf(Graph):
 
             def guessed(value):
                 if value > 5 and value < 1000:
-                    # plausability check for guessed temperature
+                    # plausibility check for guessed temperature
                     import os
 
-                    print(
-                        "File",
-                        os.path.basename(self.filename),
-                        "temperature guessed",
-                        value,
-                    )
+                    _msg = "File {} temperature guessed {}"
+                    print(_msg.format(os.path.basename(self.filename), value))
                     self[len0].update({"temperature": value})
                     return True
                 return False
@@ -181,11 +171,15 @@ class GraphCf(Graph):
                                 continue
                         except Exception:
                             pass
-        # if self[len0].attr('temperature') == "" and self[len0].attr('temperature [k]') != "":
-        #    self[len0].update({'temperature': self[len0].attr('temperature [k]')})
+
         # delete Rp, temperature, etc
         for c in range(len(self) - 1 - nb_add, len0, -1):
             self.deleteCurve(c)
+
+        # final touch label
+        if self[len0].attr("label").endswith("K Series"):
+            self[len0].autoLabel("${sample} ${cell} ${temperature [k], :.0f} K")
+
         # cosmetics
         self.update({"typeplot": "semilogx", "alter": ["", "idle"]})
         self.update(

@@ -66,6 +66,9 @@ from grapa.gui.GUIMainElements import (
 # - TinyTusker: various improvements
 
 
+# Version 0.6.3.1  17.05.2024
+# - GraphCf, improved data parsing
+
 # Version 0.6.3.0 21.04.2024
 # - New type of file supported, TinyTusker
 # - Can now open files directly from Openbis. This require the external library pybis, and access to the Empa-developped code openbis uploader 207.

@@ -3,11 +3,11 @@
 Created on Sun Jun 11 14:50:26 2017
 
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics,
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics,
 Romain Carron
 """
 
-__version__ = '0.6.3.0'
+__version__ = '0.6.3.1'
 
 from grapa.graph import Graph
 from grapa.curve import Curve
