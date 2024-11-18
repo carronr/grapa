@@ -37,29 +37,15 @@ class FuncGUI:
         self.func = func
         self.textsave = textsave
         self.hiddenvars = {}
-        if isinstance(hiddenvars, dict):
-            self.hiddenvars = hiddenvars
-        elif hiddenvars is not None:
-            print(
-                "WARNING FuncGUIParams, hiddenvars must be a dict, will be ",
-                "ignored,",
-                hiddenvars,
-            )
         self.fields = []
+        self.set_hiddenvars(hiddenvars)
 
-    def initLegacy(self, input):
-        self.func = input[0]
-        self.textsave = input[1]
-        if len(input) > 4 and isinstance(input[4], dict):
-            self.hiddenvars = input[4]
-        for i in range(len(input[2])):
-            label = input[2][i]
-            value = input[3][i] if len(input) > 3 else ""
-            if isinstance(value, (list, np.ndarray)):
-                value = listToString(value)
-            options = input[5][i] if len(input) > 5 else {}
-            self.append(label, value, options=options)
-        return self
+    def set_hiddenvars(self, hiddenvars):
+        if isinstance(hiddenvars, dict):
+            self.hiddenvars = dict(hiddenvars)
+        elif hiddenvars is not None:
+            msg = "WARNING FuncGUI: hiddenvars must be a dict, will be ignored: {}"
+            print(msg.format(hiddenvars))
 
     def append(
         self, label, value, widgetclass="Entry", bind=None, keyword=None, options=None
@@ -93,6 +79,20 @@ class FuncGUI:
                 "keyword": kw,
             }
         )
+
+    def initLegacy(self, line):
+        self.func = line[0]
+        self.textsave = line[1]
+        if len(line) > 4 and isinstance(line[4], dict):
+            self.hiddenvars = line[4]
+        for i in range(len(line[2])):
+            label = line[2][i]
+            value = line[3][i] if len(line) > 3 else ""
+            if isinstance(value, (list, np.ndarray)):
+                value = listToString(value)
+            options = line[5][i] if len(line) > 5 else {}
+            self.append(label, value, options=options)
+        return self
 
     def _optsToProps(self, options, widgetclass, bind, keyword):
         # to be called as
@@ -181,7 +181,7 @@ class FuncGUI:
                 else:
                     widgetclass = getattr(tk, widgetclass)
             except Exception as e:
-                msg =  "ERROR FuncGUI.create_widgets, cannot create widget of class {}. Exception {} {}"
+                msg = "ERROR FuncGUI.create_widgets, cannot create widget of class {}. Exception {} {}"
                 print(msg.format(widgetclass, type(e), e))
                 continue
 

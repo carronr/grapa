@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -10,6 +10,7 @@ import numpy as np
 from grapa.graph import Graph
 from grapa.graphIO import GraphIO
 from grapa.curve import Curve
+from grapa.datatypes.curveJscVoc import CurveJscVoc
 
 
 class GraphPLQY(Graph):
@@ -25,15 +26,54 @@ class GraphPLQY(Graph):
 
     @classmethod
     def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **kwargs):
-        if (
-            fileext == ".txt"
-            and filename.startswith("PLQY")
-            and line1.startswith("Output file of Abt207 PLQY setup")
-        ):
-            return True
+        if fileext == ".txt":
+            if line1.startswith(
+                "Output file of Abt207 PLQY setup"
+            ) and filename.startswith("PLQY"):
+                return True
+            if line1.startswith(
+                "Output file of Abt207 home-made PLQY"
+            ) and filename.startswith("PLPowerDep_"):
+                return True
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
+        filename = os.path.basename(self.filename)
+        if filename.startswith("PLQY"):
+            return GraphPLQY.readDataFromFilePLQY(self, attributes, **kwargs)
+        elif filename.startswith("PLPowerDep_"):
+            return GraphPLQY.readDataFromFilePLPowDep(self, attributes, **kwargs)
+        print(
+            "GraphPLQY BUG - Sorry, was a mistake, do not know how to open the file..."
+        )
+
+    def readDataFromFilePLPowDep(self, attributes, **kwargs):
+        """to open Power dependency module"""
+        le = len(self)
+        GraphIO.readDataFromFileGeneric(self, attributes, **kwargs)
+        # remove unnecessary Curves
+        while len(self) > le + 1:
+            del self[le + 1]
+        # cosmetics and functional modifications
+        self[-1].update(
+            {
+                "linespec": "o-",
+                "temperature": self[-1].attr("fit temperature [k]"),
+                "label": self[-1].attr("sample"),
+            }
+        )
+        self.castCurve(CurveJscVoc.CURVE, -1, silentSuccess=True)
+        self.update(
+            {
+                "alter": ["", "abs"],
+                "typeplot": "semilogy",
+                "xlabel": ["Calculated QFLS", "", "meV"],
+                "ylabel": ["Excitation power as current density", "", "mA cm$^{-2}$"],
+            }
+        )
+
+    def readDataFromFilePLQY(self, attributes, **kwargs):
+        """To open the rest - output of measurements with lockin"""
         fname, _ = os.path.splitext(os.path.basename(self.filename))
         split = fname.split("_")
         label = ""

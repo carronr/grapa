@@ -20,8 +20,9 @@ GUI_colorscale05	[[1,0,1], [1,0.5,1], [0.5,0.75,1], 'hls']
 GUI_colorscale07	'inferno'
 GUI_colorscale10	'gnuplot2'
 GUI_colorscale11	'viridis'
-GUI_colorscale12	'afmhot'
-GUI_colorscale13	'YlGn'
+GUI_colorscale12	'magma'
+GUI_colorscale13	'afmhot'
+GUI_colorscale14	'YlGn'
 
 # default saving image format
 save_imgformat	.png

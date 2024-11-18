@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from copy import deepcopy

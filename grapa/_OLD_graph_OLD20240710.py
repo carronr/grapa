@@ -10,43 +10,9 @@ import numpy as np
 from copy import deepcopy
 from re import findall as refindall
 import matplotlib as mpl
-import json
 
 from grapa.curve import Curve
 from grapa.mathModule import is_number, strToVar
-
-
-def load_kw(filename):
-    # data contained in json file structured as:
-    # [
-    #     ["== Figure ==", "", []],
-    #     ["figsize", "Figure size (inch).\nExample:", [[6.0, 4.0]]],
-    #     ...
-    # ]
-    out = {}
-    # open file with json
-    with open(filename, "r") as file:
-        datalist = json.load(file)
-    # process data
-    out["keys"] = [line[0] for line in datalist]
-    # textual help, concatenate with examples if appropriate
-    out["guitexts"] = []
-    for line in datalist:
-        out["guitexts"].append(line[1])
-        if line[1].endswith("Example:") or line[1].endswith("Examples:"):
-            aux = [
-                str(li) if not isinstance(li, str) else '"' + li + '"' for li in line[2]
-            ]
-            out["guitexts"][-1] += " " + ", ".join(aux)
-    # lists of examples - NOT cast into str()
-    out["guiexamples"] = [line[2] for line in datalist]
-    ## test if needed
-    # for i in range(len(out["keys"])):
-    # print(out["keys"][i])
-    # print(out["guitexts"][i])
-    # for example in out["guiexamples"][i]:
-    # print("   ", example)
-    return out
 
 
 class Graph:
@@ -118,10 +84,358 @@ class Graph:
     CONFIG_FILENAME = None
     CONFIG_GRAPH = None
 
-    _folder = os.path.dirname(os.path.realpath(__file__))
-    KEYWORDS_GRAPH = load_kw(os.path.join(_folder, "keywordsdata_graph.txt"))
-    KEYWORDS_CURVE = load_kw(os.path.join(_folder, "keywordsdata_curve.txt"))
-    KEYWORDS_HEADERS = load_kw(os.path.join(_folder, "keywordsdata_headers.txt"))
+    headersKeys = ["meastype", "collabels"] + ["savesilent"]
+    graphInfoKeysData = []
+    graphInfoKeysData.append(["== Figure ==", ""])
+    graphInfoKeysData.append(["figsize", 'Figure size (inch).\nExample: "[6.0, 4.0]"'])
+    graphInfoKeysData.append(
+        [
+            "subplots_adjust",
+            'Margins (relative).\nExamples: "0.15" (bottom only), or "[0.125, 0.1, 0.9, 0.9]" left,b,r,top, or "[1,1,5,3.5,\'abs\']"',
+        ]
+    )
+    graphInfoKeysData.append(["dpi", 'Resolution dots-per-inch.\nExample: "300"'])
+    graphInfoKeysData.append(
+        ["fontsize", 'Font size of titles, annotations, etc.\nExample: "12"']
+    )
+    graphInfoKeysData.append(
+        [
+            "title",
+            "Graph title, based on ax.set_title().\nExample: \"My data\", or \"['A dataset', {'color':'r'}]\"",
+        ]
+    )
+    graphInfoKeysData.append(["== Axes ==", ""])
+    graphInfoKeysData.append(
+        [
+            "xlim",
+            'Limits of x axis, based on ax.set_xlim().\nExamples: "[2,9]", or "[\'\',4]"',
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "ylim",
+            'Limits of y axis, based on ax.set_ylim().\nExamples: "[0,100]", or "[0,\'\']"',
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "xlabel",
+            "Label of x axis, based on ax.set_xlabel().\nExample: \"Axis x [unit]\", \"['My label', {'size':6, 'color':'r'}]\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "ylabel",
+            "Label of y axis, based on ax.set_ylabel().\nExample: \"Axis y [unit]\", \"['My label', {'size':6, 'color':'r'}]\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "xticksstep",
+            'Value difference between ticks on x axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"',
+        ]
+    )  # ax.xaxis.set_ticks
+    graphInfoKeysData.append(
+        [
+            "yticksstep",
+            'Value difference between ticks on y axis, or ticks positions.\nExample: "0.01", or "[0,1,2]"',
+        ]
+    )  # ax.yaxis.set_ticks
+    graphInfoKeysData.append(
+        [
+            "xtickslabels",
+            "Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: \"[[0,1],['some','value']]\", or \"[None, None, {'rotation':45, 'size': 6, 'color':'r'}]\"",
+        ]
+    )  # plt.xticks
+    graphInfoKeysData.append(
+        [
+            "ytickslabels",
+            "Customized ticks. First is a list of values, then a list of labels, then possibly options.\nExamples: \"[[0,1],['some','value']]\", or \"[None, None, {'rotation':45, 'size': 6, 'color':'r'}]\"",
+        ]
+    )  # plt.yticks
+    graphInfoKeysData.append(
+        [
+            "xlabel_coords",
+            'Position of xlabel, based on ax.xaxis.set_label_coords().\nExamples: "-0.1", or "[0.5,-0.15]"',
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "ylabel_coords",
+            'Position of ylabel, based on ax.yaxis.set_label_coords().\nExamples: "-0.1", or "[-0.1,0.5]"',
+        ]
+    )
+    graphInfoKeysData.append(["== Legends ==", ""])
+    graphInfoKeysData.append(
+        [
+            "legendproperties",
+            "Position, or keywords to ax.legend(). Examples: \"best\", \"sw\", or\n\"{'bbox_to_anchor':(0.2,0.8), 'ncol':2, 'fontsize':8}\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "legendtitle",
+            "Legend title. Example: \"Some title\", or \"['Some title', {'size':25}]\"",
+        ]
+    )  # messy implementation
+    graphInfoKeysData.append(["== Annotations ==", ""])
+    graphInfoKeysData.append(
+        [
+            "axhline",
+            "Horizontal line(s), based on ax.axhline().",
+            [
+                "0",
+                "[1, 1.5, 2, {'color':'r'}]",
+                "[[3, {'xmin':0.4}], [4, {'xmax': 0.6, 'linewidth':2}]]",
+                "[0, {'linewidth': 0.5}]",
+            ],
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "axvline",
+            "Vertical line(s), based on ax.axvline().",
+            [
+                "0",
+                "[1, 1.5, 2, {'color':'r'}]",
+                "[[3, {'ymin':0.4}], [4, {'ymax': 0.6, 'linewidth':2}]]",
+                "[0, {'linewidth': 0.5}]",
+            ],
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "text",
+            "Annotations, use GUI window if possible. \"Some text\", or \"['Here', 'There']\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "textxy",
+            'Use GUI window if possible. "(0.05, 0.95)" , or "[(0.2, 0.3), (0.8, 0.9)]"',
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "textargs",
+            "Use GUI window if possible. \"{'fontsize':15}\", or \"[{'horizontalalignment': 'right',\n'xytext': (0.4, 0.65), 'arrowprops': {'shrink': 0.05}, 'xy': (0.46, 0.32)}, {}]\"",
+        ]
+    )
+    graphInfoKeysData.append(["== Secondary axes ==", ""])
+    graphInfoKeysData.append(
+        [
+            "twiny_xlabel",
+            "Secondary x axis label.\nExamples: \"Other axis x [unit]\", \"['My label', {'size':6, 'color':'r'}]\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "twinx_ylabel",
+            "Secondary y axis label.\nExamples: \"Other axis x [unit]\", \"['My label', {'size':6, 'color':'r'}]\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        ["twiny_xlim", 'Secondary x axis limits.\nExamples: "[2,9]", or "[\'\',4]"']
+    )
+    graphInfoKeysData.append(
+        ["twinx_ylim", 'Secondary y axis limits.\nExamples: "[0,100]", or "[0,\'\']"']
+    )
+    graphInfoKeysData.append(["== Misc ==", ""])
+    graphInfoKeysData.append(
+        [
+            "alter",
+            "Data transform keyword, specific to the type of manipulated data.\nExamples: \"linear\", \"['y','x']\", or \"['nmeV', 'tauc']\"",
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "typeplot",
+            'General graph plotting instruction, based on ax.set_xscale() and ax.set_yscale().\nExamples: "plot", "semilogx", etc.',
+        ]
+    )
+    graphInfoKeysData.append(
+        [
+            "arbitraryfunctions",
+            "A list of instructions. Each instruction is a list as\n[method of ax, list of arguments, dict of keyword arguments]",
+            [
+                "[['xaxis.set_ticks',[[1.5, 5.5]],{'minor':True}], ['set_xticklabels',[['a','b']],{'minor':True}]]",
+                "[['set_axis_off', [], {}]]",
+                "[['grid', [True], {'axis': 'both'}]]",
+                "[['yaxis.set_major_formatter', ['StrMethodFormatter({x:.2f})'], {}]]",
+                "[['xaxis.set_minor_locator', ['MultipleLocator(0.5)'], {}]]",
+            ],
+        ]
+    )
+    graphInfoKeysData_ = np.array([d[0:2] for d in graphInfoKeysData])
+    graphInfoKeys = list(graphInfoKeysData_[:, 0])
+    graphInfoKeysExample = list(graphInfoKeysData_[:, 1])
+    graphInfoKeysExalist = []
+    for i in range(len(graphInfoKeysData)):
+        if len(graphInfoKeysData[i]) < 3:
+            split = graphInfoKeysData[i][1].split('"')
+            graphInfoKeysExalist.append([""] + split[1::2])
+        else:
+            graphInfoKeysExalist.append(graphInfoKeysData[i][2])
+
+    #    graphInfoKeys = ['xlim', 'ylim', 'figsize', 'title', 'xlabel', 'ylabel'] + ['text', 'textxy', 'textargs'] + ['xticksstep', 'yticksstep'] + ['axhline', 'axvline'] + ['legendproperties', 'legendtitle'] + ['alter', 'typeplot'] + ['twinx_ylabel', 'twinx_ylim', 'twiny_xlabel', 'twiny_xlim'] + ['xlabel_coords', 'ylabel_coords'] + ['subplots_adjust', 'fontsize'] + ['xtickslabels', 'ytickslabels'] + ['arbitraryfunctions'] + ['dpi']
+    #    graphInfoKeysExample = ["[2,9], or ['',4]", "[0,100], or [0,'']", str(FIGSIZE_DEFAULT)+' (inch)', 'Some title', 'Axis x [unit]', 'Axis y [unit]'] + ['Some text, or [\'Here\', \'There\']', "(0.05, 0.95) , or [(0.2, 0.3), (0.8, 0.9)] if multiple text", "{'fontsize':15}, or \n[{'horizontalalignment': 'right', 'xytext': (0.4, 0.65),\n'arrowprops': {'shrink': 0.05}, 'xy': (0.46, 0.32)}, {}]"] + ['0.01, or [0,1,2]', '0.01, or [0,1,2]'] + ['0, or [-1, 1]', '0, or [-1, 1]'] + ["best, sw, etc., or\n{'bbox_to_anchor':(0.2,0.8),'ncol':2, 'fontsize':8} kwargs to ax.legend()", 'Some title, or [\'Some title\', {\'size\':25}] font properties prop'] + ["linear, or ['nmeV', 'tauc']", 'plot, fill, scatter, boxplot, etc.'] + ['Secondary y axis label [unit]', "[0,100], or [0,'']", 'Secondary x axis label [unit]', "[2,9], or ['',4]"] + ['-0.15 or [0.5,-0.15]', '-0.1 or [-0.1,0.5]'] + ['0.15 (bottom only), or [0.125, 0.1, 0.9, 0.9] left,b,r,top, or [1,1,5,3.5,\'abs\']', '12'] + ["[[0,1],['some','value']], or [None, None, {'rotation':45, 'color':'r'}]", "[[0,1],['some','value']], or [None, None, {'rotation':45, 'color':'r'}]"] + ["[['xaxis.set_ticks',[[1.5, 5.5]],{'minor':True}],\n['set_xticklabels',[['a','b']],{'minor':True}]]"] + [300]
+    type_examples = ["", "== usual methods =="]
+    # "simple" plotting methods, with prototype similar to plot()
+    type_examples += ["plot", "fill", "errorbar", "scatter", "boxplot"]
+    type_examples += [
+        "== similar to plot ==",
+        "semilogx",
+        "semilogy",
+        "loglog",
+        "plot_date",
+        "stem",
+        "step",
+        "triplot",
+    ]
+    # plotting methods not accepting formatting string as 3rd argument
+    type_examples += [
+        "== (no linespec) ==",
+        "bar",
+        "barbs",
+        "barh",
+        "cohere",
+        "csd",
+        "fill_between",
+        "fill_betweenx",
+        "hexbin",
+        "hist2d",
+        "quiver",
+        "xcorr",
+    ]
+    #  plotting of single vector data
+    type_examples += [
+        "== 1D vector data ==",
+        "acorr",
+        "angle_spectrum",
+        "eventplot",
+        "hist",
+        "magnitude_spectrum",
+        "phase_spectrum",
+        "pie",
+        "psd",
+        "specgram",
+    ]
+    type_examples += ["== other ==", "spy", "stackplot", "violinplot"]
+    type_examples += ["imshow", "contour", "contourf"]
+    # list of attributes recognized for plotting. These are typically attributes of the curves. Can be extended if needed.
+    dataInfoKeysGraphData = []
+    dataInfoKeysGraphData.append(["== Basic properties ==", ""])
+    dataInfoKeysGraphData.append(
+        [
+            "type",
+            'Plotting method of Axes, ie. "plot", "scatter", "fill", "boxplot", "errorbar", etc.\nTip: after "scatter", set next Curve as "scatter_c" or "scatter_s"',
+            type_examples,
+        ]
+    )
+    dataInfoKeysGraphData.append(
+        [
+            "linespec",
+            'Format string controlling the line style or marker.\nExamples: "r", "--", ".-or", "^k"',
+        ]
+    )
+    dataInfoKeysGraphData.append(
+        ["label", 'Curve label to be shown in legend. Example: "Experiment C"']
+    )
+    dataInfoKeysGraphData.append(["== Display ==", ""])
+    dataInfoKeysGraphData.append(
+        [
+            "color",
+            'Curve color. Examples: "r", "purple", or "[0.5,0,0]" (rgb or rgba notations)',
+        ]
+    )
+    dataInfoKeysGraphData.append(["alpha", 'Transparency. Examples. "0.5", "1"'])
+    dataInfoKeysGraphData.append(["linewidth", 'Linewidth in points. Example: "1.5"'])
+    dataInfoKeysGraphData.append(["marker", 'Examples: "o", "s", "x"'])
+    dataInfoKeysGraphData.append(
+        ["markersize", 'Size of marker, in points. Example: "2.5"']
+    )
+    dataInfoKeysGraphData.append(
+        ["markerfacecolor", 'Marker inner color. Example: "r", "[0.5,0,0]"']
+    )
+    dataInfoKeysGraphData.append(
+        ["markeredgecolor", 'Marker border color. Example: "r", "[0.5,0,0]"']
+    )
+    dataInfoKeysGraphData.append(
+        ["markeredgewidth", 'Marker border width, in points. Example: "1.5"']
+    )
+    dataInfoKeysGraphData.append(
+        [
+            "zorder",
+            'Determines the drawing order (float), highest is drawn on top.\nExample: "2", "3"',
+        ]
+    )
+    dataInfoKeysGraphData.append(["== Offsets ==", ""])
+    dataInfoKeysGraphData.append(
+        [
+            "offset",
+            "Offset to data. Examples: \"-10\" (on y values), \"[2,'1/20']\" for (x,y) offset.\nSpecial keywords: \"['minmax', '0max']\" and combinations.",
+        ]
+    )
+    dataInfoKeysGraphData.append(
+        [
+            "muloffset",
+            'Multiplicative offset to data. Examples: "0.01" for y values, or\n"[10, 1e2]" for (x,y) multiplicative offsets',
+        ]
+    )
+    dataInfoKeysGraphData.append(["== For specific curve types ==", ""])
+    dataInfoKeysGraphData.append(
+        ["facecolor", 'Color of "fill" Curve types. Examples: "r", "[0.5,0,0]"']
+    )
+    dataInfoKeysGraphData.append(
+        [
+            "cmap",
+            'Colormap, for Curve types which accept this keyword such as scatter). Examples:\n"afmhot", "inferno", or "[[0.91,0.25,1], [1.09,0.75,1], \'hls\']" (see Colorize options)',
+        ]
+    )
+    dataInfoKeysGraphData.append(
+        ["vminmax", 'Bounds values for cmap. Examples: "[0,7]", or "[3, \'\']"']
+    )
+    dataInfoKeysGraphData.append(
+        [
+            "colorbar",
+            "If not empty display a colorbar according to keyword cmap. Example: \"1\",\n\"{'ticks': [-1, 0, 2]}\" or \"{'orientation':'horizontal', 'adjust':[0.1, 0.1, 0.7, 0.1]}\",\nor \"{'label': 'Some text', 'adjust': [1.01, 0, 0.05, 1, 'ax']}\"",
+        ]
+    )
+    dataInfoKeysGraphData.append(
+        ["xerr", 'x error for curve type "errorbar". Example: "1", or "5"']
+    )
+    dataInfoKeysGraphData.append(
+        ["yerr", 'y error for curve type "errorbar". Example: "1", or "5"']
+    )
+    dataInfoKeysGraphData.append(["== Misc ==", ""])
+    dataInfoKeysGraphData.append(["labelhide", 'Use "1" to hide label in the graph'])
+    dataInfoKeysGraphData.append(["legend", "Deprecated. Curve label in legend."])
+    dataInfoKeysGraphData.append(
+        ["ax_twinx", 'Plot curve on secondary axis. Example: "True", or anything']
+    )
+    dataInfoKeysGraphData.append(
+        ["ax_twiny", 'Plot curve on secondary axis. Example: "True", or anything']
+    )
+    dataInfoKeysGraphData.append(["linestyle", 'Use "none" to hide a Curve'])
+    dataInfoKeysGraphData.append(
+        [
+            "['key', value]",
+            "User-defined keyword-values pairs. Will be fed to the plotting method if possible.\nExamples: \"['fillstyle', 'top']\" for half-filled markers, \"['comment', 'a valuable info']",
+        ]
+    )
+    dataInfoKeysGraphData_ = np.array([d[0:2] for d in dataInfoKeysGraphData])
+    dataInfoKeysGraph = list(dataInfoKeysGraphData_[:, 0])
+    dataInfoKeysGraphExample = list(dataInfoKeysGraphData_[:, 1])
+    dataInfoKeysGraphExalist = []
+    for i in range(len(dataInfoKeysGraphData)):
+        if len(dataInfoKeysGraphData[i]) < 3:
+            split = dataInfoKeysGraphData[i][1].split('"')
+            dataInfoKeysGraphExalist.append([""] + split[1::2])
+        else:
+            dataInfoKeysGraphExalist.append(dataInfoKeysGraphData[i][2])
+
+    #    dataInfoKeysGraph = ['type', 'linespec', 'color', 'legend', 'label', 'labelhide', 'linewidth', 'facecolor', 'linestyle', 'alpha', 'marker', 'markersize', 'markerfacecolor', 'markeredgewidth', 'markeredgecolor', 'cmap', 'vminmax', 'colorbar', 'xerr', 'yerr', 'offset', 'muloffset', 'ax_twinx', 'ax_twiny', 'insetfile', "['key', value]"]
+    #    dataInfoKeysGraphExample = ['plot, scatter, fill, boxplot, errorbar, etc. (scatter_c after previous scatter)', '--r', 'r, [0.5,0,0], etc.', 'Some legend', 'Some legend', '1 to hide label in graph', '1.5', 'r, [0.5,0,0], etc.', '"" or none', '0.5, 1, etc.', 'o, or s, etc.', '2', 'r, [0.5,0,0], etc.', '1.', 'r, [0.5,0,0], etc.', 'afmhot, or inferno, or color list as in Colorize', 'Imposes bounds for cmap. Ex: [0,7], or [3, \'\']', '1, or {\'ticks\': [-1, 0, 2]}, or {\'orientation\':\'horizontal\', \'adjust\':[0.1, 0.1, 0.7, 0.1]}', '1, or 5. Requires \'type\': \'errorbar\'.', '1, or 5. Requires \'type\': \'errorbar\'.', '-10, or [2,20]', '0.01, or [10, 1e2]', 'True, or anything', 'True, or anything', 'file to place as inset. Related keywords: insetcoords and insetupdate', "['color', [0,0.2,0.7], or ['comment', 'a valuable info']]"]
 
     # constructor
     def __init__(self, filename="", complement="", silent=True, config="config.txt"):
@@ -180,12 +494,13 @@ class Graph:
                 # others one by one
                 if not isinstance(complement, list):
                     if complement != "":
-                        msg = (
-                            "WARNING class Graph: complement must be a list if "
-                            "filename is a list. Filename {} elements, complement:"
-                            " {}."
+                        print(
+                            "WARNING class Graph: complement must be a list",
+                            "if filename is a list. Filename",
+                            len(filename),
+                            "elements, complement:",
+                            complement,
                         )
-                        print(msg.format(len(filename), complement))
                     complement = [complement] * len(filename)
                 self.filename = filename[0]
                 GraphIO.readDataFile(self, complement[0])
@@ -258,8 +573,13 @@ class Graph:
     def curve(self, index):
         """Returns the Curve object at index i in the list."""
         if index >= len(self) or len(self) == 0:
-            msg = "ERROR Class Graph method Curve: cannot find Curve (index {}, max possible {})."
-            print(msg.format(index, len(self)))
+            print(
+                "ERROR Class Graph method Curve: cannot find Curve (index",
+                index,
+                ", max possible",
+                len(self),
+                ")",
+            )
             return
         return self.data[index]
 
@@ -430,13 +750,13 @@ class Graph:
         for key in attributes:
             k = key.lower().replace("ï»¿", "")
             try:
-                if k in self.KEYWORDS_HEADERS["keys"]:
+                if k in self.headersKeys:
                     if attributes[key] != "":
                         self.headers.update({k: attributes[key]})
                     elif k in self.headers:
                         del self.headers[k]
                 elif (
-                    k in self.KEYWORDS_GRAPH["keys"]
+                    k in self.graphInfoKeys
                     or forceGraphInfo
                     or k.startswith("subplots")
                 ):
@@ -452,8 +772,14 @@ class Graph:
                     else:
                         self.curve(-1).update({k: attributes[key]})
             except Exception as e:
-                msg = "Error Graph.update: key {}, attributes {}, exception {}"
-                print(msg.format(key, attributes, e))
+                print(
+                    "Error Graph.update: key",
+                    key,
+                    " attributes",
+                    attributes,
+                    "exception",
+                    e,
+                )
 
     def updateValuesDictkeys(self, *args, **kwargs):
         """
@@ -495,7 +821,7 @@ class Graph:
         #     if k in self.headers:
         #         out.update({key: self.headers[k]})
         #         del self.headers[k]
-        # elif k in self.graphInfoKeys:  # KEYWORDS_GRAPH["keys"]
+        # elif k in self.graphInfoKeys:
         #     if k in self.graphInfo:
         #         out.update({key: self.graphInfo[k]})
         #         del self.graphInfo[k]
@@ -524,6 +850,14 @@ class Graph:
             return self[0].attr(k, default=default)
         return default
 
+    # certainly useless
+    # def deleteAttr(self, attrList):
+    #     out = {}
+    #     for key in attrList:
+    #         out.update({key: self.attr(key)})
+    #         self.delete(key)
+    #     return out
+
     def castCurve(self, newtype, idx, silentSuccess=False):
         """
         Replace a Curve with another type of Curve with identical data and
@@ -543,8 +877,13 @@ class Graph:
                     print("Graph.castCurve")
                 return flag
         else:
-            msg = "Graph.castCurve: idx not in suitable range ({}, max {})."
-            print(msg.format(idx, len(self)))
+            print(
+                "Graph.castCurve: idx not in suitable range (",
+                idx,
+                ", max",
+                len(self),
+                ").",
+            )
         return False
 
     def colorize(
@@ -601,8 +940,8 @@ class Graph:
         """
         Apply a template to the Graph object. The template is a Graph object
         which contains:
-        - self.getAttributes listed in KEYWORDS_GRAPH["keys"]
-        - self.curve(i).getAttributes listed in KEYWORDS_CURVE["keys"]
+        - self.getAttributes listed in graphInfoKeys
+        - self.curve(i).getAttributes listed in dataInfoKeysGraph
         alsoCurves: True also apply Curves properties, False only apply Graph
         properties
         """
@@ -610,18 +949,18 @@ class Graph:
         for key in Graph.DEFAULT:
             if graph.getAttribute(key) == Graph.DEFAULT[key]:
                 graph.update({key: ""})
-        for key in graph.KEYWORDS_GRAPH["keys"]:
+        for key in graph.graphInfoKeys:
             val = graph.getAttribute(key)
             if val != "":
                 self.update({key: val})
         if alsoCurves:
-            for c in range(len(self)):
-                if c >= len(graph):
+            for c in range(self.length()):
+                if c >= graph.length():
                     break
-                for key in self.KEYWORDS_CURVE["keys"]:
-                    val = graph[c].getAttribute(key)
+                for key in self.dataInfoKeysGraph:
+                    val = graph.curve(c).getAttribute(key)
                     if val != "":
-                        self[c].update({key: val})
+                        self.curve(c).update({key: val})
 
     def replaceLabels(self, old, new):
         """
@@ -645,11 +984,17 @@ class Graph:
         if text != self.attr("text"):
             print("Corrected attribute text", text, "(former", self.attr("text"), ")")
         if texy != self.attr("textxy") and self.attr("textxy", None) is not None:
-            msg = "Corrected attribute textxy {} (former {})."
-            print(msg.format(texy, self.attr("textxy")))
+            print(
+                "Corrected attribute textxy", texy, "(former", self.attr("textxy"), ")"
+            )
         if targ != self.attr("textargs"):
-            msg = "Corrected attribute textargs {} (former {})."
-            print(msg.format(targ, self.attr("textargs")))
+            print(
+                "Corrected attribute textargs",
+                targ,
+                "(former",
+                self.attr("textargs"),
+                ")",
+            )
         self.update({"text": text, "textxy": texy, "textargs": targ})
 
     def _checkValidTextInput(self, text, texy, targ):
@@ -712,13 +1057,11 @@ class Graph:
         By default, removes the last text annotation in the list
         If byId is provided, removes the annotation with corresponding index
         """
-        restore = [
-            {
-                "text": self.attr("text"),
-                "textxy": self.attr("textxy"),
-                "textargs": self.attr("textargs"),
-            }
-        ]
+        restore = [{
+            "text": self.attr("text"),
+            "textxy": self.attr("textxy"),
+            "textargs": self.attr("textargs"),
+        }]
         attrs = ["text", "textxy", "textargs"]
         self.checkValidText()
         if self.attr("text", None) is None:

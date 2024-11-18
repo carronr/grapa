@@ -2,7 +2,50 @@ TFPV data reading software
 GRAPA: GRAphing and Photovoltaics Analysis
 
 KNOWND BUGS
-- A few are there for sure, please feel free to announce them.
+- A few are there for sure, please announce them - romain.carron@empa.ch
+
+
+
+Version 0.6.4.0
+Released 07.11.2024
+Additions
+- GUI: Added an option to modify the graph background color for visualization purpose. The output image remains with a transparent background, to be provided separately.
+- GUI: Added a button to reverse the curve order. Ignores curve selection.
+- Curve EQE: Bandgap derivative, added calculation of the bandgap PV by Rau (https://doi.org/10.1103/PhysRevApplied.7.044016), by averaging the energy weighted by EQE derivative value, over the derivative FWHM. Its value is slightly more sensitive to experimental noise than the derivative method. When the derivative peak is asymmetric, the value tends to be slightly higher than the derivative peak (up to 30meV ?).
+- Curve EQE: Bandgap derivative, also added a fit to the derivative suited to best estimation of sigma value, intended for independent estimation of DeltaVoc_rad.
+- Curve EQE: Added new function to calculate the short-circuit Voc loss, due to Jsc < Jsc_SQ. Calculation following Rau et al PRA 7 044016 (2017) DOI: https://doi.org/10.1103/PhysRevApplied.7.044016
+- Curve EQE: Function ERE. Added the calculation Qe-LED by Rau (equivalent to ERE with geometrical factor fg=1), and the Voc bloss breackdown into DeltaVoc short-circuit, radiative, non-radiative. The center-of-mass of the PL peak (EQE*blackbody) is also provided for comparison purposes. The bandgap PV of Rau is used for calculations, or given by user. Note: changes in input bandgap is mostly accomodated in the DeltaVoc_rad value. Added auxiliary Curves to visualize data extraction fits. Added auxiliary Curve for parameter copy-paste.
+- Curve Image: Can now configure levels using arange, linspace, logspace, geomspace. The parameter extend can also be set.
+- Graph PLQY: implemented reading of output files of power dependency module.
+- Script CVfT: From a set of C-f data acquired at different voltages and temperatures, provides C-V-f maps for each temperatures indicating low values for phase, as well as C-f, C-V with T and C-V with Hz plots.
+- Script Cf: added Bode plot, |Z| and impedance angle versus log(frequency)
+- Script Boxplot: Added summary graph presenting all generated boxplots
+Modifications
+- General: Conversion nm-eV is now calculated from Plank and c constants (previously: 1239.5, now about 1239.8419)
+- General: graph colorize modifed behavior: if sameIfEmptyLabel, same colors are also applied in case label is hidden (labelhide)
+- Curve EQE: Revised parametrization of bandgap by derivative peak method. The fit is now parametrized in unit of eV.
+- Graph PLQY: when opening a file, added PLQY(time) as curve hidden by default
+- Graph TinyTusker: various improvements
+- Script Cf, image derivative: redesigned the image. The axes are now omega versus 1000/T (input data are in K, calulated on-the-fly with alter keyword). The fit curves of activation energies can be directly added onto the C-f derivative image.
+- Script JV: Rp, Rs from acquisition software are now reported in summary files and in graphical summary (diode).
+- Script JV: Rsquare fit quality restricted to the diode region is reported in the summary files and in graphical summary (diode). The marker size of the other fit parameters shrinks in case poor Rsquare values were obtained.
+- Script Correlation: Improved detection of input parameters varied in a logarithmic manner.
+- Script Correlation: Revised colorscale of plot "parseddata" for datasets with 2 input parameters
+Bug corrections
+- General: Solved a bug that prevented making figures with a unique subplot
+- General: The property xtickslabels and ytickslabels can now be used also in conjunction with the property alter.
+- General: Plot type fill_between and fill_betweenx now have more proper behavior.
+- GUI: Small adjustments against MacOS dark mode
+- GUI: Solved a bug that appeared when a tab was closed before the figure drawing was finished. Graphs drawn later on were not drawn correctly if contained several axes.
+Miscellaneous
+- General: Centralized physical constants in a unique file constants.py. Hopefully everything works as before.
+- Implementation: new text files to store content of (now renamed) variables Graph.dataInfoKeysGraphData, Graph.graphInfoKeysData, Graph.headersKeys
+- Implementation: tidy up the code at a number of places
+
+
+
+
+
 
 
 Version 0.6.3.1

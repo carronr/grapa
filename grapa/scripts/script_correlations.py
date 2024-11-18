@@ -1,7 +1,6 @@
 import os
 import sys
 import copy
-import glob
 import numpy as np
 from scipy.stats import pearsonr
 import fnmatch
@@ -15,6 +14,7 @@ if path not in sys.path:
 from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.datatypes.graphScaps import GraphScaps
+from grapa.colorscale import Color
 
 
 AS_DATATABLE = "AS_DATATABLE"
@@ -61,15 +61,26 @@ def plot_parameters_2D(pkeys, pvals, seriesx=None, seriesy=None, newGraphKwargs=
     if seriesy is None:
         seriesy = range(2, len(pkeys))
 
+    # preparatory works
+    islog = [guess_is_logarithm_quantity(pvals[i, :]) for i in seriesx]
+    typeplot = ""
+    if islog[0] and islog[1]:
+        typeplot = "loglog"
+    elif islog[0] and not islog[1]:
+        typeplot = "semilogx"
+    elif not islog[0] and islog[1]:
+        typeplot = "semilogy"
+
     s_a = [0.1, 0.1, 0.9, 0.9, 0.5, 0.5]
     figsize = [8, 8]
     spanx = figsize[0] * (s_a[2] - s_a[0]) / (2 * 1 + 1 * s_a[4]) * 72  # in points
-    npntsx = np.sqrt(pvals.shape[1]) * 1.5  # *2 safety marging, symbols not too large
+    npntsx = np.sqrt(pvals.shape[1]) * 1.5  # *2 safety margin, symbols not too large
     markersize = (spanx / npntsx) ** 2
     # print('markersize', markersize)
 
     graphaux = Graph(**newGraphKwargs)
-    graphaux.append(Curve([[0], [0]], {}))
+    dataaux = [[1], [1]]
+    graphaux.append(Curve(dataaux, {}))
     attr0 = {
         "type": "scatter",
         "marker": "o",
@@ -79,12 +90,16 @@ def plot_parameters_2D(pkeys, pvals, seriesx=None, seriesy=None, newGraphKwargs=
     x0, x1 = pvals[seriesx[0], :], pvals[seriesx[1], :]
     graphaux.append(Curve([x0, x1], attr0))
     graphaux.castCurve("subplot", 0, silentSuccess=True)
+    xlim = list(np.exp(values_to_lim(np.log(x0)))) if islog[0] else values_to_lim(x0)
+    ylim = list(np.exp(values_to_lim(np.log(x1)))) if islog[1] else values_to_lim(x1)
     su = {
         "xlabel": pkeys[seriesx[0]],
         "ylabel": pkeys[seriesx[1]],
-        "xlim": values_to_lim(x0),
-        "ylim": values_to_lim(x1),
+        "xlim": xlim,
+        "ylim": ylim,
     }
+    if typeplot != "":
+        su.update({"typeplot": typeplot})
     graphaux[0].update({"subplotupdate": su})
 
     graphshow = Graph(**newGraphKwargs)
@@ -286,7 +301,9 @@ def guess_is_logarithm_quantity(series):
     if len(sunique) > 2:
         ratios = sunique[1:] / sunique[:-1]
         ratiosda = np.abs(ratios - ratios[0])
-        if np.max(ratiosda) < 1e-15:
+        # print("ratiosda", ratios, ratiosda)
+        if np.max(ratiosda) < 1e-3:  # 1e-15
+            # print("logarithm TRUE")
             return True
     return False
 
@@ -345,7 +362,6 @@ def filter_pvals(pkeys, pvals, filters: list = None):
 def process_datatable(
     filenamebase, pkeys, pvals, seriesx=None, seriesy=None, **ngkwargs
 ):
-    graphshow = None
     if len(seriesx) == 1:
         graphshow = plot_parameters_1D(pkeys, pvals, **ngkwargs)
         graphshow.plot(filenamebase + "_summary")
@@ -371,6 +387,37 @@ def process_datatable(
         graphtable.plot(filenamebase + "_correlation_data")
         graphpearson.plot(filenamebase + "_correlation_pearson")
     return graphtable, graphpearson, pearson
+
+
+def colorize_graph(graph, seriesx, pvals):
+    # Modifies object graph
+    # for 2D parameter sweeps: colorize in sweeps in hls colorspace, with
+    # - hue between 0 and 1 according to the first parameter, starting with red,
+    #   with additional small increment according to 2nd parameter,
+    # - luminance from 0.25 to 0.75 according to the second parameter
+    if seriesx is None:
+        return
+    if len(seriesx) == 1:
+        graph.colorize("viridis")
+        return
+    elif len(seriesx) == 2:
+        x0, x1 = pvals[seriesx[0], :], pvals[seriesx[1], :]
+        lookup = [[x0[i], x1[i]] for i in range(len(x0))]
+        p0 = list(np.unique(x0))
+        p1 = list(np.unique(x1))
+        print("Colorize graph in a 2D fashion")
+        hues = list(0.91 + np.linspace(0, -1, len(p0) + 1))[:-1]
+        huestep = np.abs(hues[1] - hues[0]) * 0.5 if len(hues) > 1 else 0.2
+        lums = np.linspace(0.25, 0.75, len(p1))
+        for c in range(len(graph)):
+            hue, lum = lookup[c]
+            p1i = p1.index(lum)
+            hls = [hues[p0.index(hue)] + huestep * p1i / (len(p1) - 1), lums[p1i], 1]
+            # print("hls", hls)
+            # rgb = colorsys.hls_to_rgb(*hls)
+            rgb = Color(hls, space="hls").get()
+            graph[c].update({"color": list(rgb)})
+        return
 
 
 class Helper:
@@ -537,7 +584,17 @@ def process_file(
 
     # open input data
     graph = Graph(filename, **newGraphKwargs)
+    # some checks
+    if len(graph) == 0:
+        print("Could not find data in the file. Script end.")
+        return False
+    # cosmetics
+    if len(graph) > 10:
+        graph.update({"legendproperties": {"fontsize": 6}})
 
+    # identification of data type
+    fnamebase = os.path.splitext(filename)[0]
+    dataext = graph[0].attr("curve").replace("Curve ", "")
     if datakeys == AUTO:
         if graph.attr("meastype") == GraphScaps.FILEIO_GRAPHTYPE:
             print("Datatype AUTO, detected Scaps.")
@@ -551,17 +608,7 @@ def process_file(
             datakeys = AS_DATATABLE
             helper = HelperDatatable
 
-    # some checks
-    if len(graph) == 0:
-        print("Could not find data in the file. Script end.")
-        return False
-    fnamebase = os.path.splitext(filename)[0]
-    dataext = graph[0].attr("curve").replace("Curve ", "")
-
     print("Running script assuming data", datakeys)
-
-    # if datakeys != AS_DATATABLE:
-    graph.plot(fnamebase + "_parseddata" + dataext)
 
     # specific to file format to retrieve the parameters of interest
     # SCAPS: data as data table: parameter0, parameter1, ..., Voc, Jsc, FF, Eff
@@ -576,6 +623,7 @@ def process_file(
     #    fnamebase += "_filter"
 
     if np.isnan(pvals).all():
+        graph.plot(fnamebase + "_parseddata" + dataext)  # before coloring
         print("Data table of parameters contains only NaN, script stops here.")
         print(pkeys)
         print(pvals.shape)
@@ -595,6 +643,10 @@ def process_file(
         sery = seriesy_
         print("Automatic choice of seriesy: {}.".format(sery))
 
+    # if datakeys != AS_DATATABLE:
+    colorize_graph(graph, serx, pvals)
+    graph.plot(fnamebase + "_parseddata" + dataext)
+
     # process datatable
     graphtable, graphpearson, pearson = process_datatable(
         fnamebase, pkeys, pvals, seriesx=serx, seriesy=sery, **ngkwargs
@@ -607,33 +659,38 @@ def process_file(
 
 
 if __name__ == "__main__":
-    datakeys = AUTO
-    filters = []
-    seriesx = None
-    seriesy = None
+    datakeys_ = AUTO
+    filters_ = []
+    seriesx_ = None
+    seriesy_ = None
 
+    """
     # Example
-    # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
+    filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
     # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CIGStau_CIGSp.iv'
-    # datakeys = ['batch parameters 0 value', 'batch parameters 1 value','temperature [k]']
-    # filters = [["i_ZnO*affinit*", HIGHER, 4.45], [1, '>', 220]]
+    datakeys_ = ['batch parameters 0 value', 'batch parameters 1 value','temperature [k]']
+    filters_ = [["i_ZnO*affinit*", HIGHER, 4.45], [1, '>', 220]]
+    """
 
     # Example
     filename = r"..\examples\JV\SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_Param.txt"
-    # datakeys = AS_DATATABLE  # not necessarily needed, autodetection should work
-    filters = [["Jsc_mApcm2", HIGHER, 10]]
-    seriesx = range(11)
+    # datakeys_ = AS_DATATABLE  # not necessarily needed, autodetection should work
+    filters_ = [["Jsc_mApcm2", HIGHER, 10]]
+    seriesx_ = range(11)
 
+    """
     # Example
-    # filename = r"..\examples\JV\SAMPLE_B_3layerMo\export_SAMPLE_B_3LayerMo_summary_allJV.txt"
-    # datakeys = ["Voc", "Jsc", "FF", 'area']  # , 'Eff', 'Rp', 'acquis soft rs']
-    # filters = [["Jsc", HIGHER, 10]]
+    filename = (
+        r"..\examples\JV\SAMPLE_B_3layerMo\export_SAMPLE_B_3LayerMo_summary_allJV.txt"
+    )
+    datakeys_ = ["Voc", "Jsc", "FF", "area"]  # , 'Eff', 'Rp', 'acquis soft rs']
+    filters_ = [["Jsc", HIGHER, 10]]
+    """
 
     process_file(
-        filename, datakeys=datakeys, filters=filters, seriesx=seriesx, seriesy=seriesy
+        filename,
+        datakeys=datakeys_,
+        filters=filters_,
+        seriesx=seriesx_,
+        seriesy=seriesy_,
     )
-
-    # files = glob.glob('test/*.iv')
-    # print('Files:', files)
-    # for file in files:
-    #     process_scaps_file(file)

@@ -4,18 +4,20 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
 import warnings
 import inspect
+import importlib
+
 from string import Template
 
 from grapa.gui.GUIFuncGUI import FuncGUI
 
 from grapa.graphIO_aux import Plotter
+from grapa.constants import CST
 
 
 class TemplateCustom(Template):
@@ -27,18 +29,17 @@ class TemplateCustom(Template):
 class Curve:
     CURVE = "Curve"
 
-    NMTOEV = 1239.5
     LINESTYLEHIDE = ["none", "None", None]
 
-    def __init__(self, Curve, attributes, silent=True):
+    def __init__(self, data, attributes, silent=True):
         self.silent = silent
         self.data = np.array([])
         self.attributes = {}
         # add data
-        if isinstance(Curve, (np.ndarray, np.generic)):
-            self.data = Curve
+        if isinstance(data, (np.ndarray, np.generic)):
+            self.data = data
         else:
-            self.data = np.array(Curve)
+            self.data = np.array(data)
         if self.data.shape[0] < 2:
             self.data = self.data.reshape((2, len(self.data)))
             print(
@@ -113,9 +114,9 @@ class Curve:
             )
             for key in at:
                 vals = []
-                if key in Graph.dataInfoKeysGraph:
-                    i = Graph.dataInfoKeysGraph.index(key)
-                    vals = Graph.dataInfoKeysGraphExalist[i]
+                if key in Graph.KEYWORDS_CURVE["keys"]:
+                    i = Graph.KEYWORDS_CURVE["keys"].index(key)
+                    vals = [str(v) for v in Graph.KEYWORDS_CURVE["guiexamples"][i]]
                 line.append(
                     key,
                     self.attr(key),
@@ -312,6 +313,7 @@ class Curve:
                 'KeyError in Curve.updateNextCurvesScatter: "graph" or',
                 '"graph_i" not provided in kwargs',
             )
+            return False
         for i in range(len(values)):
             if c + i < len(graph):
                 graph[c + 1 + i].update({"type": values[i]})
@@ -425,7 +427,7 @@ class Curve:
                         xyValue = [xyValue[0, ::-1], xyValue[1, ::-1]]
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
-                    return Curve.NMTOEV / self.x(index, xyValue=xyValue)
+                    return CST.nm_eV / self.x(index, xyValue=xyValue)
             elif alter == "nmcm-1":
                 # invert order of xyValue, to help for graph xlim and ylim
                 if xyValue is not None:
@@ -456,24 +458,17 @@ class Curve:
                     module_name = (
                         "grapa.datatypes." + split[0][0].lower() + split[0][1:]
                     )
-                    import importlib
-
                     try:
                         mod = importlib.import_module(module_name)
                         met = getattr(getattr(mod, split[0]), split[1])
                         return met(self, index=index, xyValue=xyValue)
                     except ImportError as e:
-                        print(
-                            "ERROR Curve.x Exception raised during module",
-                            "import",
-                            module_name,
-                            ":",
-                        )
+                        msg = "ERROR Curve.x Exception raised during module import {}:"
+                        print(msg.format(module_name))
                         print(e)
                 else:
-                    print(
-                        "Error Curve.x: cannot identify alter keyword (" + alter + ")."
-                    )
+                    msg = "Error Curve.x: cannot identify alter keyword ({})."
+                    print(msg.format(alter))
 
         # alter might be used by subclasses
         val = self.data if xyValue is None else np.array(xyValue)
@@ -572,8 +567,6 @@ class Curve:
             elif alter != "":
                 split = alter.split(".")
                 if len(split) == 2:
-                    import importlib
-
                     module_name = (
                         "grapa.datatypes." + split[0][0].lower() + split[0][1:]
                     )
@@ -582,19 +575,13 @@ class Curve:
                         met = getattr(getattr(mod, split[0]), split[1])
                         return met(self, index=index, xyValue=xyValue)
                     except ImportError as e:
-                        print(
-                            "ERROR Curve.y Exception raised during module",
-                            "import",
-                            module_name + ":",
-                        )
+                        msg = "ERROR Curve.y Exception raised during module import {}:"
+                        print(msg.format(module_name))
                         print(e)
                 else:
                     if alter != "idle":
-                        print(
-                            "Error Curve.y: cannot identify alter keyword ("
-                            + alter
-                            + ")."
-                        )
+                        msg = "Error Curve.y: cannot identify alter keyword ({})."
+                        print(msg.format(alter))
         # return (subset of) data
         val = self.data if xyValue is None else np.array(xyValue)
         if len(val.shape) > 1:
@@ -766,7 +753,13 @@ class Curve:
             # identifiers must be surrounded by {}
             from string import Formatter
 
-            identifiers = [ele[1] for ele in Formatter().parse(formatter) if ele[1]]
+            # identifiers = [ele[1] for ele in Formatter().parse(formatter) if ele[1]]
+            identifiers = []
+            for ele in Formatter().parse(formatter):
+                if ele[1]:
+                    identifiers.append(ele[1])
+                    if ele[2]:
+                        identifiers[-1] = identifiers[-1] + ":" + ele[2]
         attrs = {}
         for key in identifiers:
             attrs[key] = str(self.attr(key))
@@ -774,7 +767,10 @@ class Curve:
                 split = key.split(",")
                 ke = split[0].strip()
                 fm = split[1].strip()
-                attrs[key] = ("{" + fm + "}").format(self.attr(ke))
+                if len(fm) > 0:
+                    attrs[key] = ("{" + fm + "}").format(self.attr(ke))
+                else:
+                    attrs[key] = str(self.attr(ke))
         label = t.safe_substitute(attrs)
         self.update({"label": label.replace("  ", " ").strip()})
         return True
@@ -819,7 +815,6 @@ class Curve:
         for typ_ in curveTypes:
             if newTypeGUI == "Curve":
                 return Curve(self.data, attributes=self.getAttributes(), silent=True)
-                break
             if (
                 newTypeGUI == typ_[0]
                 or newTypeGUI == typ_[1]
@@ -1150,7 +1145,7 @@ class Curve:
                 print(type(key), key, attr[key])
             if (
                 (not isinstance(attr[key], str) or attr[key] != "")
-                and key in Graph.dataInfoKeysGraph
+                and key in Graph.KEYWORDS_CURVE["keys"]
                 and key
                 not in [
                     "plot",
@@ -1271,14 +1266,31 @@ class Curve:
             "barh",
             "cohere",
             "csd",
-            "fill_between",
-            "fill_betweenx",
+            # "fill_between",
+            # "fill_betweenx",
             "hexbin",
             "hist2d",
             "quiver",
             "xcorr",
         ]:
             handle = getattr(ax, type_graph)(x, y, **fmt)
+        elif type_graph in ["fill_between", "fill_betweenx"]:
+            success = False
+            if graph is not None and len(graph) > graph_i + 1:
+                x2 = graph[graph_i + 1].x_offsets(alter=alter[0])
+                y2 = graph[graph_i + 1].y_offsets(alter=alter[1])
+                if not np.array_equal(x, x2):
+                    msg = (
+                        "WARNING Curve {} and {}: fill_between, fill_betweenx: x "
+                        "series must be equal. Fill to 0."
+                    )
+                    print(msg.format(graph_i, graph_i + 1))
+                else:
+                    ignoreNext += 1
+                    success = True
+                    handle = getattr(ax, type_graph)(x, y, y2, **fmt)
+            if not success:
+                handle = getattr(ax, type_graph)(x, y, **fmt)
         #  plotting of single vector data
         elif type_graph in [
             "acorr",

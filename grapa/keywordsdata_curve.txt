@@ -1,0 +1,119 @@
+[
+    ["== Basic properties ==", "", []],
+    [
+        "type",
+        "Plotting method of Axes, ie. \"plot\", \"scatter\", \"fill\", \"boxplot\", \"errorbar\", etc.\nTip: after \"scatter\", set next Curve as \"scatter_c\" or \"scatter_s\"",
+        [
+            "",
+            "== usual methods ==",
+			"plot",
+            "fill",
+            "errorbar",
+            "scatter",
+            "boxplot",
+            "== similar to plot ==",
+            "semilogx",
+            "semilogy",
+            "loglog",
+            "plot_date",
+            "stem",
+            "step",
+            "triplot",
+            "== (no linespec) ==",
+            "bar",
+            "barbs",
+            "barh",
+            "cohere",
+            "csd",
+            "fill_between",
+            "fill_betweenx",
+            "hexbin",
+            "hist2d",
+            "quiver",
+            "xcorr",
+            "== 1D vector data ==",
+            "acorr",
+            "angle_spectrum",
+            "eventplot",
+            "hist",
+            "magnitude_spectrum",
+            "phase_spectrum",
+            "pie",
+            "psd",
+            "specgram",
+            "== other ==",
+            "spy",
+            "stackplot",
+            "violinplot",
+            "imshow",
+            "contour",
+            "contourf"
+        ]
+    ],
+    [
+        "linespec",
+        "Format string controlling the line style or marker.\nExamples:",
+		["r", "--", ".-r", "^k"]
+    ],
+    ["label", "Curve label to be shown in legend. Example:", ["Experiment C"]],
+    ["== Display ==", "", []],
+    [
+        "color",
+        "Curve color. Examples: \"r\", \"purple\", or [0.5,0,0] (rgb or rgba notations)",
+        ["r", "purple", [0.5, 0, 0, 0.5]]
+    ],
+    ["alpha", "Transparency. Examples:", [0.5, 1]],
+    ["linewidth", "Linewidth in points. Example:", [1.5]],
+    ["marker", "Examples:", ["o", "s", "x"]],
+    ["markersize", "Size of marker, in points. Example:", [2.5]],
+    ["markerfacecolor", "Marker inner color. Example:", ["r", [0.5, 0, 0]]],
+    ["markeredgecolor", "Marker border color. Example:", ["r", [0.5, 0, 0]]],
+    ["markeredgewidth", "Marker border width, in points. Example:", [1.5]],
+    [
+        "zorder",
+        "Determines the drawing order (float), highest is drawn on top.\nExample:",
+        [2, 3]
+    ],
+    ["== Offsets ==", "", []],
+    [
+        "offset",
+        "Offset to data. Examples: \"-10\" (on y values), \"[2,'1/20']\" for (x,y) offset.\nSpecial keywords: \"['minmax', '0max']\" and combinations.",
+        [-10, "[2, '1/20']", ["minmax", "0max"]]
+    ],
+    [
+        "muloffset",
+        "Multiplicative offset to data. Examples: \"0.01\" for y values, or\n\"[10, 1e2]\" for (x,y) multiplicative offsets",
+        [0.01, [10, "1e2"], [1, "1/20"]]
+    ],
+    ["== For specific curve types ==", "", []],
+    ["facecolor", "Color of \"fill\" Curve types. Examples:", ["r", [0.5, 0, 0]]],
+    [
+        "cmap",
+        "Colormap, for Curve types which accept this keyword such as scatter). Examples:\n\"afmhot\", \"inferno\", or \"[[0.91,0.25,1], [1.09,0.75,1], 'hls']\" (see Colorize options)",
+        ["plasma", "viridis", [[0.91, 0.25, 1], [1.09, 0.75, 1], "hls"]]
+    ],
+    ["vminmax", "Bounds values for cmap. Examples:", [[0, 7], [3, ""]]],
+    [
+        "colorbar",
+        "If not empty display a colorbar according to keyword cmap. Example: \"1\",\n\"{'ticks': [-1, 0, 2]}\" or \"{'orientation':'horizontal', 'adjust':[0.1, 0.1, 0.7, 0.1]}\",\nor \"{'label': 'Some text', 'adjust': [1.01, 0, 0.05, 1, 'ax']}\"",
+        [
+            1,
+            {"ticks": [-1, 0, 2]},
+            {"orientation": "horizontal", "adjust": [0.1, 0.1, 0.7, 0.1]},
+            {"label": "Some text", "adjust": [1.01, 0, 0.05, 1, "ax"]}
+        ]
+    ],
+    ["xerr", "x error for curve type \"errorbar\". Example:", [1, 5]],
+    ["yerr", "y error for curve type \"errorbar\". Example:", [1, 5]],
+    ["== Misc ==", "", []],
+    ["labelhide", "Use 1 or True to hide label in the graph", [1]],
+    ["legend", "Deprecated. Curve label in legend.", []],
+    ["ax_twinx", "Plot curve on secondary axis. Example:", [1]],
+    ["ax_twiny", "Plot curve on secondary axis. Example:", [1]],
+    ["linestyle", "Use \"none\" to hide a Curve", ["None"]],
+    [
+        "['key', value]",
+        "User-defined keyword-values pairs. Will be fed to the plotting method if possible.\nExamples: \"['fillstyle', 'top']\" for half-filled markers, \"['comment', 'a valuable info']",
+        [["fillstyle", "top"], ["comment", "a valuable info"]]
+    ]
+]

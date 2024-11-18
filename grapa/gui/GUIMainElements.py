@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics,
-Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 import sys
 import os
@@ -10,6 +9,8 @@ import copy
 import numpy as np
 import tkinter as tk
 from tkinter import ttk
+from _tkinter import TclError
+import warnings
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -52,7 +53,7 @@ from grapa.gui.GUImisc import (
 from grapa.gui.createToolTip import CreateToolTip
 from grapa.gui.GUIgraphManager import GraphsTabManager
 from grapa.gui.GUIFuncGUI import FuncGUI
-from grapa.interface_openbis import GrapaOpenbis
+from grapa.gui.interface_openbis import GrapaOpenbis
 
 
 class GUIFrameCanvasGraph:
@@ -75,9 +76,14 @@ class GUIFrameCanvasGraph:
 
     def updateUI(self):
         """Update plot on canvas"""
-        self.fig.clear()
-        self.canvas.draw()
-        # to update before the updateUI() call
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Attempt to set non-positive")
+            self.fig.clear()
+            self.canvas.draw()
+        tabproperties = self.app.getTabProperties()
+        # background color
+        self.setCanvasBackground()
+        # screen DPI: to update before the updateUI() call
         self.fig.set_dpi(self.app.getTabProperties()["dpi"])
         # update graph
         #        try:
@@ -85,6 +91,7 @@ class GUIFrameCanvasGraph:
         while isinstance(ax, (list, np.ndarray)) and len(ax) > 0:
             ax = ax[-1]
         self.fig, self.ax = fig, ax
+
         # except ValueError as e:
         #     print('Exception ValueError during GUI plot canvas update.')
         #     print('Exception', type(e), e)
@@ -128,7 +135,6 @@ class GUIFrameCanvasGraph:
         # canvassize = [1.03*defsize[0]*dpi, 1.03*defsize[1]*dpi]
         self.fig = plt.figure(figsize=figsize, dpi=dpi)
         self.canvas = FigureCanvasTkAgg(self.fig, master=frame)
-        self.canvas.get_tk_widget().configure(background="white")
         # possibly also configure width=canvassize[0], height=canvassize[1]
         self.canvas.get_tk_widget().pack(
             side="top", anchor="w", fill=tk.BOTH, expand=True
@@ -139,6 +145,24 @@ class GUIFrameCanvasGraph:
         except AttributeError:
             pass  # changes in later versions of FigureCanvasTkAgg
         self.ax = self.fig.add_subplot(111)
+
+    def setCanvasBackground(self):
+        # check value exists
+        color = "white"
+        try:
+            color = self.app.getTabProperties()["backgroundcolor"]
+        except KeyError:
+            self.app.getTabProperties(backgroundcolor=color)
+        # set value
+        try:
+            self.canvas.get_tk_widget().configure(background=color)
+        except TclError as e:
+            msg = (
+                "Illegal color name. Please use either tkinter color names, or RGB "
+                "as #90ee90. Catched Exception {}: {}"
+            )
+            print(msg.format(type(e), e))
+            self.canvas.get_tk_widget().configure(background="white")
 
     def updateUponResizeWindow(self, *args):
         # updates only when main application is ready
@@ -221,7 +245,10 @@ class GUIFrameCentralOptions:
         self.varXlim1.set(varToStr(xlim[1]))
         self.varYlim0.set(varToStr(ylim[0]))
         self.varYlim1.set(varToStr(ylim[1]))
-        self._varDPI.set(self.app.getTabProperties()["dpi"])
+        # tabs properties DPI and backgroundcolor
+        tabproperties = self.app.getTabProperties()
+        self._varDPI.set(tabproperties["dpi"])
+        self._varBGC.set(tabproperties["backgroundcolor"])
 
     def createWidgets(self, frame, canvas):
         # toolbar
@@ -278,14 +305,28 @@ class GUIFrameCentralOptions:
             frame, text="Annotations, legend and titles", command=self.popupAnnotations
         )
         btn.pack(side="left", anchor="n", pady=5)
+        # DPI, background color
+        fr = tk.Frame(frame)
+        fr.pack(side="right", anchor="center")
+        self.cw_line1_right(fr)
+
+    def cw_line1_right(self, frame):
+        # background color
+        lbl = tk.Label(frame, text="Background")
+        lbl.pack(side="left")
+        colorlist = ["white", "black", "grey15", "#90ee90"]
+        self._varBGC = ComboboxVar(frame, colorlist, "white", width=7)
+        self._varBGC.pack(side="left")
+        self._varBGC.bind("<Return>", lambda event: self.setBGColorFromEntry())
         # screen dpi
-        btn = tk.Button(frame, text="Save", command=self.setScreenDPIFromEntry)
-        btn.pack(side="right", anchor="n", pady=5)
+        lbl = tk.Label(frame, text="  Screen dpi")
+        lbl.pack(side="left")
         self._varDPI = EntryVar(frame, value=self.app.DEFAULT_SCREENDPI, width=5)
-        self._varDPI.pack(side="right", anchor="n", pady=8, padx=5)
+        self._varDPI.pack(side="left", padx=5)
         self._varDPI.bind("<Return>", lambda event: self.setScreenDPIFromEntry())
-        lbl = tk.Label(frame, text="Screen dpi")
-        lbl.pack(side="right", anchor="n", pady=7)
+        # button
+        btn = tk.Button(frame, text="Save", command=self.setScreenBGColorDPIFromEntry)
+        btn.pack(side="left")
 
     def cw_line2(self, frame):
         self.varXlabel = EntryVar(frame, "", width=20)
@@ -294,21 +335,21 @@ class GUIFrameCentralOptions:
         self.varXlim1 = EntryVar(frame, "", width=8)
         self.varYlim0 = EntryVar(frame, "", width=8)
         self.varYlim1 = EntryVar(frame, "", width=8)
-        tk.Label(frame, text="xlabel:").pack(side="left", anchor="c")
-        self.varXlabel.pack(side="left", anchor="c")
-        tk.Label(frame, text="   ylabel:").pack(side="left", anchor="c")
-        self.varYlabel.pack(side="left", anchor="c")
-        tk.Label(frame, text="   xlim:").pack(side="left", anchor="c")
-        self.varXlim0.pack(side="left", anchor="c")
-        tk.Label(frame, text="to").pack(side="left", anchor="c")
-        self.varXlim1.pack(side="left", anchor="c")
-        tk.Label(frame, text="   ylim:").pack(side="left", anchor="c")
-        self.varYlim0.pack(side="left", anchor="c")
-        tk.Label(frame, text="to").pack(side="left", anchor="c")
-        self.varYlim1.pack(side="left", anchor="c")
+        tk.Label(frame, text="xlabel:").pack(side="left", anchor="center")
+        self.varXlabel.pack(side="left", anchor="center")
+        tk.Label(frame, text="   ylabel:").pack(side="left", anchor="center")
+        self.varYlabel.pack(side="left", anchor="center")
+        tk.Label(frame, text="   xlim:").pack(side="left", anchor="center")
+        self.varXlim0.pack(side="left", anchor="center")
+        tk.Label(frame, text="to").pack(side="left", anchor="center")
+        self.varXlim1.pack(side="left", anchor="center")
+        tk.Label(frame, text="   ylim:").pack(side="left", anchor="center")
+        self.varYlim0.pack(side="left", anchor="center")
+        tk.Label(frame, text="to").pack(side="left", anchor="center")
+        self.varYlim1.pack(side="left", anchor="center")
         tk.Label(frame, text="   ").pack(side="left")
         btn = tk.Button(frame, text="Save", command=self.updateAttributes)
-        btn.pack(side="left", anchor="c")
+        btn.pack(side="left", anchor="center")
         tk.Label(frame, text="   ").pack(side="left")
         self.varXlabel.bind("<Return>", lambda event: self.updateAttributes())
         self.varYlabel.bind("<Return>", lambda event: self.updateAttributes())
@@ -317,7 +358,7 @@ class GUIFrameCentralOptions:
         self.varYlim0.bind("<Return>", lambda event: self.updateAttributes())
         self.varYlim1.bind("<Return>", lambda event: self.updateAttributes())
         bt = tk.Button(frame, text="Data editor", command=self.popupDataEditor)
-        bt.pack(side="right", anchor="c")
+        bt.pack(side="right", anchor="center")
 
     def _setLimitsSubplots(self):
         self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
@@ -337,16 +378,18 @@ class GUIFrameCentralOptions:
         self.app.callGraphMethod("update", {"typeplot": new})
         self.app.updateUI()
 
-    def setScreenDPIFromEntry(self):
+    def setScreenDPIFromEntry(self, updateUI=True):
         """Updates the DPI according to the value stored in the GUI Entry"""
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
+        if updateUI:
+            self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
         try:
             self.app.getTabProperties(dpi=float(self._varDPI.get()))
             self.checkValidScreenDPI()
         except Exception:  # float() conversion may have failed
             pass
-        if self.app.initiated:
-            self.app.updateUI()
+        if updateUI:
+            if self.app.initiated:
+                self.app.updateUI()
 
     def checkValidScreenDPI(self):
         """Checks that the DPI value stored in tab is reasonable"""
@@ -388,6 +431,22 @@ class GUIFrameCentralOptions:
             self.app.getTabProperties(dpi=new)
             self.app.blinkWidget(self._varDPI, 5)
             self._varDPI.set(new)  # a bit useless, done at next updateUI...
+
+    def setBGColorFromEntry(self, updateUI=True):
+        if updateUI:
+            self.app.storeSelectedCurves()  # before modifications, to prepare updateUI
+        value = str(self._varBGC.get())
+        self.app.getTabProperties(backgroundcolor=value)
+        if updateUI:
+            if self.app.initiated:
+                self.app.updateUI()
+
+    def setScreenBGColorDPIFromEntry(self):
+        self.app.storeSelectedCurves()  # before modifications, to prepare updateUI
+        self.setBGColorFromEntry(updateUI=False)
+        self.setScreenDPIFromEntry(updateUI=False)
+        if self.app.initiated:
+            self.app.updateUI()
 
     def updateDataTransform(self, new):
         [idx, display, alter, typePlot] = self.identifyDataTransform()
@@ -506,18 +565,18 @@ class GUIFrameDataPicker:
         self.cw_datapickerDown(fr1)
 
     def cw_datapickerUp(self, frame):
-        tk.Label(frame, text="Click on graph").pack(side="left", anchor="c")
+        tk.Label(frame, text="Click on graph").pack(side="left", anchor="center")
         tk.Label(frame, text="x").pack(side="left", anchor="c")
         self.varX = EntryVar(frame, 0, width=10, varType=tk.DoubleVar)
-        self.varX.pack(side="left", anchor="c")
-        tk.Label(frame, text="y").pack(side="left", anchor="c")
+        self.varX.pack(side="left", anchor="center")
+        tk.Label(frame, text="y").pack(side="left", anchor="center")
         self.varY = EntryVar(frame, 0, width=10, varType=tk.DoubleVar)
-        self.varY.pack(side="left", anchor="c")
+        self.varY.pack(side="left", anchor="center")
         self.varRestrict = CheckbuttonVar(frame, "Restrict to data", False)
-        self.varRestrict.pack(side="left", anchor="c")
-        tk.Label(frame, text="curve").pack(side="left", anchor="c")
+        self.varRestrict.pack(side="left", anchor="center")
+        tk.Label(frame, text="curve").pack(side="left", anchor="center")
         self.varCurve = OptionMenuVar(frame, [0], 0, varType=tk.IntVar)
-        self.varCurve.pack(side="left", anchor="c")
+        self.varCurve.pack(side="left", anchor="center")
         try:
             self.varCurve.var.trace_add("write", self.selectCurve)
         except AttributeError:  # IntVar has no attribute 'trace_add'
@@ -525,24 +584,24 @@ class GUIFrameDataPicker:
         self.varCrosshair = CheckbuttonVar(
             frame, "Crosshair", False, command=self.updateCrosshair
         )
-        self.varCrosshair.pack(side="left", anchor="c")
+        self.varCrosshair.pack(side="left", anchor="center")
 
     def cw_datapickerDown(self, frame):
         btn0 = tk.Button(
             frame, text="Create text with coordinates", command=self.createTextbox
         )
-        btn0.pack(side="left", anchor="c")
+        btn0.pack(side="left", anchor="center")
         tk.Label(frame, text=" or ").pack(side="left")
         btn1 = tk.Button(frame, text="Save point", command=self.savePoint)
-        btn1.pack(side="left", anchor="c")
+        btn1.pack(side="left", anchor="center")
         CreateToolTip(btn1, "Ctrl+M")
         self.varIfTransform = CheckbuttonVar(frame, "screen data", True)
-        self.varIfTransform.pack(side="left", anchor="c")
+        self.varIfTransform.pack(side="left", anchor="center")
         self.varIfCurveSpec = CheckbuttonVar(frame, "Curve specific", False)
-        self.varIfCurveSpec.pack(side="left", anchor="c")
+        self.varIfCurveSpec.pack(side="left", anchor="center")
         # explanatory text for checkbox
         self.varExplain = LabelVar(frame, "")
-        self.varExplain.pack(side="left", anchor="c")
+        self.varExplain.pack(side="left", anchor="center")
 
     def selectCurve(self, *args):
         """Called when user selects another Curve in data picker"""
@@ -997,6 +1056,14 @@ class GUIFrameMenuMain:
         # Cf
         btn0 = tk.Button(frame, text="C-f (1 folder)", command=self.scriptCf)
         btn0.pack(side="top", anchor="w", padx=10)
+        # CVf-T
+        btn = tk.Button(frame, text="CVf-T maps(1 folder)", command=self.scriptCVfT)
+        btn.pack(side="top", anchor="w", padx=10)
+        tooltiplbl = (
+            "Parse folder and 1 subfolder level for Cf files according to V "
+            "and T, computes CVf-T maps as well as CV-T and Cf-T plots"
+        )
+        CreateToolTip(btn, tooltiplbl)
         # Jsc-Voc
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
@@ -1180,8 +1247,11 @@ class GUIFrameMenuMain:
         if file is not None and file != "":
             print("...creating sample maps...")
             ngkw = self.app.newGraphKwargs
-            filelist = processSampleCellsMap(file, newGraphKwargs=ngkw)
-            if len(filelist) > 0:
+            filelist, fileout = processSampleCellsMap(file, newGraphKwargs=ngkw)
+            if len(fileout) > 0:
+                graph = Graph(fileout[0])
+                self.app.openFile(graph)
+            elif len(filelist) > 0:
                 graph = Graph(filelist[-1])
                 self.app.openFile(graph)
 
@@ -1232,6 +1302,16 @@ class GUIFrameMenuMain:
         if folder is not None and folder != "":
             ngkw = self.app.newGraphKwargs
             graph = script_processCf(folder, newGraphKwargs=ngkw)
+            self.app.openFile(graph)
+
+    def scriptCVfT(self):
+        """Script Cf"""
+        from grapa.scripts.script_processCVfT import script_process_cvft
+
+        folder = self.app.promptFolder()
+        if folder is not None and folder != "":
+            ngkw = self.app.newGraphKwargs
+            graph = script_process_cvft(folder, newGraphKwargs=ngkw)
             self.app.openFile(graph)
 
     def scriptCorrelations(self):
@@ -1404,7 +1484,7 @@ class GUIFrameTemplateColorize:
                 if not isinstance(elem, str):
                     toStr = [str(nb if not nb.is_integer() else int(nb)) for nb in elem]
                     lst.append("[" + ",".join(toStr) + "]")
-                    print("_setColChoice, elem,", elem)
+                    # print("_setColChoice, elem,", elem)
                 else:
                     lst.append("'" + elem + "'")
             scale = "[" + ", ".join(lst) + "]"
@@ -1461,14 +1541,21 @@ class GUIFrameActionsGeneric:
 
     def cw_reorder(self, frame):
         tk.Label(frame, text="Reorder").pack(side="left")
-        b0 = tk.Button(frame, text="\u21E7", command=self.shiftCurveTop)
+        b0 = tk.Button(frame, text=" \u21E7 ", command=self.shiftCurveTop)
         b0.pack(side="left", padx=1)
-        b1 = tk.Button(frame, text="\u21D1 Up", command=self.shiftCurveUp)
+        b1 = tk.Button(frame, text=" \u21D1 ", command=self.shiftCurveUp)
         b1.pack(side="left", padx=1)
-        b2 = tk.Button(frame, text="\u21D3 Down", command=self.shiftCurveDown)
+        b2 = tk.Button(frame, text=" \u21F5 ", command=self.shiftCurveReverse)
         b2.pack(side="left", padx=1)
-        b3 = tk.Button(frame, text="\u21E9", command=self.shiftCurveBottom)
+        b3 = tk.Button(frame, text=" \u21D3 ", command=self.shiftCurveDown)
         b3.pack(side="left", padx=1)
+        b4 = tk.Button(frame, text=" \u21E9 ", command=self.shiftCurveBottom)
+        b4.pack(side="left", padx=1)
+        CreateToolTip(b0, "Selection to Top")
+        CreateToolTip(b1, "Selection Up")
+        CreateToolTip(b2, "Reverse all Curves")
+        CreateToolTip(b3, "Selection Down")
+        CreateToolTip(b4, "Selection Bottom")
 
     def cw_delete(self, frame):
         tk.Label(frame, text="Delete Curve").pack(side="left")
@@ -1612,6 +1699,10 @@ class GUIFrameActionsGeneric:
 
     def shiftCurveBottom(self):
         self.shiftCurve(len(self.app.graph()) - 1, relative=False)
+
+    def shiftCurveReverse(self):
+        self.app.graph().reverseCurves()
+        self.app.updateUI()
 
     def deleteCurve(self):
         """Delete the currently selected curve."""
@@ -1843,9 +1934,9 @@ class GUIFramePropertyEditor:
         """triggers by observable when user selects a property in the Tree"""
         # print('imposekey curve', curve, 'key', key)
         if curve == -1:
-            keyList = Graph.graphInfoKeys
+            keyList = Graph.KEYWORDS_GRAPH["keys"]
         else:
-            keyList = Graph.dataInfoKeysGraph
+            keyList = Graph.KEYWORDS_CURVE["keys"]
         self.varKey.resetValues(keyList)
         if key != "":
             self.varKey.set(key, force=True)
@@ -1864,20 +1955,16 @@ class GUIFramePropertyEditor:
         else:
             curve = curves[0]
         if curve == -1:
-            keyList = Graph.graphInfoKeys
-            example = Graph.graphInfoKeysExample
-            exaList = Graph.graphInfoKeysExalist
+            keywords = Graph.KEYWORDS_GRAPH
             currentVal = self.app.graph().attr(key)
         else:
-            keyList = Graph.dataInfoKeysGraph
-            example = Graph.dataInfoKeysGraphExample
-            exaList = Graph.dataInfoKeysGraphExalist
+            keywords = Graph.KEYWORDS_CURVE
             currentVal = self.app.graph()[curve].attr(key)
         try:
-            # set example, and populate Combobox values field
-            i = keyList.index(key)
-            self.varValue["values"] = exaList[i]
-            self.varExample.set(example[i])
+            # set text with examples, and populate Combobox values field
+            i = keywords["keys"].index(key)
+            self.varValue["values"] = [str(v) for v in keywords["guiexamples"][i]]
+            self.varExample.set(keywords["guitexts"][i])
         except ValueError:
             self.varValue["values"] = []
             self.varExample.set("")

@@ -3,12 +3,13 @@
 Created on Sun Oct 29 14:19:52 2017
 
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
 from copy import deepcopy
 import numpy as np
+import matplotlib
 
 from grapa.graph import Graph
 from grapa.curve import Curve
@@ -115,8 +116,12 @@ class Curve_Image(Curve):
                 ]
             )
         else:
-            msg = "(extent not active if first row, column as coordinates)"
+            msg = "extent: not active if first row, column as coordinates"
             out.append([None, msg, [], []])
+        # colorscale
+        at = ["colorbar"]
+        out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at}))
+        out[-1].append(at[0], self.attr(at[0]), options={"width": 50})
         # colormap
         attxt = ["cmap (ignored if color image)", "vmin", "vmax"]
         at = [a.split(" ")[0] for a in attxt]
@@ -144,9 +149,27 @@ class Curve_Image(Curve):
                 options={"field": "Combobox", "values": interpolation},
             )
         else:  # contour, contourf
-            at = ["levels"]
+            at = ["levels", "extend", "norm"]
+            optse = {"field": "Combobox", "values": ["neither", "both", "min", "max"]}
+            optsn = {
+                "field": "Combobox",
+                "values": list(matplotlib.scale.get_scale_names()),
+            }
             out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at}))
             out[-1].append("levels (list of values)", self.attr(at[0]))
+            out[-1].append("extend", self.attr(at[1]), options=optse)
+            out[-1].append(", norm", self.attr(at[2]), options=optsn)
+
+            levels = self.attr("levels")
+            if len(levels) == 0:
+                levels = [np.min(self.x()), np.max(self.y())]
+            out.append(FuncGUI(self.updateLevels, "Set", {}))
+            choice = ["arange", "linspace", "logspace", "geomspace"]
+            opts = {"field": "Combobox", "values": choice}
+            out[-1].append("levels:", choice[1], options=opts)
+            out[-1].append("start", np.min(levels))
+            out[-1].append("stop", np.max(levels))
+            out[-1].append("num or step", len(levels))
 
         # convert data matrix to 3 column xyz and vice-versa
         if graph is not None:
@@ -175,6 +198,32 @@ class Curve_Image(Curve):
             if a != "":
                 flag = True
         self.update({"extent": (list(args) if flag else "")})
+
+    def updateLevels(self, typ, start, stop, step):
+        try:
+            if typ == "arange":
+                levels = np.arange(start, stop, step)
+            elif typ == "linspace":
+                levels = np.linspace(start, stop, int(step))
+            elif typ == "logspace":
+                levels = np.logspace(start, stop, int(step))
+            elif typ == "geomspace":
+                levels = np.geomspace(start, stop, int(step))
+            else:
+                msg = "Curve image updateLevels, input value not recognized '{}'."
+                return msg.format(typ)
+        except ValueError as e:
+            print("Exception", type(e), e)
+            return False
+        if len(levels) == 0:
+            levels = ""
+        if len(levels) > 1000:
+            msg = (
+                "Curve image updateLevels, grapa won't generate that many points ({})."
+            )
+            return msg.format(len(levels))
+        self.update({"levels": list(levels)})
+        return True
 
     def convert_matrix_xyz(self, *args, graph=None):
         """Converts a 2D data meshgrid Z[x, y] into 3 columns X, Y, Z"""
@@ -220,11 +269,17 @@ class Curve_Image(Curve):
         def get_z(data, x, y):
             ind = (data[0, :] == x) * (data[1, :] == y)
             if sum(ind) == 0:
-                msg = "Warning xyz_to_x_y_z: Missing datapoint, must be regular mesh e.g. meshgrid. Coordinates {}, {}."
+                msg = (
+                    "Warning xyz_to_x_y_z: Missing datapoint, must be regular mesh "
+                    "e.g. meshgrid. Coordinates {}, {}."
+                )
                 print(msg.format(x, y))
                 return np.nan
             if sum(ind) > 1:
-                msg = "Warning xyz_to_x_y_z: Duplicate datapoint, must be regular mesh e.g. meshgrid. Coordinates {}, {}."
+                msg = (
+                    "Warning xyz_to_x_y_z: Duplicate datapoint, must be regular "
+                    "mesh e.g. meshgrid. Coordinates {}, {}."
+                )
                 print(msg.format(x, y))
             return data[2, ind][0]
 
@@ -264,7 +319,10 @@ class Curve_Image(Curve):
                 start_i = i
                 break
         if start_i is None:
-            msg = "ERROR Curve Image aggregate_samex_into_matrix: cannot find curve in provided graph."
+            msg = (
+                "ERROR Curve Image aggregate_samex_into_matrix: cannot find curve "
+                "in provided graph."
+            )
             print(msg)
             raise RuntimeError
         # aggregate data
@@ -287,13 +345,12 @@ class Curve_Image(Curve):
             if graph[j].isHidden():
                 numcurves += 1
                 continue
-            # test equal accepting nan, w/o using equal_nan=True for retrocompatilility
+            # test equal accepting nan, w/o using equal_nan=True for retro compatibility
             test = graph[j].x_offsets(alter=alter[0])
             if len(x) != len(test):
                 break
             mask = ~(np.isnan(x) * np.isnan(test))
             if np.array_equal(x[mask], test[mask]):
-                # if np.array_equal(x, graph[j].x_offsets(alter=alter[0]), equal_nan=True):
                 data.append(graph[j].y_offsets(alter=alter[1]))
                 numcurves += 1
             else:
@@ -353,7 +410,10 @@ class Curve_Image(Curve):
                     try:
                         from pillow import Image as PILimage
                     except ImportError:
-                        msg = "Curve Image: cannot import either PIL or pillow. Cannot open image."
+                        msg = (
+                            "Curve Image: cannot import either PIL or pillow. "
+                            "Cannot open image."
+                        )
                         print(msg)
                         return data, ignoreNext, X, Y
                 data = PILimage.open(datafile)
@@ -387,7 +447,10 @@ class Curve_Image(Curve):
                     X, Y, data = self.xyz_to_x_y_z(data)
                     ignoreNext = 1  # only consider 3 columns (2 Curve), not matrix
                 else:
-                    msg = "WARNING Curve Image: data as xyz does not contain the required 3 columns."
+                    msg = (
+                        "WARNING Curve Image: data as xyz does not contain the "
+                        "required 3 columns."
+                    )
                     print(msg)
             data, X, Y = self.process_matrix(data, X, Y, xy1rowcol, transpose, rotate)
         return data, ignoreNext, X, Y
@@ -404,5 +467,6 @@ class Curve_Image(Curve):
         # extent
         # cmap vmin xmax
         # aspect ratio interpolation
+        # levels, extend
         # convert
         return True

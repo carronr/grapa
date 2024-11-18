@@ -3,7 +3,7 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 
@@ -20,13 +20,11 @@ from grapa.graphIO import GraphIO
 from grapa.curve import Curve
 from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, smooth
 from grapa.gui.GUIFuncGUI import FuncGUI
+from grapa.constants import CST
 
 
 class CurveJV(Curve):
-    q = 1.60217657e-19  # [C]
-    k = 1.38e-23  # [J K-1]
     defaultIllumPower = 1000  # W/m2
-    TEMPERATURE_STC = 273.15 + 25  # K
 
     DARK = "dark"
     ILLUM = "illuminated"
@@ -88,7 +86,7 @@ class CurveJV(Curve):
         if is_number(self.attr("Temperature")):
             self.T = self.attr("Temperature")
         if self.attr("temperature") == "":
-            self.update({"temperature": self.TEMPERATURE_STC})
+            self.update({"temperature": float(CST.STC_T)})
 
         if self.attr("_fitDiodeWeight") == "":
             self.update({"_fitDiodeWeight": 5})
@@ -361,6 +359,7 @@ class CurveJV(Curve):
 
     def darkOrIllum(self, ifText=False, forceCalc=False, ifJscBelow=0.1):
         if self.attr("darkOrIllum", "") == "" or forceCalc:
+            ifDark = False  # to be set later on
             sure = False
             name = self.attr("filename").split("/")[-1]
             split = refindall("([dD][aA][rR][kK])", name)
@@ -448,7 +447,7 @@ class CurveJV(Curve):
     # d1	0.66	18.6	72.3	8.9	0.57	0.53	16.8	8.9	9710	1.1	11.07.2016 16:02:23	25	1			G:\CIGS\RC\_data\JV\Oct1048_ref\I-V_Oct1048ref_d1_01.txt
     def printShort(self, header=False):
         if header:
-            out = "Cell\tVoc [V]\tJsc [mA/cm2]\tFF [%]\tEff. [%]\tArea [cm-2]\tVmpp [V]\tJmpp [mA/cm2]\tPmpp [mW/cm2]\tRp [Ohmcm2]\tRs [Ohmcm2]\tn\tJ0 [A/cm2]\tTemperature [K]\tAcquis. T [°C]\tFilename\tRemarks\n"
+            out = "Cell\tVoc [V]\tJsc [mA/cm2]\tFF [%]\tEff. [%]\tArea [cm-2]\tVmpp [V]\tJmpp [mA/cm2]\tPmpp [mW/cm2]\tRp [Ohmcm2]\tRs [Ohmcm2]\tn\tJ0 [A/cm2]\tRsquare diode region\tTemperature [K]\tAcquis. T [°C]\tRp acquis. software [Ohmcm2]\tRs acquis. software [Ohmcm2]\tFilename\tRemarks\n"
             return out
 
         def st(st, precis):
@@ -456,7 +455,8 @@ class CurveJV(Curve):
             # +1: hacked my own function to increase precision for every parameter
 
         attr = self.getAttributes()
-        popt = self.attr("diodeFit", [np.nan] * 5)
+        popt = self.attr("diodefit", [np.nan] * 5)
+        rsquare_diode = self.attr("_fitdiode_rsquare_diode", np.nan)
 
         msg = "{}\t{}\t{}\t{}\t{}\t{}"
         out = msg.format(
@@ -476,9 +476,10 @@ class CurveJV(Curve):
             st(popt[3], 2),
             st(popt[0], 2),
         )
-        msg = "\t{}\t{}\t{}\t{}\t"
+        msg = "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t"
         out += msg.format(
             "{:.2e}".format(0.001 * popt[2]),
+            st(rsquare_diode, 6),
             st(self.T, 1),
             st(
                 attr["acquis soft temperature"]
@@ -486,6 +487,8 @@ class CurveJV(Curve):
                 else np.nan,
                 1,
             ),
+            st(attr["acquis soft rp"] if "acquis soft rp" in attr else np.nan, 1),
+            st(attr["acquis soft rs"] if "acquis soft rs" in attr else np.nan, 1),
             attr["filename"],
         )
         out += self.attr("_fitDiodeWarning")  # will be '' if no warning issued.
@@ -597,7 +600,7 @@ class CurveJV(Curve):
         return np.log(np.abs(self.func_diodeIdeal(V, n, Jl, J0)))
 
     def func_diodeIdeal(self, V, n, Jl, J0):
-        return -(Jl - J0 * (np.exp(self.q / (n * self.k * self.T) * V) - 1))
+        return -(Jl - J0 * (np.exp(CST.q / (n * CST.kb * self.T) * V) - 1))
 
     def fit_func_diodeResistors_AbsLog(
         self, V, logJ, n, Jl, J0, Rs, Rp, Vshift=0, sigma=[]
@@ -610,7 +613,7 @@ class CurveJV(Curve):
         # decoupling the effect of n and J0 in the fit function
         # Vshift is where slope of log(V) is highest
         # Change also paramettrization of Rp to get values closer to 1
-        J0 = J0 * (np.exp(self.q * Vshift / (n * self.k * self.T)))
+        J0 = J0 * (np.exp(CST.q * Vshift / (n * CST.kb * self.T)))
         Rp = np.log10(Rp)
         # Fit with n, J0, Rs, Rp
         p0 = np.array([n, J0, Rs, Rp])
@@ -622,7 +625,7 @@ class CurveJV(Curve):
         # restore inital problem parametrization
         Rp = np.power(10, np.abs(Rp))
         Rs = np.abs(Rs)
-        J0 = np.abs(J0) / (np.exp(self.q * Vshift / (n * self.k * self.T)))
+        J0 = np.abs(J0) / (np.exp(CST.q * Vshift / (n * CST.kb * self.T)))
         # calculation of Jl
         Jsc = self.attr("Jsc") if self.attr("Jsc") != "" else 0
         Jl = self.JlSuchAsJ0VJsc(Jsc, n, J0, Rs, Rp)
@@ -631,14 +634,14 @@ class CurveJV(Curve):
 
     def func_diodeResistorsAbsLog10_modParam(self, V, n, Jl, J0, Rs, Rp):
         Vshift = self.fitFixPar["Vshift"]
-        J0 = J0 / (np.exp(self.q * Vshift / (n * self.k * self.T)))
+        J0 = J0 / (np.exp(CST.q * Vshift / (n * CST.kb * self.T)))
         Rp = np.power(10, Rp)
         return np.log10(np.abs(self.func_diodeResistors(V, n, Jl, J0, Rs, Rp)))
 
     def func_diodeResistorsAbsLog10_modParam_red(self, V, n, J0, Rs, Rp):
         Vshift = self.fitFixPar["Vshift"]
         Jl = self.fitFixPar["Jl"]
-        J0 = np.abs(J0) / (np.exp(self.q * Vshift / (n * self.k * self.T)))
+        J0 = np.abs(J0) / (np.exp(CST.q * Vshift / (n * CST.kb * self.T)))
         Rp = np.power(10, Rp)
         return np.log10(np.abs(self.func_diodeResistors(V, n, Jl, J0, Rs, Rp)))
 
@@ -657,7 +660,7 @@ class CurveJV(Curve):
 
     def JlSuchAsJ0VJsc(self, Jsc, n, J0, Rs, Rp):
         Jl = (
-            J0 * (np.exp(self.q / (n * self.k * self.T) * (-Jsc) * Rs) - 1)
+            J0 * (np.exp(CST.q / (n * CST.kb * self.T) * (-Jsc) * Rs) - 1)
             + ((-Jsc) * Rs) / Rp
         )
         return Jl
@@ -680,7 +683,7 @@ class CurveJV(Curve):
             # probe different values of J, with corresponding/unique value of V
             out = -J - (
                 Jl
-                - J0 * (np.exp(self.q / (n * self.k * T) * (V + (J - Jsc) * Rs)) - 1)
+                - J0 * (np.exp(CST.q / (n * CST.kb * T) * (V + (J - Jsc) * Rs)) - 1)
                 - (V + (J - Jsc) * Rs) / Rp
             )
             if np.isinf(out).any():  # do not accept inf values
@@ -770,14 +773,14 @@ class CurveJV(Curve):
         Rp = self.getAttribute("Rp")  # Ohm/cm2
         # calculation of n. Starting value between 1 and 2 (* maxV to fit modules)
         maxV = max(1, np.max(V))
-        n = self.q / (self.k * self.T * max(0.001, maxdlogJdV)) * 0.75
+        n = CST.q / (CST.kb * self.T * max(0.001, maxdlogJdV)) * 0.75
         n = min(2 * maxV, max(1, n))
         #        Rs = dlogJdV[-1]*0.05  # Ohm/cm2 # rough approximetion, only temporary for I0 estimation! -> not close enough to reality
         Rs = 0.5  # start with a low value
         # J0: assume Jsc=0, invert diode equation
         i = idx_maxdlogJdV
         J0_init = np.abs(Jl - J[i] - V[i] / (Rp / 1000)) / (
-            np.exp(self.q / (n * self.k * self.T) * (V[i] + J[i] * (-Rs / 1000))) - 1
+            np.exp(CST.q / (n * CST.kb * self.T) * (V[i] + J[i] * (-Rs / 1000))) - 1
         )
         if J0_init == 0:  # must prove a sensical starting value
             J0_init = 1e-5
@@ -787,7 +790,7 @@ class CurveJV(Curve):
             -1000
             * 1
             / J[-2]
-            * (n * self.k * self.T / self.q * np.log(1 + (J[-2] - Jl) / J0) - V[-2])
+            * (n * CST.kb * self.T / CST.q * np.log(1 + (J[-2] - Jl) / J0) - V[-2])
         )  # in front for sign convention+units : -1/1000
         # without Rp. normally good enough Rs_ = -1000 * 1/J[-2] * (n*self.k*self.T/self.q * np.log(1 + (J[-2]-Jl+V[-2]/Rp*1000)/J0) - V[-2]) # in front for sign convention+units : -1/1000
         if dlogJdV[-1] > dlogJdV[-2]:
@@ -853,6 +856,11 @@ class CurveJV(Curve):
         sqResiduals = (JfitLogAbs - JLogAbs) ** 2
         self.diodeFitCheckQuality(sqResiduals[idx_DiodeRegion])
 
+        ss_res = np.sum(sqResiduals[idx_DiodeRegion])
+        JLogAbs_avg = np.average(JLogAbs[idx_DiodeRegion])
+        ss_tot = np.sum((JLogAbs[idx_DiodeRegion] - JLogAbs_avg) ** 2)
+        rsquare_diode = 1 - ss_res / ss_tot
+
         if not silent:
             print("fit diode + resistors")
             print("   param, inital, fit")
@@ -862,6 +870,7 @@ class CurveJV(Curve):
             print("   J0", J0 / 1000, popt[2] / 1000, "A/cm2")
             print("   Rs", Rs, popt[3], "Ohmcm2")
             print("   Rp", Rp, popt[4], "Ohmcm2")
+            print("   Rsquare diode region", rsquare_diode)
 
         if ifPlot:
             x = V
@@ -898,7 +907,7 @@ class CurveJV(Curve):
             ax.set_ylabel("Current density [" + units[1] + "]")
         #            ax.plot (V, sigma, 'c')
 
-        self.update({"diodeFit": popt})
+        self.update({"diodefit": popt, "_fitdiode_rsquare_diode": rsquare_diode})
         return popt
 
     def fit_resampleX(self, Vspacing):

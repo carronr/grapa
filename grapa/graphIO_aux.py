@@ -2,18 +2,51 @@
 """
 Created on Thu Nov  1 18:21:57 2018
 
-@author: Romain
+@author: Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 from copy import copy
 import numpy as np
 import warnings
+import matplotlib as mpl
 
-# with warnings.catch_warnings():
-#    warnings.simplefilter("ignore")
-# import matplotlib.pyplot as plt
 
-# from grapa.curve_inset import Curve_Inset
-# from grapa.curve_subplot import Curve_Subplot
+class SubplotsAdjuster:
+    @classmethod
+    def default(cls):
+        """Retrieves matplotlib default subplots_adjust parameters in rcParams"""
+        subplot_adjust = {}
+        for key in ["bottom", "left", "right", "top", "hspace", "wspace"]:
+            subplot_adjust.update({key: mpl.rcParams["figure.subplot." + key]})
+        return subplot_adjust
+
+    @classmethod
+    def merge(cls, default, spa_user, fig):
+        """
+        default: dict of default parameters
+        spa_user: dist of user-defined parameters
+        fig: either a figure, or a list or tuple of 2 elements 'figsize'
+        """
+        subplot_adjust = dict(default)
+        if spa_user != "":
+            if isinstance(spa_user, dict):
+                subplot_adjust.update(spa_user)
+            elif isinstance(spa_user, list):
+                # handles relative in given in absolute
+                if isinstance(spa_user[-1], str) and spa_user[-1] == "abs":
+                    del spa_user[-1]
+                    if hasattr(fig, "get_size_inches"):
+                        fs = fig.get_size_inches()
+                    else:
+                        fs = fig
+                    for i in range(len(spa_user)):
+                        spa_user[i] = spa_user[i] / fs[i % 2]
+                indic = ["left", "bottom", "right", "top", "wspace", "hspace"]
+                for i in range(min(len(spa_user), len(indic))):
+                    subplot_adjust.update({indic[i]: float(spa_user[i])})
+            else:
+                subplot_adjust.update({"bottom": float(spa_user)})
+        return subplot_adjust
 
 
 class ParserAxlines:
@@ -95,6 +128,135 @@ class ParserAxvline(ParserAxlines):
                         e,
                     )
         return True
+
+
+class ParserMisc:
+    @classmethod
+    def set_xyticklabels(cls, value, xyaxis):
+        """
+        Set ticks according to user wishes
+        xyaxis: e.g. ax.xaxis
+        """
+        # value = self.graphInfo["xtickslabels"]
+        # ensure proper formatting of input
+        if not isinstance(value, list):
+            value = [value, [], {}]
+        value = list(value)  # let us not modify input object
+        if len(value) == 0:
+            value.append(None)
+        if len(value) == 1:
+            value.append(None)
+        if len(value) == 2:
+            value.append({})
+        newticks = True
+        # actual work
+        ticksloc = value[0]
+        if not isinstance(ticksloc, list):
+            ticksloc = xyaxis.get_ticklocs()
+            newticks = False  # later will be set to existing values
+        labels = []
+        kw = {}
+        if value[1] is not None:
+            labels = list(value[1])
+        if isinstance(value[2], dict):
+            kw = dict(value[2])
+        if len(kw) > 0 and len(labels) != len(ticksloc):
+            # mandatory kw labels if provide keywords
+            if newticks:
+                xyaxis.set_ticks(ticksloc)
+            labels = [la.get_text() for la in xyaxis.get_ticklabels()]
+        if len(labels) == len(ticksloc):
+            kw.update({"labels": labels})
+        xyaxis.set_ticks(ticksloc, **kw)
+        return ticksloc, kw
+
+    @classmethod
+    def setAxisLabel(cls, method, label, graph):
+        out = {"size": False}
+        if isinstance(label, list) and len(label) == 2 and isinstance(label[-1], dict):
+            method(label[0], **label[-1])
+            if "size" in label[-1] or "fontsize" in label[-1]:
+                out["size"] = True
+        elif isinstance(label, list) and len(label) in [3, 4]:
+            lbl = graph.formatAxisLabel(label[0:3])
+            kwargs = label[-1] if isinstance(label[-1], dict) else {}
+            method(lbl, **kwargs)
+            if "size" in kwargs or "fontsize" in kwargs:
+                out["size"] = True
+        else:
+            method(label)
+        return out
+
+    @classmethod
+    def alterLim(cls, ax, lim, xory, alter, curvedummy):
+        limAuto = ax.get_xlim() if xory == "x" else ax.get_ylim()
+        limInput = [li if not isinstance(li, str) else np.inf for li in lim]
+        lim = list(limInput)
+        try:
+            if xory == "x":
+                fun = ax.set_xlim
+                lim = list(
+                    curvedummy.x(
+                        alter=alter[0],
+                        xyValue=[lim, [0] * len(lim)],
+                        errorIfxyMix=True,
+                        neutral=True,
+                    )
+                )
+            elif xory == "y":
+                fun = ax.set_ylim
+                lim = list(
+                    curvedummy.y(
+                        alter=alter[1],
+                        xyValue=[[0] * len(lim), lim],
+                        errorIfxyMix=True,
+                        neutral=True,
+                    )
+                )
+            else:
+                return False
+        except ValueError as e:
+            print("GraphIO set lim ValueError, abort.", e)
+            return False
+        except TypeError:
+            # print('GraphIO set lim TypeError, continue with limAuto', e,
+            #       xory, lim)
+            lim = [np.inf, np.inf]
+        # if inf (e.g. alter transform failed) whereas input was provided,
+        # then take provided value
+        if np.sum(np.isinf(lim)) == 2 and np.sum(np.isinf(limInput)) < 2:
+            lim = [li if not np.isinf(li) else None for li in limInput]
+        else:  # default matplotlib values if not provided
+            lim = [
+                limAuto[i] if np.isnan(lim[i]) or np.isinf(lim[i]) else lim[i]
+                for i in range(len(lim))
+            ]
+        if lim[0] != lim[1]:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                fun((lim[0], lim[1]))
+
+    @classmethod
+    def set_xytickstep(cls, val, xyaxis, axlim):
+        arr = None
+        if isinstance(val, list):
+            arr = val
+        elif val != 0:
+            val = abs(val)
+            # axlim = xyaxis.get_lim()  # for some reason get_lim does not exist
+            ticks = [t for t in xyaxis.get_ticklocs() if min(axlim) <= t <= max(axlim)]
+            start, end = min(ticks), max(ticks)
+            while start - val >= min(axlim):
+                start -= val
+            while end + val <= max(axlim):
+                end += val
+            arr = np.arange(start, end + end / 1e10, val)
+        # performs modification
+        if arr is not None:
+            xyaxis.set_ticks(arr)
+            return True
+        print("WARNING xticksstep invalid input", val)
+        return False
 
 
 class GroupedPlotters:
@@ -318,42 +480,3 @@ class PlotterViolin(Plotter):
             ax_.set_xticks(xticks)
             ax_.set_xticklabels(xtklbl)
         return handle
-
-
-"""
-# NOT READY YET
-class PlotterSeabornStripplot(Plotter):
-    def add_curve(self, curve, y, fmt, ax):
-        if len(y) > 0 and not np.isnan(y).all():
-            position = curve.attr("boxplot_position", None)
-            position = Plotter.position if position is None else position
-
-            self.y[position] = y[~np.isnan(y)]
-            self.callkw["labels"].append(fmt["label"] if "label" in fmt else "")
-
-            # self.colors.append(fmt['color'] if 'color' in fmt else '')  # colors: to handle through palette keyword?
-
-            # TODO: handle keywords
-            # self.plot_seaborn_stripswamplots(violinplot['positions'][-1], y, ax)
-
-            Plotter.position += 1
-
-    def plot(self, ax, ax_):
-        self.callkw["ax"] = ax
-        try:
-            import seaborn as sns
-
-            return sns.stripplot(self.y, **self.callkw)
-        except ImportError:
-            print("PlotterSeabornStripplot import error, cannot import seaborn")
-        return None
-
-        # kwstrip = self.attr("seaborn_stripplot_kw", None)
-        # if kwstrip is not None:
-        # try:
-        # import seaborn as sns
-        # kwstrip = dict(kwstrip)
-        # kwstrip.update({"ax": ax, "native_scale": True})
-        # sns.stripplot({position: y[~np.isnan(y)]}, **kwstrip)
-        # except ImportError:
-"""

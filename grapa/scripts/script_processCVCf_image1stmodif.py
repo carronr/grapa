@@ -3,7 +3,7 @@
 Created on Mon Mar  6 23:57:53 2017
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -29,7 +29,7 @@ from grapa.mathModule import roundSignificant
 from grapa.datatypes.graphCf import GraphCf
 from grapa.datatypes.graphCV import GraphCV
 from grapa.datatypes.curveCV import CurveCV
-from grapa.datatypes.curveArrhenius import CurveArrheniusExtrapolToZero, CurveArrhenius
+from grapa.datatypes.curveArrhenius import CurveArrheniusExtrapolToZero
 
 
 def maskUndesiredLegends(graph, legend):
@@ -136,7 +136,7 @@ def script_processCV(
     graphPhase.update(
         {
             "xlabel": graph.attr("xlabel"),
-            "ylabel": graph.formatAxisLabel("Impedance phase [°]"),
+            "ylabel": graph.formatAxisLabel("Impedance angle [°]"),
         }
     )
     # mask undesired legends
@@ -275,7 +275,7 @@ def script_processCV(
     N0V = Curve(
         [N0V_T, N0V_N],
         {
-            "label": "N$_\\mathrm{CV}$ (0V)",
+            "label": "N$_\mathrm{CV}$ (0V)",
             "linestyle": "none",
             "linespec": "s",
             "markeredgewidth": 0,
@@ -325,7 +325,7 @@ def script_processCV(
         }
     )
     graphVbi[1].update(
-        {"linespec": "x", "color": "k", "label": "N$_\\mathrm{CV}$ (same Vlim)"}
+        {"linespec": "x", "color": "k", "label": "N$_\mathrm{CV}$ (same Vlim)"}
     )
     graphVbi[2].update(
         {
@@ -336,7 +336,7 @@ def script_processCV(
         }
     )
     graphVbi[3].update(
-        {"linespec": "x", "color": "r", "label": "N$_\\mathrm{CV}$ (adaptative Vlim)"}
+        {"linespec": "x", "color": "r", "label": "N$_\mathrm{CV}$ (adaptative Vlim)"}
     )
     graphVbi.update(
         {
@@ -372,7 +372,7 @@ def script_processCV(
     if pltClose:
         plt.close()
     graph.update({"axvline": "", "legendtitle": ""})
-    # Mott-Schottky, then N vs V, with fit lines - adaptative ROI
+    # Mottschottky, then N vs V, with fit lines - adaptative ROI
     for i in range(graph.length() - 1, numCurves - 1, -1):
         graph.deleteCurve(i)
     graph.merge(graphSmart)
@@ -403,8 +403,9 @@ def script_processCV(
         plt.close()
 
     if len(WARNINGS) > 0:
-        msg = "Enf of process C-V. Got warnings along the way. See above or summary"
-        print(msg)
+        print(
+            "Enf of process C-V. Got some warnings along the way... see above or summary"
+        )
         for msg in WARNINGS:
             print(msg)
     else:
@@ -422,7 +423,6 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
     graph = Graph("", **newGraphKwargs)
     graphPhase = Graph("", **newGraphKwargs)
     graphNyqui = Graph("", **newGraphKwargs)
-    graphBode = Graph("", **newGraphKwargs)
     # list possible files
     listdir = []
     for file in os.listdir(folder):
@@ -450,58 +450,55 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
         if graph.length() == 0:
             graph.update(graphTmp.graphInfo)
         graph.append(graphTmp.curve(0))  # append C-f
-        if len(graphTmp) > 1:
-            dataz, dataphase = None, None
+        if graphTmp.length() > 1:
             for c in graphTmp.iterCurves():
                 if c.attr("_CfPhase", False):
                     graphPhase.append(c)
-                    dataphase = c.x(), c.y()
-                    graphBode.append(Curve([c.x(), c.y()], c.getAttributes()))
-                    graphBode[-1].update({"ax_twinx": 1, "linespec": "--"})
                 if c.attr("_CfNyquist", False):
                     graphNyqui.append(c)
-                    dataz = c.x(), c.y()
-            if dataz is not None and dataphase is not None:
-                graphBode.append(
-                    Curve(
-                        [dataphase[0], np.sqrt(dataz[0] ** 2 + dataz[1] ** 2)],
-                        graphTmp[0].getAttributes(),
-                    )
-                )
-                graphBode[-1].update({"label": ""})
-    # colorize curves
-    colorscaleThW = Colorscale(np.array([[1, 0.43, 0], [0, 0, 1]]), invert=True)
-    graph.colorize(colorscaleThW)
-    graphPhase.colorize(colorscaleThW)
-    graphNyqui.colorize(colorscaleThW)
-    graphBode.colorize(colorscaleThW, sameIfEmptyLabel=True)
-    # title, labels
+    graph.colorize(
+        Colorscale(np.array([[1, 0.43, 0], [0, 0, 1]]), invert=True)
+    )  # ThW admittance colorscale
+    graphPhase.colorize(
+        Colorscale(np.array([[1, 0.43, 0], [0, 0, 1]]), invert=True)
+    )  # ThW admittance colorscale
+    graphNyqui.colorize(
+        Colorscale(np.array([[1, 0.43, 0], [0, 0, 1]]), invert=True)
+    )  # ThW admittance colorscale
     lbl = graph.curve(-1).attr("label").replace(" K", "K").split(" ")
     if len(lbl) > 1:
-        # title
         graph.update({"title": " ".join(lbl[:-1])})
         graphPhase.update({"title": " ".join(lbl[:-1])})
         graphNyqui.update({"title": " ".join(lbl[:-1])})
-        graphBode.update({"title": " ".join(lbl[:-1])})
-        # labels
         graph.replaceLabels(" ".join(lbl[:-1]), "")
         graphPhase.replaceLabels(" ".join(lbl[:-1]), "")
-    for curve in graphNyqui:
-        curve.update({"label": "{:.0f} K".format(curve.attr("temperature [k]"))})
-    for curve in graphBode:
-        phaseorz = "phase" if curve.attr("_cfphase") else "|z|"
-        temperature = curve.attr("temperature [k]")
-        curve.update({"label": "{:.0f} K {}".format(temperature, phaseorz)})
+        graphNyqui.replaceLabels(" ".join(lbl[:-1]), "")
+    graphPhase.update(
+        {
+            "xlabel": graph.attr("xlabel"),
+            "ylabel": graphPhase.formatAxisLabel("Impedance angle [°]"),
+        }
+    )
+    graphNyqui.update(
+        {
+            "xlabel": graph.attr("xlabel"),
+            "ylabel": graphNyqui.formatAxisLabel("Impedance angle [°]"),
+        }
+    )
+    graphNyqui.update(
+        {
+            "xlabel": graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[0]),
+            "ylabel": graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[1]),
+        }
+    )
     # mask undesired legends
     maskUndesiredLegends(graph, legend)
     maskUndesiredLegends(graphPhase, legend)
     maskUndesiredLegends(graphNyqui, legend)
-    maskUndesiredLegends(graphBode, legend)
     # set xlim
     setXlim(graph, "tight")
     setXlim(graphPhase, "tight")
     setXlim(graphNyqui, "tight")
-    setXlim(graphBode, "tight")
 
     # save
     filesave = os.path.join(
@@ -511,39 +508,27 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
     graphattr = {}
     for attr in ["alter", "typeplot", "xlim", "ylim", "xlabel", "ylabel"]:
         graphattr.update({attr: graph.attr(attr)})
-
     # default graph: C vs log(f)
     graph.update({"ylim": [0, np.nan]})
     graph.plot(filesave=filesave + "Clogf", **plotargs)
     if pltClose:
         plt.close()
-
     # graph 2: derivative
     graph.update({"alter": ["", "CurveCf.y_mdCdlnf"], "typeplot": "semilogx"})
     graph.update(
-        {"ylim": [0, np.nan], "ylabel": "Derivative - f dC/df"}
+        {"ylim": [0, np.nan], "ylabel": "Derivative f dC/df"}
     )  # same math as d Capacitance / d ln(f)
     graph.plot(filesave=filesave + "deriv", **plotargs)
     if pltClose:
         plt.close()
-
     # graph 3: derivative, zoomed-in
     graph.update({"alter": ["", "CurveCf.y_mdCdlnf"], "typeplot": "semilogx"})
     graph.update({"ylim": [0, 1.5 * max(graph.curve(0).y(alter="CurveCf.y_mdCdlnf"))]})
     graph.plot(filesave=filesave + "derivZoom", **plotargs)
     if pltClose:
         plt.close()
-
     # graph 4: phase
-    graphPhase.update(
-        {
-            "xlabel": graph.attr("xlabel"),
-            "ylabel": graphPhase.formatAxisLabel("Impedance phase [°]"),
-            "alter": "",
-            "typeplot": "semilogx",
-            "ylim": [0, 90],
-        }
-    )
+    graphPhase.update({"alter": "", "typeplot": "semilogx", "ylim": [0, 90]})
     f = graphPhase.curve(0).x()
     graphPhase.append(
         Curve(
@@ -554,99 +539,104 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
     graphPhase.plot(filesave=filesave + "phase", **plotargs)
     if pltClose:
         plt.close()
-
     # graph 5: Nyquist
+    limmax = -np.inf
+    for c in graphNyqui.iterCurves():
+        limmax = max(limmax, max(c.x()), max(c.y()))
     graphNyqui.update(
         {
             "alter": "",
-            "xlabel": graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[0]),
-            "ylabel": graphNyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[1]),
+            "xlim": [0, limmax],
+            "ylim": [0, limmax],
+            "subplots_adjust": [0.15, 0.15, 0.95, 0.95],
+            "figsize": [5, 5],
         }
     )
-    # Nyquist limits
-    limmaxx, limmaxy = -np.inf, -np.inf
-    for curve in graphNyqui:
-        limmaxx = max(limmaxx, max(curve.x()))
-        limmaxy = max(limmaxy, max(curve.y()))
-    limmax = max(limmaxx, limmaxy)
-    upd = {  # default: square plot
-        "xlim": [0, limmax],
-        "ylim": [0, limmax],
-        "subplots_adjust": [0.15, 0.15, 0.95, 0.95],
-        "figsize": [5, 5],
-    }
-    if limmaxy <= 0.5 * limmaxx:  # if data fit into a 2:1 rectangle
-        upd.update(
-            {
-                "ylim": [0, limmax * 0.5],
-                "subplots_adjust": [0.15, 0.15, 0.95, 0.95],
-                "figsize": [8, 4],
-            }
-        )
-    graphNyqui.update(upd)
     graphNyqui.plot(filesave=filesave + "Nyquist", **plotargs)
     if pltClose:
         plt.close()
-
-    # graph 6: image derivative, omega (aka f) vs T (or rather arrhenius)
+    # graph 6: image derivative, T vs f
     graphImage = Graph()
-    x = [1] + list(graph.curve(0).x() * 2 * np.pi)  # convert frequency into omega
-    matrix = [x]
-    tempmin, tempmax = np.inf, -np.inf
-    for curve in graph:
-        T = curve.attr("temperature", None)
+    flag = True
+    x = [0] + list(graph.curve(0).x())
+    Tmin, Tmax = np.inf, -np.inf
+    for c in graph.iterCurves():
+        T = c.attr("temperature", None)
         if T is None:
-            T = curve.attr("temperature [k]", None)
+            T = c.attr("temperature [k]", None)
         if T is None:
-            msg = "Script Cf, image, cannot identify Temperature. File ignored. {}"
-            print(msg.format(curve.getAttributes()))
-            continue
+            print("Script Cf, image, cannot identify Temperature", c.getAttributes())
+            flag = False
         else:
-            tempmin, tempmax = min(tempmin, T), max(tempmax, T)
-        y = [T] + list(curve.y(alter="CurveCf.y_mdCdlnf"))
+            Tmin, Tmax = min(Tmin, T), max(Tmax, T)
+        y = [T] + list(c.y(alter="CurveCf.y_mdCdlnf"))
         if len(x) != len(y):
-            msg = (
-                "WARNING data curve {} not consistent number of points throughout "
-                "the input files! File ignored. {}"
+            print(
+                "WARNING data curve",
+                T,
+                "not consistent number of points",
+                "throughout the input files!",
+                c.attr("filename"),
             )
-            print(msg.format(T, curve.attr("filename")))
-            continue  # do not work with the data
-        matrix.append(y)
-    matrix = np.array(matrix)
-    if matrix.shape[0] > 1:  # enough datapoints
-        # format data
-        for line in range(1, matrix.shape[1]):
-            freq = matrix[0, line] / 2 / np.pi
-            graphImage.append(
-                Curve_Image([matrix[:, 0], matrix[:, line]], {"frequency [Hz]": freq})
-            )
+            continue
+        graphImage.append(Curve_Image([x, y], {}))
+    if flag:
         # levels -> int value does not seem to work (matplotlib version?)
         m, M = np.inf, -np.inf
-        for curve in graphImage:
-            m = min(m, np.min(curve.y()[1:]))
-            M = max(M, np.max(curve.y()[1:]))
+        for c in graphImage.iterCurves():
+            m = min(m, np.min(c.y()[1:]))
+            M = max(M, np.max(c.y()[1:]))
         space = roundSignificant(M / 15, 1)
         levels = list(np.arange(0, M * 1.5, space))
-        for i in range(len(levels) - 2, -1, -1):
-            if levels[i] > M:
+        for l in range(len(levels) - 2, -1, -1):
+            if levels[l] > M:
                 del levels[-1]
             else:
                 break
         if len(levels) > 1 and levels[0] > levels[1]:
             del levels[0]
-        # graph size - identical pixel unit size for all image in terms of Delta T
-        # and Delta ln(f)
-        omegamin, omegamax = np.min(matrix[0, 1:]), np.max(matrix[0, 1:])
-        tempdelta = (1000 / tempmin - 1000 / tempmax) * 1
-        if tempdelta > 0:
-            fdelta = (np.log10(omegamax) - np.log10(omegamin)) * 1
-            subadj = [0.8, 0.5, 0.8 + tempdelta, 0.5 + fdelta, "abs"]
+        # transpose - x axis is expected to be 1000/K
+        for curve in graphImage:
+            curve.update({"temperature [K]": curve.y()[0]})
+            y = curve.y()
+            y[0] = 1000 / y[0]
+            curve.setY(y)
+        # graph size
+        fmin, fmax = np.min(graph[0].x()), np.max(graph[0].x())
+        Tdelta = (1000 / Tmin - 1000 / Tmax) * 1  # (Tmax - Tmin) / 50
+        if Tdelta > 0:
+            fdelta = (np.log10(fmax) - np.log10(fmin)) * 1
+            subadj = [0.8, 0.5, 0.8 + Tdelta, 0.5 + fdelta, "abs"]
             graphImage.update(
-                {"subplots_adjust": subadj, "figsize": [3 + tempdelta, 1 + fdelta]}
+                {"subplots_adjust": subadj, "figsize": [2 + Tdelta, 1 + fdelta]}
             )
         else:
             print("script Cf, image, Warning T delta <=0, cannot properly scale image.")
-        # ticks
+        graphImage.update(
+            {
+                "typeplot": "semilogy",
+                "ylabel": graph.attr("xlabel"),
+                "ylim": [fmin, fmax],
+            }
+        )
+        graphImage[0].update(
+            {
+                "transpose": True,
+                "datafile_xy1rowcol": 1,
+                "cmap": "magma_r",
+                "type": "contourf",
+                "colorbar": {
+                    "label": graph.attr("ylabel"),  # '-dC / dln(f)',
+                    "adjust": [1.05, 0, 0.05, 1, "ax"],
+                },
+                "levels": levels,
+                "extend": "both",
+            }
+        )
+        # 'cmap': [[0.91, 0.25, 1], [1.09, 0.75, 1], 'hls']
+        # axis cosmetics and ticks
+        for curve in graphImage:
+            curve.update({"ax_twiny": 1})
         xtickslabels = [[], []]
         values_base = [400, 350, 300, 250, 200, 170, 150, 130, 115, 100, 80, 60, 50, 40]
         for value in values_base:
@@ -656,68 +646,24 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
             if value not in xtickslabels[1]:
                 xtickslabels[0].append(1000 / value)
                 xtickslabels[1].append("")
-        # display image as desired
-        attrs = {
-            "typeplot": "semilogy",
-            "alter": ["CurveArrhenius.x_1000overK", ""],
-            "ylim": [omegamin, omegamax],
-            "twinx_ylim": [omegamin / 2 / np.pi, omegamax / 2 / np.pi],
-            "ylabel": graphImage.formatAxisLabel(
-                ["Angular frequency $\\omega$", "", "s$^{-1}$"]
-            ),
-            "twinx_ylabel": graph.attr("xlabel"),
-            "xlabel": graphImage.formatAxisLabel(["Temperature", "T", "K"]),
-            "twiny_xlabel": graphImage.formatAxisLabel(
-                ["1000/Temperature", "", "1000/K"]
-            ),
-            "xlim": [tempmax, tempmin],
-            "twiny_xlim": [tempmax, tempmin],
-            "xtickslabels": xtickslabels,
-        }
-        graphImage.update(attrs)
-        graphImage[0].update(
+        graphImage.update(
             {
-                "datafile_xy1rowcol": 1,
-                "cmap": "magma_r",
-                "type": "contourf",
-                "colorbar": {
-                    "label": graph.attr("ylabel"),  # '-dC / dln(f)',
-                    "adjust": [1.18, 0, 0.05, 1, "ax"],
-                },
-                "levels": levels,
-                "extend": "both",
+                "xlabel": graphImage.formatAxisLabel(["Temperature", "", "K"]),
+                "twiny_xlabel": "1000/Temperature [1000/K]",
+                "xlim": [1000 / Tmax, 1000 / Tmin],
+                "twiny_xlim": [1000 / Tmax, 1000 / Tmin],
+                "xtickslabels": xtickslabels,
             }
         )
-        # For secondary axes
-        attx = {"ax_twinx": 1, "labelhide": 1, "label": "Ax twinx", "type": "semilogy"}
-        atty = {"ax_twiny": 1, "labelhide": 1, "label": "Ax twiny"}
-        graphImage.append(Curve([[1], [1]], attx))
-        graphImage.append(Curve([[1], [1]], atty))
-        # Fit curve to play with
-        image_fit_data = [[100, 150, 200, 250, 300, 350], [1, 1, 1, 1, 1, 1]]
-        image_fit_attr = {
-            "_arrhenius_variant": "Cfdefault",
-            "_fitfunc": "func_Arrhenius",
-            "_popt": [0.15, 1e8],
-            "_fitroi": [3, 10],
-            "color": "k",
-            "curve": "Curve Arrhenius",
-            "label": "Fit curve to toy with",
-            "labelhide": 1,
-            "linestyle": "none",
-        }
-        graphImage.append(CurveArrhenius(image_fit_data, image_fit_attr))
-        graphImage[-1].updateFitParam(*graphImage[-1].attr("_popt"))
-        # plot
+
         graphImage.plot(filesave=filesave + "image", **plotargs)
-        # if pltClose:
-        #    plt.close()
+        if pltClose:
+            plt.close()
 
     # graph 7: f vs apparent doping
+    graph.update({"alter": ["CurveCV.x_CVdepth_nm", "x"], "typeplot": "semilogy"})
     graph.update(
         {
-            "alter": ["CurveCV.x_CVdepth_nm", "x"],
-            "typeplot": "semilogy",
             "xlabel": graph.formatAxisLabel(["Apparent depth", "d", "nm"]),
             "ylabel": graph.formatAxisLabel(["Frequency", "f", "Hz"]),
             "xlim": "",
@@ -728,41 +674,20 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
     if pltClose:
         plt.close()
 
-    # Bode plot
-    graphBode.update(
-        {
-            "xlabel": graph.attr("ylabel"),
-            "ylabel": "Modulus |Z| [Ohm]",
-            "typeplot": "loglog",
-            "twinx_ylabel": graphNyqui.formatAxisLabel("Impedance phase [°]"),
-            "twinx_ylim": [0, 90],
-            "subplots_adjust": [0.15, 0.15],
-        }
-    )
-    if len(graphBode) > 1:
-        graphBode[0].update({"labelhide": 1})
-        graphBode[1].update({"labelhide": ""})
-    graphBode.plot(filesave=filesave + "Bode", **plotargs)
-    if pltClose:
-        plt.close()
-
-    # restore initial graph
-    graph.update(graphattr)
-    if pltClose:
-        plt.close()
+    graph.update(graphattr)  # restore initial graph
     print(
         "Tip for next step: pick inflection points for different T, then the fit "
         "activation energy."
     )
     print("End of process C-f.")
-    return graphImage
+    return graph
 
 
 if __name__ == "__main__":
-    folder_ = "./../examples/Cf/"
-    graph_ = script_processCf(folder_, pltClose=False)
+    folder = "./../examples/Cf/"
+    graph = script_processCf(folder, pltClose=False)
 
-    folder_ = "./../examples/CV/"
-    # graph_ = script_processCV(folder_, ROIfit=[0.15, 0.3], pltClose=True)
+    folder = "./../examples/CV/"
+    # graph = script_processCV(folder, ROIfit=[0.15,0.3], pltClose=True)
 
     plt.show()

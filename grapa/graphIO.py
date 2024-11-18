@@ -3,7 +3,7 @@
 Created on Tue Jun 13 22:38:05 2017
 
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -27,7 +27,13 @@ from grapa.mathModule import is_number, strToVar, varToStr, strUnescapeIter
 from grapa.curve_inset import Curve_Inset
 from grapa.curve_subplot import Curve_Subplot
 from grapa.curve_image import Curve_Image  # needed for curve casting
-from grapa.graphIO_aux import ParserAxhline, ParserAxvline, GroupedPlotters
+from grapa.graphIO_aux import (
+    ParserAxhline,
+    ParserAxvline,
+    ParserMisc,
+    GroupedPlotters,
+    SubplotsAdjuster,
+)
 
 
 FILEIO_GRAPHTYPE_DATABASE = "Database"
@@ -162,14 +168,9 @@ class GraphIO(Graph):
                 attributes.update({"complement": complement})
         # default attributes of curve
         if "label" not in attributes:
-            attributes.update(
-                {
-                    "label": fileName.split("/")[-1]
-                    .split("\\")[-1]
-                    .replace("_", " ")
-                    .replace("  ", " ")
-                }
-            )
+            labeldefault = fileName.split("/")[-1].split("\\")[-1]
+            labeldefault = labeldefault.replace("_", " ").replace("  ", " ")
+            attributes.update({"label": labeldefault})
         # default (mandatory) attributes of Graph
         for key in ["subplots_adjust", "fontsize"]:
             if key in attributes:
@@ -181,7 +182,7 @@ class GraphIO(Graph):
         toDel = []
         for key in complement:
             try:
-                if key.lower() in Graph.graphInfoKeys:
+                if key.lower() in Graph.KEYWORDS_GRAPH["keys"]:
                     self.update({key: complement[key]})
                     toDel.append(key)
             except Exception:
@@ -234,7 +235,7 @@ class GraphIO(Graph):
                         line2=line2,
                         line3=line3,
                     )
-                    if res is None or res != False:
+                    if res is None or not res != False:
                         loaded = True
                         break
         # if not, then try default methods
@@ -264,7 +265,7 @@ class GraphIO(Graph):
         for i in range(len(filecontent)):
             try:
                 float(filecontent[i][0])
-                # return fileGeneric only if the first eleemnt of any row can
+                # return fileGeneric only if the first element of any row can be
                 # interpreted as a number, ie. float(element) do not raise a
                 # ValueError
                 return GraphIO.readDataFromFileGeneric
@@ -393,9 +394,9 @@ class GraphIO(Graph):
             None if "delimiterHeaders" not in kwargs else kwargs["delimiterHeaders"]
         )
 
-        def splitline(line, delimiter):
-            couple = line.split(delimiter)
-            return [couple[i].strip(" :") for i in range(len(couple))]
+        def splitline(line, delimiter_):
+            couple_ = line.split(delimiter_)
+            return [couple_[i_].strip(" :") for i_ in range(len(couple_))]
 
         # process header lines
         numEmpty = 0
@@ -429,9 +430,9 @@ class GraphIO(Graph):
                         isLabelDefault
                         and len(lastLine) > 1
                         and lastSampleInfo
-                        not in self.graphInfoKeys
-                        + self.headersKeys
-                        + self.dataInfoKeysGraph
+                        not in self.KEYWORDS_GRAPH["keys"]
+                        + self.KEYWORDS_HEADERS["keys"]
+                        + self.KEYWORDS_CURVE["keys"]
                     )
                 ):
                     # if some column names were identified, try to define
@@ -496,10 +497,10 @@ class GraphIO(Graph):
                     couple[0] = replace[couple[0]]
                 # end of matlab conversion
                 # identify headers values
-                if couple[0] in self.headersKeys:
+                if couple[0] in self.KEYWORDS_HEADERS["keys"]:
                     self.headers[couple[0]] = strToVar(val)
                 # identify graphInfo values
-                elif couple[0] in self.graphInfoKeys or couple[0].startswith(
+                elif couple[0] in self.KEYWORDS_GRAPH["keys"] or couple[0].startswith(
                     "subplots"
                 ):
                     self.graphInfo[couple[0]] = strToVar(val)
@@ -676,7 +677,7 @@ class GraphIO(Graph):
                     if newtype not in ["", "curve", "curvexy"]:
                         self.castCurve(newtype, c, silentSuccess=True)
 
-    def readDataFromFileDatabase(self, attributes, fileContent=None, **kwargs):
+    def readDataFromFileDatabase(self, attributes, fileContent=None, **_kwargs):
         """
         fileContent: list of lists containing file content (imagine csv file)
         kwargs: useless here
@@ -805,7 +806,7 @@ class GraphIO(Graph):
         ifClipboardExport=False,
     ):
         """
-        Exports content of Grah object into a human- and machine- readable
+        Exports content of Grah object into a human- and machine-readable
         format.
         """
         if len(filesave) > 4 and filesave[-4:] == ".xml":
@@ -839,7 +840,7 @@ class GraphIO(Graph):
                 for key in keyListHeaders:
                     if key in self.headers:
                         out = out + key + "\t" + varToStr(self.headers[key]) + "\n"
-        # if compact mode, loop over curves to identify consecutive with identical x axis
+        # if compact mode, loop over curves to identify consecutive with identical xaxis
         separator = ["\t"] + ["\t\t\t"] * (self.length() - 1) + ["\t"]
         if ifCompact and not ifTemplate:
             for i in range(self.length()):
@@ -853,7 +854,7 @@ class GraphIO(Graph):
             for c in range(self.length()):
                 for attr in self.curve(c).getAttributes():
                     if attr not in keysList:
-                        if attr in self.dataInfoKeysGraph or (not ifTemplate):
+                        if attr in self.KEYWORDS_CURVE["keys"] or (not ifTemplate):
                             keysList.append(attr)
         # if save altered Curce export curves modified for alterations and
         # offsets, and delete offset and muloffset key
@@ -937,11 +938,9 @@ class GraphIO(Graph):
                     chari = findall(("[0-9]+"), errmsg[idx:])
                     if len(chari) > 0:
                         chari = int(chari[0])
+                        outmsg = out[max(0, chari - 20) : min(len(out), chari + 15)]
                         print(
-                            "--> surrounding characters:",
-                            out[max(0, chari - 20) : min(len(out), chari + 15)].replace(
-                                "\n", "\\n"
-                            ),
+                            "--> surrounding characters:", outmsg.replace("\n", "\\n")
                         )
             f.close()
         return filename
@@ -955,13 +954,11 @@ class GraphIO(Graph):
             ifCompact=True, ifClipboardExport=False
         """
         for key in kwargs:
-            print(
-                "WARNING GraphIO.exportXML: received keyword",
-                key,
-                ":",
-                kwargs[key],
-                ", don't know what to do with it.",
+            msg = (
+                "WARNING GraphIO.exportXML: received keyword {}: {}, don't know "
+                "what to do with it."
             )
+            print(msg.format(key, kwargs[key]))
         try:
             from lxml import etree
         except ImportError as e:
@@ -1017,18 +1014,20 @@ class GraphIO(Graph):
             fig = plt.figure()  # create a new figure
             ax = None
         # count number of graphs to be plotted
-        axes = [{"ax": None, "activenext": True} for curve in self]
+        axes = [{"ax": None, "activenext": True} for _curve in self]
         ncurvesondefault = 0  # do not create default axis if no curve on it
+        isthereasubplot = False
         ngraphs = 0
         for c in range(len(self)):
             curve = self[c]
             if isinstance(curve, Curve_Inset):
                 axes[c].update({"ax": "inset", "activenext": False})
                 # default can be overridden if Graph file has length 0
-            elif isinstance(curve, Curve_Subplot):
+            elif isinstance(curve, Curve_Subplot) and not curve.isHidden():
                 rowspan = int(curve.attr("subplotrowspan", 1))
                 colspan = int(curve.attr("subplotcolspan", 1))
                 ngraphs += rowspan * colspan
+                isthereasubplot = True
             elif ngraphs == 0:
                 ncurvesondefault += 1
                 ngraphs = 1
@@ -1047,13 +1046,11 @@ class GraphIO(Graph):
                 val += [1] * max(0, (target) - len(val))
                 while len(val) > target:
                     del val[-1]
-                print(
-                    "GraphIO._createSubplotsGridspec: corrected width_ratios"
-                    "to match ncols",
-                    ncols,
-                    ":",
-                    val,
+                msg = (
+                    "GraphIO._createSubplotsGridspec: corrected width_ratios to "
+                    "match ncols {}: {}."
                 )
+                print(msg.format(ncols, val))
             gridspeckwargs.update({"width_ratios": val})
         val = list(self.attr("subplotsheight_ratios", ""))
         if len(val) > 0:
@@ -1062,18 +1059,16 @@ class GraphIO(Graph):
                 val += [1] * max(0, (target) - len(val))
                 while len(val) > target:
                     del val[-1]
-                print(
-                    "GraphIO._createSubplotsGridspec: corrected",
-                    "height_ratios to match nrows",
-                    nrows,
-                    ":",
-                    val,
+                msg = (
+                    "GraphIO._createSubplotsGridspec: corrected height_ratios to "
+                    "match nrows {}: {}."
                 )
+                print(msg.format(nrows, val))
             gridspeckwargs.update({"height_ratios": val})
         # generate axes matrix: either gs, either ax is created
         gs, matrix = None, np.array([[]])
         if ax is None:
-            if ngraphs == 1:
+            if ngraphs == 1 and not isthereasubplot:
                 ax = fig.add_subplot(111)
                 ax.ticklabel_format(useOffset=False)
                 ax.patch.set_alpha(0.0)
@@ -1106,29 +1101,26 @@ class GraphIO(Graph):
         colspan = int(curve.attr("subplotcolspan", 1))
         gspos = gs.get_grid_positions(fig)
         flag = False
+        ax = None
         for i_ in range(len(matrix)):
             for j_ in range(len(matrix[i_])):
                 if matrix[i_, j_] == -1:
                     # first free spot found: start there
                     if rowspan > matrix.shape[0] - i_:
                         # calculation of number of rows probably faulty
-                        print(
-                            "WARNING GraphIO.plot: rowspan larger than can",
-                            "handled for subplot",
-                            subplotscounter,
-                            ", value coerced to",
-                            matrix.shape[0] - i_,
+                        msg = (
+                            "WARNING GraphIO.plot: rowspan larger than can handled "
+                            "for subplot {}, value coerced to {}."
                         )
+                        print(msg.format(subplotscounter, matrix.shape[0] - i_))
                     if colspan > matrix.shape[1] - j_:
                         # either faulty calculation of number of rows,
                         # either that colspan cannot fit in ncols
-                        print(
-                            "WARNING GraphIO.plot: colspan larger than can",
-                            "handled for subplot",
-                            subplotscounter,
-                            ", value coerced to",
-                            matrix.shape[1] - j_,
+                        msg = (
+                            "WARNING GraphIO.plot: colspan larger than can handled "
+                            "for subplot {}, value coerced to {}."
                         )
+                        print(msg.format(subplotscounter, matrix.shape[1] - j_))
                     rowspan = min(rowspan, matrix.shape[0] - i_)
                     colspan = min(colspan, matrix.shape[1] - j_)
                     if self.attr("subplotstranspose", False):
@@ -1137,24 +1129,24 @@ class GraphIO(Graph):
                                 gspos[2][i_] + subplotsid[0],
                                 gspos[1][j_] + subplotsid[1],
                             )
-                            self.addText(
-                                "(" + chr(ord("a") + subplotscounter) + ")",
-                                coords,
-                                subplotidkwargs,
-                            )
-                        ax = plt.subplot(gs[j_ : (j_ + colspan), i_ : (i_ + rowspan)])
+                            txt = "(" + chr(ord("a") + subplotscounter) + ")"
+                            self.addText(txt, coords, subplotidkwargs)
+                        # ax = plt.subplot(gs[j_ : (j_ + colspan), i_ : (i_ + rowspan)])
+                        ax = fig.add_subplot(
+                            gs[j_ : (j_ + colspan), i_ : (i_ + rowspan)]
+                        )
                     else:
                         if subplotsid:
                             coords = (
                                 gspos[2][j_] + subplotsid[0],
                                 gspos[1][i_] + subplotsid[1],
                             )
-                            self.addText(
-                                "(" + chr(ord("a") + subplotscounter) + ")",
-                                coords,
-                                subplotidkwargs,
-                            )
-                        ax = plt.subplot(gs[i_ : (i_ + rowspan), j_ : (j_ + colspan)])
+                            txt = "(" + chr(ord("a") + subplotscounter) + ")"
+                            self.addText(txt, coords, subplotidkwargs)
+                        # ax = plt.subplot(gs[i_ : (i_ + rowspan), j_ : (j_ + colspan)])
+                        ax = fig.add_subplot(
+                            gs[i_ : (i_ + rowspan), j_ : (j_ + colspan)]
+                        )
                     matrix[i_ : (i_ + rowspan), j_ : (j_ + colspan)] = subplotscounter
                     flag = True
                     break
@@ -1186,7 +1178,7 @@ class GraphIO(Graph):
             accepted by plt.savefig
         figsize: default figure size is a class consant
         filesave: (optional) filename for the saved graph
-        ifExport: if True, reate a human- and machine readable .txt file
+        ifExport: if True, reate a human- and machine-readable .txt file
             containing all information of the graph
         figAx= [fig, ax] provided. Useful when wish to embedd graph in a GUI.
         ifSubPlot: False, unless fig to be drawn in a subplot. Not handled by
@@ -1199,7 +1191,7 @@ class GraphIO(Graph):
         def sca_errorhandled(ax, txt=""):
             try:
                 plt.sca(ax)
-                # actually, show aoid using pyplot together with tkagg !!!
+                # actually, show avoid using pyplot together with tkagg !!!
             except AttributeError:
                 if not self._PLOT_PRINTEDERROR_ATTRIBUTE:
                     # print('WARNING sca(ax)', txt, '. AttributeError catched, cause to investigate...')
@@ -1221,9 +1213,7 @@ class GraphIO(Graph):
             restore.update({attr: self.attr(attr)})
 
         # retrieve default axis positions subplotAdjustDef
-        subplotAdjustDef = {}
-        for key in ["bottom", "left", "right", "top", "hspace", "wspace"]:
-            subplotAdjustDef.update({key: mpl.rcParams["figure.subplot." + key]})
+        subplotAdjustDef = SubplotsAdjuster.default()
         subplotColorbar = [
             0.90,
             subplotAdjustDef["bottom"],
@@ -1279,6 +1269,14 @@ class GraphIO(Graph):
             subplotsid,
             subplotsngraphs,
         ) = GraphIO._createSubplotsGridspec(self, figAx, ifSubPlot=ifSubPlot)
+
+        # HOPEFULLY SOLVED BUG - grapa fails to plot figures especially with subplots
+        # seems that ax is sometimes not None whereas the Figure does not contain any ax
+        # print("Graph.plot. {}. # {}.".format(fig, plt.get_fignums()), "ax: {}. {}".format(ax, len(fig.get_axes())), os.path.basename(self.attr("filename")))
+        # if len(fig.get_axes()) == 0 and ax is not None:
+        #    print("MAYBE FAILS!?!")
+        #    print("   ", matrix, gs)
+
         # either ax is None and gs is not None, either the other way around
         subplotsncols, subplotsnrows = matrix.shape
         subplotidkwargs = {
@@ -1296,27 +1294,12 @@ class GraphIO(Graph):
         colorbar_ax = []
 
         # adjust positions of the axis within the graph (subplots_adjust)
-        subplotAdjust = dict(subplotAdjustDef)
-        if "subplots_adjust" in self.graphInfo:
-            val = deepcopy(self.graphInfo["subplots_adjust"])
-            if isinstance(val, dict):
-                subplotAdjust.update(val)
-            elif isinstance(val, list):
-                # handles relative in given in absolute
-                if isinstance(val[-1], str) and val[-1] == "abs":
-                    del val[-1]
-                    fs = fig.get_size_inches()
-                    for i in range(len(val)):
-                        val[i] = val[i] / fs[i % 2]
-                indic = ["left", "bottom", "right", "top", "wspace", "hspace"]
-                for i in range(min(len(val), len(indic))):
-                    subplotAdjust.update({indic[i]: float(val[i])})
-            else:
-                subplotAdjust.update({"bottom": float(val)})
+        attr_spa = self.attr("subplots_adjust")
+        subplot_adjust = SubplotsAdjuster.merge(subplotAdjustDef, attr_spa, fig)
         if fig is not None:
-            fig.subplots_adjust(**subplotAdjust)
+            fig.subplots_adjust(**subplot_adjust)
         if gs is not None:
-            gs.update(**subplotAdjust)
+            gs.update(**subplot_adjust)
         # auxiliary graph, to be created when new axis, filled with curves and
         # plotted when new axis is created
         graphAux = None  # auxiliary Graph, calling plot() when creating new axis
@@ -1479,14 +1462,8 @@ class GraphIO(Graph):
                 )
             except Exception as e:
                 # need to catch exceptions as we want to proceed with graph
-                print(
-                    type(e).__name__,
-                    "Exception occured in Curve.plot",
-                    "function, Curve no",
-                    curve_i,
-                    ". Error message:",
-                    e,
-                )
+                msg = "{} Exception occured in Curve.plot(), Curve no {}. Error message: {}"
+                print(msg.format(type(e).__name__, curve_i, e))
                 print(sys.exc_info()[0].__name__, sys.exc_info()[-1].tb_lineno)
 
             # remind pairs ax - curve
@@ -1559,55 +1536,41 @@ class GraphIO(Graph):
         curvedummy = self.curve(-1) if len(self) > 0 else Curve([[0], [0]], {})
         fontsizeset = []
 
-        def setAxisLabel(method, label):
-            out = {"size": False}
-            if (
-                isinstance(label, list)
-                and len(label) == 2
-                and isinstance(label[-1], dict)
-            ):
-                method(label[0], **label[-1])
-                if "size" in label[-1] or "fontsize" in label[-1]:
-                    out["size"] = True
-            elif isinstance(label, list) and len(label) in [3, 4]:
-                lbl = self.formatAxisLabel(label[0:3])
-                kwargs = label[-1] if isinstance(label[-1], dict) else {}
-                method(lbl, **kwargs)
-                if "size" in kwargs or "fontsize" in kwargs:
-                    out["size"] = True
-            else:
-                method(label)
-            return out
-
         if "title" in self.graphInfo:
-            out = setAxisLabel(ax.set_title, self.graphInfo["title"])
+            out = ParserMisc.setAxisLabel(ax.set_title, self.graphInfo["title"], self)
             if out["size"]:
                 fontsizeset.append(ax.title)
-        if "xlabel" in self.graphInfo:
-            out = setAxisLabel(ax.set_xlabel, self.graphInfo["xlabel"])
+        if "xlabel" in self.graphInfo and gs is None:
+            # gs check because xlabel could be automatically set upong file parsing
+            out = ParserMisc.setAxisLabel(ax.set_xlabel, self.graphInfo["xlabel"], self)
             if out["size"]:
                 fontsizeset.append(ax.xaxis.label)
-        if "ylabel" in self.graphInfo:
-            out = setAxisLabel(ax.set_ylabel, self.graphInfo["ylabel"])
+        if "ylabel" in self.graphInfo and gs is None:
+            # gs check because ylabel could be automatically set upong file parsing
+            out = ParserMisc.setAxisLabel(ax.set_ylabel, self.graphInfo["ylabel"], self)
             if out["size"]:
                 fontsizeset.append(ax.yaxis.label)
         # labels twin axis
         if "twinx_ylabel" in self.graphInfo:
             if axTwinX is not None:
-                out = setAxisLabel(axTwinX.set_ylabel, self.graphInfo["twinx_ylabel"])
+                val = self.graphInfo["twinx_ylabel"]
+                out = ParserMisc.setAxisLabel(axTwinX.set_ylabel, val, self)
                 if out["size"]:
                     fontsizeset.append(axTwinX.yaxis.label)
             elif axTwinXY is not None:
-                out = setAxisLabel(axTwinXY.set_ylabel, self.graphInfo["twinx_ylabel"])
+                val = self.graphInfo["twinx_ylabel"]
+                out = ParserMisc.setAxisLabel(axTwinXY.set_ylabel, val, self)
                 if out["size"]:
                     fontsizeset.append(axTwinXY.yaxis.label)
         if "twiny_xlabel" in self.graphInfo:
             if axTwinY is not None:
-                out = setAxisLabel(axTwinY.set_xlabel, self.graphInfo["twiny_xlabel"])
+                val = self.graphInfo["twiny_xlabel"]
+                out = ParserMisc.setAxisLabel(axTwinY.set_xlabel, val, self)
                 if out["size"]:
                     fontsizeset.append(axTwinY.xaxis.label)
             elif axTwinXY is not None:
-                out = setAxisLabel(axTwinXY.set_xlabel, self.graphInfo["twiny_xlabel"])
+                val = self.graphInfo["twiny_xlabel"]
+                out = ParserMisc.setAxisLabel(axTwinXY.set_xlabel, val, self)
                 if out["size"]:
                     fontsizeset.append(axTwinXY.xaxis.label)
 
@@ -1634,153 +1597,41 @@ class GraphIO(Graph):
             lst.plot(ax.axvline, curvedummy, alter, type_plot)
 
         # xlim, ylim. Start with xtickslabels as this guy would override xlim
-        if "xtickslabels" in self.graphInfo and not ignoreXLim:
+        if "xtickslabels" in self.graphInfo:
             val = self.graphInfo["xtickslabels"]
-            if not isinstance(val, list):
-                val = [val, [], {}]
-            ticksloc = val[0]
-            if not isinstance(ticksloc, list):
-                ticksloc = ax.xaxis.get_ticklocs()
-            ar = val[1] if len(val) > 1 and val[1] is not None else []
-            #                ticksvals = [a.get_text() for a in ax.xaxis.get_ticklabels()] # don't need to retrieve if do not change them
-            kw = val[2] if len(val) > 2 and isinstance(val[2], dict) else {}
+            ticklocs, kw = ParserMisc.set_xyticklabels(val, ax.xaxis)
             if "size" in kw:
                 fontsizeset.append("ax.get_xticklabels()")
-            # implementation based on plt.xticks of matplotlib 3.3
-            ### plt.xticks(ticksloc, ar, **kw)
-            locs = ax.set_xticks(ticksloc)
-            labels = ax.set_xticklabels(ar, **kw)
-            for l in labels:
-                l.update(kw)
-        if "ytickslabels" in self.graphInfo and not ignoreYLim:
+        if "ytickslabels" in self.graphInfo:
             val = self.graphInfo["ytickslabels"]
-            if not isinstance(val, list):
-                val = [val, [], {}]
-            ticksloc = val[0]
-            if not isinstance(ticksloc, list):
-                ticksloc = ax.yaxis.get_ticklocs()
-            ar = val[1] if len(val) > 1 and val[1] is not None else []
-            #                ticksvals = [a.get_text() for a in ax.yaxis.get_ticklabels()] # don't need to retrieve if do not change them
-            kw = val[2] if len(val) > 2 and isinstance(val[2], dict) else {}
+            ticklocs, kw = ParserMisc.set_xyticklabels(val, ax.yaxis)
             if "size" in kw:
                 fontsizeset.append("ax.get_yticklabels()")
-            # implementation based on plt.xticks of matplotlib 3.3
-            ### plt.yticks(ticksloc, ar, **kw)
-            locs = ax.set_yticks(ticksloc)
-            labels = ax.set_yticklabels(ar, **kw)
-            for l in labels:
-                l.update(kw)
-
-        def alterLim(ax, lim, xory):
-            limAuto = ax.get_xlim() if xory == "x" else ax.get_ylim()
-            limInput = [li if not isinstance(li, str) else np.inf for li in lim]
-            lim = list(limInput)
-            try:
-                if xory == "x":
-                    fun = ax.set_xlim
-                    lim = list(
-                        curvedummy.x(
-                            alter=alter[0],
-                            xyValue=[lim, [0] * len(lim)],
-                            errorIfxyMix=True,
-                            neutral=True,
-                        )
-                    )
-                elif xory == "y":
-                    fun = ax.set_ylim
-                    lim = list(
-                        curvedummy.y(
-                            alter=alter[1],
-                            xyValue=[[0] * len(lim), lim],
-                            errorIfxyMix=True,
-                            neutral=True,
-                        )
-                    )
-                else:
-                    return False
-            except ValueError as e:
-                print("GraphIO set lim ValueError, abort.", e)
-                return False
-            except TypeError:
-                # print('GraphIO set lim TypeError, continue with limAuto', e,
-                #       xory, lim)
-                lim = [np.inf, np.inf]
-            # if inf (e.g. alter transform failed) whereas input was provided,
-            # then take provided value
-            if np.sum(np.isinf(lim)) == 2 and np.sum(np.isinf(limInput)) < 2:
-                lim = limInput
-            else:  # default matplotlib values if not provided
-                lim = [
-                    limAuto[i] if np.isnan(lim[i]) or np.isinf(lim[i]) else lim[i]
-                    for i in range(len(lim))
-                ]
-            if lim[0] != lim[1]:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    fun((lim[0], lim[1]))
 
         # xlim should be after xtickslabels
+        aac = [alter, curvedummy]
         if "xlim" in self.graphInfo:
-            alterLim(ax, deepcopy(self.graphInfo["xlim"]), "x")
+            ParserMisc.alterLim(ax, self.graphInfo["xlim"], "x", *aac)
         if "ylim" in self.graphInfo:
-            alterLim(ax, deepcopy(self.graphInfo["ylim"]), "y")
+            ParserMisc.alterLim(ax, self.graphInfo["ylim"], "y", *aac)
         if "twinx_ylim" in self.graphInfo:
             if axTwinXY is not None:
-                alterLim(axTwinXY, deepcopy(self.graphInfo["twinx_ylim"]), "y")
+                ParserMisc.alterLim(axTwinXY, self.graphInfo["twinx_ylim"], "y", *aac)
             if axTwinX is not None:
-                alterLim(axTwinX, deepcopy(self.graphInfo["twinx_ylim"]), "y")
+                ParserMisc.alterLim(axTwinX, self.graphInfo["twinx_ylim"], "y", *aac)
         if "twiny_xlim" in self.graphInfo:
             if axTwinXY is not None:
-                alterLim(axTwinXY, deepcopy(self.graphInfo["twiny_xlim"]), "x")
+                ParserMisc.alterLim(axTwinXY, self.graphInfo["twiny_xlim"], "x", *aac)
             if axTwinY is not None:
-                alterLim(axTwinY, deepcopy(self.graphInfo["twiny_xlim"]), "x")
+                ParserMisc.alterLim(axTwinY, self.graphInfo["twiny_xlim"], "x", *aac)
+
+        # xticksstep
         if "xticksstep" in self.graphInfo and not ignoreXLim:
             val = self.graphInfo["xticksstep"]
-            arr = None
-            if isinstance(val, (list)):
-                arr = val
-            elif val != 0:
-                val = abs(val)
-                axlim = ax.get_xlim()
-                ticks = [
-                    t
-                    for t in ax.xaxis.get_ticklocs()
-                    if t >= min(axlim) and t <= max(axlim)
-                ]
-                start, end = min(ticks), max(ticks)
-                while start - val >= min(axlim):
-                    start -= val
-                while end + val <= max(axlim):
-                    end += val
-                #                start, end = ax.get_xlim()
-                arr = np.arange(start, end + end / 1e10, val)
-            if arr is not None:
-                ax.xaxis.set_ticks(arr)
-            else:
-                print("WARNING xticksstep invalid input", val)
+            ParserMisc.set_xytickstep(val, ax.xaxis, ax.get_xlim())
         if "yticksstep" in self.graphInfo and not ignoreYLim:
             val = self.graphInfo["yticksstep"]
-            arr = None
-            if isinstance(val, (list)):
-                arr = val
-            elif val != 0:  # start, end = ax.get_ylim()
-                val = abs(val)
-                axlim = ax.get_ylim()
-                ticks = [
-                    t
-                    for t in ax.yaxis.get_ticklocs()
-                    if t >= min(axlim) and t <= max(axlim)
-                ]
-                start, end = min(ticks), max(ticks)
-                while start - val >= min(axlim):
-                    start -= val
-                while end + val <= max(axlim):
-                    end += val
-                arr = np.arange(start, end + end / 1e10, val)
-            if arr is not None:
-                ax.yaxis.set_ticks(arr)
-            else:
-                print("WARNING yticksstep invalid input", val)
+            ParserMisc.set_xytickstep(val, ax.yaxis, ax.get_ylim())
 
         # text annotations
         if "text" in self.graphInfo:
@@ -1817,14 +1668,8 @@ class GraphIO(Graph):
                         and texy[i] not in [["", ""], ("", "")]
                     ):
                         if "xytext" in args[i]:
-                            print(
-                                "Graph plot annotate:",
-                                text[i],
-                                "textxy",
-                                texy[i],
-                                "override",
-                                args[i]["xytext"],
-                            )
+                            msg = "Graph plot annotate: {} textxy {} override {}"
+                            print(msg.format(text[i], texy[i], args[i]["xytext"]))
                         args[i].update({"xytext": texy[i]})
                     if "xytext" not in args[i]:
                         if "xy" in args[i]:
@@ -1860,14 +1705,10 @@ class GraphIO(Graph):
                         if arrow_set_clip_box:
                             ann.arrow_patch.set_clip_box(ax.bbox)
                     except Exception as e:
-                        print(
-                            "Exception",
-                            type(e),
-                            "during ax.annotate:",
-                            text[i],
-                            args[i],
-                        )
+                        msg = "Exception {} during ax.annotate: {}, {}"
+                        print(msg.format(type(e), text[i], args[i]))
                         print(e)
+
         # legend
         if gs is None:  # create legend on current ax
             legPropUser = deepcopy(self.attr("legendproperties", default="best"))
@@ -1890,11 +1731,9 @@ class GraphIO(Graph):
                 }
                 if legPropUser["loc"] in rep:
                     legPropUser["loc"] = rep[legPropUser["loc"]]
-            prop = (
-                {}
-                if "fontsize" not in self.graphInfo
-                else {"size": self.graphInfo["fontsize"]}
-            )
+            prop = {}
+            if "fontsize" in self.graphInfo:
+                prop = {"size": self.graphInfo["fontsize"]}
             if "prop" in legPropUser:
                 prop.update(legPropUser["prop"])
             legPropUser["prop"] = prop
@@ -1997,7 +1836,15 @@ class GraphIO(Graph):
                     fsplit = f.split(".")
                     # print ('   ', ax, fsplit, len(fsplit))
                     obj = ax
+                    if len(fsplit) > 0 and fsplit[0] == "fig":
+                        obj = fig
+                        del fsplit[0]
                     for subf in fsplit:
+                        if subf.startswith("_"):
+                            # to prevent possible security vulnerability.
+                            # not sure it is "safe".
+                            msg = "Error: arbitraryfunctions does not accept functions or attributes starting with character _. {}"
+                            raise RuntimeError(msg.format(fsplit))
                         if hasattr(obj, "__call__"):
                             obj = getattr(obj(), subf)
                         else:
@@ -2020,16 +1867,13 @@ class GraphIO(Graph):
                             except Exception:
                                 pass  # just continue with unmodified arg
                     # print('      ',arg)
-                    obj(
-                        *arg, **opt
-                    )  # res = obj(**opt) if len(arg) == 0 else obj(*arg, **opt)
+                    obj(*arg, **opt)
                 except Exception as e:
-                    print(
-                        "Exception in function Graph.plot arbitrary",
-                        "functions. Exception",
-                        type(e),
-                        e,
+                    msg = (
+                        "Exception in function Graph.plot arbitrary functions. "
+                        "Exception {} {}"
                     )
+                    print(msg.format(type(e), e))
                     pass
 
         # font sizes
@@ -2081,7 +1925,8 @@ class GraphIO(Graph):
                 filename_ = filename + imgForma_
                 if not self.attr("saveSilent"):
                     print("Graph saved as " + filename_.replace("/", "\\"))
-                plt.savefig(filename_, transparent=True, dpi=saveDPI)
+                # plt.savefig(filename_, transparent=True, dpi=saveDPI)
+                fig.savefig(filename_, transparent=True, dpi=saveDPI)
                 self.filename = filename_
 
                 if imgFormatTarget == ".emf":

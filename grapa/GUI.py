@@ -22,10 +22,11 @@ print("Loading grapa...")
 path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 if path not in sys.path:
     sys.path.append(path)
+from grapa import __version__
 from grapa.graph import Graph
 from grapa.graphIO import FILEIO_GRAPHTYPE_GRAPH
 from grapa.curve import Curve
-from grapa.observable import Observable
+from grapa.gui.observable import Observable
 from grapa.gui.GUIMainElements import (
     GUIFrameMenuMain,
     GUIFrameConsole,
@@ -37,138 +38,63 @@ from grapa.gui.GUIMainElements import (
     GUIFrameActionsCurves,
 )
 
+
 # WISHLIST:
 # - config autotemplate for boxplot
 # - B+W preview
-# Stackplot: transparency Alpha ?
+# - Write workflow Cf
+# - Write workflow CV
+# - Write workflow JV
+# - Write workflow Jsc Voc
+# - open config file in OS default editor
 
-# BUG: fit JV, when unit in mV
+# TODO
+# - LONGTERM check import .graph instead of grapa. Look at standard python packages. Check from GUI, with spyder various versions, and when calling script from external python script (Note: gui Change curve type was failing in early test, when importing in different manner)
+# - LONGTERM: get rid of graph.sampleInfo
+# - progressively remove all uses of pyplot, does not mix well with tkagg and stuff
+# - CurveIMage colorbar, make it as dropdown combobox
+# - Stackplot: transparency Alpha ?
+# - scatter, add text values for each point. [clear all annotations] [text formatting "{.2g}". Remove only] [kwargs: centered both]
 
-# - all: update date copyright
-
-# TODO: Write workflow Cf
-# TODO: Write workflow CV
-# TODO: Write workflow JV
-# TODO: Write workflow Jsc Voc
-
-# TODO: progressively remove all uses of pyplot, does not miy well with tkagg and stuff
-# - colorbar: also shortcut for type image?
-# TODO: check import .graph instead of grapa. Look at standard python packages. Check from GUI, with spyder various versions, and when calling script from external python script
-# TODO: open config file in OS default editor
-
-# TO EVALUATE: GraphJV, identify cell already in GraphJV instead of CurveJV. Empty if fails. Identification in CurveJV: as default, fall back on GraphJV mechanisms. Also: measId.
-# TO EVALUATE: scatter, add text values for each point. [clear all annotations] [text formatting "{.2g}". Remove only] [kwargs: centered both]
-
-
-# DONE
-# Small adjustments against MacOS dark mode
-# - GraphPLQY: when opening a file, added PLQY(time) as curve hidden by default
-# - TinyTusker: various improvements
+# BUGS
+# TODO export/copytoclipboard with alter (screen data), fails when several curves with same x coordinates. to check: if no x transform; if x transform all the same; if x transform makes different x values out of same x input. Possible solution: no compact mode when x transform.
+# TODO: bug can prevent ERE to complete ??? SAMPLE???
 
 
-# Version 0.6.3.1  17.05.2024
-# - GraphCf, improved data parsing
-
-# Version 0.6.3.0 21.04.2024
-# - New type of file supported, TinyTusker
-# - Can now open files directly from Openbis. This require the external library pybis, and access to the Empa-developped code openbis uploader 207.
-# - Added Curve action Autolabel: Curve labels can be generated based on a template, using the attributes values. Example: ${sample} ${cell}". Curve types: SIMS, Cf, CV, EQE, JV
-# - Boxplot: new possibility to add seaborn stripplot and swarmplot on top of boxplot
-# - Boxplot: GUI, added option to select the value of showfliers
-# - Boxplot: Added support for the whole list of parameters for ax.boxplot. Hopefully, not that many problems with unintentional keywords.
-# - Curve CV: added display and retrieval of carrier density and apparent depth, after using the function "Show doping at"
-# - Curve EQE: revised caculation of the bandgap by derivative method (choice of datapoints for fitting of maximum value)
-# - Curve JV: added data transform Sites' method, dV/dJ vs 1/(J-Jsc)
-# - Curve Subplot: added Curve Actions for easier modification of axis limits and labels
-# - Curve TRPL: revised parsing of acquisition time values. Should work with spectroscopic dataset as well.
-# Bugs & code cleaning
-# - Solved issue with leftovers on the canvas when changing figure e.g. size.
-# - Improved auto screen dpi. When opening a file, the graph should be displayed witih a size close to the maximum displayable value
-# - Refactored code for boxplot and violinplot
-# - Solved small bugs here and there, likely added a few new ones...
-
-
-# Version 0.6.2.2
-# Released 12.10.2023
-# New data file format supported:
-# - PLQY file Abt207
-# - GraphJV_Wavelabs: new file format to parse JV as well as MPP data files
-# New features
-# - Curve TRPL: new data processing function, Curve_differential_lifetime_vs_signal
-# - CurveSIMS: formatted for the Label, using python string template mechanisms and curve properties as variables. Maybe more useful than CurveSIMS.
+# 0.6.4.0 ONGOING
+# Additions
+# - GUI: Added an option to modify the graph background color for visualization purpose. The output image remains with a transparent background, to be provided separately.
+# - GUI: Added a button to reverse the curve order. Ignores curve selection.
+# - Curve EQE: Bandgap derivative, added calculation of the bandgap PV by Rau (https://doi.org/10.1103/PhysRevApplied.7.044016), by averaging the energy weighted by EQE derivative value, over the derivative FWHM. Its value is slightly more sensitive to experimental noise than the derivative method. When the derivative peak is asymmetric, the value tends to be slightly higher than the derivative peak (up to 30meV ?).
+# - Curve EQE: Bandgap derivative, also added a fit to the derivative suited to best estimation of sigma value, intended for independent estimation of DeltaVoc_rad.
+# - Curve EQE: Added new function to calculate the short-circuit Voc loss, due to Jsc < Jsc_SQ. Calculation following Rau et al PRA 7 044016 (2017) DOI: https://doi.org/10.1103/PhysRevApplied.7.044016
+# - Curve EQE: full revision of function ERE. Added the calculation Qe-LED by Rau (equivalent to ERE with geometrical factor fg=1), and the Voc bloss breackdown into DeltaVoc short-circuit, radiative, non-radiative. The center-of-mass of the PL peak (EQE*blackbody) is also provided for comparison purposes. The bandgap PV of Rau is used for calculations, or given by user. Note: changes in input bandgap is mostly accomodated in the DeltaVoc_rad value. Added auxiliary Curves to visualize data extraction fits. Added auxiliary Curve for parameter copy-paste.
+# - Curve Image: Can now configure levels using arange, linspace, logspace, geomspace. The parameter extend can also be set.
+# - Graph PLQY: implemented reading of output files of power dependency module.
+# - Script CVfT: From a set of C-f data acquired at different voltages and temperatures, provides C-V-f maps for each temperatures indicating low values for phase, as well as C-f, C-V with T and C-V with Hz plots.
+# - Script Cf: added Bode plot, |Z| and impedance angle versus log(frequency)
+# - Script Boxplot: Added summary graph presenting all generated boxplots
+# Modifications
+# - General: Conversion nm-eV is now calculated from Plank and c constants (previously: 1239.5, now about 1239.8419)
+# - General: graph colorize modifed behavior: if sameIfEmptyLabel, same colors are also applied in case label is hidden (labelhide)
+# - Curve EQE: Revised parametrization of bandgap by derivative peak method. The fit is now parametrized in unit of eV.
+# - Graph PLQY: when opening a file, added PLQY(time) as curve hidden by default
+# - Graph TinyTusker: various improvements
+# - Script Cf, image derivative: redesigned the image. The axes are now omega versus 1000/T (input data are in K, calulated on-the-fly with alter keyword). The fit curves of activation energies can be directly added onto the C-f derivative image.
+# - Script JV: Rp, Rs from acquisition software are now reported in summary files and in graphical summary (diode).
+# - Script JV: Rsquare fit quality restricted to the diode region is reported in the summary files and in graphical summary (diode). The marker size of the other fit parameters shrinks in case poor Rsquare values were obtained.
+# - Script Correlation: Improved detection of input parameters varied in a logarithmic manner.
+# - Script Correlation: Revised colorscale of plot "parseddata" for datasets with 2 input parameters
 # Bug corrections
-# - CurveSIMS, bug recently introduced that prevented opening files under some conditions.
-
-
-# Version 0.6.2.1
-# Released 11.09.2023
-# BUGS
-# - Solved a bug in CurveJV that was preventing proper recognition of dark and illuminated curves in some cases, e.g. for scripts.
-
-# Version 0.6.2.0
-# - New file format: grapa can extract part of the data contained in a set of SCAPS software output data (.iv, .cv, .cf, .qe).
-# - New script: show correlation graphs between quantities taken from da tables, excel files. For Scaps simulation batches, shows the simulated curves as well as correlations between sweep variables and PV parameters.
-# - Curve Images: added conversion function, to convert matrix data into 3-column xyz format and conversely. The data is displayed in a new Graph.
-# - Curve Images: contour, contourf: revised the code for column/row extraction, transposition and rotation.
-# - GUI: Copy Image to clipboard now should preserve transparency
-# - GUI: "New empty Curve" nows inserts, and not append the new empty Curve.
-# - Curve EQE: now parse the reference filename from the raw data file
-# - Curve TRPL: fit should be more robust and have less convergence issues.
-# - Curve TRPL: added function to calculate tau_effective, by 2 methods. A warning is issued if a tau value may risk to artifact the result.
-# - Curve TRPL: added functions to send fit parameters to clipboard. Also reports the weighted averages if no risk of artifact.
-# , and calculate tau_effective
-# - Curve JV: axvline and axhline are created with thinner lines
-# - Curve JV: identification of sample and cell performed at opening; fields to edit available. Goal: identify challenging cases with new setup.
-# - Script JV: the "_allJV" now has axis labels
-# BUGS
-# - SIMS: solved a bug that was failing to perform quantification of SIMS relative yield. There was no indication that the normalization failed on the GUI, only in the command line window. As a result, curve ratios (e.g. GGI) ma have beed calculated in an erroneous manner
-# - A bug with Curve actions with widgets of type Checkbox. They values were always displayed as False.
-# - Script JV: returns a different graph (JVall). The other graphs could not be "saved" due to a technicality.
-# - Script JV: solved a bug that prevented parsing a datafile that was created after a first execution of the JV script which did not find that file.
-# and a few minor bugs here and there
-
-
-# Version 0.6.1.0
-# - GUI: it is not possible to open several files at once (finally!)
-# - Axis labels and graph title can now be entered as ['Quantity', 'symbol', 'unit'], with optional formatting additional dict element
-# - Curve EQE current integration: added a checkbox to show the cumulative current sum.
-# - Curve JV: the code should now be insensitive to sorting of input data (extraction of parameters is done on a sorted copy of the data)
-# - Curve TRPL fit procedure: recondition the fitting problem, the fitting should be more robust and less prone to reaching max iterations
-# - Curve XRF MCA: retro-compatiblity of element labelling features
-# - Curve XRF: does not anymore overwrite spectral calibration if already set
-# - File format: grapa can now open JV files from Ossila sofware, rather primitive data parser.
-# - File format: grapa can now extract data from a certain .spe file format containing XRF data. The data parser is very primitive.
-# - Bug: Curve JV, can read date time.
-# - Ensured forward compatibility up to Winpython 3.10.40
-
-
-"""
-*** *** *** example of config.txt file *** *** ***
-# only keywords (first word) matters: comment line are loaded but never refered
-# to repeating keyword will overwrite content of first instance
-# graph labels default unit presentation: [unit], (unit), / unit, or [], (), /
-graph_labels_units	[]
-# graph labels presence of symbols (ie: $C$ in 'Capacitance $C$ [nF]')
-graph_labels_symbols	False
-# path to inkscape executable, to export in .emf image format. Can be a string, or a list of strings
-inkscape_path	["C:\Program Files\Inkscape\inkscape.exe", "G:\__CommonData\Software\_inkscape_standalone\32bits\App\Inkscape\inkscape.exe"]
-# GUI default colorscales. Each colorscale is represented as a string (matplotlib colorscales), or a list of colors.
-# Each color can be a [r,g,b] triplet, a [r,g,b,a] quadruplet, or a [h,l,s,'hls'] quadruplet. rgb, rgba, hls, hsv colorscape are supported.
-GUI_colorscale00	[[1,0,0], [1,1,0.5], [0,1,0]]
-GUI_colorscale01	[[1,0.3,0], [0.7,0,0.7], [0,0.3,1]]
-GUI_colorscale02	[[1,0.43,0], [0,0,1]]
-GUI_colorscale03	[[0.91,0.25,1], [1.09,0.75,1], 'hls']
-GUI_colorscale04	[[0.70,0.25,1], [0.50,0.75,1], 'hls']
-GUI_colorscale05	[[1,0,1], [1,0.5,1], [0.5,0.75,1], 'hls']
-GUI_colorscale07	'inferno'
-GUI_colorscale10	'gnuplot2'
-GUI_colorscale11	'viridis'
-GUI_colorscale12	'afmhot'
-GUI_colorscale13	'YlGn'
-# default saving image format
-save_imgformat	.png
-*** *** *** end of example *** *** ***
-"""
+# - General: Solved a bug that prevented making figures with a unique subplot
+# - General: The property xtickslabels and ytickslabels can now be used also in conjunction with the property alter.
+# - General: Plot type fill_between and fill_betweenx now have more proper behavior.
+# - GUI: Small adjustments against MacOS dark mode
+# - GUI: Solved a bug that appeared when a tab was closed before the figure drawing was finished. Graphs drawn later on were not drawn correctly if contained several axes.
+# Miscellaneous
+# - General: Centralized physical constants in a unique file constants.py. Hopefully everything works as before.
+# - Implementation: new text files to store content of (now renamed) variables Graph.dataInfoKeysGraphData, Graph.graphInfoKeysData, Graph.headersKeys
+# - Implementation: tidy up the code at a number of places
 
 
 # to be able to print in something else than default console
@@ -185,9 +111,10 @@ def stdout_redirect(where):
 class Application(tk.Frame):
     DEFAULT_SCREENDPI = 72
 
-    def __init__(self, master=None):
+    def __init__(self, master):
         self.master = master
-        tk.Frame.__init__(self, master)
+        super().__init__(master)
+        self.master.title("Grapa software v" + __version__)
         self.initiated = False
         self.newGraphKwargs = {"silent": True}
         try:  # possibly retrieve arguments from command line
@@ -428,15 +355,8 @@ class Application(tk.Frame):
         """Execute 'method' on graph[curve], with *args and **kwargs"""
         out = getattr(self.graph()[curve], method)(*args, **kwargs)
         if self.ifPrintCommands():
-            print(
-                "graph["
-                + str(curve)
-                + "]."
-                + method
-                + "("
-                + self.argsToStr(*args, **kwargs)
-                + ")"
-            )
+            msg = "graph[{}].{}({})"
+            print(msg.format(str(curve), method, self.argsToStr(*args, **kwargs)))
         return out
 
     def promptFile(self, initialdir="", type="open", multiple=False, **kwargs):
@@ -510,10 +430,6 @@ class Application(tk.Frame):
         if self.ifPrintCommands():
             print("graph.merge(Graph('" + file + "'))")
         self.updateUI()
-
-    # def closeTab(self):  # should not be required anymore
-    #     """ Closes current graph tab """
-    #     self.frameCentral.frameGraph.tabs.pop()
 
     def saveGraph(self, filesave, fileext="", saveAltered=False, ifCompact=True):
         """
@@ -643,9 +559,7 @@ def buildUI():
     except Exception:
         pass
     app = Application(master=root)
-    from grapa import __version__
 
-    app.master.title("Grapa software v" + __version__)
     # starts runnning programm
     with stdout_redirect(app.frameConsole.console):
         # retrieve content of last release

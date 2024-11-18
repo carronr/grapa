@@ -3,8 +3,7 @@
 Created on Thu Feb 23 20:37:38 2017
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
@@ -121,12 +120,12 @@ class CurveCf(Curve):
                     T = float(T)
                 break
         if not np.isnan(T):
+            msg = "Data picker CurveCf T = {}, omega = {}."
             print(
-                "Data picker CurveCf T =",
-                T,
-                ", omega =",
-                self.x(idx)[0] * 2 * np.pi,
-                ".",
+                msg.format(
+                    T,
+                    self.x(idx)[0] * 2 * np.pi,
+                )
             )
             return T, self.x(idx)[0] * 2 * np.pi, attr
         return Curve.getDataCustomPickerXY(self, idx, **kwargs)

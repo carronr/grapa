@@ -3,7 +3,7 @@
 Created on Fri Dec 23 16:46:38 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import glob
@@ -21,6 +21,7 @@ if path not in sys.path:
 
 from grapa.graph import Graph
 from grapa.curve import Curve
+from grapa.curve_subplot import Curve_Subplot
 
 try:
     from grapa.scripts.script_processJV import writeFileAvgMax
@@ -93,8 +94,10 @@ def labelFromGraph(graph, silent=False, file=""):
             .replace("  ", " ")
         )
         if not silent:
-            msg = ("label: {} (from file name - no 'label', 'sample' or 'sample name' "
-                   "attribute found in file header)")
+            msg = (
+                "label: {} (from file name - no 'label', 'sample' or 'sample name' "
+                "attribute found in file header)"
+            )
             print(msg.format(lbl))
     return lbl
 
@@ -266,6 +269,7 @@ def JVSummaryToBoxPlots(
         1 - margin[2] / figsize[0],
         1 - margin[3] / figsize[1],
     ]
+    filesaves = []
     for i in range(len(graphs)):
         graph = graphs[i]
         if len(graph) > 0:
@@ -295,6 +299,33 @@ def JVSummaryToBoxPlots(
                 graph.plot(filesave=filesave, **plotkwargs)
                 if pltClose:
                     plt.close()
+                filesaves.append(filesave + ".txt")
+
+    # summary graph
+    graphsum = Graph()
+    for filesave in filesaves:
+        graphsum.append(Curve_Subplot([[0], [0]], {}))
+        fname = os.path.basename(filesave)
+        quantity = fname.replace(exportPrefix, "").replace(".txt", "")
+        print("fname", fname)
+        graphsum[-1].update({"subplotfile": fname, "label": "Subplot " + quantity})
+    if len(graphsum) > 0:
+        graphsum.update({"subplotsncols": 2, "subplotstranspose": 1})
+        panelsize = [3, 3]
+        margin = [1, 1, 1, 1, 1, 1]
+        nrows = 2
+        ncols = np.ceil(len(graphsum) / nrows)
+        graphsum[0].update_spa_figsize_abs(
+            panelsize, margin, ncols=ncols, nrows=nrows, graph=graphsum
+        )
+        filesave = os.path.realpath(os.path.join(folder, exportPrefix + "summary"))
+        cwd = os.getcwd()
+        os.chdir(folder)
+        print("filesave", filesave)
+        graphsum.plot(filesave=filesave, **plotkwargs)
+        if pltClose:
+            plt.close()
+        os.chdir(cwd)
 
     # print and save statistics
     if len(strStatistics) > 0:
@@ -306,7 +337,7 @@ def JVSummaryToBoxPlots(
 
     # return last plot
     print("JVSummaryToBoxPlots completed.")
-    return graphs[0]
+    return graphsum
 
 
 if __name__ == "__main__":

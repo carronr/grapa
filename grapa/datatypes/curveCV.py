@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics,
+Romain Carron
 """
 
 import numpy as np
@@ -10,14 +10,13 @@ import warnings
 
 from grapa.curve import Curve
 from grapa.mathModule import roundSignificant, derivative, is_number
+from grapa.constants import CST
 
 
 class CurveCV(Curve):
     CURVE = "Curve CV"
 
-    CST_q = 1.6021766208e-19  # C # electrical charge
-    CST_eps0 = 8.85418782e-12  # m-3 kg-1 s4 A2 # vacuum permittivity
-    CST_epsR = 10  # relative permittivity
+    CST_epsilonR = 10  # relative permittivity
 
     CST_MottSchottky_Vlim_def = [0, 0.4]
     CST_MottSchottky_Vlim_adaptative = [-0.5, np.inf]
@@ -141,7 +140,7 @@ class CurveCV(Curve):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             # y defined as nF/cm2, output depth in [nm]
-            w = eps_r * CurveCV.CST_eps0 / (1e-5 * self.y(**kwargs)) * 1e9
+            w = eps_r * CST.epsilon0 / (1e-5 * self.y(**kwargs)) * 1e9
         return w
 
     def y_CV_Napparent(self, xyValue=None, **kwargs):
@@ -154,7 +153,7 @@ class CurveCV(Curve):
             dCm2dV = derivative(self.x(**kwargs), (1e-5 * self.y(**kwargs)) ** (-2))
         eps_r = CurveCV.getEpsR(self)
         # output unit in [cm-3]
-        N = -2 / (CurveCV.CST_q * eps_r * CurveCV.CST_eps0 * (dCm2dV)) * 1e-6
+        N = -2 / (CST.q * eps_r * CST.epsilon0 * (dCm2dV)) * 1e-6
         return N
 
     # FUNCTIONS RELATED TO GUI (fits, etc.)
@@ -171,7 +170,7 @@ class CurveCV(Curve):
     def getEpsR(self):
         if self.attr("epsR", 0) != 0:
             return self.attr("epsR")
-        return CurveCV.CST_epsR
+        return CurveCV.CST_epsilonR
 
     def setEpsR(self, value):
         self.update({"epsR": value})
@@ -222,7 +221,7 @@ class CurveCV(Curve):
         datay = 1 / (datay * 1e-5) ** 2  # calculation in SI units [F m-2]
         z = np.polyfit(datax, datay, 1, full=True)[0]
         Vbi = -z[1] / z[0]
-        N_CV = -2 / (CurveCV.CST_q * CurveCV.getEpsR(self) * CurveCV.CST_eps0) / z[0]
+        N_CV = -2 / (CST.q * CurveCV.getEpsR(self) * CST.epsilon0) / z[0]
         return Vbi, N_CV * 1e-6  # N_CV in [cm-3]
 
     def func_MottSchottky(self, V, Vbi, N_CV):
@@ -238,7 +237,7 @@ class CurveCV(Curve):
         mask = V < Vbi
         Cm2 = (
             2
-            / (CurveCV.CST_q * CurveCV.getEpsR(self) * CurveCV.CST_eps0 * (N_CV * 1e6))
+            / (CST.q * CurveCV.getEpsR(self) * CST.epsilon0 * (N_CV * 1e6))
             * (Vbi - V)
         )
         out[mask] = Cm2[mask] ** (-0.5)
@@ -269,7 +268,6 @@ class CurveCV(Curve):
 
         N_ = medfilt(N, 3)  # thus we eliminate faulty points
         idx = np.argmin(N_[ROI[0] : ROI[1]])
-        # print(self.attr('temperature [k]'), [V[ROI[0]+idx+window[0]], V[ROI[0]+idx+window[1]]])
         lim0 = max(ROI[0] + idx + window[0], 0)
         lim1 = min(ROI[0] + idx + window[1], len(V) - 1)
         return [V[lim0], V[lim1]]
@@ -284,7 +282,7 @@ class CurveCV(Curve):
             print("CurveCV.CurveCV_0V: please provide a number")
             return False
         i = np.argmin(np.abs(self.x() - Vtarget))
-        if i > 0 and i < len(self.x()) - 1:
+        if 0 < i < len(self.x()) - 1:
             x = np.concatenate(([0], self.x()[i - 1 : i + 2], [0]))
             y = np.concatenate(([np.nan], self.y()[i - 1 : i + 2], [np.nan]))
             curve = CurveCV([x, y], self.attributes)
@@ -299,7 +297,10 @@ class CurveCV(Curve):
             )
 
             if len(curve.x()) > 2:
-                msg = "Apparent space charge region width [nm] {}, Apparent carrier density (doping) [cm-3] {}"
+                msg = (
+                    "Apparent space charge region width [nm] {:.5f}, Apparent "
+                    "carrier density (doping) [cm-3] {:.5f}"
+                )
                 print(
                     msg.format(
                         curve.x_offsets(alter="CurveCV.x_CVdepth_nm")[2],

@@ -1,5 +1,6 @@
 Sample	sample_b_3layermo
 label	sample\nb\n3layermo
+color	c
 Cell	Voc [V]	Jsc [mA/cm2]	FF [%]	Eff. [%]	Area [cm-2]	Vmpp [V]	Jmpp [mA/cm2]	Pmpp [mW/cm2]	Rp [Ohmcm2]	Rs [Ohmcm2]	n	J0 [A/cm2]	Temperature [K]	Acquis. T [°C]	Filename	Remarks
 a1	0.72148	33.561	74.004	17.919	0.545	0.57815	30.994	17.919	5288.7	0.769	1.8	5.75e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_a1_01.txt	
 a2	0.71685	33.591	75.35	18.144	0.544	0.58185	31.184	18.144	5226.3	0.637	1.695	2.44e-09	298.15	nan	D:/D/Programmation/python/packages/grapa/examples/JV/SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_a2_01.txt	
