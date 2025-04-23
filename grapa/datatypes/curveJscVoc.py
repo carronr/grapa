@@ -3,17 +3,18 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
 
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
 from grapa.curve import Curve
 from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
 from grapa.constants import CST
+from grapa.utils.graphIO import GraphIO
+from grapa.utils.funcgui import FuncListGUIHelper
 
 
 class GraphJscVoc(Graph):
@@ -22,22 +23,22 @@ class GraphJscVoc(Graph):
     AXISLABELS = [["Voc", "", "V"], ["Jsc", "", "mA cm$^{-2}$"]]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **_kwargs):
         if (
-            fileExt == ".txt"
-            and fileName[:7] == "JscVoc_"
+            fileext == ".txt"
+            and filename[:7] == "JscVoc_"
             and line1[:14] == "Sample name: 	"
         ):
             return True  # can open this stuff
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
-        le = self.length()
+        le = len(self)
         GraphIO.readDataFromFileGeneric(self, attributes, **kwargs)
         # expect 3 columns data
         self.castCurve(CurveJscVoc.CURVE, le, silentSuccess=True)
         # remove strange characters from attributes keys
-        attr = self.curve(le).getAttributes()
+        attr = self[le].get_attributes()
         dictUpd = {}
         for key in attr:
             if "²" in key or "Â²" in key:
@@ -51,7 +52,7 @@ class GraphJscVoc(Graph):
                 dictUpd.update({key: ""})
         self[le].update(dictUpd)
         # remove strange characters from attributes values
-        for key in self[le].getAttributes():
+        for key in self[le].get_attributes():
             val = self[le].attr(key)
             if isinstance(val, str) and r"ÃÂ²" in val:
                 self[le].update({key: val.replace(r"ÃÂ²", "2")})
@@ -66,8 +67,10 @@ class GraphJscVoc(Graph):
             .replace(" Values Jsc [mA/cm2]", "")
         )
         self[le].update({"label": lbl, "sample": lbl})
+        self[le].data_units(unit_x="V", unit_y="mA cm-2")
         self[le + 1].update({"type": "scatter_c"})
-        # self.curve(le+1).swapShowHide() # hide T curve
+        self[le + 1].data_units(unit_x="V", unit_y="K")
+        # self.curve(le+1).visible(False) # hide T curve
         self.update(
             {
                 "typeplot": "semilogy",
@@ -94,7 +97,7 @@ class GraphJscVoc(Graph):
                         return self[c]
                 return False
 
-    def splitTemperatures(self, curve, threshold=3):
+    def split_temperatures(self, curve, threshold=3):
         """
         Splits the compiled data into different data (one for each T)
         curve: stores the Jsc-Voc pairs - will need to find the T
@@ -136,26 +139,31 @@ class GraphJscVoc(Graph):
         return datas, temps
 
     def CurvesJscVocSplitTemperature(self, threshold=3, curve=None):
-        """
-        Splits the compiled data into different data (one for each T)
-        threshold in °C
-        curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
-            to allow calls from GUI
+        """Splits the compiled data into different data (one for each T)
+
+        :param threshold: in K
+        :param curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
+               to allow calls from GUI
         """
         if curve is None:
             print(
                 "Error CurvesJscVocSplitTemperature, you must provide",
                 'argument key "curve" with a Jsc-Voc Curve.',
             )
-        datas, temps = GraphJscVoc.splitTemperatures(self, curve, threshold=3)
-        attr = curve.getAttributes()
+        datas, temps = GraphJscVoc.split_temperatures(self, curve, threshold=3)
+        attr = curve.get_attributes()
         out = []
         for i in range(len(datas)):
             out.append(CurveJscVoc(datas[i], attr))
-            out[-1].update({"temperature": temps[i], "type": "", "cmap": ""})
             out[-1].update(
-                {"label": out[-1].attr("label") + " " + "{:.0f}".format(temps[i]) + "K"}
+                {
+                    "temperature": temps[i],
+                    "type": "",
+                    "cmap": "",
+                    "label": "{} {:.0f} K".format(out[-1].attr("label"), temps[i]),
+                }
             )
+            out[-1].data_units(unit_x="V", unit_y="mA cm-2")
         return out
 
     # handling of curve fitting
@@ -168,14 +176,16 @@ class GraphJscVoc(Graph):
         curve=None,
         silent=False,
     ):
-        """
-        Fit the Jsc-Voc data, returns fitted Curves.
+        """Fit the Jsc-Voc data, returns fitted Curves.
         If required, first splits data in different temperatures.
-        Voclim, Jsclim: fit limits for Voc and Jsc, in data units
-        threshold in °C
-        graphsnJ0: if True, also returns A vs T, J0 vs T and J0 vs A*T
-        curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
-            to allow calls from GUI
+
+        :param Voclim: fit limits for Voc, in data units
+        :param Jsclim: fit limits for Jsc, in data units
+        :param threshold: tolerance to temperature, in K
+        :param graphsnJ0: if True, also returns A vs T, J0 vs T and J0 vs A*T
+        :param curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
+               to allow calls from GUI
+        :param silent: If False, prints more information
         """
         if curve is None:
             print(
@@ -193,7 +203,7 @@ class GraphJscVoc(Graph):
             T = np.nan
         # check if is single or multiple temperature
         if np.isnan(T):
-            datas, temps = GraphJscVoc.splitTemperatures(
+            datas, temps = GraphJscVoc.split_temperatures(
                 self, curve, threshold=threshold
             )
         else:
@@ -217,15 +227,8 @@ class GraphJscVoc(Graph):
                 + curve.attr("filename").split("/")[-1].split("\\")[-1],
             }
             if not silent:
-                print(
-                    "Fit Jsc-Voc (T =",
-                    temps[i],
-                    "): ideality factor n =",
-                    n,
-                    ", J0 =",
-                    "{:1.4e}".format(J0),
-                    "[mA/cm2].",
-                )
+                msg = "Fit Jsc-Voc (T={}): ideality factor n={}, J0={:1.4e} [mA/cm2]."
+                print(msg.format(temps[i], n, J0))
             x, y = curve.selectData(xlim=Voclim, ylim=Jsclim, data=datas[i])
             out.append(CurveJscVoc([x, curve.func_nJ0(x, n, J0, T=temps[i])], attr))
             ns.append(n)
@@ -237,6 +240,7 @@ class GraphJscVoc(Graph):
             )
 
             # generate n vs T, J0 vs T
+            ylabel_j0 = ["Saturation current J$_0$", "", "mA cm$^{-2}$"]
             lbl = curve.attr("label")
             if len(lbl) > 0:
                 lbl += " "
@@ -247,6 +251,8 @@ class GraphJscVoc(Graph):
                         "linestyle": "none",
                         "linespec": "o",
                         "label": lbl + "Ideality factor A vs T [K]",
+                        Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
+                        Curve.KEY_AXISLABEL_Y: ["Ideality factor", "A", ""],
                     },
                 )
             )
@@ -257,6 +263,8 @@ class GraphJscVoc(Graph):
                         "linestyle": "none",
                         "linespec": "o",
                         "label": lbl + "J0 vs T [K]",
+                        Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
+                        Curve.KEY_AXISLABEL_Y: ylabel_j0,
                     },
                 )
             )
@@ -266,13 +274,17 @@ class GraphJscVoc(Graph):
                 )
             )
             out[-1].update(
-                {"label": lbl + out[-1].attr("label")}
+                {
+                    "label": lbl + out[-1].attr("label"),
+                    Curve.KEY_AXISLABEL_X: ["A * temperature", "", "K"],
+                    Curve.KEY_AXISLABEL_Y: ylabel_j0,
+                }
             )  # 'label': lbl+'J0 vs A*T'
             # out[-1].update({'type': 'scatter', 'markeredgewidth':0, 'markersize':100, 'cmap': 'inferno'})# 'label': lbl+'J0 vs A*T'
             # out.append(Curve([np.array(temps)*np.array(ns), np.array(temps)], {'linestyle': 'none', 'type': 'scatter_c'}))
         return out
 
-    def splitIllumination(
+    def split_illumination(
         self,
         threshold=3,
         ifFit=False,
@@ -328,7 +340,7 @@ class GraphJscVoc(Graph):
             colorscale = Colorscale(
                 np.array([[0.91, 0.25, 1], [1.09, 0.75, 1]]), space="hls"
             )
-            colors = colorscale.valuesToColor(np.array(range(len(data))) / len(data))
+            colors = colorscale.values_to_color(np.array(range(len(data))) / len(data))
         except Exception:
             colors = [""] * len(data)
         xylbls = [
@@ -348,6 +360,8 @@ class GraphJscVoc(Graph):
                     "_Arrhenius_variant": "ExtrapolationTo0",
                     "_Arrhenius_dataLabel": xylbls,
                     "_Arrhenius_dataLabelArrhenius": xylbls,
+                    Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
+                    Curve.KEY_AXISLABEL_Y: ["Voc", "", "V"],
                 }
             )
             if ifFit:
@@ -358,7 +372,7 @@ class GraphJscVoc(Graph):
                         1.1 * max(out[-1].x_1000overK()),
                     ]
                 out.append(out[-1].CurveArrhenius_fit(Tlim, silent=True))
-                res.append([j, out[-1].getAttribute("_popt")])
+                res.append([j, out[-1].attr("_popt")])
             if extend0:
                 out[-1].resampleX("linspace", 0, np.max(out[-1].x_1000overK()), 51)
         if not silent:
@@ -374,6 +388,12 @@ class GraphJscVoc(Graph):
 
 class CurveJscVoc(Curve):
     CURVE = "Curve JscVoc"
+
+    AXISLABELS_X = {"": GraphJscVoc.AXISLABELS[0]}
+    AXISLABELS_Y = {
+        "": GraphJscVoc.AXISLABELS[1],
+        Curve.ALTER_ABS: GraphJscVoc.AXISLABELS[1],
+    }
 
     CST_Jsclim0 = 1.0  # mA/cm2
 
@@ -394,10 +414,7 @@ class CurveJscVoc(Curve):
             [self.setArea, "Area correction", [lbl], ["{:6.5f}".format(self.getArea())]]
         )  # one line per function
         # fit function
-        if (
-            self.getAttribute("_fitFunc") == ""
-            or self.getAttribute("_popt", None) is None
-        ):
+        if self.attr("_fitFunc") == "" or self.attr("_popt", None) is None:
             Voclim = roundSignificantRange([0, max(self.x()) * 1.01], 3)
             Jsclim = roundSignificantRange([0.1, max(self.y()) * 1.1], 2)
             out.append(
@@ -415,7 +432,7 @@ class CurveJscVoc(Curve):
                     self.updateFitParam,
                     "Modify fit",
                     ["n", "J0"],
-                    roundSignificant(self.getAttribute("_popt"), 5),
+                    roundSignificant(self.attr("_popt"), 5),
                 ]
             )
         # split according to temperatures
@@ -431,9 +448,9 @@ class CurveJscVoc(Curve):
         # split according to illumination intensities (Voc vs T)
         Tlim = [0, 350]
         if graph is not None:
-            for c in range(graph.length() - 1):
-                if graph.curve(c) == self:
-                    if np.array_equiv(graph.curve(c + 1).x(), graph.curve(c).x()):
+            for c in range(len(graph) - 1):
+                if graph[c] == self:
+                    if np.array_equiv(graph[c + 1].x(), graph[c].x()):
                         Tlim = [
                             0.99 * np.min(graph.curve(c + 1).y()),
                             1.01 * np.max(graph.curve(c + 1).y()),
@@ -442,7 +459,7 @@ class CurveJscVoc(Curve):
         Tlim = roundSignificantRange(Tlim, 3)
         out.append(
             [
-                GraphJscVoc.splitIllumination,
+                GraphJscVoc.split_illumination,
                 "Separate Voc vs T",
                 ["T max fluct.", "fit Voc(T)", "T limits", "extend to 0"],
                 [3, True, Tlim, True],
@@ -450,7 +467,9 @@ class CurveJscVoc(Curve):
                 [{}, {"field": "Checkbutton"}, {}, {"field": "Checkbutton"}],
             ]
         )
-        out.append([self.printHelp, "Help!", [], []])
+        out.append([self.print_help, "Help!", [], []])
+
+        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
         return out
 
     def alterListGUI(self):
@@ -461,7 +480,7 @@ class CurveJscVoc(Curve):
     # Handling of cell area
     def getArea(self):
         """return area of the cell as stored in the Curve parameters"""
-        area = self.getAttribute("area [cm2]")
+        area = self.attr("area [cm2]")
         if is_number(area):
             return area
         return 1
@@ -496,11 +515,13 @@ class CurveJscVoc(Curve):
 
     def T(self, default=None, silent=False):
         """Returns the acquisition temperature, otherwise default."""
-        test = self.getAttribute("temperature", 0)
+        test = self.attr("temperature", 0)
         if test != 0:
             return test
         if not silent:
-            print("Curve JscVoc cannot find keyword temperature.", self.getAttributes())
+            print(
+                "Curve JscVoc cannot find keyword temperature.", self.get_attributes()
+            )
         if default is None:
             return CurveJscVoc.Tdefault
         return default
@@ -551,15 +572,16 @@ class CurveJscVoc(Curve):
     def CurvesJscVocSplitIllumination(self, curve=None):
         """
         Splits the compiled data into different curves (one for each intensity)
-        curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
-            to allow calls from GUI
+
+        :param curve: stores the Jsc-Voc pairs. If None: error. Weird prototype design
+               to allow calls from GUI
         """
         if curve is None:
             print(
                 'Error CurvesJscVocSplitIllumination, you must provide argument key "curve" with a Jsc-Voc Curve.'
             )
-        datas, temps = GraphJscVoc.splitTemperatures(self, curve, threshold=3)
-        attr = curve.getAttributes()
+        datas, temps = GraphJscVoc.split_temperatures(self, curve, threshold=3)
+        attr = curve.get_attributes()
         out = []
         for i in range(len(datas)):
             out.append(CurveJscVoc(datas[i], attr))
@@ -569,7 +591,7 @@ class CurveJscVoc(Curve):
             )
         return out
 
-    def printHelp(self):
+    def print_help(self):
         print("*** *** ***")
         print("CurveJV offer basic treatment of Jsc-Voc pairs of solar cells.")
         print("Based on Thomas Weiss script, and on the following references:")

@@ -1,0 +1,8 @@
+NOTE
+
+28.01.2025
+Trying to add tests progresively, to improve programming practices.
+The goal is mainly to test how to use the test features.
+It is unlikely that the tests become extensive enough to be meaningful.
+
+

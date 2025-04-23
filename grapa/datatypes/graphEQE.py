@@ -1,6 +1,8 @@
 """
+To parse files containing extrnal quantum efficiency EQE data.
+
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 import os
 import numpy as np
@@ -11,22 +13,24 @@ from grapa.datatypes.curveEQE import CurveEQE
 
 
 class GraphEQE(Graph):
+    """To parse files containing extrnal quantum efficiency EQE data"""
+
     FILEIO_GRAPHTYPE = "EQE curve"
     FILEIO_GRAPHTYPE_OLD = "EQE curve (old)"
 
-    AXISLABELS = [["Wavelength", r"\lambda", "nm"], ["Cell EQE", "", "%"]]
+    AXISLABELS = [CurveEQE.AXISLABELS_X[""], CurveEQE.AXISLABELS_Y[""]]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", **kwargs):
+    def isFileReadable(cls, _filename, fileext, line1="", **_kwargs):
         # new QE files
-        if fileExt == ".sr" and line1 == "This is a QE measurment":
+        if fileext == ".sr" and line1 == "This is a QE measurment":
             return True
         # old setup QE files (2013(?) or older)
-        if fileExt == ".sr" and line1[0:16] == "Reference Cell: ":
+        if fileext == ".sr" and line1[0:16] == "Reference Cell: ":
             return True
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
+    def readDataFromFile(self, attributes, **_kwargs):
         ifOld = False
         # retrieve sample name - code should work for old and new file format
         f = open(self.filename, "r")
@@ -76,8 +80,8 @@ class GraphEQE(Graph):
         self.append(CurveEQE(data, attributes))
         self[-1].update(attributesFile)
         if len(data.shape) > 1:
-            self[-1].update({"mulOffset": 100})
-        self[-1].update({"_units": ["nm", ""]})
+            self[-1].update({"muloffset": 100})
+        self[-1].data_units("nm", "")
         # update label with information stored inside the file
         lbl = line[-1].replace("_", " ")
         if lbl == "Ref":

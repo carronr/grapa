@@ -1,5 +1,8 @@
 [
 	["meastype", "", []],
 	["collabels", "", []],
+	["rowlabels", "", []],
+	["rowlabelnums", "", []],
+	["collabelsdetail", "", []],
 	["savesilent", "", []]
 ]

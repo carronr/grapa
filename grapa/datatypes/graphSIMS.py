@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -11,13 +11,10 @@ from scipy.optimize import fsolve
 
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import GraphIO
 from grapa.datatypes.curveSIMS import CurveSIMS
 
 from grapa.mathModule import roundSignificant, is_number
-
-
-# TODO: test ALL occurences for msg.format
 
 
 class GraphSIMS(Graph):
@@ -83,8 +80,10 @@ class GraphSIMS(Graph):
     AXISLABELS = [["Sputter time", "t", "s"], ["Intensity", "", "counts"]]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line2="", line3="", **kwargs):
-        if fileExt == ".txt" and (
+    def isFileReadable(
+        cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
+    ):
+        if fileext == ".txt" and (
             line1.startswith("\ttotal\t") or line3.startswith("Sputter Time (s)")
         ):
             return True
@@ -95,7 +94,7 @@ class GraphSIMS(Graph):
             return True
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
+    def readDataFromFile(self, attributes, **_kwargs):
         # open using fileGeneric
         GraphIO.readDataFromFileGeneric(self, attributes)
         tot, nan = 0, 0
@@ -106,8 +105,8 @@ class GraphSIMS(Graph):
             GraphIO.readDataFromFileGeneric(
                 self, attributes, ifReplaceCommaByPoint=True, lstrip=" #"
             )
-        # print(self[1].getAttributes())
-        # print(self[2].getAttributes())
+        # print(self[1].get_attributes())
+        # print(self[2].get_attributes())
         self.update({"typeplot": "semilogy"})
         ylabel = self[-1].attr("sputter time (s)")
         if ylabel == "":
@@ -123,7 +122,7 @@ class GraphSIMS(Graph):
         for c in range(len(self)):
             self[c].update({"label": self[c].attr("total"), "sample": sample})
             self.castCurve("CurveSIMS", c, silentSuccess=True)
-            self[c].autoLabel("${_simselement}")  # BEWARE
+            self[c].label_auto("${_simselement}")  # BEWARE
         # prints default keywords
         msg = "SIMS available ratio keywords: {}."
         print(msg.format(", ".join(key["aliases"][0] for key in GraphSIMS.SHORTCUTS)))
@@ -150,13 +149,17 @@ class GraphSIMS(Graph):
                 c.update({"linestyle": "none"})
                 hidden.append(h)
         if len(hidden) > 0:
-            print("SIMS curves hidden automatically:", ", ".join(hidden) + ".")
+            msg = "SIMS curves hidden automatically: {}."
+            print(msg.format(", ".join(hidden)))
 
     def getLayerBoundaries(self, msmtid):
         for c in range(len(self)):
             if self[c].attr("_SIMSmsmt") == msmtid:
                 return self[c].attr("_SIMSLayerBoundaries")
-        msg = "ERROR graphSIMS getLayerBoundaries cannot find curve with desired msmtid ({})"
+        msg = (
+            "ERROR graphSIMS getLayerBoundaries cannot find curve with desired "
+            "msmtid ({})"
+        )
         print(msg.format(msmtid))
         return False
 
@@ -181,11 +184,21 @@ class GraphSIMS(Graph):
                     mult = depth / (x[1] - x[0])
                 self[c].setDepthParameters(offset, mult)
         if offset is None:
-            msg = "ERROR GraphSIMS setLayerBoundariesDepthParameters cannot find curve with desired msmtid ({})"
+            msg = (
+                "ERROR GraphSIMS setLayerBoundariesDepthParameters cannot find "
+                "curve with desired msmtid ({})"
+            )
             print(msg.format(msmtid))
         return True
 
     def setLayerBoundariesDepthParametersGUI(self, depth, ROI, msmtid=None):
+        """Calibrate depth by linear scaling of input x axis, given two positions and
+        a corresponding distance.
+
+        :param depth: known depth difference of ROI
+        :param ROI: range of interest, in units of input x data. [xmin, xmax].
+        :param msmtid: identifier for the Curves to consider.
+        """
         return GraphSIMS.setLayerBoundariesDepthParameters(self, msmtid, ROI, depth)
 
     def getCurve(self, msmtid, element, silent=False, returnIdx=False):
@@ -198,7 +211,10 @@ class GraphSIMS(Graph):
                     return c
                 return self[c]
         if not silent:
-            msg = "ERROR getCurve: cannot find curve associated with element {} and id {}."
+            msg = (
+                "ERROR getCurve: cannot find curve associated with element {} and "
+                "id {}."
+            )
             print(msg.format(element, msmtid))
             return False
         return None
@@ -215,7 +231,7 @@ class GraphSIMS(Graph):
             c = GraphSIMS.getCurve(self, msmtid, key, silent=True)
             if c is not None:
                 c.update({"_SIMSYieldCoef": elementYield[key]})
-                print("Graph SIMS setYields", key, elementYield[key])
+                print("Graph SIMS setYields {}, {}".format(key, elementYield[key]))
 
     def appendReplaceCurveRatio(
         self, msmtid, ratioCurves, curveId, attributes={}, savgol=None
@@ -229,7 +245,11 @@ class GraphSIMS(Graph):
             savgol = list(savgol)
             if len(savgol) < 2 or not is_number(savgol[0]) or not is_number(savgol[1]):
                 savgol = None
-                msg = "Warning GraphSIMS.appendReplaceCurveRatio: savgol must be a 2-elements list of ints for savistky-golay width and degree. Received {}."
+                msg = (
+                    "Warning GraphSIMS.appendReplaceCurveRatio: savgol must be a "
+                    "2-elements list of ints for savistky-golay width and degree. "
+                    "Received {}."
+                )
                 print(msg.format(savgol))
             if savgol is not None:  # tests on savlues
                 savgol[0] = max(1, int((savgol[0] - 1) / 2) * 2 + 1, 1)
@@ -238,18 +258,23 @@ class GraphSIMS(Graph):
             if savgol == [1, 1]:
                 savgol = None
             if savgol is not None:
-                msg = "GraphSIMS: smooth curve data using Savistky-Golay window {} degree {}."
+                msg = (
+                    "GraphSIMS: smooth curve data using Savistky-Golay window {} "
+                    "degree {}."
+                )
                 print(msg.format(savgol[0], savgol[1]))
 
         ratio_curves = GraphSIMS.getRatioProcessRatiocurves(self, ratioCurves)
         ret = True
         ratio = None
         x = None
-        attrs = {"filename": "",
-                 "_SIMSlayerBoundaries": "",
-                 "_simsdepth_offset": "",
-                 "_simsdepth_mult": "",
-                 "sample": ""}
+        attrs = {
+            "filename": "",
+            "_SIMSlayerBoundaries": "",
+            "_simsdepth_offset": "",
+            "_simsdepth_mult": "",
+            "sample": "",
+        }
         yieldcoefs = []
         for i in range(len(ratio_curves)):
             yieldcoefs.append([])
@@ -303,7 +328,7 @@ class GraphSIMS(Graph):
         if c is None:
             self.append(new)
         else:
-            self.replaceCurve(new, c)
+            self.curve_replace(new, c)
         return ret
 
     def appendReplaceCurveRatioGUI(self, ratioCurves, curveId, msmtid=None):
@@ -312,6 +337,16 @@ class GraphSIMS(Graph):
     def appendReplaceCurveRatioGUISmt(
         self, ratioCurves, curveId, SGw, SGd, msmtid=None
     ):
+        """Creates a Curve computed as a ratio of Curves.
+
+        :param ratioCurves: which Curve ratio is to be computed
+        :param curveId: give it a beautiful label (e.g. "GGI")
+        :param SGw: width of a Savitsky-Golay smooth to apply to the elemental traces
+               prior to combination, using window and degree. No effect if w 1 d 1.
+               Possibly suitable smoothing w 21 d 3.
+        :param SGd: degree of the Savitsky-Golay smoothing.
+        :param msmtid: identifier for the Curves to consider.
+        """
         return GraphSIMS.appendReplaceCurveRatio(
             self, msmtid, ratioCurves, curveId, savgol=[SGw, SGd]
         )
@@ -328,7 +363,10 @@ class GraphSIMS(Graph):
                     flag = True
                     break
             if not flag:
-                msg = "WARNING: SIMS setYieldsFromExternalData unknown key ({}). Used {} instead."
+                msg = (
+                    "WARNING: SIMS setYieldsFromExternalData unknown key ({}). Used "
+                    "{} instead."
+                )
                 print(msg.format(ratioCurves, GraphSIMS.SHORTCUTS[0]["aliases"][0]))
                 ratioCurves = GraphSIMS.SHORTCUTS[0]["short"]
         return ratioCurves
@@ -349,8 +387,8 @@ class GraphSIMS(Graph):
             for j in range(len(ratio_curves[i])):
                 key = ratio_curves[i][j]
                 curve = GraphSIMS.getCurve(self, msmtid, key, silent=True)
-                GraphSIMS.check_saturation(curve)
                 if curve is not None:
+                    GraphSIMS.check_saturation(curve)
                     out_coefs[i][j] = curve.attr("_SIMSYieldCoef", default=1)
                     avgs_of_ratios[i, :] += curve.y(index=ROI) * out_coefs[i][j]
                     out_avg[i][j] = np.average((curve.y(index=ROI))) * out_coefs[i][j]
@@ -428,12 +466,32 @@ class GraphSIMS(Graph):
         )
 
     def targetRatioSetYieldGUI(self, ROI, ratioCurves, element, target, msmtid=None):
+        """Adjust the relative SIMS yield of the Curve of a given `element`, such that
+        the Curve ratio `ratioCurves` has the chosen value `target` within the selected
+        range of interest `ROI`.
+
+        :param ROI: range of interest, in units of input x data. [x_min, x_max].
+        :param ratioCurves: which Curve ratio is to be adjusted
+        :param element: which element the yield has to be adjusted
+        :param target: the known integrated ratio we want to reach by adjusting the
+               element yield
+        :param msmtid: identifier for the Curves to consider.
+        """
         ROI = GraphSIMS.ROI_GUI2idx(self, msmtid, ROI)
         return GraphSIMS.targetRatioSetYield(
             self, msmtid, ROI, ratioCurves, element, target
         )
 
     def getRatioGUI(self, ROI, ratioCurves, msmtid=None, ifROIisIdx=False):
+        """Computes a ratio of curves within a ROI.
+
+        :param ROI: range of interest, in units of input x data. [x_min, x_max]
+        :param ratioCurves:  which Curve ratio is to be adjusted
+        :param msmtid:  identifier for the Curves to consider.
+        :param ifROIisIdx: if True, the ROI is given in units of index. If False, in
+               terms of (calibrated) depth.
+        """
+
         if msmtid is None:
             print("ERROR GraphSIMS getRatioGUI: msmtid was not provided.")
             return False
@@ -471,7 +529,10 @@ class GraphSIMS(Graph):
     @classmethod
     def check_saturation(cls, curve):
         if np.max(curve.y()) > cls.THRESHOLD_SATURATION:
-            msg = "WARNING: please check for possible saturation of curve {} ({}). Expect saturation if signal > {}."
+            msg = (
+                "WARNING: please check for possible saturation of curve {} ({}). "
+                "Expect saturation if signal > {}."
+            )
             print(
                 msg.format(
                     curve.attr("label"),

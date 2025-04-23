@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Oct 29 14:19:52 2017
+"""A subclass of Curve to deal with images, contour and contourf
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -11,15 +10,16 @@ from copy import deepcopy
 import numpy as np
 import matplotlib
 
+from grapa import KEYWORDS_CURVE
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.gui.GUIFuncGUI import FuncGUI
+from grapa.utils.funcgui import FuncGUI
 
 
 class Curve_Image(Curve):
     """
-    The purpose is this class is to provid GUI support to create images, contour plots
-    etc.
+    The purpose class Curve_Image is to provid GUI support to create images (imshow),
+    as well as contour and contourf plots.
     """
 
     CURVE = "image"
@@ -48,10 +48,11 @@ class Curve_Image(Curve):
         if default not in type_values:
             texttype = "issue: keyword 'type' should be:"
             default = "imshow"
-        out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": ["type"]}))
-        out[-1].append(
-            texttype, default, options={"field": "Combobox", "values": type_values}
-        )
+        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": ["type"]})
+        item.appendcbb(texttype, default, type_values)
+        doc = "Toggle matplotlib plot function: {}.".format(", ".join(type_values))
+        item.set_funcdocstring_alt(doc)
+        out.append(item)
 
         interpolation = [
             "",
@@ -77,31 +78,29 @@ class Curve_Image(Curve):
         datafile_xy1rowcol = bool(self.attr("datafile_XY1rowcol"))
         datafile_dataasxyz = bool(self.attr("datafile_dataasxyz"))
         # file
-        out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": ["datafile"]}))
-        out[-1].append("data file", self.attr("datafile"), options={"width": 40})
+        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": ["datafile"]})
+        item.append("data file", self.attr("datafile"), options={"width": 40})
+        item.set_funcdocstring_alt("Change filename of file containing data.")
+        out.append(item)
+
         # X,Y 1st row column; data as XYZ
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Set",
-                ["first row, column as coordinates", "data as 3-colum XYZ"],
-                [datafile_xy1rowcol, datafile_dataasxyz],
-                {"keys": ["datafile_XY1rowcol", "datafile_dataasxyz"]},
-                [{"field": "Checkbutton"}, {"field": "Checkbutton"}],
-            ]
-        )
+        opts_dfxy = {"options": {"field": "Checkbutton"}}
+        item = FuncGUI(self.updateValuesDictkeys, "Set")
+        item.set_hiddenvars({"keys": ["datafile_XY1rowcol", "datafile_dataasxyz"]})
+        item.append("first row, column as coordinates", datafile_xy1rowcol, **opts_dfxy)
+        item.append("data as 3-colum XYZ", datafile_dataasxyz, **opts_dfxy)
+        doc = "First row, column as coordinates, and data as 3-column XYZ."
+        item.set_funcdocstring_alt(doc)
+        out.append(item)
+
         # transpose, rotate
         at = ["transpose", "rotate"]
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Set",
-                at,
-                [self.attr(a) for a in at],
-                {"keys": at},
-                [{"field": "Combobox", "values": ["", "True", "False"]}, {}],
-            ]
-        )
+        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+        item.appendcbb(at[0], self.attr(at[0]), ["", "True", "False"])
+        item.append(at[1], self.attr(at[1]))
+        item.set_funcdocstring_alt("Update attributes 'transpose' and 'rotate'.")
+        out.append(item)
+
         # extent
         if not datafile_xy1rowcol:
             extent = list(self.attr("extent"))
@@ -109,7 +108,7 @@ class Curve_Image(Curve):
                 extent.append("")
             out.append(
                 [
-                    self.updateExtent,
+                    self.update_extent,
                     "Set",
                     ["extent left", "right", "bottom", "top"],
                     extent,
@@ -118,36 +117,36 @@ class Curve_Image(Curve):
         else:
             msg = "extent: not active if first row, column as coordinates"
             out.append([None, msg, [], []])
+
         # colorscale
-        at = ["colorbar"]
-        out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at}))
-        out[-1].append(at[0], self.attr(at[0]), options={"width": 50})
+        key = "colorbar"
+        valscb = [self.attr(key)]
+        if "colorbar" in KEYWORDS_CURVE["keys"]:
+            i = KEYWORDS_CURVE["keys"].index(key)
+            valscb += [str(v) for v in KEYWORDS_CURVE["guiexamples"][i]]
+        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": [key]})
+        item.appendcbb(key, self.attr(key), valscb, options={"width": 50})
+        item.set_funcdocstring_alt("Modifies the attribute 'colorbar'.")
+        out.append(item)
+
         # colormap
         attxt = ["cmap (ignored if color image)", "vmin", "vmax"]
         at = [a.split(" ")[0] for a in attxt]
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Set",
-                attxt,
-                [self.attr(a) for a in at],
-                {"keys": at},
-            ]
-        )
+        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+        for a in attxt:
+            item.append(a, self.attr(a.split(" ")[0]))
+        item.set_funcdocstring_alt("Update keywords 'cmap', 'vmin', 'vmax'")
+        out.append(item)
+
         # aspect ratio, interpolation, or levels
         if self.attr("type") == "imshow":
             at = ["aspect", "interpolation"]
-            out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at}))
-            out[-1].append(
-                "aspect ratio",
-                self.attr(at[0]),
-                options={"field": "Combobox", "values": aspect, "bind": "beforespace"},
-            )
-            out[-1].append(
-                "interpolation",
-                self.attr(at[1]),
-                options={"field": "Combobox", "values": interpolation},
-            )
+            item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+            item.appendcbb("aspect ratio", self.attr(at[0]), aspect, bind="beforespace")
+            item.appendcbb("interpolation", self.attr(at[1]), interpolation)
+            doc = "Update attributes 'aspect' (ratio) and 'interpolation'"
+            item.set_funcdocstring_alt(doc)
+            out.append(item)
         else:  # contour, contourf
             at = ["levels", "extend", "norm"]
             optse = {"field": "Combobox", "values": ["neither", "both", "min", "max"]}
@@ -155,51 +154,59 @@ class Curve_Image(Curve):
                 "field": "Combobox",
                 "values": list(matplotlib.scale.get_scale_names()),
             }
-            out.append(FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at}))
-            out[-1].append("levels (list of values)", self.attr(at[0]))
-            out[-1].append("extend", self.attr(at[1]), options=optse)
-            out[-1].append(", norm", self.attr(at[2]), options=optsn)
+            item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+            item.append("levels (list of values)", self.attr(at[0]))
+            item.append("extend", self.attr(at[1]), options=optse)
+            item.append(", norm", self.attr(at[2]), options=optsn)
+            doc = "Updates matplotlib keywords 'levels', 'extend', 'horm'."
+            item.set_funcdocstring_alt(doc)
+            out.append(item)
 
             levels = self.attr("levels")
             if len(levels) == 0:
                 levels = [np.min(self.x()), np.max(self.y())]
-            out.append(FuncGUI(self.updateLevels, "Set", {}))
+            item = FuncGUI(self.update_levels, "Set", {})
             choice = ["arange", "linspace", "logspace", "geomspace"]
             opts = {"field": "Combobox", "values": choice}
-            out[-1].append("levels:", choice[1], options=opts)
-            out[-1].append("start", np.min(levels))
-            out[-1].append("stop", np.max(levels))
-            out[-1].append("num or step", len(levels))
+            item.append("levels:", choice[1], options=opts)
+            item.append("start", np.min(levels))
+            item.append("stop", np.max(levels))
+            item.append("num or step", len(levels))
+            out.append(item)
 
         # convert data matrix to 3 column xyz and vice-versa
         if graph is not None:
+            opts_mtx = {"options": {"field": "Label"}}
             if datafile_dataasxyz:
-                out.append(
-                    FuncGUI(self.convert_xyz_matrix, "Convert", {"graph": graph})
-                )
-                out[-1].append(
-                    "xyz 3-column format into matrix", "", options={"field": "Label"}
-                )
+                item = FuncGUI(self.convert_xyz_matrix, "Convert", {"graph": graph})
+                item.append("xyz 3-column format into matrix", "", **opts_mtx)
+                out.append(item)
             else:
-                out.append(
-                    FuncGUI(self.convert_matrix_xyz, "Convert", {"graph": graph})
-                )
-                out[-1].append(
-                    "matrix into xyz 3-column format", "", options={"field": "Label"}
-                )
+                item = FuncGUI(self.convert_matrix_xyz, "Convert", {"graph": graph})
+                item.append("matrix into xyz 3-column format", "", **opts_mtx)
+                out.append(item)
 
         # help
-        out.append(FuncGUI(self.printHelp, "Help!"))
+        out.append(FuncGUI(self.print_help, "Help!"))
+        self._funclistgui_memorize(out)
         return out
 
-    def updateExtent(self, *args):
+    def update_extent(self, *args):
+        """Update the attribute extent. Must define all values, none left empt ''."""
         flag = False
         for a in args:
             if a != "":
                 flag = True
         self.update({"extent": (list(args) if flag else "")})
 
-    def updateLevels(self, typ, start, stop, step):
+    def update_levels(self, typ: str, start, stop, step):
+        """Modifies the 'levels' used to colorize a plot.
+
+        :param typ: possible values 'arange', 'linspace', 'logspace', 'geomspace'
+        :param start: start of e.g. arange
+        :param stop: stop of e.g. arange
+        :param step: step of e.g. arange
+        """
         try:
             if typ == "arange":
                 levels = np.arange(start, stop, step)
@@ -225,14 +232,14 @@ class Curve_Image(Curve):
         self.update({"levels": list(levels)})
         return True
 
-    def convert_matrix_xyz(self, *args, graph=None):
+    def convert_matrix_xyz(self, *_args, graph=None):
         """Converts a 2D data meshgrid Z[x, y] into 3 columns X, Y, Z"""
         # args: to catch fake argument for GUI purpose
         data, num = self.aggregate_into_matrix(graph=graph)
         data = data.transpose()
         x, y = range(data.shape[0]), range(data.shape[1])
         xyz = self.x_y_z_to_xyz(x, y, data)
-        attrs = self.getAttributes()
+        attrs = self.get_attributes()
         out = Graph()
         out.append(Curve([xyz[:, 0], xyz[:, 1]], attrs))
         out.append(Curve([xyz[:, 0], xyz[:, 2]], {}))
@@ -242,7 +249,8 @@ class Curve_Image(Curve):
         out[0].update({"datafile_dataasxyz": True})
         return out  # [c for c in out]
 
-    def convert_xyz_matrix(self, *args, graph=None):
+    def convert_xyz_matrix(self, *_args, graph=None):
+        """Converts matrix data stored as 3-column xyz into a 2D data meshgrid."""
         print("Curve Image convert_xyz_matrix: About to loose x, y information.")
         data, num = self.aggregate_into_matrix(graph=graph)
         if data.shape[0] < 3:
@@ -252,7 +260,7 @@ class Curve_Image(Curve):
         out = Graph()
         for x in range(1, matrix.shape[0]):
             out.append(Curve([matrix[0, :], matrix[x, :]], {}))
-        out[0].update(self.getAttributes())
+        out[0].update(self.get_attributes())
         curvetype = out[0].attr("curve")
         if curvetype != "":
             out.castCurve(curvetype, 0)
@@ -342,7 +350,7 @@ class Curve_Image(Curve):
         data = [x, y]
         numcurves = 1
         for j in range(start_i + 1, len(graph)):
-            if graph[j].isHidden():
+            if not graph[j].visible():
                 numcurves += 1
                 continue
             # test equal accepting nan, w/o using equal_nan=True for retro compatibility
@@ -367,7 +375,7 @@ class Curve_Image(Curve):
                 x = data[0, 1:]
                 y = data[1:, 0]
                 data = data[1:, 1:]
-            except:
+            except KeyError:
                 pass
         if transpose:
             data = np.transpose(data)
@@ -386,7 +394,7 @@ class Curve_Image(Curve):
                     nrot -= 1
         return data, x, y
 
-    def getImageData(self, graph, graph_i, alter, ignoreNext=0):
+    def get_image_data(self, graph, graph_i, alter, ignore_next=0):
         """
         graph: the Graph the Curve is in
         graph_i: index of Curve in graph
@@ -415,7 +423,7 @@ class Curve_Image(Curve):
                             "Cannot open image."
                         )
                         print(msg)
-                        return data, ignoreNext, X, Y
+                        return data, ignore_next, X, Y
                 data = PILimage.open(datafile)
                 if rotate:
                     data = data.rotate(rotate)
@@ -441,11 +449,11 @@ class Curve_Image(Curve):
             data, numcurves = Curve_Image.aggregate_into_matrix_i(
                 graph, graph_i, alter=alter
             )
-            ignoreNext += numcurves - 1
+            ignore_next += numcurves - 1
             if dataasxyz:
                 if data.shape[0] >= 3:
                     X, Y, data = self.xyz_to_x_y_z(data)
-                    ignoreNext = 1  # only consider 3 columns (2 Curve), not matrix
+                    ignore_next = 1  # only consider 3 columns (2 Curve), not matrix
                 else:
                     msg = (
                         "WARNING Curve Image: data as xyz does not contain the "
@@ -453,20 +461,4 @@ class Curve_Image(Curve):
                     )
                     print(msg)
             data, X, Y = self.process_matrix(data, X, Y, xy1rowcol, transpose, rotate)
-        return data, ignoreNext, X, Y
-
-    @staticmethod
-    def printHelp(self):
-        print("*** *** ***")
-        print("Class Curve_Image display images (imshow), contour and contourf plots.")
-        print("Detailed help to be written...")
-        # keyword type
-        # data file
-        # first row, col as coordinates; data as 3 column XYZ
-        # transpose, rotate
-        # extent
-        # cmap vmin xmax
-        # aspect ratio interpolation
-        # levels, extend
-        # convert
-        return True
+        return data, ignore_next, X, Y

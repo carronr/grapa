@@ -7,6 +7,7 @@
 .idea/vcs.xml
 .idea/workspace.xml
 /dist/*.*
+/_publication_howto/*.*
 /grapa.egg-info/dependency_links.txt
 /grapa.egg-info/PKG-INFO
 /grapa.egg-info/requires.txt

@@ -3,7 +3,9 @@ Grapa
 
 DOI: 10.5281/zenodo.1164571
 
-**Description**
+================
+Description
+================
 
 Grapa is a python package providing a graphical interface and the
 underlying code dedicated to the visualization, analysis and
@@ -32,7 +34,9 @@ Grapa stands for "GRAphing and Photovoltaics Analysis".
 Cheers!
 
 
-**Features overview**
+==================
+Features overview
+==================
 
 -  Open and merge a wide range of experimental data. Data import
    possible from clipboard.
@@ -56,11 +60,15 @@ Cheers!
    processing and fitting options.
 
 
-**Installation**
+==================
+Installation
+==================
 
 There are several options to install grapa. The easiest is certainly:
 
-  pip install grapa
+.. code-block:: python
+
+   pip install grapa
 
 Alternatively, the source can be retrieved from the development page
 on github (https://github.com/carronr/grapa_). Download the latest
@@ -70,17 +78,33 @@ your hard drive, and can be run with your favorite python distribution.
 The software graphical user interface GUI can be started by executing
 the following lines:
 
-  | import grapa
-  | grapa.grapa()
+
+.. code-block:: python
+
+   import grapa
+   grapa.grapa()
+
 
 Grapa can also be used in scripts. Just above the console, a
 checkbox "Commands in console" should help you to get started.
 
-Grapa was developed using python 3.4 and matplotlib 1.5, and should be
-compatible with more recent versions.
+Grapa is developed using python 3.13 and matplotlib 3.10, and should be
+backwards-compatible down to python 3.4 and matplotlib 1.5.
 
 
-**More questions?**
+
+==================
+License
+==================
+
+MIT License
+
+
+
+==================
+Questions?
+==================
+
 
 See manual.pdf in folder /manual
 

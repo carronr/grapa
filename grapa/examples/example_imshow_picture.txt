@@ -1,8 +1,8 @@
-xtickslabels	[[], []]
+subplots_adjust	0.15
 fontsize	12.0
+xtickslabels	[[], []]
 xlim	[0.0, 300.0]
 arbitraryfunctions	[['set_axis_off', [], {}]]
-subplots_adjust	0.15
 ytickslabels	[[], []]
 typeplot	plot
 ylim	[300.0, 0.0]
@@ -11,8 +11,7 @@ _datapicker				True
 alpha	0.85
 color				[0.4, 0.8, 0.3, 0.3]
 curve	image
-filename	D:/D/Programmation/python/packages/grapa/examples/test2.txt
-imagefile	turtle.jpg
+datafile	turtle.jpg
 label	image			Created with data picker
 linespec				x
 type	imshow			fill

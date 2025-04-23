@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Mar  5 13:49:24 2017
+"""Curve subclass hndling fits with mathematical expressions.
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
@@ -12,6 +11,7 @@ import warnings
 from grapa.curve import Curve
 from grapa.mathModule import roundSignificant, roundSignificantRange
 from grapa.constants import CST
+from grapa.utils.funcgui import FuncListGUIHelper
 
 
 class CurveArrhenius(Curve):
@@ -23,7 +23,7 @@ class CurveArrhenius(Curve):
     and we want to be able to easily switch from on type to the other.
     New types of plots can be implemented as subclasses without modifying the
     CurveArrhenius cain class.
-    *** *** ***
+    --- --- ---
     Generally assumes x as temperature [K] and y as a some kind of signal [eV].
 
     By default the output of the fit is E, Offset, with E the energy [eV] and
@@ -31,10 +31,11 @@ class CurveArrhenius(Curve):
     The default fit function is Offset - E/(k*T), with k in [eV/K].
 
     Alternative implementations are:
-     - _Arrhenius_variant is set to 'Cfdefects'
-       Assumes input as omega [s-1] vs temperature [K].
-       Useful to process C-f data. Relevant quantity to plot is
-       log(omega * T**-2), and corresponding fit is log(2*ksi) - E /(kT).
+
+    - _Arrhenius_variant is set to 'Cfdefects'
+      Assumes input as omega [s-1] vs temperature [K].
+      Useful to process C-f data. Relevant quantity to plot is
+      log(omega * T**-2), and corresponding fit is log(2*ksi) - E /(kT).
     """
 
     CURVE = "Curve Arrhenius"
@@ -163,7 +164,8 @@ class CurveArrhenius(Curve):
                     ],
                 ]
             )
-        out.append([self.printHelp, "Help!", [], []])
+        out.append([self.print_help, "Help!", [], []])
+        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
         return out
 
     def alterListGUI(self):
@@ -293,7 +295,7 @@ class CurveArrhenius(Curve):
                 "vs",
                 variant.dataLabel[0],
             )
-            print(variant.getHelp())
+            print(variant.get_help())
         return variant.popt(z)  # [-z[0]*CurveArrhenius.k_eVoverK * 1000, z[1]]
 
     def func_Arrhenius(self, T, E, prefactor):
@@ -354,7 +356,7 @@ class CurveArrhenius(Curve):
         self.updateFitParam(*self.attr("_popt"))
         return True
 
-    def printHelp(self):
+    def print_help(self):
         print("*** *** ***")
         print("Curve Arrhenius general help:")
         print("Offers some support for fitting Arrhenius plots.")
@@ -378,10 +380,10 @@ class CurveArrhenius(Curve):
         lst = [key for key in dct]
         lst.sort()
         for key in lst:
-            print(key, ":", dct[key].getHelp(short=True))
+            print(key, ":", dct[key].get_help(short=True))
         print("")
         print("Help on this specific implementation of Arrhenius Curve:")
-        print(variant.getHelp())
+        print(variant.get_help())
         dataLabel = self.getVariant().dataLabel
         print("Expected data input:", dataLabel[0], ",", dataLabel[1])
         return True
@@ -404,10 +406,12 @@ class CurveArrheniusDefault(CurveArrhenius):
         "label": "value vs Temperature",
     }
 
+    @staticmethod
     def popt(z):  # transforms polynom z into correct fit parameters
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, z[1]]
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         # the help dedicated to the specific implementation
         return "Arrhenius plot is: value = offset - E /(kT)"
 
@@ -431,6 +435,7 @@ class CurveArrheniusJscVocJ00(CurveArrhenius):
         "linespec": "o",
     }
 
+    @staticmethod
     def popt(z):  # fit polynom z to desired output values
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, np.exp(z[1])]
 
@@ -443,7 +448,8 @@ class CurveArrheniusJscVocJ00(CurveArrhenius):
             out = np.log(self.y(index=index, **kwargs))
         return out
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         out = (
             "Computes E_A the activation energy of J0, and J00 its value"
             + "extrapolated at 1/T = 0."
@@ -470,6 +476,7 @@ class CurveArrheniusCfDefects(CurveArrhenius):
     # by default hidden - would cause strange value on derivative plot
     dataLabelArrhenius = [r"1000 / T", r"ln($\omega T^{-2}$)"]
 
+    @staticmethod
     def popt(z):
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, 0.5 * np.exp(z[1])]
 
@@ -486,7 +493,8 @@ class CurveArrheniusCfDefects(CurveArrhenius):
             out = np.log(self.y(index, **kwargs) * self.x(index, **kwargs) ** -2)
         return out
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         if short:
             return "Handles omega [s-1] vs T [K] inflection points of C-f curves, using a weak T**-2 temperature dependency."
         out = "Assumes traps can follow frequency: omega = 2 ksi T**2 exp(-E/(kT))\n"
@@ -510,6 +518,7 @@ class CurveArrheniusCfdefault(CurveArrhenius):
     # by default hidden - would cause strange value on derivative plot
     dataLabelArrhenius = [r"1000 / T", r"ln($\omega$)"]
 
+    @staticmethod
     def popt(z):
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, 0.5 * np.exp(z[1])]
 
@@ -522,7 +531,8 @@ class CurveArrheniusCfdefault(CurveArrhenius):
             out = np.log(self.y(index, **kwargs))
         return out
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         if short:
             return "Handles omega [s-1] vs T [K] inflection points of C-f curves, using no weak T**-2 temperature dependency."
         out = "Assumes a (barrier / trap / something without weak T dependency) can follow frequency:\n"
@@ -552,6 +562,7 @@ class CurveArrheniusExtrapolToZero(CurveArrhenius):
     def BUTTONFitROI(cls):
         return "ROI [K]"
 
+    @staticmethod
     def popt(z):
         return [z[0], z[1]]
 
@@ -564,7 +575,8 @@ class CurveArrheniusExtrapolToZero(CurveArrhenius):
     def x_1000overK(self, index=np.nan, **kwargs):  # NOT ARRHENIUS
         return self.x(index, **kwargs)
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         out = "(not Arrhenius relation) Fits the data with 1-degree polynom."
         if short:
             return out
@@ -598,6 +610,7 @@ class CurveArrheniusExpDecay(CurveArrhenius):
         out = Curve.alterListGUI(self)
         return out
 
+    @staticmethod
     def popt(z):
         return [1 / z[0] * 1000, -z[1] / z[0]]
 
@@ -612,7 +625,8 @@ class CurveArrheniusExpDecay(CurveArrhenius):
     def x_1000overK(self, index=np.nan, **kwargs):  # NOT ARRHENIUS
         return self.x(index, alter="nmeV", **kwargs)
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         out = "Characterize an exponential decay (ie. Urbach)."
         if short:
             return out
@@ -653,6 +667,7 @@ class CurveArrheniusPowerLaw(CurveArrhenius):
         ]
         return out
 
+    @staticmethod
     def popt(z):
         return [np.exp(z[1]), z[0]]
 
@@ -669,7 +684,8 @@ class CurveArrheniusPowerLaw(CurveArrhenius):
             warnings.simplefilter("ignore")
             return np.log(self.x(index, **kwargs))
 
-    def getHelp(short=False):
+    @staticmethod
+    def get_help(short=False):
         out = "Characterize a power law."
         if short:
             return out

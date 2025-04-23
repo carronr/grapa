@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import GraphIO
 from grapa.curve import Curve
 from grapa.datatypes.curveJscVoc import CurveJscVoc
 
@@ -24,8 +24,13 @@ class GraphPLQY(Graph):
     KEY_AVGPHASE = "Average phase [deg]"
     KEY_AVGPLQY = "Average PLQY [-]"
 
+    AXISLABEL_A_X = ["Signal x", "", "A"]
+    AXISLABEL_A_Y = ["Signal y", "", "A"]
+    AXISLABEL_TIME = ["Time", "", "s"]
+    AXISLABEL_PLQY = ["PLQY", "", "-"]
+
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **_kwargs):
         if fileext == ".txt":
             if line1.startswith(
                 "Output file of Abt207 PLQY setup"
@@ -105,7 +110,8 @@ class GraphPLQY(Graph):
             label += " zero"
         if len(self) > le + 4:
             label += " PLQY {:.1e}".format(self[le + 4].y()[-1])
-        self[le].update({"label": label, "time": ""})
+        self[le].update({"label": label + " Y vs X", "time": ""})
+        self[le].data_units(unit_x="A", unit_y="A")
         if self[le].attr("sample") == "":
             self[le].update({"sample": self[le].attr("sample name")})
         # retrieve info, then delete y vs time, rho avg, theta avg, PLQY avg
@@ -118,19 +124,37 @@ class GraphPLQY(Graph):
         # delete unneeded
         while len(self) > le + 1:
             del self[le + 1]
-        #
+        # add PLQY vs time, graph cosmetics
+        xlabel = GraphPLQY.AXISLABEL_A_X
+        ylabel = GraphPLQY.AXISLABEL_A_Y
+        axvline = [0, {"linewidth": 0.5}]
+        axhline = [0, {"linewidth": 0.5}]
+        typeplot = ""
+        self[le].update({Curve.KEY_AXISLABEL_X: xlabel, Curve.KEY_AXISLABEL_Y: ylabel})
         if curve_time_r is not None:
-            curve_time_r.update(self[le].getAttributes())
-            curve_time_r.update({"label": label + " PLQY vs time"})
-            curve_time_r.swapShowHide()
+            xlabel = GraphPLQY.AXISLABEL_TIME
+            ylabel = GraphPLQY.AXISLABEL_PLQY
+            axvline, axhline = "", ""
+            typeplot = "semilogy"
+            curve_time_r.update(dict(self[le].get_attributes()))
+            curve_time_r.update(
+                {
+                    "label": label + " PLQY_avg vs time",
+                    Curve.KEY_AXISLABEL_X: xlabel,
+                    Curve.KEY_AXISLABEL_Y: ylabel,
+                }
+            )
+            curve_time_r.data_units(unit_x="s", unit_y="")
             self.append(curve_time_r)
-        # graph cosmetics
+            self[le].visible(False)
         self.update(
             {
-                "xlabel": ["Signal x", "", "A"],
-                "ylabel": ["Signal y", "", "A"],
-                "axhline": [0, {"linewidth": 0.5}],
-                "axvline": [0, {"linewidth": 0.5}],
+                "xlabel": xlabel,
+                "ylabel": ylabel,
+                "axhline": axhline,
+                "axvline": axvline,
+                "typeplot": typeplot,
                 "collabels": "",
+                "subplots_adjust": [0.20, 0.15],
             }
         )

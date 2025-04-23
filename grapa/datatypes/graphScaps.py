@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
+Parse the output of SCAPS simulations
+
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -16,22 +18,24 @@ from grapa.datatypes.curveEQE import CurveEQE
 
 class GraphScaps:
     """
-    Parse the output of SCAPS files
+    Parse the output of SCAPS simulations
     """
 
     FILEIO_GRAPHTYPE = "SCAPS output data"
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(
+        cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
+    ):
         if (
-            fileExt in [".iv", ".cv", ".cf", ".qe"]
+            fileext in [".iv", ".cv", ".cf", ".qe"]
             and line1.startswith("SCAPS ")
             and "ELIS-UGent: Version scaps" in line1
         ):
             return True
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
+    def readDataFromFile(self, attributes, **_kwargs):
         # rely on code below in the file to parse the content of SCAPS files
         simulations = Simulations()
         simulations.parse_file(self.filename)

@@ -1,9 +1,14 @@
+"""
+Provides a script that performs correlation analysis on a data input.
+possibly, SCAPS 2-D parameter sweeps
+"""
 import os
 import sys
 import copy
+import fnmatch
+
 import numpy as np
 from scipy.stats import pearsonr
-import fnmatch
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -397,10 +402,12 @@ def colorize_graph(graph, seriesx, pvals):
     # - luminance from 0.25 to 0.75 according to the second parameter
     if seriesx is None:
         return
+
     if len(seriesx) == 1:
         graph.colorize("viridis")
         return
-    elif len(seriesx) == 2:
+
+    if len(seriesx) == 2:
         x0, x1 = pvals[seriesx[0], :], pvals[seriesx[1], :]
         lookup = [[x0[i], x1[i]] for i in range(len(x0))]
         p0 = list(np.unique(x0))
@@ -523,7 +530,7 @@ class HelperDatatable(Helper):
                 for curve in graph:
                     pkeys.append(curve.attr("label"))
         # cleanup grapa "salting" of column labels
-        attrs = graph[0].getAttributes()
+        attrs = graph[0].get_attributes()
         for key in attrs:
             if pkeys[0].endswith(key):
                 flag = True
@@ -556,23 +563,32 @@ def process_file(
     seriesx=None,
     seriesy=None,
     newGraphKwargs={},
-):
-    """
+) -> Graph:
+    """Process a file contaiing correleation data. e.g. a SCAPS output file of a
+    2-parameter sweep. Creates different graph files and images in the same folder,
+    and returns one of the graphs.
+
     :param filename: file to process
     :param datakeys: how to interpret the file content.
-        AS_DATATABLE: open the file as a datatable
-        AS_SCAPS: assumes this is the output of Scaps simulations. also preselect series
-            of interest
-        AUTO: first open the graph, then auto detect
-        [key1, key2, ...]: to retrieve from graph Graph, each Curve is one "experiment"
+
+           - AS_DATATABLE: open the file as a datatable
+
+           - AS_SCAPS: assumes this is the output of Scaps simulations. also preselect
+             series of interest
+
+           - AUTO: first open the graph, then auto detect
+
+           -  [key1, key2, ...]: to retrieve from graph Graph, each Curve is one
+              "experiment"
+
     :param filters: list of conditions to exclude specific "experiments" (e.g. rows in
-        a table) should be excluded. e.g. [["Jsc_mApcm2", HIGHER, 10]]
+           a table) should be excluded. e.g. [["Jsc_mApcm2", HIGHER, 10]]
     :param seriesx: list/range of data to consider for the correlation plots
-        By default, whow all columns
+           By default, whow all columns
     :param seriesy: list/range of data to consider for the correlation plots
-        By default, whow all columns
+           By default, whow all columns
     :param newGraphKwargs: specific to Grapa, to e.g. have consistent config file
-    :return:
+    :return: a Graph object
     """
     print("Processing file", filename)
     ngkwargs = {"newGraphKwargs": newGraphKwargs}
@@ -664,7 +680,7 @@ if __name__ == "__main__":
     seriesx_ = None
     seriesy_ = None
 
-    """
+    r"""
     # Example
     filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
     # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CIGStau_CIGSp.iv'
@@ -678,7 +694,7 @@ if __name__ == "__main__":
     filters_ = [["Jsc_mApcm2", HIGHER, 10]]
     seriesx_ = range(11)
 
-    """
+    r"""
     # Example
     filename = (
         r"..\examples\JV\SAMPLE_B_3layerMo\export_SAMPLE_B_3LayerMo_summary_allJV.txt"

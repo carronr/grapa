@@ -3,7 +3,7 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 
@@ -15,15 +15,31 @@ from copy import deepcopy
 from re import findall as refindall, sub as resub
 import os
 
+
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
 from grapa.curve import Curve
-from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, smooth
-from grapa.gui.GUIFuncGUI import FuncGUI
 from grapa.constants import CST
+from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, smooth
+from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI
 
 
 class CurveJV(Curve):
+    """
+    CurveJV offer basic treatment of J-V curves of solar cells.
+    Input units are [V] and [mA] (or [mA cm-2]).
+    """
+
+    CURVE = "Curve JV"
+
+    AXISLABELS_X = {
+        "": ["Bias voltage", "V", "V"],
+        "CurveJV.xinversejminusjsc": ["1/(J-Jsc) (Sites)", "", "cm$^2$ A$^{-1}$"],
+    }
+    AXISLABELS_Y = {
+        "": ["Current density", "J", "mA cm$^{-2}$"],
+        "CurveJV.yDifferentialR": ["Differential resistance dV/dJ", "", "Ohm cm$^2$"],
+    }
+
     defaultIllumPower = 1000  # W/m2
 
     DARK = "dark"
@@ -31,16 +47,22 @@ class CurveJV(Curve):
     DARK_ILLUM = {True: DARK, False: ILLUM}
     DARK_ILLUM_VALUESLIST = list(DARK_ILLUM.values())
 
-    CURVE = "Curve JV"
-
     # to retrieve info from filename: sample name, cell, measurement id
-    FINDALLSTR = "^(I-V_)*(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt"
+    # FINDALLSTR = "^(I-V_)*(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt"
+    FILENAMEPARSE_EXPR = [
+        "^I-V_(.*)_([a-zA-Z#]+[0-9]+)_([bfwdBFWD]+)[_]*([-.a-zA-Z0-9]*)_([0-9]+).txt",
+        "^I-V_(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt",
+    ]
+    FILENAMEPARSE_KEYS = [
+        ["sample", "cell", "fwd_bwd", "illumspectrum", "measId"],
+        ["sample", "cell", "measId", "additional"],
+    ]
 
     FORMAT_AUTOLABEL = [
         "${sample} ${cell}",
         "${sample}",
-        "${sample} ${cell} ${temperature, :.0f} K",
-        "${temperature, :.0f} K",
+        "${sample} ${cell} ${temperature:.0f} K",
+        "${temperature:.0f} K",
     ]
 
     def __init__(
@@ -80,7 +102,7 @@ class CurveJV(Curve):
 
         # illumPower default 1000 W/m2
         illumPower = illumPower if is_number(illumPower) else float(illumPower)
-        self.update({"units": units, "illumPower": illumPower})
+        self.update({"_units": units, "illumPower": illumPower})
 
         # temperature. self.T for convenience. See also update() override
         if is_number(self.attr("Temperature")):
@@ -99,13 +121,11 @@ class CurveJV(Curve):
                 "likely to fail on provided input.",
             )
         # sample, cell
-        self.sample()
-        self.cell()
-
+        self.parse_filename(to_attr=True)
         if ifCalc:
             try:
                 self.calcVocJscFFEffMPP()
-                self.darkOrIllum()
+                self.darkOrIllum(forceCalc=True)  # maybe updated as Jsc value available
             except Exception as e:
                 print("WARNING CurveJV init: Exception", type(e))
                 print(e)
@@ -114,35 +134,32 @@ class CurveJV(Curve):
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...] (, [default1, default2, ...]) ]
-        # auto-label
-        out.append(
-            [
-                self.autoLabel,
-                "Auto label",
-                ["template"],
-                [self.FORMAT_AUTOLABEL[0]],
-                {},
-                [{"field": "Combobox", "values": self.FORMAT_AUTOLABEL}],
-            ]
-        )
         # sample, cell
-        keys = ["Sample", "Cell", "darkorillum"]
+        keys = ["Sample", "Cell"]
         item = FuncGUI(self.updateValuesDictkeys, "Save", {"keys": keys})
         item.append("Sample", self.attr("sample"), options={"width": 20})
         item.append("Cell", self.attr("cell"), options={"width": 10})
+        out.append(item)
+
         darkillum = str(self.darkOrIllum(ifText=True))
-        item.append(
-            " ",
-            darkillum,
-            widgetclass="Combobox",
-            options={"state": "readonly", "values": self.DARK_ILLUM_VALUESLIST},
-        )
+        opts_di = {"state": "readonly"}
+        opts_fb = {"width": 5}
+        keys = ["darkorillum", "illumspectrum", "fwd_bwd"]
+        item = FuncGUI(self.updateValuesDictkeys, "Save", {"keys": keys})
+        item.appendcbb(" ", darkillum, self.DARK_ILLUM_VALUESLIST, options=opts_di)
+        item.append("spectrum", self.attr("illumspectrum"), options={"width": 10})
+        item.appendcbb("sweep", self.attr("fwd_bwd"), ["fwd", "bwd"], options=opts_fb)
+        out.append(item)
+
+        # auto-label
+        item = FuncGUI(self.label_auto, "Auto label")
+        item.appendcbb("template", self.FORMAT_AUTOLABEL[0], self.FORMAT_AUTOLABEL)
         out.append(item)
 
         # keys = ["Sample", "Cell"]
         # out.append([self.updateFitParam, "Save", keys, [self.attr(k) for k in keys], {"keys": keys}])
         # area
-        lbl = "Area [cm2] (old value " + "{:4.3f}".format(self.area()) + ")"
+        lbl = "Area [cm2] (current value " + "{:4.3f}".format(self.area()) + ")"
         out.append(
             [self.setArea, "Area correction", [lbl], ["{:6.5f}".format(self.area())]]
         )
@@ -188,18 +205,24 @@ class CurveJV(Curve):
                     {"graph": kwargs["graph"]},
                 ]
             )
-        out.append([self.printHelp, "Help!", [], []])
+        out.append([self.print_help, "Help!", [], []])
+        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
+        self._funclistgui_memorize(out)
         return out
 
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
-        out.append(["Log10 abs", ["", "abs"], "semilogy"])
-        out.append(["Log10 abs (raw)", ["", "abs0"], "semilogy"])
+        doc = "Standard is current density [mA cm-2] versus [V]"
+        out.append(["Log10 abs", ["", "abs"], "semilogy", doc])
+        doc = "log(J). Allows visualize Rp, Rs and diode."
+        out.append(["Log10 abs (raw)", ["", "abs0"], "semilogy", doc])
+        doc = "logarithm of (J-Jsc). Allows visualize Rp, Rs and diode."
         out.append(
             [
                 "Differential R = dV/dJ [Ohm cm2]",
                 ["", "CurveJV.yDifferentialR"],
                 "semilogy",
+                doc,
             ]
         )
         out.append(
@@ -207,6 +230,7 @@ class CurveJV(Curve):
                 "dV/dJ vs 1/(J-Jsc) - [Ohm cm2] vs [cm2/A] - Sites",
                 ["CurveJV.xinversejminusjsc", "CurveJV.yDifferentialR"],
                 "",
+                "Sites' method.",
             ]
         )
         return out
@@ -250,6 +274,7 @@ class CurveJV(Curve):
         return 0
 
     def setArea(self, area, ifCalc=True):
+        """Normalize the cell area, and modifies the data accordingly."""
         if not is_number(area):
             print("CurveJV setArea ERROR: parameter not numeric (value", area, ").")
             return
@@ -319,7 +344,7 @@ class CurveJV(Curve):
             old = os.path.split(self.attr("label"))[1]
             old = old.split("\\")[-1] + " "
             old = resub(
-                r"_[0-9][0-9](?P<next>[_ d$])", "\g<1>", old
+                r"_[0-9][0-9](?P<next>[_ d$])", r"\g<1>", old
             )  # remove msmt number
             old = (
                 old.replace("I-V_", "").replace("_", " ").replace("  ", " ").strip(" ")
@@ -327,45 +352,85 @@ class CurveJV(Curve):
             self.update({"label": old})
         return self.attr("label")
 
+    def parse_filename(self, to_attr=False):
+        """Parse the filename to extract information contained in it.
+        Parsing regexp: see CurveJV.FILENAMEPARSE_EXPR and CurveJV.FILENAMEPARSE_KEYS.
+
+        :param to_attr: if True, update the Curve attributes: 'sample', 'cell',
+               'direction', 'illumspectrum', 'measid', 'additional'.
+        """
+        out = {
+            "sample": "",
+            "cell": "",
+            "direction": "",
+            "illumspectrum": "",
+            "measId": "",
+            "additional": "",
+        }
+        filename = os.path.split(self.attr("filename"))[1]
+        for i, expr in enumerate(self.FILENAMEPARSE_EXPR):
+            keys = self.FILENAMEPARSE_KEYS[i]
+            res = refindall(expr, filename)
+            if len(res) < 1 or len(res[0]) != len(keys):
+                continue
+            for j, key in enumerate(keys):
+                if key is not None:
+                    out[key] = res[0][j]
+            if to_attr:
+                self.update(out)
+            return out
+
+        if to_attr:
+            self.update(out)
+        return out
+
     def sample(self, forceCalc=False):
         if self.attr("sample") == "" or forceCalc:
-            name = os.path.split(self.attr("filename"))[1]
-            split = refindall(self.FINDALLSTR, name)
-            if len(split) > 0 and len(split[0]) > 1:
-                self.update({"sample": split[0][1]})
-            # old version, replaced on 19.08.2020
-            # split = refindall('I-V_(.*)_[a-zA-Z][0-9]_', name); split[0].lower()})
+            data = self.parse_filename()
+            self.update({"sample": data["sample"]})
         return self.attr("sample")
 
     def cell(self, forceCalc=False):
         if self.attr("cell") == "" or forceCalc:
-            name = os.path.split(self.attr("filename"))[1]
-            split = refindall(self.FINDALLSTR, name)
-            if len(split) > 0 and len(split[0]) > 2:
-                self.update({"cell": split[0][2].lower()})
-            # old version, replaced on 19.08.2020
-            # split = refindall('_([a-zA-Z][0-9])_', name); split[0].lower()})
-        return self.attr("cell")
+            data = self.parse_filename()
+            self.update({"cell": data["cell"]})
+        return self.attr("cell").lower()
 
     def measId(self, forceCalc=False):
         if self.attr("measId") == "" or forceCalc:
-            name = os.path.split(self.getAttribute("filename"))[-1]
-            split = refindall(self.FINDALLSTR, name)
-            if len(split) > 0 and len(split[0]) > 3:
-                self.update({"measId": split[0][3]})
-            # old version, replaced on 19.08.2020
-            # split = refindall('_([0-9][0-9])[._]', name); split[0]})
+            data = self.parse_filename()
+            self.update({"measId": data["measId"]})
         return self.attr("measId")
+
+    def fwd_bwd(self, forceCalc=False):
+        if self.attr("fwd_bwd") == "" or forceCalc:
+            data = self.parse_filename()
+            self.update({"fwd_bwd": data["fwd_bwd"]})
+        return self.attr("fwd_bwd")
+
+    def illumspectrum(self, forceCalc=False):
+        if self.attr("illumspectrum") == "" or forceCalc:
+            data = self.parse_filename()
+            self.update({"illumspectrum": data["illumspectrum"]})
+        return self.attr("illumspectrum")
 
     def darkOrIllum(self, ifText=False, forceCalc=False, ifJscBelow=0.1):
         if self.attr("darkOrIllum", "") == "" or forceCalc:
             ifDark = False  # to be set later on
             sure = False
-            name = self.attr("filename").split("/")[-1]
-            split = refindall("([dD][aA][rR][kK])", name)
-            if len(split) > 0:
-                ifDark = True
+            # standard parsing of filename
+            illumspectrum = self.parse_filename()["illumspectrum"]
+            if illumspectrum != "":
+                ifDark = True if illumspectrum.lower() == "dark" else False
                 sure = True
+            # alternative parsing of filename
+            if not sure:
+                name = self.attr("filename").split("/")[-1]
+                split = refindall("([dD][aA][rR][kK])", name)
+                if len(split) > 0:
+                    ifDark = True
+                    sure = True
+            # alternative: based on Jsc
             if not sure:
                 if is_number(ifJscBelow):
                     if self.attr("Jsc") != "":
@@ -375,9 +440,11 @@ class CurveJV(Curve):
                         else:
                             ifDark = False
                         sure = True
+            # last resort
             if not sure:
                 ifDark = False
             self.update({"darkOrIllum": ifDark})
+        # read
         out = self.attr("darkOrIllum")
         if not ifText:
             return out
@@ -389,13 +456,15 @@ class CurveJV(Curve):
 
     def CurveJVFromFit(self, fitRange=None, diodeFitWeight=None, V=None, silent=False):
         """
-        Returns a CurveJV object, as the fit to the self object on the same
-        Voltage points.
-        diodeFitWeight: 0 for no change, otherwise divide the fit sigma in the
-            diode behavior region. Values such as 10 significantly improve the
-            fittin in this region.
-        V: alternative V datapoints on which evaluate function after the fit.
-            Default is full set of V datapoints.
+        Returns a CurveJV object, a fit to the self object on the same Voltage points.
+
+        :param fitRange: if None, auto-detect.
+        :param diodeFitWeight: 0 for no change, otherwise divide the fit sigma in the
+               diode behavior region. Values such as 10 significantly improve the
+               fittin in this region.
+        :param V: alternative V datapoints on which evaluate function after the fit.
+               Default is full set of V datapoints.
+        :param silent: if False, prints more information
         """
         if diodeFitWeight is not None:
             self.update({"_fitDiodeWeight": diodeFitWeight})
@@ -431,6 +500,22 @@ class CurveJV(Curve):
         return out
 
     def CurveJVFromFit_print(self, fitRange=None, fitDiodeWeight=None):
+        """fits the J-V curve with the diode equation with 1 diode and 2 resistors model.
+        The fit is performed using the log(J) values instead of J.
+        The fit quality should be assessed visually on linear and logarithmic plots.
+
+        - J0: good values are typically < 1e-4.
+
+        - n: is ideality factor. Good values are < 1.7.
+
+        - Jl: grapa implements the difference of the Jl to Jsc. Jl is not a fit
+          parameter, but is adjusted so that J(V=0) = Jsc.
+
+        :param fitRange: [V_min, V_max]
+        :param fitDiodeWeight: increased fit weight for the datapoints in the diode
+               region of the J-V curve. Can improve the accuracy of the fit near MPP.
+        :return: a CurveJV fitted curve.
+        """
         if fitDiodeWeight is not None:
             self.update({"_fitDiodeWeight": fitDiodeWeight})
         ans = self.CurveJVFromFit(fitRange=fitRange)
@@ -444,7 +529,7 @@ class CurveJV(Curve):
 
     # expected output file format
     # Cell	Voc_V	Jsc_mApcm2	FF_pc	Eff_pc	Area_cm2	Vmpp_V	Jmpp_mApcm2	Pmpp_mWpcm2	Rp_Ohmcm2	Rs_Ohmcm2	MeasTime	Temp_DegC	IllumCorr	CellCommt	GlobalCommt	FileName
-    # d1	0.66	18.6	72.3	8.9	0.57	0.53	16.8	8.9	9710	1.1	11.07.2016 16:02:23	25	1			G:\CIGS\RC\_data\JV\Oct1048_ref\I-V_Oct1048ref_d1_01.txt
+    # d1	0.66	18.6	72.3	8.9	0.57	0.53	16.8	8.9	9710	1.1	11.07.2016 16:02:23	25	1			...\I-V_Oct1048ref_d1_01.txt
     def printShort(self, header=False):
         if header:
             out = "Cell\tVoc [V]\tJsc [mA/cm2]\tFF [%]\tEff. [%]\tArea [cm-2]\tVmpp [V]\tJmpp [mA/cm2]\tPmpp [mW/cm2]\tRp [Ohmcm2]\tRs [Ohmcm2]\tn\tJ0 [A/cm2]\tRsquare diode region\tTemperature [K]\tAcquis. T [°C]\tRp acquis. software [Ohmcm2]\tRs acquis. software [Ohmcm2]\tFilename\tRemarks\n"
@@ -454,7 +539,7 @@ class CurveJV(Curve):
             return str(np.round(st, precis + 1))
             # +1: hacked my own function to increase precision for every parameter
 
-        attr = self.getAttributes()
+        attr = self.get_attributes()
         popt = self.attr("diodefit", [np.nan] * 5)
         rsquare_diode = self.attr("_fitdiode_rsquare_diode", np.nan)
 
@@ -496,6 +581,7 @@ class CurveJV(Curve):
         return out
 
     def calcVocJscFFEffMPP_print(self):
+        """Computes and print the values of basic PV parameters Voc, Jsc, FF, MPP"""
         tmp = self.silent
         self.silent = False
         self.calcVocJscFFEffMPP()
@@ -503,6 +589,7 @@ class CurveJV(Curve):
         return True
 
     def calcVocJscFFEffMPP(self):
+        """Computes the values of basic PV parameters Voc, Jsc, FF, MPP"""
         # remove NaN values from data, as well as saturated datapoints
         V, J = self.cleanDataVJ()
         # calculate Jsc
@@ -728,6 +815,7 @@ class CurveJV(Curve):
         return (Jlow_ + Jhigh) * 0.5
 
     def diodeFit_BestGuess(self, V=None, J=None, alsoVShift=True):
+        """Returns the initial guess for fit of the J-V curve."""
         if V is None or J is None:
             V, J = self.cleanDataVJ()
             Jsc = self.attr("Jsc") if self.attr("Jsc") != "" else 0
@@ -770,7 +858,7 @@ class CurveJV(Curve):
         )  # indexing correspond to J, V curves#        idx_maxdlogJdV = list(dlogJdV).index(maxdlogJdV) + 1 # indexing correspond to J, V curves
         Vshift = V[idx_maxdlogJdV]
         # Rp: actually no calculation, the standard value is the most robust indicator
-        Rp = self.getAttribute("Rp")  # Ohm/cm2
+        Rp = self.attr("Rp")  # Ohm/cm2
         # calculation of n. Starting value between 1 and 2 (* maxV to fit modules)
         maxV = max(1, np.max(V))
         n = CST.q / (CST.kb * self.T * max(0.001, maxdlogJdV)) * 0.75
@@ -886,7 +974,7 @@ class CurveJV(Curve):
                 "Rp": popt[4],
             }
 
-            units = self.attr("units")
+            units = self.data_units()
 
             fig, ax = plt.subplots()
             ax.plot(V, np.log10(np.abs(J)), "bx")
@@ -911,6 +999,12 @@ class CurveJV(Curve):
         return popt
 
     def fit_resampleX(self, Vspacing):
+        """Specifies new basis for datapoints for the x data, and recomputes the fitted
+        values on the new basis of points"""
+        if not self.has_attr("_popt"):
+            msg = "Fit_resampleX: should only execute on fitted curve ('_popt' defined)"
+            print(msg)
+            return msg
         newV = ""
         if isinstance(Vspacing, float):
             Vspacing = np.abs(Vspacing)
@@ -944,7 +1038,7 @@ class CurveJV(Curve):
         idx = list(range(i - 2, i + 5) if V[i] < 0 else range(i - 3, i + 4))
         if idx[0] < 0:
             idx = [0, 1, 2, 3, 4, 5]
-        idx = [i for i in idx if i >= 0 and i < len(V)]
+        idx = [i for i in idx if 0 <= i < len(V)]
         z = np.polyfit(V[idx], J[idx], 1, full=True)[0]
         return -z[1]
 
@@ -982,11 +1076,7 @@ class CurveJV(Curve):
         idx = []
         try:
             for i in range(len(V)):
-                if (
-                    V[i] > np.min(fitRange)
-                    and np.abs(V[i]) > 0.1
-                    and V[i] < np.max(fitRange)
-                ):
+                if np.min(fitRange) < V[i] < np.max(fitRange) and np.abs(V[i]) > 0.1:
                     idx.append(i)
         except Exception:
             fitRange = [-0.5, np.inf]
@@ -996,11 +1086,7 @@ class CurveJV(Curve):
                 ".",
             )
             for i in range(len(V)):
-                if (
-                    V[i] > np.min(fitRange)
-                    and np.abs(V[i]) > 0.1
-                    and V[i] < np.max(fitRange)
-                ):
+                if np.min(fitRange) < V[i] < np.max(fitRange) and np.abs(V[i]) > 0.1:
                     idx.append(i)
         return idx
 
@@ -1027,11 +1113,17 @@ class CurveJV(Curve):
             J = J[: -nSatur - 1]
         # check if duplicates on V
         if len(np.unique(V)) != len(V):
-            print("WARNING CurveJV: duplicate found in V data, unpredictable results!")
+            print(
+                "WARNING CurveJV: duplicate found in V data, unpredictable results!",
+                self.attr("filename"),
+            )
         # check if V is in ascending datapoint order
         is_sorted = all(a <= b for a, b in zip(V, V[1:]))
         if not is_sorted:
-            print("Curve JV: input data are not sorted. Presumably ok.")
+            print(
+                "Curve JV: input data are not sorted. Presumably ok.",
+                self.attr("filename"),
+            )
             J = np.array([x for _, x in sorted(zip(V, J))])
             V = np.sort(V)
         return V, J
@@ -1057,7 +1149,7 @@ class CurveJV(Curve):
         threshold: criterion to select datapoint is that derivative is > threshold*max(deriv)
         also winimal voltage width for example [-0.05, 0.1]
         """
-        if minWidth == None:
+        if minWidth is None:
             minWidth = [-0.1, 0.1]
 
         # for simplicity rename variable
@@ -1090,14 +1182,13 @@ class CurveJV(Curve):
 
     def calcResiduals(self, diodeFit=None, ifPlot=False):
         V, J, Jsc = self.selectJVdataForFit(fitRange=[0.1, np.inf])
-        Jsc = self.getAttribute(
-            "Jsc"
-        )  # do not want to use the Jsc calculated with restrictions
+        # do not want to use the Jsc calculated with restrictions
+        Jsc = self.attr("Jsc")
         J += Jsc
         JLogAbs = np.log10(np.abs(J))
         dJdV = derivative(V, JLogAbs)
         d2JdV2 = derivative(V, derivative(V, JLogAbs))
-        p = diodeFit if diodeFit is not None else self.getAttribute("diodeFit")
+        p = diodeFit if diodeFit is not None else self.attr("diodeFit")
         if p == "":
             p = self.diodeFit()
         Jfit = self.func_diodeResistors(V, p[0], p[1], p[2], p[3], p[4])
@@ -1164,7 +1255,7 @@ class CurveJV(Curve):
         if ifPlot:
             fig = plt.figure()
             ax1 = plt.subplot(211)
-            ax1.set_title(self.getAttribute("filename"))
+            ax1.set_title(self.attr("filename"))
             plt.plot(self.V(), np.log10(np.abs(self.J() + Jsc)), "k", label="")
             plt.plot(V, JLogAbs, ".k", label="data")
             plt.plot(V, JfitLogAbs, "r", label="fit")
@@ -1194,9 +1285,7 @@ class CurveJV(Curve):
 
     def diodeFitCheckQuality(self, sqResiduals, threshold=2e-4):
         diodeFitWeight = (
-            self.getAttribute("_fitDiodeWeight")
-            if self.getAttribute("_fitDiodeWeight") != ""
-            else 0
+            self.attr("_fitDiodeWeight") if self.attr("_fitDiodeWeight") != "" else 0
         )
         SqResMed = np.median(sqResiduals) if len(sqResiduals) > 0 else np.nan
         if SqResMed > threshold:
@@ -1247,11 +1336,8 @@ class CurveJV(Curve):
                 ):
                     graph[c + 1].appendPoints([voc], [self.T])
                 else:
-                    print(
-                        "WARNING: CurveJV extractJscVoc: could not identify",
-                        "curve to store temperature, or data length",
-                        "mismatch",
-                    )
+                    msg = "WARNING: CurveJV extractJscVoc: could not identify curve to store temperature, or data length mismatch"
+                    print(msg)
                 flag = True
                 break
         if not flag:
@@ -1266,31 +1352,4 @@ class CurveJV(Curve):
             curve1 = Curve([[voc], [self.T]], {identifierT: True, "type": "scatter_c"})
             graph.append(curve1)
             graph.castCurve("CurveJscVoc", -2, silentSuccess=True)
-        return True
-
-    def printHelp(self):
-        print("*** *** ***")
-        print("CurveJV offer basic treatment of J-V curves of solar cells.")
-        print("Input units are [V] and [mA] (or [mA cm-2]).")
-        print("Curve transforms:")
-        print("- Linear: standard is current density [mA cm-2] versus [V].")
-        print("- Log 10 abs: logarithm of (J-Jsc). Allows visualize Rp, Rs and diode.")
-        print("Analysis functions:")
-        print("- Set area: normalize the cell area.")
-        print("- Voc, Jsc, FF, Eff, MPP: computes the basic cell parameters.")
-        print(
-            "- JV fit: fits the log(JV) curve using a 1 diode + 2 resistors",
-            "model. The fit quality should be assessed visually on lin and",
-            "log plots.",
-        )
-        print("  J0: good values are typically < 1e-4.")
-        print("  n: is ideality factor. Good values are < 1.7.")
-        print("  Jl: is here the difference of the Jl of the model and Jsc.")
-        print("      it is no fit parameter, but is adjusted so that J(V=0) = Jsc.")
-        print("- JV curve initial guess: starting point of the JV fit.")
-        self.printHelpFunc(CurveJV.extractJscVoc)
-        print("Further analysis:")
-        print(
-            "- J0 can also be computed from Jsc vs Voc couples with different light intensities."
-        )
         return True

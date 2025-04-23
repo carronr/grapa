@@ -3,12 +3,17 @@
 Created on Thu Nov  1 18:21:57 2018
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 from copy import copy
-import numpy as np
 import warnings
+from inspect import signature
+import logging
+
+import numpy as np
 import matplotlib as mpl
+
+logger = logging.getLogger(__name__)
 
 
 class SubplotsAdjuster:
@@ -98,13 +103,9 @@ class ParserAxhline(ParserAxlines):
             if pos != 0 or type_plot not in ["semilogy", "loglog"]:
                 try:
                     method(pos, **el["kwargs"])
-                except Exception as e:
-                    print(
-                        "Keyword axhline, exception",
-                        type(e),
-                        "in ParserAxhline.plot",
-                        e,
-                    )
+                except Exception:
+                    msg = "Exception in ParserAxhline.plot: {}, {}."
+                    logger.error(msg.format(pos, el), exc_info=True)
         return True
 
 
@@ -120,13 +121,9 @@ class ParserAxvline(ParserAxlines):
             if pos != 0 or type_plot not in ["semilogx", "loglog"]:
                 try:
                     method(pos, **el["kwargs"])
-                except Exception as e:
-                    print(
-                        "Keyword axvline, exception",
-                        type(e),
-                        "in ParserAxhline.plot",
-                        e,
-                    )
+                except Exception:
+                    msg = "Exception ParserAxhline.plot: {}, {}."
+                    logger.error(msg.format(pos, el), exc_info=True)
         return True
 
 
@@ -166,12 +163,28 @@ class ParserMisc:
                 xyaxis.set_ticks(ticksloc)
             labels = [la.get_text() for la in xyaxis.get_ticklabels()]
         if len(labels) == len(ticksloc):
-            kw.update({"labels": labels})
-        xyaxis.set_ticks(ticksloc, **kw)
+            proto = signature(xyaxis.set_ticks)
+            if "labels" in proto.parameters:
+                kw.update({"labels": labels})
+            else:
+                msg = (
+                    "xtickslabels or ytickslabels: attempt to use of "
+                    "ax.set_ticks() with keyword labels, but matplotlib version "
+                    "too old. labels ignored, likely display errors."
+                )
+                logger.warning(msg)
+        try:
+            xyaxis.set_ticks(ticksloc, **kw)
+        except TypeError:
+            for key in ["color", "rotation"]:
+                if key in kw:
+                    del kw[key]
+            xyaxis.set_ticks(ticksloc, **kw)
+
         return ticksloc, kw
 
     @classmethod
-    def setAxisLabel(cls, method, label, graph):
+    def set_axislabel(cls, method, label, graph):
         out = {"size": False}
         if isinstance(label, list) and len(label) == 2 and isinstance(label[-1], dict):
             method(label[0], **label[-1])
@@ -188,39 +201,46 @@ class ParserMisc:
         return out
 
     @classmethod
-    def alterLim(cls, ax, lim, xory, alter, curvedummy):
+    def alter_lim(cls, ax, lim, xory, alter, curvedummy):
         limAuto = ax.get_xlim() if xory == "x" else ax.get_ylim()
         limInput = [li if not isinstance(li, str) else np.inf for li in lim]
         lim = list(limInput)
+        if xory == "x":
+            fun = ax.set_xlim
+        elif xory == "y":
+            fun = ax.set_ylim
+        else:
+            return False
+
         try:
             if xory == "x":
-                fun = ax.set_xlim
-                lim = list(
-                    curvedummy.x(
-                        alter=alter[0],
-                        xyValue=[lim, [0] * len(lim)],
-                        errorIfxyMix=True,
-                        neutral=True,
-                    )
+                newlim = curvedummy.x(
+                    alter=alter[0],
+                    xyValue=[lim, [0] * len(lim)],
+                    errorIfxyMix=True,
+                    neutral=True,
                 )
+                lim = list(newlim)
             elif xory == "y":
-                fun = ax.set_ylim
-                lim = list(
-                    curvedummy.y(
-                        alter=alter[1],
-                        xyValue=[[0] * len(lim), lim],
-                        errorIfxyMix=True,
-                        neutral=True,
-                    )
+                newlim = curvedummy.y(
+                    alter=alter[1],
+                    xyValue=[[0] * len(lim), lim],
+                    errorIfxyMix=True,
+                    neutral=True,
                 )
-            else:
-                return False
-        except ValueError as e:
-            print("GraphIO set lim ValueError, abort.", e)
-            return False
+                lim = list(newlim)
+        except ValueError:
+            msg = (
+                "ParserMisc alter_lim: cannot transform limit, keep initial input. lim "
+                "{}, xory {}, alter {}, curvedummy."
+            )  # Presumably to change logging level for e.g. debug or print, or silent
+            logger.warning(msg.format(lim, xory, alter), exc_info=False)
         except TypeError:
-            # print('GraphIO set lim TypeError, continue with limAuto', e,
-            #       xory, lim)
+            msg = (
+                "ParserMisc alter_lim TypeError, continue withoiut axis limit. lim {},"
+                " xory {}, alter {}, curvedummy."
+            )  # this is an error.
+            logger.error(msg.format(lim, xory, alter), exc_info=False)
             lim = [np.inf, np.inf]
         # if inf (e.g. alter transform failed) whereas input was provided,
         # then take provided value
@@ -255,7 +275,7 @@ class ParserMisc:
         if arr is not None:
             xyaxis.set_ticks(arr)
             return True
-        print("WARNING xticksstep invalid input", val)
+        logger.warning("xticksstep invalid input {}.".format(val))
         return False
 
 
@@ -274,10 +294,10 @@ class GroupedPlotters:
             if type_graph == key:
                 return self.plotters[key].add_curve(curve, y, fmt, ax)
 
-    def plot(self, ax, ax_):
+    def plot(self, ax, ax_or_one_of_its_twins):
         for key, plotter in self.plotters.items():
             if len(plotter) > 0:
-                plotter.plot(ax, ax_)
+                plotter.plot(ax, ax_or_one_of_its_twins)
 
 
 class Plotter:
@@ -378,7 +398,7 @@ class Plotter:
                 val1.insert(0, def1)
         out = [
             [
-                curve.plotterBoxplotAddonUpdateCurve,
+                curve.update_plotter_boxplot_addon,
                 "Save",
                 ["also show data", "kw"],
                 [def0, def1],
@@ -416,7 +436,9 @@ class PlotterBoxplot(Plotter):
             Plotter.position += 1
         return handle
 
-    def plot(self, ax, ax_):
+    def plot(self, ax, ax_or_one_of_its_twins):
+        # NOTE: the handling of ax and ax_or_one_of_its_twins looks wrong
+        # TODO: presumably the ax_twinx does not work well
         handle = ax.boxplot(self.y, **self.callkw)
         # handle coloring
         nb_el_boxplot = {"whiskers": 2, "caps": 2}
@@ -460,7 +482,9 @@ class PlotterViolin(Plotter):
             Plotter.position += 1
         return handle
 
-    def plot(self, ax, ax_):
+    def plot(self, ax, ax_or_one_of_its_twins):
+        # NOTE: the handling of ax and ax_or_one_of_its_twins looks wrong
+        # TODO presumably the ax_twinx does not work well
         # print("violinplot plot self.callkw", self.callkw)
         handle = ax.violinplot(self.y, **self.callkw)
         # set color
@@ -473,10 +497,10 @@ class PlotterViolin(Plotter):
                 handle[key].set_color([0, 0, 0])
         # violinplots labels not set automatically, unlike boxplot
         for i in range(len(self.labels)):
-            xticks = list(ax_.get_xticks())
-            xtklbl = list(ax_.get_xticklabels())
+            xticks = list(ax_or_one_of_its_twins.get_xticks())
+            xtklbl = list(ax_or_one_of_its_twins.get_xticklabels())
             xticks.append(self.callkw["positions"][i])
             xtklbl.append(self.labels[i])
-            ax_.set_xticks(xticks)
-            ax_.set_xticklabels(xtklbl)
+            ax_or_one_of_its_twins.set_xticks(xticks)
+            ax_or_one_of_its_twins.set_xticklabels(xtklbl)
         return handle

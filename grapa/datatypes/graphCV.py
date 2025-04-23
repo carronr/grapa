@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+To parse files contaiing capacitance versus voltage C-V data.
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from copy import deepcopy
@@ -10,25 +11,29 @@ import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import GraphIO
+from grapa.datatypes.curveCV import CurveCV
 
 
 class GraphCV(Graph):
+    """To parse files contaiing capacitance versus voltage C-V data."""
+
     FILEIO_GRAPHTYPE = "C-V curve"
 
-    AXISLABELS = [["Voltage", "V", "V"], ["Capacitance", "C", "nF"]]
+    AXISLABELS = [CurveCV.AXISLABELS_X[""], CurveCV.AXISLABELS_Y[""]]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", **_kwargs):
+        line1filtered = line1.encode("ascii", errors="ignore").decode()
         if (
-            fileExt == ".txt"
-            and line1.strip()[:12] == "Sample name:"
-            and fileName[0:4] == "C-V_"
+            fileext == ".txt"
+            and line1filtered.strip().startswith("Sample name:")
+            and filename.startswith("C-V_")
         ):
             return True
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
+    def readDataFromFile(self, attributes, **_kwargs):
         len0 = len(self)
         GraphIO.readDataFromFileGeneric(self, attributes)
         self.castCurve("Curve CV", len0, silentSuccess=True)
@@ -50,6 +55,7 @@ class GraphCV(Graph):
         if self[len0].attr("sample") == "" and samplename != "":
             self[len0].update({"sample": samplename})
         # set [nF] units
+        units = ["V", "nF"]
         self[len0].setY(1e9 * self[len0].y())
         # compute phase angle if required
         nb_add = 0
@@ -75,14 +81,14 @@ class GraphCV(Graph):
                 phase_angle = np.arctan(f * 2 * np.pi * C / conductance) * 180.0 / np.pi
                 #                phase_angle = np.arctan(C / conductance) * 180. / np.pi
                 self.append(
-                    Curve([self[len0].x(), phase_angle], self[len0].getAttributes())
+                    Curve([self[len0].x(), phase_angle], self[len0].get_attributes())
                 )
                 nb_add += 1
         # delete unneeded Curves
         for c in range(len(self) - 1 - nb_add, len0, -1):
-            self.deleteCurve(c)
+            self.curve_delete(c)
         # cosmetics
-        axisLabels = deepcopy(GraphCV.AXISLABELS)
+        axislabels = deepcopy(GraphCV.AXISLABELS)
         # normalize with area C
         area = self[len0].attr("cell area (cm2)", None)
         if area is None:
@@ -92,13 +98,15 @@ class GraphCV(Graph):
         if area is not None:
             self[len0].setY(self[len0].y() / area)
             self[len0].update({"cell area (cm2)": area})
-            axisLabels[1][2] = axisLabels[1][2].replace("F", "F cm$^{-2}$")
+            axislabels[1][2] = axislabels[1][2].replace("F", "F cm$^{-2}$")
+            units[1] = "nF cm-2"
             if not self.silent:
                 print("Capacitance normalized to area", self[len0].getArea(), "cm2.")
+        self[len0].data_units(*units)
         # graph cosmetics
         self.update(
             {
-                "xlabel": self.formatAxisLabel(axisLabels[0]),
-                "ylabel": self.formatAxisLabel(axisLabels[1]),
+                "xlabel": self.formatAxisLabel(axislabels[0]),
+                "ylabel": self.formatAxisLabel(axislabels[1]),
             }
         )  # default

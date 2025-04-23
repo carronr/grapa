@@ -9,6 +9,7 @@ Modified to include a delay time by Victor Zaccardo, 25mar16
 Modified to allow user-defined wraplength, Romain Carron, 12nov2017
 """
 
+
 try:
     # for Python2
     import Tkinter as tk
@@ -22,7 +23,7 @@ class CreateToolTip(object):
     create a tooltip for a given widget
     """
 
-    def __init__(self, widget, text='widget info', wraplength=180):
+    def __init__(self, widget, text="widget info", wraplength=180):
         self.waittime = 350  # miliseconds
         self.wraplength = wraplength  # pixels
         self.widget = widget
@@ -33,10 +34,10 @@ class CreateToolTip(object):
         self.id = None
         self.tw = None
 
-    def enter(self, event=None):
+    def enter(self, _event=None):
         self.schedule()
 
-    def leave(self, event=None):
+    def leave(self, _event=None):
         self.unschedule()
         self.hidetip()
 
@@ -45,13 +46,13 @@ class CreateToolTip(object):
         self.id = self.widget.after(self.waittime, self.showtip)
 
     def unschedule(self):
-        id = self.id
+        _id = self.id
         self.id = None
-        if id:
-            self.widget.after_cancel(id)
+        if _id:
+            self.widget.after_cancel(_id)
 
-    def showtip(self, event=None):
-        x = y = 0
+    def showtip(self, _event=None):
+        # x = y = 0
         x, y, cx, cy = self.widget.bbox("insert")
         x += self.widget.winfo_rootx() + 25
         y += self.widget.winfo_rooty() + 20
@@ -60,9 +61,15 @@ class CreateToolTip(object):
         # Leaves only the label and removes the app window
         self.tw.wm_overrideredirect(True)
         self.tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(self.tw, text=self.text, justify='left',
-                         background="#ffffff", relief='solid', borderwidth=1,
-                         wraplength=self.wraplength)
+        label = tk.Label(
+            self.tw,
+            text=self.text,
+            justify="left",
+            background="#ffffff",
+            relief="solid",
+            borderwidth=1,
+            wraplength=self.wraplength,
+        )
         label.pack(ipadx=1)
 
     def hidetip(self):

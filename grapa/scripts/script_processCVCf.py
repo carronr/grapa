@@ -3,15 +3,15 @@
 Created on Mon Mar  6 23:57:53 2017
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
-import numpy as np
-import copy
-import matplotlib.pyplot as plt
 import sys
+import copy
 import warnings
+import numpy as np
+import matplotlib.pyplot as plt
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -20,7 +20,7 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import file_read_first3lines
 from grapa.curve import Curve
 from grapa.colorscale import Colorscale
 from grapa.curve_image import Curve_Image
@@ -51,8 +51,8 @@ def setXlim(graph, keyword="tight"):
     if keyword != "tight":
         print("processCV Cf setXlim unknown keyword")
     xlim = [np.inf, -np.inf]
-    for c in graph.iterCurves():
-        xlim = [min(xlim[0], min(c.x())), max(xlim[1], max(c.x()))]
+    for curve in graph:
+        xlim = [min(xlim[0], min(curve.x())), max(xlim[1], max(curve.x()))]
     graph.update({"xlim": xlim})
 
 
@@ -82,9 +82,7 @@ def script_processCV(
         if os.path.isfile(os.path.join(folder, file)):
             fileName, fileExt = os.path.splitext(file)
             fileExt = fileExt.lower()
-            line1, line2, line3 = GraphIO.readDataFileLine123(
-                os.path.join(folder, file)
-            )
+            line1, line2, line3 = file_read_first3lines(os.path.join(folder, file))
             if GraphCV.isFileReadable(
                 fileName, fileExt, line1=line1, line2=line2, line3=line3
             ):
@@ -109,7 +107,7 @@ def script_processCV(
         if len(graph) == 0:
             graph = graphTmp
             while len(graph) > 1:
-                graph.deleteCurve(1)
+                graph.curve_delete(1)
         else:
             graph.append(graphTmp[0])
         if len(graphTmp) > 1:
@@ -131,8 +129,8 @@ def script_processCV(
         graph.update({"title": joined})
         graphPhase.update({"title": joined})
         if legendifauto == "":  # later, will also remove most text of legend
-            graph.replaceLabels(joined, "")
-            graphPhase.replaceLabels(joined, "")
+            graph.replace_labels(joined, "")
+            graphPhase.replace_labels(joined, "")
     graphPhase.update(
         {
             "xlabel": graph.attr("xlabel"),
@@ -284,7 +282,7 @@ def script_processCV(
     )
     for c in range(len(graph) - 1, -1, -1):  # remove unnecessary curves
         if graph[c] in curves:
-            graph.deleteCurve(c)
+            graph.curve_delete(c)
 
     # Fit Mott-Schottky curves
     Ncvminmax0 = [np.inf, -np.inf]
@@ -295,9 +293,9 @@ def script_processCV(
     graphVbi.append(Curve([[], []], {"linestyle": "none"}))
     graphVbi.append(N0V)
     graphSmart = Graph("", **newGraphKwargs)
-    numCurves = graph.length()
+    numCurves = len(graph)
     for curve in range(numCurves):  # number of Curves in graph will change
-        c = graph.curve(curve)
+        c = graph[curve]
         c.update({"linewidth": 0.25})
         new = c.CurveCV_fitVbiN(ROIfit, silent=True)
         smart = c.CurveCV_fitVbiN(c.smartVlim_MottSchottky(Vlim=ROIsmart), silent=True)
@@ -347,8 +345,8 @@ def script_processCV(
     graphVbi.plot(filesave=filesave + "VbiT", **plotargs)
     if pltClose:
         plt.close()
-    for curve in graphVbi.iterCurves():
-        curve.swapShowHide()
+    for curve in graphVbi:
+        curve.visible(not curve.visible())
     graphVbi.update(
         {
             "xlabel": graphVbi.formatAxisLabel(["Temperature", "T", "K"]),
@@ -373,8 +371,8 @@ def script_processCV(
         plt.close()
     graph.update({"axvline": "", "legendtitle": ""})
     # Mott-Schottky, then N vs V, with fit lines - adaptative ROI
-    for i in range(graph.length() - 1, numCurves - 1, -1):
-        graph.deleteCurve(i)
+    for i in range(len(graph) - 1, numCurves - 1, -1):
+        graph.curve_delete(i)
     graph.merge(graphSmart)
     graph.update(presets["MS"])
     graph.update({"legendtitle": "Mott-Schottky fit (adaptative Vlim)"})
@@ -391,7 +389,7 @@ def script_processCV(
     # graph phase
     graphPhase.update({"alter": "", "ylim": [0, 90]})
     f = graphPhase.curve(0).x()
-    #    graphPhase.append(Curve([[min(f), max(f), max(f), min(f)], [0, 0, 20, 20]], {'type': 'fill', 'facecolor': [1,0,0,0.5], 'linewidth': 0}))
+    #    graphPhase.append(Curve([[min(f), max(f), max(f), min(f)], [0, 0, 20, 20]],{'type': 'fill', 'facecolor': [1,0,0,0.5], 'linewidth': 0}))
     graphPhase.append(
         Curve(
             [[min(f), max(f)], [20, 20]],
@@ -429,15 +427,14 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
         if os.path.isfile(os.path.join(folder, file)):
             fileName, fileExt = os.path.splitext(file)
             fileExt = fileExt.lower()
-            line1, line2, line3 = GraphIO.readDataFileLine123(
-                os.path.join(folder, file)
-            )
+            line1, line2, line3 = file_read_first3lines(os.path.join(folder, file))
             if GraphCf.isFileReadable(
                 fileName, fileExt, line1=line1, line2=line2, line3=line3
             ):
                 listdir.append(file)
     if len(listdir) == 0:
         print("Found no suitable file in folder", folder)
+        return None
     listdir.sort()
     # open all data files
     for file in listdir:
@@ -447,25 +444,28 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
             complement={"_CfLoadPhase": True, "_CfLoadNyquist": True},
             **newGraphKwargs
         )
-        if graph.length() == 0:
-            graph.update(graphTmp.graphInfo)
-        graph.append(graphTmp.curve(0))  # append C-f
+        if len(graph) == 0:
+            graph.update(graphTmp.graphinfo)
+        graph.append(graphTmp[0])  # append C-f
+
         if len(graphTmp) > 1:
             dataz, dataphase = None, None
-            for c in graphTmp.iterCurves():
-                if c.attr("_CfPhase", False):
-                    graphPhase.append(c)
-                    dataphase = c.x(), c.y()
-                    graphBode.append(Curve([c.x(), c.y()], c.getAttributes()))
+            for curve in graphTmp:
+                if curve.attr("_CfPhase", False):
+                    graphPhase.append(curve)
+                    dataphase = curve.x(), curve.y()
+                    graphBode.append(
+                        Curve([curve.x(), curve.y()], curve.get_attributes())
+                    )
                     graphBode[-1].update({"ax_twinx": 1, "linespec": "--"})
-                if c.attr("_CfNyquist", False):
-                    graphNyqui.append(c)
-                    dataz = c.x(), c.y()
+                if curve.attr("_CfNyquist", False):
+                    graphNyqui.append(curve)
+                    dataz = curve.x(), curve.y()
             if dataz is not None and dataphase is not None:
                 graphBode.append(
                     Curve(
                         [dataphase[0], np.sqrt(dataz[0] ** 2 + dataz[1] ** 2)],
-                        graphTmp[0].getAttributes(),
+                        graphTmp[0].get_attributes(),
                     )
                 )
                 graphBode[-1].update({"label": ""})
@@ -484,8 +484,8 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
         graphNyqui.update({"title": " ".join(lbl[:-1])})
         graphBode.update({"title": " ".join(lbl[:-1])})
         # labels
-        graph.replaceLabels(" ".join(lbl[:-1]), "")
-        graphPhase.replaceLabels(" ".join(lbl[:-1]), "")
+        graph.replace_labels(" ".join(lbl[:-1]), "")
+        graphPhase.replace_labels(" ".join(lbl[:-1]), "")
     for curve in graphNyqui:
         curve.update({"label": "{:.0f} K".format(curve.attr("temperature [k]"))})
     for curve in graphBode:
@@ -594,24 +594,25 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
     matrix = [x]
     tempmin, tempmax = np.inf, -np.inf
     for curve in graph:
-        T = curve.attr("temperature", None)
-        if T is None:
-            T = curve.attr("temperature [k]", None)
-        if T is None:
+        temperature = curve.attr("temperature", None)
+        if temperature is None:
+            temperature = curve.attr("temperature [k]", None)
+        if temperature is None:
             msg = "Script Cf, image, cannot identify Temperature. File ignored. {}"
-            print(msg.format(curve.getAttributes()))
+            print(msg.format(curve.get_attributes()))
             continue
-        else:
-            tempmin, tempmax = min(tempmin, T), max(tempmax, T)
-        y = [T] + list(curve.y(alter="CurveCf.y_mdCdlnf"))
+
+        tempmin, tempmax = min(tempmin, temperature), max(tempmax, temperature)
+        y = [temperature] + list(curve.y(alter="CurveCf.y_mdCdlnf"))
         if len(x) != len(y):
             msg = (
                 "WARNING data curve {} not consistent number of points throughout "
                 "the input files! File ignored. {}"
             )
-            print(msg.format(T, curve.attr("filename")))
+            print(msg.format(temperature, curve.attr("filename")))
             continue  # do not work with the data
         matrix.append(y)
+
     matrix = np.array(matrix)
     if matrix.shape[0] > 1:  # enough datapoints
         # format data
@@ -758,11 +759,15 @@ def script_processCf(folder, legend="minmax", pltClose=True, newGraphKwargs={}):
     return graphImage
 
 
-if __name__ == "__main__":
-    folder_ = "./../examples/Cf/"
-    graph_ = script_processCf(folder_, pltClose=False)
+def execute_standalone():
+    folder = "./../examples/Cf/"
+    graph = script_processCf(folder, pltClose=False)
 
-    folder_ = "./../examples/CV/"
-    # graph_ = script_processCV(folder_, ROIfit=[0.15, 0.3], pltClose=True)
+    folder = "./../examples/CV/"
+    # graph = script_processCV(folder, ROIfit=[0.15, 0.3], pltClose=True)
 
     plt.show()
+
+
+if __name__ == "__main__":
+    execute_standalone()

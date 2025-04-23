@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics,
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics,
 Romain Carron
 """
 
-
 from tkinter import ttk
 import tkinter as tk
-from tkinter import X, BOTH
+from tkinter import X
 
 
 def bind_tree(widget, event, callback, add=""):
-    "Binds an event to a widget and all its descendants."
+    """Binds an event to a widget and all its descendants."""
     widget.bind(event, callback, add)
     for child in widget.children.values():
         bind_tree(child, event, callback)  # , replace_callback
@@ -21,12 +20,16 @@ def bind_tree(widget, event, callback, add=""):
 class TextWriteable(tk.Text):
     """
     New texyt field class, with possibility for write (print in this field)
-    Used for the console output
+        Used for the console output
     """
 
     def write(self, string):
         self.insert(tk.END, string)
         self.see(tk.END)
+
+    def flush(self):
+        # called by StreamHandler setStream, as this widget is the console
+        self.update_idletasks()
 
 
 class OptionMenuVar(tk.OptionMenu):
@@ -43,7 +46,7 @@ class OptionMenuVar(tk.OptionMenu):
         else:
             self.var = varType()
         tk.OptionMenu.__init__(self, frame, self.var, self.values)
-        self.resetValues(self.values, default=default, func=func)
+        self.reset_values(self.values, default=default, func=func)
         if width is not None:
             self.configure(width=width)
 
@@ -54,7 +57,7 @@ class OptionMenuVar(tk.OptionMenu):
         if val in self.values or force:
             self.var.set(val)
 
-    def resetValues(self, values, labels=None, func=None, default=""):
+    def reset_values(self, values, labels=None, func=None, default=""):
         """
         - labels: if labels different from values
         """
@@ -126,6 +129,9 @@ class ComboboxVar(ttk.Combobox):
     def set(self, val):
         self.var.set(val)
 
+    def reset_values(self, values):
+        self["values"] = values
+
 
 class CheckbuttonVar(tk.Checkbutton):
     """replacement for tk.Checkbutton, with embedded tk.BooleanVar"""
@@ -147,9 +153,22 @@ class ButtonSmall(tk.Frame):
 
     def __init__(self, frame, text, command, width=16, height=16, **kwargs):
         tk.Frame.__init__(self, frame, width=width, height=height)
-        self.propagate(0)
+        self.propagate(False)
         self._button = tk.Button(self, text=text, command=command, **kwargs)
         self._button.pack(fill=tk.BOTH, expand=True)
+
+
+class ButtonVar(tk.Button):
+    def __init__(self, frame, text, command, **kwargs):
+        self.var = tk.StringVar()
+        super().__init__(frame, textvariable=self.var, command=command, **kwargs)
+        self.var.set(text)
+
+    def get(self):
+        return self.var.get()
+
+    def set(self, text):
+        return self.var.set(text)
 
 
 class FrameScrollable(tk.Frame):
@@ -190,7 +209,7 @@ class FrameScrollable(tk.Frame):
         h = self.child.winfo_height()
         self.canvas.config(width=w, height=h)
 
-    def on_configure(self, event):
+    def on_configure(self, _event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def scrolly(self, *args):
@@ -268,7 +287,7 @@ class FrameTitleContentHide(tk.Frame):
             return tk.Button(frame, text=symbol, command=self.showHide)
         else:
             fr = tk.Frame(frame, width=size[0], height=size[1])
-            fr.propagate(0)
+            fr.propagate(False)
             btn = tk.Button(fr, text=symbol, command=self.showHide)
             btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=1)
             return fr, btn
@@ -294,10 +313,10 @@ class FrameTitleContentHide(tk.Frame):
         self._dummy = tk.Frame(dwn)
         self._dummy.pack(side=side, anchor=anchor, fill=fill)
 
-    def getFrameTitle(self):
+    def get_frame_title(self):
         return self._title
 
-    def getFrameContent(self):
+    def get_frame_content(self):
         return self._content
 
     def getButton(self):
@@ -312,7 +331,7 @@ class FrameTitleContentHide(tk.Frame):
         fill = tk.X if self._layout == "horizontal" else tk.Y
         return side, anchor, fill
 
-    def showHide(self, *args):
+    def showHide(self, *_args):
         side, anchor, fill = self.sideAnchorFill()
         if self._visiblecontent:
             if self.showHideTitle:
@@ -353,70 +372,3 @@ class FrameTitleContentHideHorizontal(FrameTitleContentHide):
         self._dummy.pack(side="left", anchor="n", fill=X)
         self._content = tk.Frame(righ, **self._contentkwargs)
         self._content.pack(side="top", anchor="w", fill=X)
-
-
-def imageToClipboard(graph):
-    """copy the image output of a Graph to the clipboard - Windows only"""
-    # save image, because we don't have pixel map at the moment
-    print("Copying graph image to clipboard")
-    selffilename = graph.filename if hasattr(graph, "filename") else None
-    fileClipboard = "_grapatoclipboard"
-    tmp = graph.getAttribute("saveSilent")
-    graph.update({"saveSilent": True})
-    graph.plot(ifSave=True, ifExport=False, filesave=fileClipboard)
-    graph.update({"saveSilent": tmp})
-    if selffilename is not None:  # restore self.filename
-        graph.filename = selffilename
-    from io import BytesIO
-    from PIL import Image
-
-    try:
-        import win32clipboard
-    except ImportError as e:
-        print(
-            "Module win32clipboard not found, cannot copy to clipboard.",
-            "Image was created.",
-        )
-        print(e)
-        return False
-
-    def send_to_clipboard(clip_type, content):
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardData(clip_type, content)
-        win32clipboard.CloseClipboard()
-
-    # read image -> get pixel map, convert into clipbaord-readable format
-    output = BytesIO()
-    img = Image.open(fileClipboard + ".png")
-
-    # new version, try to copy png into clipboard.
-    # Maybe people would complain, then revert to legacy
-    img.save(output, "PNG")
-    data = output.getvalue()
-    output.close()
-    send_to_clipboard(win32clipboard.RegisterClipboardFormat("PNG"), data)
-    return True
-
-    """
-    # LEGACY. Through BMP format, transparency was lost. Keep the code in case of
-    try:
-        img = img.convert('RGBA')
-    except KeyError:
-        print('Copy to clipboard: RGBA not found. More recent version PIL',
-              "versions should be able though. Transparency won't be handled",
-              'correctly.')
-        img = img.convert('RGB')
-    try:
-        img.save(output, 'BMP')
-    except (IOError, OSError):
-        print("Copy to clipboard: cannot write image as BMP. More recent"
-              "version PIL versions should be able though. Transparency won't",
-              "be handled correctly.")
-        img = img.convert('RGB')
-        img.save(output, 'BMP')  # second try
-    data = output.getvalue()[14:]
-    output.close()
-    send_to_clipboard(win32clipboard.CF_DIB, data)
-    return True
-    """

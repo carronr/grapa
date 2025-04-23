@@ -3,7 +3,7 @@
 Created on Wed Jan 25 23:30:21 2017
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 # from abc import ABCMeta, abstractmethod

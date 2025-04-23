@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Jun 11 15:10:29 2017
+Class handling optical spectra, with notably nm to eV conversion and background
+subtraction.
 
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
@@ -12,13 +12,13 @@ import numpy as np
 from grapa.curve import Curve
 from grapa.graph import Graph
 from grapa.mathModule import is_number
-from grapa.gui.GUIFuncGUI import FuncGUI
+from grapa.utils.funcgui import FuncGUI
 
 
 class CurveMath(Curve):
     """
-    Class handling optical spectra, with notably nm to eV conversion and
-    background substraction.
+    Class handling optical spectra, with notably nm to eV conversion and background
+    subtraction.
     """
 
     CURVE = "Curve Math"
@@ -102,9 +102,9 @@ class CurveMath(Curve):
         )
         out.append([self.neg, "0 - {this Curve} ", [], []])
         out.append([self.inv, "1 / {this Curve} ", [], []])
-        out.append([self.swapXY, "x <-> y", [], []])
+        out.append([self.swap_xy, "x <-> y", [], []])
 
-        line = FuncGUI(self.assembleCurveXY, "Assemble new Curve", {"graph": graph})
+        line = FuncGUI(self.assemble_curve_xy, "Assemble new Curve", {"graph": graph})
         line.append("x:", default_samelen, options=fieldprops_samelen)
         line.append(".", "x", options=xory)
         line.append(", y:", default_samelen, options=fieldprops_samelen)
@@ -115,7 +115,7 @@ class CurveMath(Curve):
         #             [default_samelen, "x", default_samelen, "y"],
         #             {"graph": graph},
         #             [fieldprops_samelen, xory, fieldprops_samelen, xory]])
-        out.append([self.printHelp, "Help!", [], []])
+        out.append([self.print_help, "Help!", [], []])
         return out
 
     @classmethod
@@ -131,7 +131,7 @@ class CurveMath(Curve):
             if operator == "div":
                 return x / y
             if operator == "pow":
-                return x ** y
+                return x**y
             if operator != "add":
                 print(
                     "WARNING CureMath.add: unexpected operator argument",
@@ -195,7 +195,7 @@ class CurveMath(Curve):
         out.update({"math": math + "; " + txt if math != "" else txt})
         return out
 
-    def swapXY(self):
+    def swap_xy(self):
         out = 0 + self  # work on copy
         out.setX(self.y())
         out.setY(self.x())
@@ -204,8 +204,9 @@ class CurveMath(Curve):
         out.update({"math": math + "; " + txt if math != "" else txt})
         return out
 
-    def assembleCurveXY(
-            self, idx_x: int, xory_x: str, idx_y: int, xory_y: str, graph: Graph
+    @staticmethod
+    def assemble_curve_xy(
+        idx_x: int, xory_x: str, idx_y: int, xory_y: str, graph: Graph
     ) -> Curve:
         """
         Assemble new Curve from data series of same length available in a Graph object.
@@ -221,21 +222,28 @@ class CurveMath(Curve):
         data_x = curve_x.x() if xory_x == "x" else curve_x.y()
         data_y = curve_y.x() if xory_y == "x" else curve_y.y()
         if len(data_x) != len(data_y):
-            print("ERROR CurveMath assembleCurveXY: selected data series do not have"
-                  + "same length! Abort.")
+            print(
+                "ERROR CurveMath assembleCurveXY: selected data series do not have"
+                + "same length! Abort."
+            )
             print("input parameters:", idx_x, xory_x, idx_y, xory_y)
             return False
         attr = {}
-        attr.update(curve_x.getAttributes())
-        attr.update(curve_y.getAttributes())
+        attr.update(curve_x.get_attributes())
+        attr.update(curve_y.get_attributes())
         curve = Curve([data_x, data_y], attr)
-        label = "{} {} vs {} {}".format(curve_y.attr("label"), xory_y,
-                                        curve_x.attr("label"), xory_x)
+        label = "{} {} vs {} {}".format(
+            curve_y.attr("label"), xory_y, curve_x.attr("label"), xory_x
+        )
         curve.update({"label": label})
         math = curve.attr("math")
         txt = "assembled x,y from curves {} {} {}, {} {} {}".format(
-            int(idx_x), curve_x.attr("label"), xory_x,
-            int(idx_y), curve_y.attr("label"), xory_y,
+            int(idx_x),
+            curve_x.attr("label"),
+            xory_x,
+            int(idx_y),
+            curve_y.attr("label"),
+            xory_y,
         )
         curve.update({"math": math + "; " + txt if math != "" else txt})
         curve_type = curve.attr("curve", "")
@@ -243,7 +251,7 @@ class CurveMath(Curve):
             curve = curve.castCurve(curve_type)
         return curve
 
-    def printHelp(self):
+    def print_help(self):
         print("*** *** ***")
         print("CurveMath offers some mathematical transformation of the data.")
         print("Functions:")
@@ -255,6 +263,8 @@ class CurveMath(Curve):
         print(" - Div. Division as Add.")
         print(" - Neg. 0 - Curve.")
         print(" - Inv. 1 / Curve.")
-        print(" - Assemble a new Curve from data series of same length available in"
-              + "the current Graph.")
+        print(
+            " - Assemble a new Curve from data series of same length available in"
+            + "the current Graph."
+        )
         return True

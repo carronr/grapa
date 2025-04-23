@@ -1,52 +1,179 @@
-﻿# -*- coding: utf-8 -*-
-
+# -*- coding: utf-8 -*-
 """
-Created on Fri Jul 15 15:46:13 2016
+Defines Curves, a fondamental object to grapa. It stores both data and metadata.
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-import numpy as np
 import warnings
-import inspect
 import importlib
+import logging
 
-from string import Template
+import numpy as np
+from scipy.interpolate import interp1d
 
-from grapa.gui.GUIFuncGUI import FuncGUI
-
-from grapa.graphIO_aux import Plotter
 from grapa.constants import CST
+from grapa.mathModule import _fractionstr_to_float, MathOperator
+from grapa.utils.metadata import MetadataContainer
+from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
+from grapa.utils.string_manipulations import (
+    format_string_curveattr,
+    restructuredtext_to_text,
+)
+
+logger = logging.getLogger(__name__)
 
 
-class TemplateCustom(Template):
-    # braceidpattern = "(?a:[_a-z][_a-z0-9 \[\]]*)"  # added: whitespace, [, ]
-    # added: whitespace, [, ]; also, formatter indication as ${key, :.0f}
-    braceidpattern = "(?a:[_a-z][_a-z0-9 \[\]]*(,[ ]*[:.0-9\-\+eEfFgG%]+)?)"
+def update_curve_values_dictkeys(curve, *args, keys: list = None):
+    """
+    Performs update({key1: value1, key2: value2, ...}).
+
+    :param curve: Curve object
+    :param args: value1, value2, ...
+    :param keys: ['key1', 'key2', ...]. list[str]
+    :returns: True if success, False otherwise
+    """
+    if not isinstance(keys, list) or len(keys) != len(args):
+        msg = (
+            "update_curve_values_dictkeys: 'keys' must be a list, same len as "
+            "*args. Provided ({}), len {}, expected len {}."
+        )
+        logger.error(msg.format(keys), len(keys), len(args))
+        return False
+
+    if len(keys) != len(args):
+        msg = (
+            "update_curve_values_dictkeys: len of keyword argument "
+            '"keys=list[str]" ({}) must match the number of provided values as '
+            "args ({}). Stop at minimal len."
+        )
+        logger.warning(msg.format(len(keys), len(args)))
+    for i in range(min(len(keys), len(args))):
+        curve.update({keys[i]: args[i]})
+    return True
+
+
+def update_graph_values_dictkeys_conditional(
+    graph, *args, keys=None, also_attr=None, also_vals=None
+) -> bool:
+    """Similar as updateValuesDictkeys, for all curves inside a provided graph.
+
+    :param graph: Graph object, will apply to all Curves within
+    :param args: value1, value2, ...
+    :param keys: list of keys ['key1', 'key2', ...]. list[str]
+    :param also_attr: list of attribute keys
+    :param also_vals: list, same len as also_attr. Test each curve in graph, only perfom
+           modifications if curve.attr(also_attr[i]) == also_vals[i], for all i in range
+    """
+    if not isinstance(keys, list) or len(keys) != len(args):
+        msg = (
+            "update_graph_values_dictkeys_conditional: 'keys' must be a list, "
+            "same len as *args. Provided ({}), len {}, expected len {}."
+        )
+        logger.error(msg.format(keys), len(keys), len(args))
+        return False
+
+    for curve in graph:
+        flag = True
+        if also_attr is not None and also_vals is not None:
+            for key, value in zip(also_attr, also_vals):
+                if not curve.attr(key) == value:
+                    flag = False
+        if flag:
+            update_curve_values_dictkeys(curve, *args, keys=keys)
+    return True
+
+
+def get_point_closest_to_xy(curve, x, y, alter="", offsets=False):
+    """
+    Return the data point closest to the x,y values.
+    Priority on x, compares y only if equal distance on x
+    """
+    if isinstance(alter, str):
+        alter = ["", alter]
+    # select most suitable point based on x
+    datax = curve.x_offsets(alter=alter[0])
+    absm = np.abs(datax - x)
+    idx = np.where(absm == np.min(absm))
+    if len(idx) == 0:
+        idx = np.argmin(absm)
+    elif len(idx) == 1:
+        idx = idx[0]
+    else:
+        # len(idx) > 1: select most suitable point based on y
+        datay = curve.y_offsets(index=idx, alter=alter[1])
+        absM = np.abs(datay - y)
+        idX = np.where(absM == np.min(absM))
+        if len(idX) == 0:
+            idx = idx[0]
+        elif len(idX) == 1:
+            idx = idx[idX[0]]
+        else:  # equally close in x and y -> returns first datapoint found
+            idx = idx[idX[0]]
+    idxOut = idx if len(idx) <= 1 else idx[0]
+    if offsets:
+        # no alter, but offset for the return value
+        return curve.x_offsets(index=idx)[0], curve.y_offsets(index=idx)[0], idxOut
+    # no alter, no offsets for the return value
+    return curve.x(index=idx)[0], curve.y(index=idx)[0], idxOut
 
 
 class Curve:
-    CURVE = "Curve"
+    """A Curve object, fundamental to grapa. Contains data (presumably 2x 1-D vectors),
+    and metadata (can be thought as a dict of key, values). keys are lower-case."""
 
+    CURVE = "Curve"  # to replace with subclass identifier, used when loading files.
+
+    # for subclasses to define suggestions of axis labels depending on data transform
+    AXISLABELS_X = {}  # e.g. {KEY_ALTER: ["Axis label", "symbol", "unit"]}
+    AXISLABELS_Y = {}  # also, funcListGUI must call funclistgui_axislabels
+    # Keys for attributes, to suggest the user graph axis labels
+    KEY_AXISLABEL_X = "_axislabel_x"
+    KEY_AXISLABEL_Y = "_axislabel_y"
+
+    # Values for alter[0] - further are defined in Curve subclasses
+    ALTER_NM_EV = "nmeV"
+    ALTER_NM_CM = "nmcm-1"
+    ALTER_MCA_KEV = "MCAkeV"  # deprecated since 0.6.4.1
+    ALTER_SIMS_DEPTH = "SIMSdepth"
+    ALTER_Y = "y"
+
+    # Values for alter[1] - further are defined in Curve subclasses
+    ALTER_LOG10ABS = "log10abs"
+    ALTER_ABS = "abs"
+    ALTER_ABS0 = "abs0"
+    ALTER_TAUC = "tauc"
+    ALTER_TAUCLN1MINUSEQE = "taucln1-eqe"
+    ALTER_NORMALIZED = "normalized"
+    ALTER_X = "x"
+
+    # keyword values for offset and muloffset
+    OFFSET_MINMAX = "minmax"
+    OFFSET_0MAX = "0max"
+
+    # Accepted keyword values to hide a Curve (not visible), key linestyle
     LINESTYLEHIDE = ["none", "None", None]
 
-    def __init__(self, data, attributes, silent=True):
+    def __init__(self, data, attributes: dict, silent: bool = True):
+        # silent: for debugging purpose. Subclasses may print additional information
         self.silent = silent
+        self._attr = MetadataContainer()
+        self._attr.update(attributes)
         self.data = np.array([])
-        self.attributes = {}
-        # add data
+        self._init_data(data)
+        self._funclistgui_last = []
+
+    def _init_data(self, data) -> None:
+        """Format input data"""
         if isinstance(data, (np.ndarray, np.generic)):
             self.data = data
         else:
             self.data = np.array(data)
         if self.data.shape[0] < 2:
             self.data = self.data.reshape((2, len(self.data)))
-            print(
-                "WARNING class Curve: data Curve need to contain at least 2",
-                "columns. Shape of Curve:",
-                self.data.shape,
-            )
+            msg = "Curve: data need to contain at least 2 columns. Shape of data: {}"
+            logger.warning(msg.format(self.data.shape))
         # clean nan pairs at end of data
         iMax = self.data.shape[1]
         # loop down to 1 only, not 0
@@ -57,239 +184,176 @@ class Curve:
                 break
         if iMax < self.data.shape[1]:
             self.data = self.data[:, :iMax]
-        # add attributes
-        if isinstance(attributes, dict):
-            self.update(attributes)
-        else:
-            print("ERROR class Curve: attributes need to be of class dict.")
 
-    # methods related to GUI
+    # *** Methods related to GUI
     @classmethod
-    def classNameGUI(cls):  # can be overridden, see CurveArrhenius
+    def classNameGUI(cls) -> str:  # can be overridden, see CurveArrhenius
         return cls.CURVE
 
-    def funcListGUI(self, **kwargs):
+    def funcListGUI(self, **kwargs) -> list:
         """
-        Fills in the Curve actions specific to the Curve type. Syntax:
-        [func,
-         'Button text',
-         ['label 1', 'label 2', ...],
-         ['value 1', 'value 2', ...],
-         {'hiddenvar1': 'value1', ...}, (optional)
-         [dictFieldAttributes, {}, ...]] (optional)
-        By default returns quick modifs for offset and muloffset (if already
-        set), and a help for some plot types (errorbar, scatter)
-        In principle the current Graph and the position of self in the Graph
-        can be accessed through kwargs['graph'] and kwargs['graph_i']
+        Fills in the Curve actions specific to the Curve type. Retuns a list, which
+        elements are instances of `FuncGUI`, or (old style): ::
+
+            [func,
+             'Button text',
+             ['label 1', 'label 2', ...],
+             ['value 1', 'value 2', ...],
+             {'hiddenvar1': 'value1', ...}, (optional)
+             [dictFieldAttributes, {}, ...]] (optional)
+
+        By default, returns quick modifs for offset and muloffset (if already set), and
+        a help for some plot types (errorbar, scatter).
+
+        :param kwargs: this function should be called specifying kwargs['graph'] the
+               graph self is embedded in, and kwargs['graph_i'] as position of self in
+               graph.
         """
         out = []
+        # Curve typeplot eg scatter, fill, boxplot etc.
+        out += FuncListGUIHelper.typeplot(self, **kwargs)
         # offset and muloffset can be directly accessed if already set
-        typeplot = self.attr("type")
-        try:
-            graph = kwargs["graph"]
-            c = kwargs["graph_i"]
-            if typeplot == "errorbar":  # helper for type errorbar
-                out += self.funcListGUI_errorbar(graph, c)
-            elif typeplot == "scatter":  # helper for type scatter
-                out += self.funcListGUI_scatter(graph, c)
-            elif typeplot.startswith("fill"):  # helper for type fill
-                out += self.funcListGUI_fill(graph, c)
-            elif typeplot.startswith("boxplot"):  # helper for type boxplot
-                out += self.funcListGUI_boxplot(graph, c)
-            elif typeplot.startswith("violinplot"):  # helper for type boxplot
-                out += self.funcListGUI_violinplot(graph, c)
-        except Exception as e:
-            print("Exception", type(e), "in Curve.funcListGUI")
-        if (
-            self.attr("offset", None) is not None
-            or self.attr("muloffset", None) is not None
-        ):
-            from grapa.graph import Graph
-
-            at = ["offset", "muloffset"]
-            line = FuncGUI(
-                self.updateValuesDictkeys,
-                "Modify screen offsets",
-                hiddenvars={"keys": at},
-            )
-            for key in at:
-                vals = []
-                if key in Graph.KEYWORDS_CURVE["keys"]:
-                    i = Graph.KEYWORDS_CURVE["keys"].index(key)
-                    vals = [str(v) for v in Graph.KEYWORDS_CURVE["guiexamples"][i]]
-                line.append(
-                    key,
-                    self.attr(key),
-                    widgetclass="Combobox",
-                    options={"values": vals},
-                )
-            out.append(line)
+        out += FuncListGUIHelper.offset_muloffset(self, **kwargs)
+        # only if type Curve specifically - not subclass
+        if type(self) is Curve:
+            out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
         return out
 
-    def funcListGUI_errorbar(self, graph, c):
-        out = []
-        types = []
-        if c + 1 < len(graph):
-            types.append(graph[c + 1].attr("type"))
-        if c + 2 < len(graph):
-            types.append(graph[c + 2].attr("type"))
-        xyerrOR = ""
-        if len(types) > 0:
-            choices = ["", "errorbar_xerr", "errorbar_yerr"]
-            labels = ["next Curves type: (" + str(c + 1) + ")"] + [
-                "(" + str(i) + ")" for i in range(c + 2, c + 1 + len(types))
-            ]
-            fieldprops = [{"field": "Combobox", "values": choices}] * len(labels)
-            out.append(
-                [
-                    self.updateNextCurvesScatter,
-                    "Save",
-                    labels,
-                    types,
-                    {"graph": graph, "graph_i": c},
-                    fieldprops,
-                ]
-            )
-            xyerrOR = "OR "
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Save",
-                [xyerrOR + "error values x", "y"],
-                [self.attr("xerr"), self.attr("yerr")],
-                {"keys": ["xerr", "yerr"]},
-            ]
-        )
-        at = ["capsize", "ecolor"]
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Save",
-                at,
-                [self.attr(a) for a in at],
-                {"keys": at},
-            ]
-        )
-        return out
+    def _funclistgui_memorize(self, funclistgui):
+        """Used for print_help. Otherwise, want to generate funclistgui on-demand."""
+        self._funclistgui_last = funclistgui
 
-    def funcListGUI_scatter(self, graph, c):
-        out = []
-        types = []
-        if c + 1 < len(graph):
-            types.append(graph[c + 1].attr("type"))
-        if c + 2 < len(graph):
-            types.append(graph[c + 2].attr("type"))
-        if len(types) > 0:
-            choices = ["", "scatter_c", "scatter_s"]
-            labels = ["next Curves type: (" + str(c + 1) + ")"] + [
-                "(" + str(i) + ")" for i in range(c + 2, c + 1 + len(types))
-            ]
-            fieldprops = [{"field": "Combobox", "values": choices}] * len(labels)
-            out.append(
-                [
-                    self.updateNextCurvesScatter,
-                    "Save",
-                    labels,
-                    types,
-                    {"graph": graph, "graph_i": c},
-                    fieldprops,
-                ]
-            )
-        keys = ["cmap", "vminmax"]
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Save",
-                keys,
-                [self.attr(k) for k in keys],
-                {"keys": keys},
-            ]
-        )
-        return out
+    def alterListGUI(self) -> list:
+        """
+        Determines the possible curve visualisations. One element has the form:
+        AlterListItem('Label GUI', ['alter_x', 'alter_y'], 'semilogx', "print help doc")
+        By default only neutral (i.e. raw data) is provided
+        """
+        # out = [AlterListItem.item_neutral()]
+        return []
 
-    def funcListGUI_fill(self, graph, c):
-        out = []
-        at = ["fill", "hatch", "fill_padto0"]
-        at2 = list(at)
-        at2[2] = "pad to 0"
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Save",
-                at2,
-                [self.attr(a) for a in at],
-                {"keys": at},
-                [
-                    {"field": "Combobox", "values": ["True", "False"]},
-                    {
-                        "field": "Combobox",
-                        "values": ["", ".", "+", "/", r"\\"],
-                        "width": 7,
-                    },
-                    {"field": "Combobox", "values": ["", "True", "False"]},
-                ],
-            ]
-        )
-        return out
+    # *** Methods about _attr
+    def attr(self, key: str, default=MetadataContainer.VALUE_DEFAULT):
+        """Get attribute value"""
+        return self._attr(key, default=default)
 
-    def funcListGUI_boxplot(self, graph, c):
-        out = []
-        at = ["boxplot_position", "color"]
-        at2 = ["position", "color"]
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Save",
-                at2,
-                [self.attr(a) for a in at],
-                {"keys": at},
-                [{}, {}],
-            ]
-        )
-        at = ["widths", "notch", "vert", "showfliers"]
-        out.append(
-            [
-                self.updateValuesDictkeysGraph,
-                "Save",
-                at,
-                [self.attr(a) for a in at],
-                {
-                    "keys": at,
-                    "graph": graph,
-                    "alsoAttr": ["type"],
-                    "alsoVals": ["boxplot"],
-                },
-                [
-                    {},
-                    {"field": "Combobox", "values": ["True", "False"]},
-                    {"field": "Combobox", "values": ["True", "False"]},
-                    {"field": "Combobox", "values": ["True", "False"]},
-                ],
-            ]
-        )
-        # seaborn stripplot and swamplot
-        out += Plotter.funcListGUI(self)
-        return out
+    def has_attr(self, key: str) -> bool:
+        """True if attribute key is defined, False if not defined or default"""
+        return self._attr.has_attr(key)
 
-    def funcListGUI_violinplot(self, graph, c):
-        out = []
-        at = ["boxplot_position", "color"]
-        at2 = ["position", "color"]
-        out.append(
-            [
-                self.updateValuesDictkeys,
-                "Save",
-                at2,
-                [self.attr(a) for a in at],
-                {"keys": at},
-                [{}, {}],
-            ]
-        )
-        # seaborn stripplot and swamplot
-        out += Plotter.funcListGUI(self)
-        return out
+    def is_attr_value_default(self, value) -> bool:
+        """True is value is default (or does not exist), False if defined"""
+        return self._attr.is_attr_value_default(value)
 
-    def plotterBoxplotAddonUpdateCurve(self, fun, kw):
+    def get_attributes(self, keys_list=None) -> dict:
+        """Returns all attributes, or a subset with keys given in keyList"""
+        return self._attr.values(keys_list=keys_list)
+
+    def update(self, attributes: dict) -> None:
+        """Updates attributes. a dict must be provided"""
+        return self._attr.update(attributes)
+
+    def attr_pop(self, key: str):
+        """Deletes an attribute
+        Return the deleted attribute as a dict"""
+        return self._attr.pop(key)
+
+    def label_auto(self, formatter):
+        """
+        Update the curve label according to formatting using python string Template,
+        with curve attributes as variables. Examples:
+        "${sample} ${_simselement}"¨, "${sample} ${cell}", "${temperature [k]:.0f} K"
+        """
+        # if modify implementation: beware GraphSIMS, label_auto(...)
+        string = format_string_curveattr(self, formatter)
+        self.update({"label": string.replace("  ", " ").strip()})
+        return True
+
+    def visible(self, state: bool = None):
+        """Set/get state of visibility.
+        Replaces .isHidden(), with added setter functionality.
+
+        :param state: True to show the Curve, False to hide. None: unchanged state.
+        :return: True if shown (visible), False if hidden
+        """
+        if state is not None:
+            self.update({"linestyle": "" if state else "none"})
+        return False if self.attr("linestyle") in Curve.LINESTYLEHIDE else True
+
+    def data_units(self, unit_x=None, unit_y=None):
+        """Set/get units for x and y data series.
+
+        :param unit_x: new value for unit of data x
+        :param unit_y: new value for unit of data y
+        :returns: list[str] as ["nm", "%"], or ["V", "nF cm-2"]
+        """
+        units = self.attr("_units")
+        if not isinstance(units, list) or len(units) != 2:  # ensure proper formatting
+            units = list(units)
+            while len(units) < 2:
+                units.append("")
+            units = units[:2]
+            self.update({"_units": units})
+        if unit_x is not None or unit_y is not None:  # update value if needed
+            # make anew, otherwise issues with Curve([], other.getAttributes())
+            units = list(units)
+            if unit_x is not None:
+                units[0] = str(unit_x)
+            if unit_y is not None:
+                units[1] = str(unit_y)
+            self.update({"_units": units})
+        return units
+
+    def get_muloffset(self) -> list:
+        """equivalent to attr("muloffset"), with formatting as 2-element list"""
+        value = self.attr("muloffset")
+        if self.is_attr_value_default(value):
+            return [1, 1]
+        if isinstance(value, (int, float, str)):
+            return [1, value]
+        if isinstance(value, (list, tuple)):
+            while len(value) < 2:
+                value.append(1)
+            return value[:2]
+        msg = "Curve.get_muloffset, weird value not properly managed {}."
+        logger.warning(msg.format(value))
+        return [1, 1]
+
+    def updateValuesDictkeys(self, *args, **kwargs):
+        """Performs update({key1: value1, key2: value2, ...}). Handy to call from GUI
+
+        :param args: value1, value2, ...
+        :param kwargs: keys=['key1', 'key2', ...]. list[str]. Same length as args.
+        :returns: True if success, False otherwise
+        """
+        # Shortcut: handy to be used from GUI
+        return update_curve_values_dictkeys(self, *args, **kwargs)
+
+    def updateValuesDictkeysGraph(
+        self,
+        *args,
+        keys: list = None,
+        graph=None,
+        also_attr: list = None,
+        also_vals: list = None
+    ):
+        """Similar as updateValuesDictkeys, for all curves inside a provided graph.
+        Implemented as curve method for easier integration into GUI.
+
+        :param args: value1, value2, ...
+        :param keys: ['key1', 'key2', ...]
+        :param graph: Graph object, will apply to all Curves within
+        :param also_attr: list of attribute keys.
+        :param also_vals: list, same len as also_attr. Test each curve in graph, only
+               perfom modifications if
+               for all i in range, curve.attr(also_attr[i]) == also_vals[i].
+        """
+        return update_graph_values_dictkeys_conditional(
+            graph, *args, keys=keys, also_attr=also_attr, also_vals=also_vals
+        )
+
+    def update_plotter_boxplot_addon(self, fun, kw: dict) -> bool:
+        """set boxplot_addon keyword."""
         # cannot be placed in Plotter, in case user want to apply function on several
         # curves at once as selected from the GUI
         if fun == 0:
@@ -299,62 +363,35 @@ class Curve:
                 try:
                     kw = dict(kw)
                 except ValueError:
-                    print("Invalid input value, failed: {}".format(kw))
+                    msg = "update_plotter_boxplot_addon invalid input, failed ({})."
+                    logger.error(msg.format(kw))
                     return False
             self.update({"boxplot_addon": [fun, kw]})
         return True
 
-    def updateNextCurvesScatter(self, *values, **kwargs):
-        try:
-            graph = kwargs["graph"]
-            c = kwargs["graph_i"]
-        except KeyError:
-            print(
-                'KeyError in Curve.updateNextCurvesScatter: "graph" or',
-                '"graph_i" not provided in kwargs',
+    def update_scatter_next_curves(self, *values, graph=None, graph_i=None) -> bool:
+        """To receive update instructions for Curves following self in graph, when self
+        "type" is "scatter".
+
+        :param values: values for keyword "type", to apply on the Curves following self
+               in graph.
+        :param graph: the Graph object self is part of
+        :param graph_i: index of self within graph (NB: graph may contain self >1x)
+        :return: True if success, False otherwise
+        """
+        if graph is None or graph_i is None or graph[graph_i] != self:
+            msg = (
+                'Error in Curve.update_scatter_next_curves: keyword arguments "graph" '
+                'and "graph_i" are mandatory, and graph[graph_i] must be equal to self.'
             )
+            logger.error(msg)
             return False
         for i in range(len(values)):
-            if c + i < len(graph):
-                graph[c + 1 + i].update({"type": values[i]})
+            if graph_i + i + 1 < len(graph):
+                graph[graph_i + 1 + i].update({"type": values[i]})
         return True
 
-    # alterListGUI
-    def alterListGUI(self):
-        """
-        Determines the possible curve visualisations. Syntax:
-        ['GUI label', ['alter_x', 'alter_y'], 'semilogx']
-        By default only Linear (ie. raw data) is provided
-        """
-        out = []
-        out.append(["no transform", ["", ""], ""])
-        return out
-
-    # Function related to Fits
-    def updateFitParam(self, *param):
-        f = self.attr("_fitFunc", "")
-        # print ('Curve update', param, 'f', f)
-        if f != "" and not self.attributeEqual("_popt"):
-            if hasattr(self, f):
-                self.setY(getattr(self, f)(self.x(), *param))
-                self.update({"_popt": list(self.updateFitParamFormatPopt(f, param))})
-                return True
-            return "ERROR Update fit parameter: No such fit function (", f, ")."
-        return (
-            "ERROR Update fit parameter: Empty parameter (_fitFunc:",
-            f,
-            ", _popt:",
-            self.attr("_popt"),
-            ").",
-        )
-
-    def updateFitParamFormatPopt(self, f, param):
-        # possibility to override in subclasses, esp. when handling of test
-        # input is required.
-        # by default, assumes all numeric -> best stored in a np.array
-        return np.array(param)
-
-    # more classical class methods
+    # *** Methods about data
     def getData(self):
         return self.data
 
@@ -363,63 +400,23 @@ class Curve:
             return self.data.shape
         return self.data.shape[idx]
 
-    def _fractionToFloat(self, frac_str):
-        try:
-            return float(frac_str)
-        except ValueError:
-            num, denom = frac_str.split("/")
-            return float(num) / float(denom)
-
-    def x_offsets(self, **kwargs):
-        """
-        Same as x(), including the effect of offset and muloffset on output.
-        """
-        reserved = ["minmax", "0max"]
-        special = None
-        x = self.x(**kwargs)
-        offset = self.attr("offset", None)
-        if offset is not None:
-            o = offset[0] if isinstance(offset, list) else 0
-            if isinstance(o, str):
-                if o in reserved:
-                    special = o
-                    o = 0
-                else:
-                    o = self._fractionToFloat(o)
-            x = x + o
-        muloffset = self.attr("muloffset", None)
-        if muloffset is not None:
-            o = muloffset[0] if isinstance(muloffset, list) else 1
-            if isinstance(o, str):
-                if o.replace(" ", "") in reserved:
-                    special = o
-                    o = 1
-                else:
-                    o = self._fractionToFloat(o)
-            x = x * o
-        if special is not None:
-            m, M = np.min(x), np.max(x)
-            if special == "minmax":
-                x = (x - m) / (M - m)
-            elif special == "0max":
-                x = x / M
-        return x
-
     def x(
         self, index=np.nan, alter="", xyValue=None, errorIfxyMix=False, neutral=False
-    ):
-        """
-        Returns the x data.
-        index: range to the data.
-        alter: possible alteration to the data (i.e. '', 'nmeV')
-        xyValue: provide [x, y] value pair to be alter-ed. x, y can be np.array
-        errorIfxyMix: throw ValueError exception if alter value calculation
-            requires both x and y components. Useful for transforming xlim and
-            ylim, where x do not know y in advance.
-        neutral: no use yet, introduced to keep same call arguments as self.y()
+    ) -> np.ndarray:
+        """Returns the x data over the range index.
+
+        :param index: range to the data.
+        :param alter: possible alteration to the data (i.e. '', 'nmeV')
+        :param xyValue: provide [x, y] values pair to be alter-ed. x, y can be np.array
+               In that case, the curve x values are ignored.
+        :param errorIfxyMix: throw ValueError exception if alter value calculation
+               requires both x and y components. Useful for transforming xlim and
+               ylim, where x do not know y in advance.
+        :param neutral: no use yet, introduced to keep same call arguments as self.y()
+        :return: a nd.array of x values
         """
         if alter != "":
-            if alter == "nmeV":
+            if alter == self.ALTER_NM_EV:  # "nmeV"
                 # invert order of xyValue, to help for graph xlim and ylim
                 if xyValue is not None:
                     xyValue = np.array(xyValue)
@@ -428,7 +425,7 @@ class Curve:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     return CST.nm_eV / self.x(index, xyValue=xyValue)
-            elif alter == "nmcm-1":
+            elif alter == self.ALTER_NM_CM:  # "nmcm-1"
                 # invert order of xyValue, to help for graph xlim and ylim
                 if xyValue is not None:
                     xyValue = np.array(xyValue)
@@ -437,15 +434,15 @@ class Curve:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     return 1e7 / self.x(index, xyValue=xyValue)
-            elif alter == "MCAkeV":
+            elif alter == self.ALTER_MCA_KEV:  # "MCAkeV":  # deprecated since 0.6.4.1
                 offset = self.attr("_MCA_CtokeV_offset", default=0)
                 mult = self.attr("_MCA_CtokeV_mult", default=1)
                 return mult * (self.x(index, xyValue=xyValue) + offset)
-            elif alter == "SIMSdepth":
+            elif alter == self.ALTER_SIMS_DEPTH:  # "SIMSdepth":
                 offset = self.attr("_SIMSdepth_offset", default=0)
                 mult = self.attr("_SIMSdepth_mult", default=1)
                 return mult * (self.x(index, xyValue=xyValue) + offset)
-            elif alter == "y":
+            elif alter == self.ALTER_Y:  # "y":
                 try:
                     xyValue = xyValue[::-1]
                 except TypeError:
@@ -455,20 +452,18 @@ class Curve:
             elif alter != "":
                 split = alter.split(".")
                 if len(split) == 2:
-                    module_name = (
-                        "grapa.datatypes." + split[0][0].lower() + split[0][1:]
-                    )
+                    base = "grapa.datatypes.{}{}"
+                    module_name = base.format(split[0][0].lower(), split[0][1:])
                     try:
                         mod = importlib.import_module(module_name)
                         met = getattr(getattr(mod, split[0]), split[1])
                         return met(self, index=index, xyValue=xyValue)
-                    except ImportError as e:
-                        msg = "ERROR Curve.x Exception raised during module import {}:"
-                        print(msg.format(module_name))
-                        print(e)
+                    except ImportError:
+                        msg = "Curve.x Exception raised during module import {}:"
+                        logger.error(msg.format(module_name), exc_info=True)
                 else:
-                    msg = "Error Curve.x: cannot identify alter keyword ({})."
-                    print(msg.format(alter))
+                    msg = "Curve.x: cannot identify alter keyword ({})."
+                    logger.error(msg.format(alter))
 
         # alter might be used by subclasses
         val = self.data if xyValue is None else np.array(xyValue)
@@ -478,87 +473,52 @@ class Curve:
             return val[0, index]
         return val[0]
 
-    def y_offsets(self, **kwargs):
-        """
-        Same as y(), including the effect of offset and muloffset on output.
-        """
-        reserved = ["minmax", "0max"]
-        special = None
-        y = self.y(**kwargs)
-        offset = self.attr("offset", None)
-        if offset is not None:
-            o = offset[1] if isinstance(offset, list) else offset
-            if isinstance(o, str):
-                if o in reserved:
-                    special = o
-                    o = 0
-                else:
-                    o = self._fractionToFloat(o)
-            y = y + o
-        muloffset = self.attr("muloffset", None)
-        if muloffset is not None:
-            o = muloffset[1] if isinstance(muloffset, list) else muloffset
-            if isinstance(o, str):
-                if o.replace(" ", "") in reserved:
-                    special = o
-                    o = 1
-                else:
-                    o = self._fractionToFloat(o)
-            y = y * o
-        if special is not None:
-            m, M = np.min(y), np.max(y)
-            if special == "minmax":
-                y = (y - m) / (M - m)
-            elif special == "0max":
-                y = y / M
-        return y
-
     def y(
         self, index=np.nan, alter="", xyValue=None, errorIfxyMix=False, neutral=False
-    ):
-        """
-        Returns the y data.
-        index: range to the data.
-        alter: possible alteration to the data (i.e. '', 'log10abs', 'tauc')
-        xyValue: provide [x, y] value pair to be alter-ed. x, y can be np.array
-        errorIfxyMix: throw ValueError exception if alter value calculation
-            requires both x and y components. Useful for transforming xlim and
-            ylim, where x do not know y in advance.
-        neutral: additional parameter. If True prevent Jsc substraction for
-            CurveJV.
-        """
+    ) -> np.ndarray:
+        """Returns the y data over the range index.
 
+        :param index: range to the data.
+        :param alter: possible alteration to the data (i.e. '', 'nmeV')
+        :param xyValue: provide [x, y] values pair to be alter-ed. x, y can be np.array
+               In that case, the curve x values are ignored.
+        :param errorIfxyMix: throw ValueError exception if alter value calculation
+               requires both x and y components. Useful for transforming xlim and
+               ylim, where y do not know x in advance.
+        :param neutral: (additional) If True, prevent Jsc substraction for CurveJV.
+        :return: a nd.array of y values
+        """
         # if some alteration required: make operation on data requested by
         # itself, without operation
         if alter != "":
-            if alter == "log10abs":
+            if alter == self.ALTER_LOG10ABS:  # "log10abs":
                 jsc = self.attr("Jsc") if self.attr("Jsc") != "" and not neutral else 0
                 return np.log10(np.abs(self.y(index, xyValue=xyValue) + jsc))
-            elif alter == "abs":
+            elif alter == self.ALTER_ABS:  # "abs":
                 jsc = self.attr("Jsc") if self.attr("Jsc") != "" and not neutral else 0
                 return np.abs(self.y(index, xyValue=xyValue) + jsc)
-            elif alter == "abs0":
+            elif alter == self.ALTER_ABS0:  # "abs0":
                 return np.abs(self.y(index, xyValue=xyValue))
-            elif alter == "tauc":
+            elif alter == self.ALTER_TAUC:  # "tauc":
                 if errorIfxyMix:
-                    return ValueError
+                    raise ValueError
                 return np.power(
                     self.y(index, xyValue=xyValue)
-                    * self.x(index, alter="nmeV", xyValue=xyValue),
+                    * self.x(index, alter=self.ALTER_NM_EV, xyValue=xyValue),
                     2,
                 )
-            elif alter == "taucln1-eqe":
+            elif alter == self.ALTER_TAUCLN1MINUSEQE:  # "taucln1-eqe":
                 if errorIfxyMix:
-                    return ValueError
+                    raise ValueError
                 return np.power(
                     np.log(1 - self.y(index, xyValue=xyValue))
-                    * self.x(index, alter="nmeV", xyValue=xyValue),
+                    * self.x(index, alter=self.ALTER_NM_EV, xyValue=xyValue),
                     2,
                 )
-            elif alter == "normalized":
+            elif alter == self.ALTER_NORMALIZED:  # "normalized":
                 out = self.y(index, xyValue=xyValue)
                 return out / np.max(out)
-            elif alter == "x":
+            elif alter == self.ALTER_X:  # "x":
                 try:
                     xyValue = xyValue[::-1]
                 except TypeError:
@@ -567,21 +527,19 @@ class Curve:
             elif alter != "":
                 split = alter.split(".")
                 if len(split) == 2:
-                    module_name = (
-                        "grapa.datatypes." + split[0][0].lower() + split[0][1:]
-                    )
+                    base = "grapa.datatypes.{}{}"
+                    module_name = base.format(split[0][0].lower(), split[0][1:])
                     try:
                         mod = importlib.import_module(module_name)
                         met = getattr(getattr(mod, split[0]), split[1])
                         return met(self, index=index, xyValue=xyValue)
-                    except ImportError as e:
-                        msg = "ERROR Curve.y Exception raised during module import {}:"
-                        print(msg.format(module_name))
-                        print(e)
+                    except ImportError:
+                        msg = "Curve.y Exception raised during module import {}:"
+                        logger.error(msg.format(module_name), exc_info=True)
                 else:
-                    if alter != "idle":
+                    if not alter.startswith("idle"):
                         msg = "Error Curve.y: cannot identify alter keyword ({})."
-                        print(msg.format(alter))
+                        logger.error(msg.format(alter))  # maybe better to raise ??
         # return (subset of) data
         val = self.data if xyValue is None else np.array(xyValue)
         if len(val.shape) > 1:
@@ -589,6 +547,56 @@ class Curve:
                 return val[1, :]
             return val[1, index]
         return val[1]
+
+    def x_offsets(self, **kwargs):
+        """Calls y(), and apply the effects of offset and muloffset on output."""
+        return self._xy_offsets("x", **kwargs)
+
+    def y_offsets(self, **kwargs):
+        """Calls y(), and apply the effects of offset and muloffset on output."""
+        return self._xy_offsets("y", **kwargs)
+
+    def _xy_offsets(self, x_or_y, **kwargs):
+        """Calls x() or y(), and apply the effects of offset and muloffset on output."""
+        series = self.x(**kwargs) if x_or_y == "x" else self.y(**kwargs)
+        reserved = [self.OFFSET_MINMAX, self.OFFSET_0MAX]
+        special = None
+        # offset
+        offset_input = self.attr("offset")
+        if not self.is_attr_value_default(offset_input):
+            if isinstance(offset_input, list):
+                offset = offset_input[0] if x_or_y == "x" else offset_input[1]
+            else:
+                offset = 0 if x_or_y == "x" else offset_input
+            if isinstance(offset, str):
+                if offset in reserved:
+                    special = offset
+                    offset = 0
+                else:
+                    offset = _fractionstr_to_float(offset)
+            series = series + offset
+        # muloffset
+        muloffset_input = self.attr("muloffset")
+        if not self.is_attr_value_default(muloffset_input):
+            if isinstance(muloffset_input, list):
+                muloffset = muloffset_input[0] if x_or_y == "x" else muloffset_input[1]
+            else:
+                muloffset = 1 if x_or_y == "x" else muloffset_input
+            if isinstance(muloffset, str):
+                if muloffset.replace(" ", "") in reserved:
+                    special = muloffset
+                    muloffset = 1
+                else:
+                    muloffset = _fractionstr_to_float(muloffset)
+            series = series * muloffset
+        # special
+        if special is not None:
+            m, M = np.min(series), np.max(series)
+            if special == self.OFFSET_MINMAX:
+                series = (series - m) / (M - m)
+            elif special == self.OFFSET_0MAX:
+                series = series / M
+        return series
 
     def setX(self, x, index=np.nan):
         """
@@ -613,190 +621,69 @@ class Curve:
         else:
             self.data[1] = y
 
-    def appendPoints(self, xSeries, ySeries):
-        xSeries, ySeries = np.array(xSeries), np.array(ySeries)
-        if len(xSeries) == 0:
-            print("Curve appendPoints: empty xSeries provided.")
+    def appendPoints(self, x_series, y_series) -> bool:
+        """Append datapoints.
+
+        :param x_series: a list or np.array
+        :param y_series: a list or np.array. same length as x_series
+        :return: True if success, False otherwise.
+        """
+        x_series, y_series = np.array(x_series), np.array(y_series)
+        if len(x_series) == 0:
+            logger.error("Curve.appendPoints: empty xSeries provided.")
             return False
-        if len(ySeries) != len(xSeries):
-            print(
-                "Curve appendPoints: cannot handle data series with",
-                "different lengths.",
-            )
+
+        if len(y_series) != len(x_series):
+            msg = "Curve.appendPoints: cannot handle series with different lengths."
+            logger.error(msg)
             return False
-        self.data = np.append(self.data, np.array([xSeries, ySeries]), axis=1)
+
+        self.data = np.append(self.data, np.array([x_series, y_series]), axis=1)
         return True
 
-    def attr(self, key, default=""):
-        """Getter of attribute"""
-        if key.lower() in self.attributes:
-            return self.attributes[key.lower()]
-        return default
+    # Function related to Fits
+    def updateFitParam(self, *param, func=None):
+        """Update the curve y values of a fit curve.
 
-    def getAttribute(self, key, default=""):
-        """Legacy getter of attribute"""
-        return self.attr(key, default=default)
-
-    def getAttributes(self, keysList=None):
-        """Returns all attributes, or a subset with keys given in keyList"""
-        if isinstance(keysList, list):
-            out = {}
-            for key in keysList:
-                out.update({key: self.attr(key)})
-            return out
-        return self.attributes
-
-    def attributeEqual(self, key, value=""):
+        :param param: the new parameters to consider for the fit formula.
+               Will be placed into _popt.
+        :param func: will call func() instead of getattr(self,
+               self.attr("fitfunc"))(), used (at least) in curveMCA for fit
+        :return: True if ok, str if something went wrong
         """
-        Check if attribute 'key' has a certain value
-        The value can be left empty: check if attr(key) returns the
-        default value.
-        """
-        # value='' must be same as the default parameter of method getAttribute
-        val = self.attr(key)
-        if isinstance(val, type(value)) and val == value:
-            return True
-        return False
+        f = self.attr("_fitfunc")
+        # print ('Curve update', param, 'f', f)
+        if f != "" and self.has_attr("_popt"):
+            if func is None:
+                if hasattr(self, f):
+                    func = getattr(self, f)
+            if func is not None:
+                self.setY(func(self.x(), *param))
+                self.update({"_popt": list(self.updateFitParamFormatPopt(f, param))})
+                return True
+            return "ERROR Update fit parameter: No such fit function (", f, ")."
 
-    def update(self, attributes):
-        """Updates attributes. a dict must be provided"""
-        for key in attributes:
-            k = key.lower()
-            if not isinstance(attributes[key], str) or attributes[key] != "":
-                k_ = k.strip(" =:\t\n").replace("ï»¿", "")
-                self.attributes.update({k_: attributes[key]})
-            elif k in self.attributes:
-                del self.attributes[k]
+        msg = "ERROR Update fit parameter: Empty parameter (_fitFunc: {}, _popt: {})."
+        return msg.format(f, self.attr("_popt"))
 
-    def updateValuesDictkeys(self, *args, **kwargs):
-        """
-        Performs update({key1: value1, key2: value2, ...}) with
-        arguments value1, value2, ... , (*args) and
-        kwargument keys=['key1', 'key2', ...]
-        """
-        if "keys" not in kwargs:
-            print(
-                'Error Curve updateValuesDictkeys: "keys" key must be',
-                "provided, must be a list of keys corresponding to the",
-                "values provided in *args.",
-            )
-            return False
-        if len(kwargs["keys"]) != len(args):
-            print(
-                'WARNING Curve updateValuesDictkeys: len of list "keys"',
-                "argument must match the number of provided values (",
-                len(args),
-                "args provided,",
-                len(kwargs["keys"]),
-                "keys).",
-            )
-        lenmax = min(len(kwargs["keys"]), len(args))
-        for i in range(lenmax):
-            self.update({kwargs["keys"][i]: args[i]})
-        return True
+    def updateFitParamFormatPopt(self, f, param):
+        # possibility to override in subclasses, esp. when handling of test
+        # input is required.
+        # by default, assumes all numeric -> best stored in a np.array
+        return np.array(param)
 
-    def updateValuesDictkeysGraph(
-        self, *args, keys=None, graph=None, alsoAttr=None, alsoVals=None, **kwargs
-    ):
-        """
-        similar as updateValuesDictkeys, for all curves inside a given graph
-        """
-        from grapa.graph import Graph
+    # *** Methods relevant to Curve casting
+    def castCurveListGUI(self, onlyDifferent: bool = True):
+        """Returns a list of Curve subclasses into which a curve can be cast
 
-        if not isinstance(keys, list):
-            print(
-                'Error Curve updateValuesDictkeysGraph: "keys" key must be',
-                "provided, must be a list of keys corresponding to the",
-                "values provided in *args.",
-            )
-            return False
-        if not isinstance(graph, Graph):
-            print(
-                'Error Curve updateValuesDictkeysGraph: "graph" key must be',
-                "provided, must be a Graph object.",
-            )
-            return False
-        if not isinstance(alsoAttr, list):
-            print(
-                'Error Curve updateValuesDictkeysGraph: "alsoAttr" key must',
-                "be provided, must be a list of attributes.",
-            )
-            return False
-        if not isinstance(alsoVals, list):
-            print(
-                'Error Curve updateValuesDictkeysGraph: "alsoVals" key must',
-                "be provided, must be a list of values matching alsoAttr.",
-            )
-            return False
-        while len(alsoVals) < len(alsoAttr):
-            alsoVals.append("")
-        for curve in graph.iterCurves():
-            flag = True
-            for i in range(len(alsoAttr)):
-                if not curve.attr(alsoAttr[i]) == alsoVals[i]:
-                    flag = False
-            if flag:
-                curve.updateValuesDictkeys(*args, keys=keys)
-        return True
-
-    def autoLabel(self, formatter):
-        """
-        Update the curve label according to formatting using python string template,
-        with curve attributes as variables
-        e.g. "$sample $_simselement"
-        """
-        # if modify implementation: beware GraphSIMS, autoLabel(...)
-        t = TemplateCustom(formatter)
-        try:
-            identifiers = t.get_identifiers()
-        except AttributeError:  # python < 3.11
-            # identifiers must be surrounded by {}
-            from string import Formatter
-
-            # identifiers = [ele[1] for ele in Formatter().parse(formatter) if ele[1]]
-            identifiers = []
-            for ele in Formatter().parse(formatter):
-                if ele[1]:
-                    identifiers.append(ele[1])
-                    if ele[2]:
-                        identifiers[-1] = identifiers[-1] + ":" + ele[2]
-        attrs = {}
-        for key in identifiers:
-            attrs[key] = str(self.attr(key))
-            if "," in key:  # to supper e.g. "${temperature, :.0f}"
-                split = key.split(",")
-                ke = split[0].strip()
-                fm = split[1].strip()
-                if len(fm) > 0:
-                    attrs[key] = ("{" + fm + "}").format(self.attr(ke))
-                else:
-                    attrs[key] = str(self.attr(ke))
-        label = t.safe_substitute(attrs)
-        self.update({"label": label.replace("  ", " ").strip()})
-        return True
-
-    def delete(self, key):
-        out = {}
-        if key.lower() in self.attributes:
-            out.update({key: self.attr("key")})
-            del self.attributes[key.lower()]
-        return out
-
-    def swapShowHide(self):
-        self.update({"linestyle": "" if self.isHidden() else "none"})
-        return True
-
-    def isHidden(self):
-        return True if self.attr("linestyle") in Curve.LINESTYLEHIDE else False
-
-    def castCurveListGUI(self, onlyDifferent=True):
-        curveTypes = [] if onlyDifferent else [Curve]
-        curveTypes += Curve.__subclasses__()
+        :param onlyDifferent: if false, also returns the object own subclass"""
+        subclasses = [] if onlyDifferent else [Curve]
+        subclasses += Curve.__subclasses__()
         out = []
-        for c in curveTypes:
-            if not onlyDifferent or not isinstance(self, c):
-                name = c.classNameGUI()
-                out.append([name, c.__name__, c])
+        for subclass in subclasses:
+            if not onlyDifferent or not isinstance(self, subclass):
+                name = subclass.classNameGUI()
+                out.append([name, subclass.__name__, subclass])
         key = [x[0] for x in out]
         for i in range(len(key) - 2, -1, -1):
             if key[i] in key[:i]:
@@ -806,44 +693,45 @@ class Curve:
         out = [x for (y, x) in sorted(zip(key, out), key=lambda pair: pair[0])]
         return out
 
-    def castCurve(self, newTypeGUI):
-        if newTypeGUI == "Curve":
-            newTypeGUI = "Curve"
-        if type(self).__name__ == newTypeGUI:
+    def castCurve(self, new_type_gui):
+        """
+        Returns a Curve of the specified subtype, with same data and attributes as self
+        """
+        if new_type_gui == "Curve":
+            new_type_gui = "Curve"
+        if type(self).__name__ == new_type_gui:
             return self
+        attributes = self.get_attributes()
         curveTypes = self.castCurveListGUI()
         for typ_ in curveTypes:
-            if newTypeGUI == "Curve":
-                return Curve(self.data, attributes=self.getAttributes(), silent=True)
+            if new_type_gui == "Curve":
+                return Curve(self.data, attributes=attributes, silent=True)
             if (
-                newTypeGUI == typ_[0]
-                or newTypeGUI == typ_[1]
-                or newTypeGUI.replace(" ", "") == typ_[1]
+                new_type_gui == typ_[0]
+                or new_type_gui == typ_[1]
+                or new_type_gui.replace(" ", "") == typ_[1]
             ):
                 if isinstance(self, typ_[2]):
-                    print("Curve.castCurve: already that type!")
+                    logger.warning("Curve.castCurve: already that type!")
                 else:
-                    return typ_[2](
-                        self.data, attributes=self.getAttributes(), silent=True
-                    )
+                    return typ_[2](self.data, attributes=attributes, silent=True)
                 break
-        print(
-            "Curve.castCurve: Cannot understand new type:",
-            newTypeGUI,
-            "(possible types:",
-            [key for key in curveTypes],
-            ")",
-        )
+        msg = "Curve.castCurve: Cannot understand new type: {} (possible types: {})"
+        logger.error(msg.format(new_type_gui, list(curveTypes)))
         return False
 
+    # *** Other methods...
     def selectData(self, xlim=None, ylim=None, alter="", offsets=False, data=None):
-        """
-        Returns slices of the data self.x(), self.y() which satisfy
-        xlim[0] <= x <= xlim[1], and ylim[0] <= y <= ylim[1]
-        alter: '', or ['', 'abs']. Affect the test AND the output.
-        offset: if True, calls x and y are affected by offset and muloffset
-        data [xSeries, ySeries] can be provided. Helps the code of calling
-            methods being cleaner. If provided, alter and offsets are ignored.
+        """Returns slices of the data self.x(), self.y() which satisfy
+        xlim[0] <= x <= xlim[1], and ylim[0] <= y <= ylim[1].
+
+        :param xlim: [xmin, xmax], or None
+        :param ylim: [ymin, ymax], or None
+        :param alter: '', or ['', 'abs']. Affect the test AND the output.
+        :param offsets: if True, calls x and y are affected by offset and muloffset
+        :param data:  [xSeries, ySeries] can be provided. If provided, alter and offsets
+               are ignored.
+        :return x, y: as np.array
         """
         if isinstance(alter, str):
             alter = ["", alter]
@@ -869,44 +757,10 @@ class Curve:
                 mask[i] = False
         return x[mask], y[mask]
 
-    def getPointClosestToXY(self, x, y, alter="", offsets=False):
-        """
-        Return the data point closest to the x,y values.
-        Priority on x, compares y only if equal distance on x
-        """
-        if isinstance(alter, str):
-            alter = ["", alter]
-        # select most suitable point based on x
-        datax = self.x_offsets(alter=alter[0])
-        absm = np.abs(datax - x)
-        idx = np.where(absm == np.min(absm))
-        if len(idx) == 0:
-            idx = np.argmin(absm)
-        elif len(idx) == 1:
-            idx = idx[0]
-        else:
-            # len(idx) > 1: select most suitable point based on y
-            datay = self.y_offsets(index=idx, alter=alter[1])
-            absM = np.abs(datay - y)
-            idX = np.where(absM == np.min(absM))
-            if len(idX) == 0:
-                idx = idx[0]
-            elif len(idX) == 1:
-                idx = idx[idX[0]]
-            else:  # equally close in x and y -> returns first datapoint found
-                idx = idx[idX[0]]
-        idxOut = idx if len(idx) <= 1 else idx[0]
-        if offsets:
-            # no alter, but offset for the return value
-            return self.x_offsets(index=idx)[0], self.y_offsets(index=idx)[0], idxOut
-        # no alter, no offsets for the return value
-        return self.x(index=idx)[0], self.y(index=idx)[0], idxOut
-
     def getDataCustomPickerXY(self, idx, alter="", strDescription=False):
         """
         Given an index in the Curve data, returns a modified data which has
-        some sense to the user. Is overloaded in some child Curve classes, see
-        for example CurveCf
+        some sense to the user. Can be overridden in child classes, see e.g. CurveCf
         If strDescription is True, then returns a string which describes what
         this method is doing.
         """
@@ -921,547 +775,215 @@ class Curve:
             attr,
         )
 
-    def printHelpFunc(self, func, leadingstrings=None):
+    @classmethod
+    def print_help_func(cls, func, funclabel: str = "", nparammax: int = -1):
         """prints the docstring of a function"""
-        if leadingstrings is None:
-            leadingstrings = ["- ", "  "]
-        a, idx = 0, None
-        for line in func.__doc__.split("\n"):
-            if len(line) == 0:
-                continue
-            if idx is None:
-                idx = len(line) - len(line.lstrip(" "))
-            if len(line) == idx:
-                continue
-            print(leadingstrings[a] + line[idx:])
-            a = 1
+        lines = restructuredtext_to_text(func.__doc__, nparammax=nparammax)
+        if funclabel != "":
+            lines[0] = funclabel + ": " + lines[0]
+        lines = ["  " + line for line in lines]
+        if len(lines) > 0 and len(lines[0]) > 0:
+            lines[0] = "-" + lines[0][1:]
+        print("\n".join(lines))
 
-    # some arithmetics
-    def __add__(self, other, sub=False, interpolate=-1, offsets=False, operator="add"):
-        """
-        Addition operation, element-wise or interpolated along x data
-        interpolate: interpolate, or not the data on the x axis
-            0: no interpolation, only consider y() values
-            1: interpolation, x are the points contained in self.x() or in
-               other.x()
-            2: interpolation, x are the points of self.x(), restricted to
-               min&max of other.x()
-            -1: 0 if same y values (gain time), otherwise 1
-        With sub=True, performs substraction
-        offsets: if True, adds Curves after computing offsets and muloffsets.
-            If not adds on the raw data.
-        operator: 'add', 'sub', 'mul', 'div'. sub=True is a shortcut for
-            operatore='sub'. Overriden by sub=True argument.
-        """
-
-        def op(x, y, operator):
-            if operator == "sub":
-                return x - y
-            if operator == "mul":
-                return x * y
-            if operator == "div":
-                return x / y
-            if operator == "pow":
-                return x**y
-            if operator != "add":
-                print(
-                    "WARNING Curve.__add__: unexpected operator argument("
-                    + operator
-                    + ")."
-                )
-            return x + y
-
-        if sub == True:
-            operator = "sub"
-        selfx = self.x_offsets if offsets else self.x
-        selfy = self.y_offsets if offsets else self.y
-        if not isinstance(other, Curve):  # add someting/number to a Curve
-            out = Curve([selfx(), op(selfy(), other, operator)], self.getAttributes())
-            # remove offset information if use it during calculation
-            if offsets:
-                out.update({"offset": "", "muloffset": ""})
-            out = out.castCurve(self.classNameGUI())
-            return out  # cast type
-        # curve1 is a Curve
-        otherx = other.x_offsets if offsets else other.x
-        othery = other.y_offsets if offsets else other.y
-        # default mode -1: check if can gain time (avoid interpolating)
-        r = range(0, min(len(selfy()), len(othery())))
-        if interpolate == -1:
-            interpolate = 0 if np.array_equal(selfx(index=r), otherx(index=r)) else 1
-        # avoiding interpolation
-        if not interpolate:
-            le = min(len(selfy()), len(othery()))
-            r = range(0, le)
-            if le < len(selfy()):
-                print(
-                    "WARNING Curve __add__: Curves not same lengths, clipped",
-                    "result to shortest (",
-                    len(selfy()),
-                    ",",
-                    len(othery()),
-                    ")",
-                )
-            if not np.array_equal(selfx(index=r), otherx(index=r)):
-                print(
-                    "WARNING Curve __add__ (" + operator + "): Curves not same x",
-                    "axis values. Consider interpolation (interpolate=1).",
-                )
-            out = Curve(
-                [selfx(index=r), op(selfy(index=r), othery(index=r), operator)],
-                other.getAttributes(),
+    def print_help(self):
+        """Prints help for the Curve subclass, generated from docstrings."""
+        print("*** *** ***")
+        print(type(self).__doc__.strip())
+        # List of data transform
+        alterlist = self.alterListGUI()
+        if len(alterlist) > 0:
+            print("\nData transforms:")
+            for alter in alterlist:
+                if isinstance(alter, list):
+                    alter = AlterListItem(*alter)
+                string = "- {}: {}".format(alter.label, alter.doc)
+                print(string)
+        # List of functions
+        if len(self._funclistgui_last) == 0:
+            self.funcListGUI()  # NB: not complete output as no graph and graph_i kwargs
+        if len(self._funclistgui_last) == 0:
+            msg = (
+                "ERROR Curve.printHelp. One should execute self._funclistgui_memorize()"
+                "in funcListGUI, or override printHelp to override in subclass {}."
             )
-            out.update(self.getAttributes())
-            if offsets:  # remove offset information if use during calculation
-                out.update({"offset": "", "muloffset": ""})
-            out = out.castCurve(self.classNameGUI())
-            return out
-        else:  # not elementwise : interpolate
-            from scipy.interpolate import interp1d
+            raise NotImplementedError(msg.format(type(self)))
+        if len(self._funclistgui_last) > 0:
+            print("\nAnalysis functions:")
+        not_document = [self.print_help]
+        for entry in self._funclistgui_last:
+            if not isinstance(entry, FuncGUI):
+                entry = FuncGUI(None, None).init_legacy(entry)
+            if entry.func in not_document:
+                continue
+            print("\n".join(entry.func_docstring_to_text()))
+        return True
 
-            # construct new x -> all x which are in the range of the other curv
-            datax = list(selfx())
-            if interpolate == 1:  # x from both self and other
-                xmin = max(min(selfx()), min(otherx()))
-                xmax = min(max(selfx()), max(otherx()))
-                # no duplicates
-                datax += [x for x in otherx() if x not in datax]
-            else:
-                # interpolate 2: copy x from self, restrict to min&max of other
-                xmin, xmax = min(otherx()), max(otherx())
-            datax = [x for x in datax if x <= xmax and x >= xmin]
-            reverse = (selfx(index=0) > selfx(index=1)) if len(selfx()) > 1 else False
-            datax.sort(reverse=reverse)
-            f0 = interp1d(selfx(), selfy(), kind=1)
-            f1 = interp1d(otherx(), othery(), kind=1)
-            datay = [op(f0(x), f1(x), operator) for x in datax]
-            out = Curve([datax, datay], other.getAttributes())
-            out.update(self.getAttributes())
-            if offsets:  # remove offset information if use during calculation
-                out.update({"offset": "", "muloffset": ""})
-            out = out.castCurve(self.classNameGUI())
-            return out
+    # *** arithmetics with Curves
+    def __add__(self, other):
+        return math_on_curves(self, other, operator=MathOperator.ADD)
 
-    def __radd__(self, other, **kwargs):
-        return self.__add__(other, **kwargs)
+    def __radd__(self, other):
+        return math_on_curves(self, other, operator=MathOperator.ADD)
 
-    def __sub__(self, other, **kwargs):
+    def __sub__(self, other):
         """substract operation, element-wise or interpolated"""
-        kwargs.update({"sub": True})
-        return self.__add__(other, **kwargs)
+        return math_on_curves(self, other, operator=MathOperator.SUB)
 
-    def __rsub__(self, other, **kwargs):
+    def __rsub__(self, other):
         """reversed substract operation, element-wise or interpolated"""
-        kwargs.update({"sub": False, "operator": "add"})
-        return Curve.__add__(self.__neg__(), other, **kwargs)
+        return math_on_curves(self.__neg__(), other, operator=MathOperator.ADD)
 
     def __mul__(self, other, **kwargs):
         """multiplication operation, element-wise or interpolated"""
-        kwargs.update({"operator": "mul"})
-        return self.__add__(other, **kwargs)
+        return math_on_curves(self, other, operator=MathOperator.MUL)
 
-    def __rmul__(self, other, **kwargs):
-        kwargs.update({"operator": "mul"})
-        return self.__add__(other, **kwargs)
+    def __rmul__(self, other):
+        """r-multiplication operation"""
+        return math_on_curves(self, other, operator=MathOperator.MUL)
 
-    def __div__(self, other, **kwargs):
+    def __div__(self, other):
         """division operation, element-wise or interpolated"""
-        kwargs.update({"operator": "div"})
-        return self.__add__(other, **kwargs)
+        return math_on_curves(self, other, operator=MathOperator.DIV)
 
-    def __rdiv__(self, other, **kwargs):
+    def __rdiv__(self, other):
         """division operation, element-wise or interpolated"""
-        kwargs.update({"operator": "mul"})
-        return Curve.__add__(self.__invertArithmetic__(), other, **kwargs)
+        return math_on_curves(
+            self.__invertArithmetic__(), other, operator=MathOperator.MUL
+        )
 
-    def __truediv__(self, other, **kwargs):
+    def __truediv__(self, other):
         """division operation, element-wise or interpolated"""
-        kwargs.update({"operator": "div"})
-        return self.__add__(other, **kwargs)
+        return math_on_curves(self, other, operator=MathOperator.DIV)
 
-    def __rtruediv__(self, other, **kwargs):
+    def __rtruediv__(self, other):
         """division operation, element-wise or interpolated"""
-        kwargs.update({"operator": "mul"})
-        return Curve.__add__(self.__invertArithmetic__(), other, **kwargs)
+        return math_on_curves(
+            self.__invertArithmetic__(), other, operator=MathOperator.MUL
+        )
 
-    def __pow__(self, other, **kwargs):
+    def __pow__(self, other):
         """power operation, element-wise or interpolated"""
-        kwargs.update({"operator": "pow"})
-        return self.__add__(other, **kwargs)
+        return math_on_curves(self, other, operator=MathOperator.POW)
 
-    def __neg__(self, **kwargs):
-        out = Curve([self.x(), -self.y()], self.getAttributes())
-        out = out.castCurve(self.classNameGUI())
-        return out
+    def __neg__(self):
+        out = Curve([self.x(), 0 - self.y()], self.get_attributes())
+        return out.castCurve(self.classNameGUI())
 
-    def __invertArithmetic__(self, **kwargs):
-        out = Curve([self.x(), 1 / self.y()], self.getAttributes())
-        out = out.castCurve(self.classNameGUI())
-        return out
+    def __invertArithmetic__(self):
+        out = Curve([self.x(), 1 / self.y()], self.get_attributes())
+        return out.castCurve(self.classNameGUI())
 
-    # plot function
-    def plot(
-        self, ax, groupedplotters, graph=None, graph_i=None, type_plot="", ignoreNext=0
-    ):
-        """
-        plot a Curve on some axis
-        groupedplotters: to handle boxplots, violinplots and such (see graphIO_aux.py)
-        graph, graph_i: a graph instance, such that self==graph.curve(graph_i)
-            required to properly plot scatter with scatter_c, etc.
-        alter: '', or ['nmeV', 'abs']
-        type_plot: 'semilogy'
-        ignoreNext: int, counter to decide whether the next curves shall not be
-            plotted (multi-Curve plotting such as scatter)
-        """
-        from grapa.graph import Graph
+    def swapShowHide(self) -> bool:
+        """. Deprecated. Toogle on/off if Curve is displayed or not.
 
-        handle = None
-        # check default arguments
-        if graph is None:
-            graph_i = None
-        else:
-            if graph[graph_i] != self:
-                graph_i = None
-            if graph_i is None:
-                for c in range(len(graph)):
-                    if graph[c] == self:
-                        graph_i = c
-                        break
-            if graph_i is None:
-                graph = None  # self was not found in graph
-                print("Warning Curve.plot: Curve not found in provided Graph")
+        :meta private:"""
+        self.update({"linestyle": "none" if self.visible() else ""})
+        return True
 
-        # retrieve basic information
-        alter = graph._getAlter() if graph is not None else ["", ""]
-        attr = self.getAttributes()
-        linespec = self.attr("linespec")
-        # construct dict of keywords based on curves attributes, in a very
-        # restrictive way
-        # some attributes are commands for plotting, some are just related to
-        # the sample, and no obvious way to discriminate between the 2
-        fmt = {}
-        for key in attr:
-            if not isinstance(key, str):
-                print(type(key), key, attr[key])
-            if (
-                (not isinstance(attr[key], str) or attr[key] != "")
-                and key in Graph.KEYWORDS_CURVE["keys"]
-                and key
-                not in [
-                    "plot",
-                    "linespec",
-                    "type",
-                    "ax_twinx",
-                    "ax_twiny",
-                    "offset",
-                    "muloffset",
-                    "labelhide",
-                    "colorbar",
-                    "xerr",
-                    "yerr",
-                ]
-            ):
-                fmt[key] = attr[key]
-        # do not plot curve if was asked not to display it.
-        if "linestyle" in fmt and fmt["linestyle"] in Curve.LINESTYLEHIDE:
-            return None, ignoreNext
-        # some renaming of kewords, etc
-        if "legend" in fmt:
-            fmt["label"] = fmt["legend"]
-            del fmt["legend"]
-        if "cmap" in fmt and not isinstance(fmt["cmap"], str):
-            # convert Colorscale into matplotlib cmap
-            from grapa.colorscale import Colorscale
+    def isHidden(self) -> bool:
+        """. Deprecated. True if Curve is hidden, False if displayed.
 
-            fmt["cmap"] = Colorscale(fmt["cmap"]).cmap()
-        if "vminmax" in fmt:
-            if isinstance(fmt["vminmax"], list) and len(fmt["vminmax"]) > 1:
-                if (
-                    fmt["vminmax"][0] != ""
-                    and not np.isnan(fmt["vminmax"][0])
-                    and not np.isinf(fmt["vminmax"][0])
-                ):
-                    fmt.update({"vmin": fmt["vminmax"][0]})
-                if (
-                    fmt["vminmax"][1] != ""
-                    and not np.isnan(fmt["vminmax"][1])
-                    and not np.isinf(fmt["vminmax"][1])
-                ):
-                    fmt.update({"vmax": fmt["vminmax"][1]})
-            del fmt["vminmax"]
+        :meta private:"""
+        return True if self.attr("linestyle") in Curve.LINESTYLEHIDE else False
 
-        # start plotting
-        # retrieve data after transform, including of offset and muloffset
-        x = self.x_offsets(alter=alter[0])
-        y = self.y_offsets(alter=alter[1])
-        type_graph = self.attr("type", "plot")
-        if type_plot.endswith(" norm."):
-            type_graph = type_plot[:-6]
-            y = y / max(y)
+    def getAttribute(self, key: str, default=MetadataContainer.VALUE_DEFAULT):
+        """. Deprecated. Legacy getter of attribute
 
-        # add keyword arguments which are in the plot method prototypes
-        try:
-            sig = inspect.signature(getattr(ax, type_graph))
-            for key in sig.parameters:
-                if key in attr and key not in fmt:
-                    fmt.update({key: attr[key]})
-        except AttributeError:
-            print(
-                "Curve.plot: desired plotting method not found ("
-                + type_graph
-                + "). Going for default."
+        :meta private:"""
+        return self.attr(key, default=default)
+
+    def getAttributes(self, keys_list=None) -> dict:
+        """. Deprecated. Use get_attributes instead
+
+        :meta private:"""
+        return self.get_attributes(keys_list=keys_list)
+
+
+def math_on_curves(
+    curve_a: Curve,
+    curve_b,
+    interpolate=-1,
+    offsets: bool = False,
+    operator=MathOperator.ADD,
+) -> Curve:
+    """
+    Math operations on Curves, element-wise or interpolated along x data.
+
+    :param curve_a: a Curve object
+    :param curve_b: a Curve object, or e.g. a float
+    :param interpolate: interpolate, or not, the data on the x-axis
+
+           - 0: no interpolation, only consider y() values
+
+           - 1: interpolation, x are the points contained in curve_a.x() or in
+             curve_b.x()
+
+           - 2: interpolation, x are the points of curve_a.x(), restricted to min&max of
+             curve_b.x()
+
+           - -1: 0 if same x values (gain time), otherwise 1
+
+    :param offsets: if True, adds Curves after computing offsets and muloffsets.
+           If False, adds on the raw data.
+    :param operator: MathOperator.ADD, MathOperator.SUB, MathOperator.MUL,
+           MathOperator.DIV
+    :return: a Curve object
+    """
+
+    def finalize(out_, curve, offsets_):
+        out_.update(curve.get_attributes())
+        # remove offset information if use it during calculation
+        if offsets_:
+            out_.update({"offset": "", "muloffset": ""})
+        return out_.castCurve(curve.classNameGUI())
+
+    ca_x = curve_a.x_offsets if offsets else curve_a.x
+    ca_y = curve_a.y_offsets if offsets else curve_a.y
+    if not isinstance(curve_b, Curve):  # add something/number to a Curve
+        out = Curve([ca_x(), MathOperator.operate(ca_y(), curve_b, operator)], {})
+        return finalize(out, curve_a, offsets)
+
+    # 'other' is a Curve
+    cb_x = curve_b.x_offsets if offsets else curve_b.x
+    cb_y = curve_b.y_offsets if offsets else curve_b.y
+    # default mode -1: check if can gain time (avoid interpolating)
+    r = range(0, min(len(ca_y()), len(cb_y())))
+    if interpolate == -1:
+        interpolate = 0 if np.array_equal(curve_a.x(index=r), curve_b.x(index=r)) else 1
+    # avoiding interpolation
+    if not interpolate:
+        le = min(len(ca_y()), len(cb_y()))
+        r = range(0, le)
+        if le < len(ca_y()):
+            msg = "math_on_curves: Curves not same length, clip to shortest ({}, {})"
+            logger.warning(msg.format(len(ca_y()), len(cb_y())))
+        if not np.array_equal(curve_a.x(index=r), curve_b.x(index=r)):
+            msg = (
+                "math_on_curves ({}): Curves not same x axis values. Consider "
+                "interpolation (interpolate=1)."
             )
-            # for xample 'errorbar_yerr' after suppression of previous Curve
-            # 'errorbar'. Will be 'plot' anyway.
-            pass
-        except Exception as e:
-            print("Exception in Curve.plot while identifying keyword", "arguments:")
-            print(type(e), e)
+            logger.warning(msg.format(operator))
+        datay = MathOperator.operate(curve_a.y(index=r), curve_b.y(index=r), operator)
+        out = Curve([curve_a.x(index=r), datay], curve_b.get_attributes())
+        return finalize(out, curve_a, offsets)
 
-        if "labelhide" in attr and attr["labelhide"]:
-            if "label" in fmt:
-                del fmt["label"]
-
-        # No support for the following methods (either 2D data, or complicated
-        # to implement):
-        #    hlines, vlines, broken_barh, contour, contourf, polar,
-        #    pcolor, pcolormesh, streamplot, tricontour, tricontourf,
-        #    tripcolor
-        # Partial support for:
-        #    imgshow
-        attrIgnore = [
-            "label",
-            "plot",
-            "linespec",
-            "type",
-            "ax_twinx",
-            "ax_twiny",
-            "offset",
-            "muloffset",
-            "labelhide",
-            "colorbar",
-        ]
-        # "simple" plotting methods, with prototype similar to plot()
-        if type_graph in [
-            "semilogx",
-            "semilogy",
-            "loglog",
-            "plot_date",
-            "stem",
-            "step",
-            "triplot",
-        ]:
-            handle = getattr(ax, type_graph)(x, y, linespec, **fmt)
-        elif type_graph in ["fill"]:
-            if self.attr("fill_padto0", False):
-                handle = ax.fill(
-                    [x[0]] + list(x) + [x[-1]], [0] + list(y) + [0], linespec, **fmt
-                )
-            else:
-                handle = ax.fill(x, y, linespec, **fmt)
-        # plotting methods not accepting formatting string as 3rd argument
-        elif type_graph in [
-            "bar",
-            "barbs",
-            "barh",
-            "cohere",
-            "csd",
-            # "fill_between",
-            # "fill_betweenx",
-            "hexbin",
-            "hist2d",
-            "quiver",
-            "xcorr",
-        ]:
-            handle = getattr(ax, type_graph)(x, y, **fmt)
-        elif type_graph in ["fill_between", "fill_betweenx"]:
-            success = False
-            if graph is not None and len(graph) > graph_i + 1:
-                x2 = graph[graph_i + 1].x_offsets(alter=alter[0])
-                y2 = graph[graph_i + 1].y_offsets(alter=alter[1])
-                if not np.array_equal(x, x2):
-                    msg = (
-                        "WARNING Curve {} and {}: fill_between, fill_betweenx: x "
-                        "series must be equal. Fill to 0."
-                    )
-                    print(msg.format(graph_i, graph_i + 1))
-                else:
-                    ignoreNext += 1
-                    success = True
-                    handle = getattr(ax, type_graph)(x, y, y2, **fmt)
-            if not success:
-                handle = getattr(ax, type_graph)(x, y, **fmt)
-        #  plotting of single vector data
-        elif type_graph in [
-            "acorr",
-            "angle_spectrum",
-            "eventplot",
-            "hist",
-            "magnitude_spectrum",
-            "phase_spectrum",
-            "pie",
-            "psd",
-            "specgram",
-        ]:
-            # careful with eventplot, the Curve data are modified
-            handle = getattr(ax, type_graph)(y, **fmt)
-        # a more peculiar plotting
-        elif type_graph in ["spy"]:
-            handle = getattr(ax, type_graph)([x, y], **fmt)
-        elif type_graph == "stackplot":
-            # look for next Curves with type == 'stackplot', and same x
-            nexty = []
-            fmt["labels"], fmt["colors"] = [""], [""]
-            if "label" in fmt:
-                fmt["labels"] = ["" if self.attr("labelhide") else fmt["label"]]
-                del fmt["label"]
-            if "color" in fmt:
-                fmt["colors"] = [fmt["color"]]
-                del fmt["color"]
-            attrIgnore.append("color")
-            if graph is not None:
-                for j in range(graph_i + 1, len(graph)):
-                    if graph[j].attr("type") == type_graph and np.array_equal(
-                        x, graph[j].x_offsets(alter=alter[0])
-                    ):
-                        ignoreNext += 1
-                        if not graph[j].isHidden():
-                            nexty.append(graph[j].y_offsets(alter=alter[1]))
-                            lbl = graph[j].attr("label")
-                            fmt["labels"].append(
-                                "" if graph[j].attr("labelhide") else lbl
-                            )
-                            fmt["colors"].append(graph[j].attr("color"))
-                            continue
-                    else:
-                        break
-            if np.all([(c == "") for c in fmt["colors"]]):
-                del fmt["colors"]
-            handle = getattr(ax, type_graph)(x, y, *nexty, **fmt)
-        elif type_graph == "errorbar":
-            # look for next Curves, maybe xerr/yerr was provided
-            if "xerr" in attr:
-                fmt.update({"yerr": attr["xerr"]})
-            if "yerr" in attr:
-                fmt.update({"yerr": attr["yerr"]})
-            if graph is not None:
-                for j in range(graph_i + 1, min(graph_i + 3, len(graph))):
-                    if len(graph[j].y()) == len(y):
-                        typenext = graph[j].attr("type")
-                        if typenext not in ["errorbar_xerr", "errorbar_yerr"]:
-                            break
-                        if typenext == "errorbar_xerr":
-                            fmt.update({"xerr": graph[j].y_offsets()})
-                            ignoreNext += 1
-                            continue
-                        if typenext == "errorbar_yerr":
-                            fmt.update({"yerr": graph[j].y_offsets()})
-                            ignoreNext += 1
-                            continue
-                    break
-            handle = ax.errorbar(x, y, fmt=linespec, **fmt)
-        elif type_graph == "scatter":
-            convert = {"markersize": "s", "markeredgewidth": "linewidths"}
-            for key in convert:
-                if key in fmt:
-                    fmt.update({convert[key]: fmt[key]})
-                    del fmt[key]
-            try:
-                if graph is not None:
-                    for j in range(graph_i + 1, min(graph_i + 3, len(graph))):
-                        typenext = graph[j].attr("type")
-                        if typenext not in ["scatter_c", "scatter_s"]:
-                            break
-                        if "s" not in fmt and typenext == "scatter_s":
-                            fmt.update({"s": graph[j].y_offsets(alter=alter[1])})
-                            ignoreNext += 1
-                            continue
-                        elif "c" not in fmt and (
-                            typenext == "scatter_c"
-                            or np.array_equal(x, graph[j].x_offsets(alter=alter[0]))
-                        ):
-                            fmt.update({"c": graph[j].y_offsets(alter=alter[1])})
-                            ignoreNext += 1
-                            if "color" in fmt:
-                                # there cannot be both c and color keywords
-                                del fmt["color"]
-                            continue
-                        else:
-                            break
-                handle = ax.scatter(x, y, **fmt)
-            except Exception as e:
-                print(
-                    "ERROR! Exception occured in Curve.plot function during", "scatter."
-                )
-                print(type(e), e)
-        elif type_graph in ["boxplot", "violinplot"]:
-            handle = groupedplotters.add_curve(type_graph, self, y, fmt, ax)
-        elif type_graph in ["imshow", "contour", "contourf"]:
-            from grapa.curve_image import Curve_Image
-
-            img, ignoreNext, X, Y = Curve_Image.getImageData(
-                self, graph, graph_i, alter, ignoreNext
-            )
-            if "label" in fmt:
-                del fmt["label"]
-            if type_graph in ["contour", "contourf"]:
-                for key in [
-                    "corner_mask",
-                    "colors",
-                    "alpha",
-                    "cmap",
-                    "norm",
-                    "vmin",
-                    "vmax",
-                    "levels",
-                    "origin",
-                    "extent",
-                    "locator",
-                    "extend",
-                    "xunits",
-                    "yunits",
-                    "antialiased",
-                    "nchunk",
-                    "linewidths",
-                    "linestyles",
-                    "hatches",
-                ]:
-                    if key in attr and key not in fmt:
-                        fmt.update({key: attr[key]})
-                # TODO: remove linewidths, linestyles for contourf, hatches for
-                # contour
-            args = [img]
-            if (
-                X is not None
-                and Y is not None
-                and type_graph in ["contour", "contourf"]
-            ):
-                args = [X, Y] + args
-            try:
-                handle = getattr(ax, type_graph)(*args, **fmt)
-            except Exception as e:
-                print("Curve plot", type_graph, "Exception")
-                print(type(e), e)
-        else:
-            # default is plot (lin-lin) # also valid if no information is
-            # stored, aka returned ''
-            handle = ax.plot(x, y, linespec, **fmt)
-
-        handles = handle if isinstance(handle, list) else [handle]
-        for key in attr:
-            if key not in fmt and key not in attrIgnore:
-                for h in handles:
-                    if hasattr(h, "set_" + key):
-                        try:
-                            getattr(h, "set_" + key)(attr[key])
-                        except Exception as e:
-                            print(
-                                "GraphIO Exception during plot kwargs",
-                                "adjustment for key",
-                                key,
-                                ":",
-                                type(e),
-                            )
-                            print(e)
-
-        return handle, ignoreNext
+    # not elementwise : interpolate
+    # construct new x -> all x which are in the range of the other curve
+    datax = list(ca_x())
+    if interpolate == 1:  # x from both self and other
+        xmin = max(min(ca_x()), min(cb_x()))
+        xmax = min(max(ca_x()), max(cb_x()))
+        # no duplicates
+        datax += [x for x in cb_x() if x not in datax]
+    else:
+        # interpolate 2: copy x from self, restrict to min&max of other
+        xmin, xmax = min(cb_x()), max(cb_x())
+    datax = [x for x in datax if xmax >= x >= xmin]
+    reverse = (curve_a.x(index=0) > curve_a.x(index=1)) if len(ca_x()) > 1 else False
+    datax.sort(reverse=reverse)
+    f0 = interp1d(ca_x(), ca_y(), kind="linear")
+    f1 = interp1d(cb_x(), cb_y(), kind="linear")
+    datay = [MathOperator.operate(f0(x), f1(x), operator) for x in datax]
+    out = Curve([datax, datay], curve_b.get_attributes())
+    return finalize(out, curve_a, offsets)

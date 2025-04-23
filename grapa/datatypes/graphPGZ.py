@@ -3,8 +3,7 @@
 Created on Fri Jan 26 13:30:22 2023
 
 @author: Romain Carron
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 
@@ -14,7 +13,6 @@ from grapa.curve import Curve
 
 
 class GraphPGZ(Graph):
-
     FILEIO_GRAPHTYPE = "PGZ path file"
 
     AXISLABELS = [["Position x", "", "mm"], ["Position y", "", "mm"]]

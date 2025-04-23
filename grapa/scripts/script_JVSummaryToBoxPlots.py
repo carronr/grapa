@@ -3,7 +3,7 @@
 Created on Fri Dec 23 16:46:38 2016
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import glob
@@ -29,28 +29,7 @@ except ImportError:
     pass
 
 
-def replaceLabels(graph, label):
-    print("label", label)
-    if label in ["Voc [V]"]:
-        label = graph.formatAxisLabel(["Voc", "", "V"])
-    elif label in ["Jsc [mA/cm2]"]:
-        label = graph.formatAxisLabel(["Jsc", "", "mA cm$^{-2}$"])
-    elif label in ["FF [%]"]:
-        label = graph.formatAxisLabel(["FF", "", "%"])
-    elif label in ["Eff. [%]"]:
-        label = graph.formatAxisLabel(["Eff.", "", "%"])
-    elif label in ["Rp [Ohmcm2]"]:
-        label = graph.formatAxisLabel(["Rp", "", "Ohm cm$^2$"])
-    elif label in ["Rs [Ohmcm2]"]:
-        label = graph.formatAxisLabel(["Rs", "", "Ohm cm$^2$"])
-    elif label in ["n"]:
-        label = graph.formatAxisLabel(["n", "", " "])
-    elif label in ["J0 [A/cm2]"]:
-        label = graph.formatAxisLabel(["J$_0$", "", "A cm$^{-2}$"])
-    return label
-
-
-def labelFromGraph(graph, silent=False, file=""):
+def label_from_graph(graph, silent=False, file=""):
     # label will be per priority:
     # 1. if a 'label' field is present at beginning of file (so all curve labels are
     #    identical)
@@ -179,7 +158,7 @@ def JVSummaryToBoxPlots(
             print("Cannot interpret file data. Go to next one.")
             continue
 
-        complement = copy.deepcopy(graph[0].getAttributes())
+        complement = copy.deepcopy(graph[0].get_attributes())
         complement.update(
             {
                 "type": "boxplot",
@@ -204,7 +183,7 @@ def JVSummaryToBoxPlots(
                 print("Exception += ", type(e), e)
                 pass
 
-        label = labelFromGraph(graph, silent=silent, file=file)
+        label = label_from_graph(graph, silent=silent, file=file)
         # "clean" label according to replacement pairs provided by user
         for rep in replace:
             label = label.replace(rep[0], rep[1])
@@ -216,9 +195,13 @@ def JVSummaryToBoxPlots(
         # construct one column of each box plot
         collabels = graph.attr("collabels")
         curvesOfInterest = JVcols if mode == "JV" else range(len(graph))
+        print("size graph", len(graph), curvesOfInterest)
         for i in range(len(curvesOfInterest)):
             c = curvesOfInterest[i]
-            data = graph.curve(c).getData()
+            if c >= len(graph):
+                print("graph[c]c.getData()", len(graph), c)
+                continue
+            data = graph[c].getData()
 
             # prepare graph title
             while i >= len(titles):
@@ -307,7 +290,6 @@ def JVSummaryToBoxPlots(
         graphsum.append(Curve_Subplot([[0], [0]], {}))
         fname = os.path.basename(filesave)
         quantity = fname.replace(exportPrefix, "").replace(".txt", "")
-        print("fname", fname)
         graphsum[-1].update({"subplotfile": fname, "label": "Subplot " + quantity})
     if len(graphsum) > 0:
         graphsum.update({"subplotsncols": 2, "subplotstranspose": 1})
@@ -341,9 +323,9 @@ def JVSummaryToBoxPlots(
 
 
 if __name__ == "__main__":
-    folder = "./../examples/boxplot/"
-    #    folder = './../examples/boxplot/notJVspecific/'
+    folder_ = "./../examples/boxplot/"
+    #    folder_ = './../examples/boxplot/notJVspecific/'
     JVSummaryToBoxPlots(
-        folder=folder, exportPrefix="boxplots_", pltClose=False, silent=True
+        folder=folder_, exportPrefix="boxplots_", pltClose=True, silent=True
     )
     plt.show()

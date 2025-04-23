@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Oct 29 15:03:50 2017
+"""A subclass of Curve to deal with subplots
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.graphIO_aux import SubplotsAdjuster
 from grapa.mathModule import roundSignificant
-from grapa.gui.GUIFuncGUI import FuncGUI
+from grapa.utils.plot_graph_aux import SubplotsAdjuster
+from grapa.utils.funcgui import FuncGUI
 
 
 class Curve_Subplot(Curve):
     """
-    The purpose is this class is to provide GUI support to handle subplots
+    Curve_Subplot provides GUI support to handle subplots within a Graph.
+    The main graph will be subdivised in an array of subplots.
     """
 
     CURVE = "subplot"
@@ -140,6 +140,7 @@ class Curve_Subplot(Curve):
                     {"keys": ["subplotswidth_ratios", "subplotsheight_ratios"]},
                 ]
             )
+
             # subplots_adjust
             spa_attr = graph.attr("subplots_adjust")
             out.append(
@@ -151,11 +152,12 @@ class Curve_Subplot(Curve):
                     {"keys": ["subplots_adjust"]},
                 ]
             )
+
             # plot dimensions absolute numbers (inch)
             nsub = [
                 1
                 for curve in graph
-                if isinstance(curve, Curve_Subplot) and not curve.isHidden()
+                if isinstance(curve, Curve_Subplot) and curve.visible()
             ]
             nsub = np.sum(nsub)
             # ncols  # already defined
@@ -198,7 +200,7 @@ class Curve_Subplot(Curve):
             line.append("nrows", int(nrows), keyword="nrows")
             out.append(line)
 
-        out.append([self.printHelp, "Help!", [], []])  # one line per function
+        out.append([self.print_help, "Help!", [], []])  # one line per function
         return out
 
     def update_spa_figsize_abs(
@@ -258,8 +260,7 @@ class Curve_Subplot(Curve):
         self.update({"subplotupdate": spu})
         return True
 
-    @staticmethod
-    def printHelp():
+    def print_help(self):
         print("*** *** ***")
         print(
             "Class Curve_Subplot facilitates the creation and customization of",

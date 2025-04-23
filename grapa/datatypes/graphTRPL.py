@@ -1,28 +1,33 @@
 # -*- coding: utf-8 -*-
 """
+Parse files containing time-resolved photoluminscence (TRPL) decays
+
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain
-Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from os import path as ospath
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import GraphIO
 from grapa.datatypes.curveTRPL import CurveTRPL
 
 
 class GraphTRPL(Graph):
+    """Parse files containing time-resolved photoluminscence (TRPL) decays"""
+
     FILEIO_GRAPHTYPE = "TRPL decay"
 
-    AXISLABELS = [["Time", "t", "time"], ["Intensity", "", "counts"]]
+    AXISLABELS = [CurveTRPL.AXISLABELS_X[""], CurveTRPL.AXISLABELS_Y[""]]
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line2="", line3="", **kwargs):
-        if fileExt == ".dat" and line1 == "Time[ns]	crv[0] [Cnts.]":
+    def isFileReadable(
+        cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
+    ):
+        if fileext == ".dat" and line1 == "Time[ns]	crv[0] [Cnts.]":
             return True  # TRPL file
         elif (
-            fileExt == ".dat"
+            fileext == ".dat"
             and line1 == "Parameters:"
             and (
                 (
@@ -63,7 +68,7 @@ class GraphTRPL(Graph):
         # print('label', self.attr('label'), [l for l in lbl if l not in smp], smp)
         self[len0].update({"label": " ".join(new)})
         # clean values
-        for key in self[len0].getAttributes():
+        for key in self[len0].get_attributes():
             val = self[len0].attr(key)
             if isinstance(val, str) and "Â°" in val:
                 self[len0].update({key: val.replace("Â°", "°")})
@@ -84,7 +89,7 @@ class GraphTRPL(Graph):
         self.update({"subplots_adjust": [0.2, 0.15]})
         # cleaning
         if "line1" in kwargs and kwargs["line1"] == "Parameters:":
-            attr = self[len0].getAttributes()
+            attr = self[len0].get_attributes()
             keys = list(attr.keys())
             for key in keys:
                 val = attr[key]

@@ -22,6 +22,7 @@ class GrapaOpenbis:
             self.ok = False
 
     def create_widgets(self, frame):
+        """Create GUI elements"""
         if self.ok:
             tk.Label(frame, text="Openbis files").pack(side="left")
             btn = tk.Button(frame, text="Open", command=self.open_files_openbis)
@@ -30,6 +31,7 @@ class GrapaOpenbis:
             btn.pack(side="left")
 
     def open_files_openbis(self, merge=False):
+        """Open files using openbis plugin"""
         if self.path not in sys.path:
             sys.path.append(self.path)
         try:
@@ -46,9 +48,9 @@ class GrapaOpenbis:
         files = open_gui_select_files(master=window, download=True, destroy=True)
         if len(files) > 0:
             if merge:
-                self.app.mergeGraph(files)
+                self.app.merge_graph(files)
             else:
-                self.app.openFile(files)
+                self.app.open_file(files)
 
     def merge_files_openbis(self):
         self.open_files_openbis(merge=True)

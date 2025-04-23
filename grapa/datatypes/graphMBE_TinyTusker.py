@@ -3,12 +3,11 @@
 Created on Wed  Jan 17 12:53:00 2024
 
 @author: Matthias Diethelm
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
-from grapa.graph import Graph
-from grapa.datatypes.curveJV import CurveJV
+
 from grapa.graph import Graph
 from grapa.curve import Curve
 
@@ -25,19 +24,15 @@ class GraphMBE_TinyTusker(Graph):
     # second axis
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line3="", **kwargs):
-        if fileExt == ".csv" and line1.startswith("data label"):
+    def isFileReadable(cls, _filename, fileext, line1="", line3="", **_kwargs):
+        if fileext == ".csv" and line1.startswith("data label"):
             return True
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
+    def readDataFromFile(self, attributes, **_kwargs):
         # Summary element
         self.data.append(Curve(np.vstack(([], [])), attributes))
-        self.curve(-1).update(
-            {
-                "label": "Summary",
-            }
-        )
+        self[-1].update({"label": "Summary"})
 
         # determine header lines
 

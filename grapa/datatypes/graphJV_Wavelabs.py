@@ -3,7 +3,7 @@
 Created on Tue May 23 12:53:00 2023
 
 @author: Matthias Diethelm
-Copyright (c) 2023, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -77,20 +77,23 @@ class GraphJV_Wavelabs(Graph):
     FILEIO_GRAPHTYPE = "J-V curve"
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", **kwargs):
-        if fileExt == ".xlsx" and (
-            fileName.startswith("IV Measurement")
-            or fileName.startswith("MPPT Measurement")
+    def isFileReadable(cls, filename, fileext, line1="", **_kwargs):
+        if fileext == ".xlsx" and (
+            filename.startswith("IV Measurement")
+            or filename.startswith("MPPT Measurement")
         ):
             try:
                 xl  # if import pylightxl worked successfully
                 return True
             except NameError:
-                msg = "ImportError package pylightxl not found, file import Wavelabs may not work."
+                msg = (
+                    "ImportError package pylightxl not found, file import Wavelabs "
+                    "may not work."
+                )
                 print(msg)
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
+    def readDataFromFile(self, attributes, **_kwargs):
         if "IV Measurement" in self.filename:
             GraphJV_Wavelabs.parse_iv(self, attributes)
         elif "MPPT Measurement" in self.filename:
@@ -188,7 +191,7 @@ class GraphJV_Wavelabs(Graph):
             data = cleanupdata(data, i)
             # create Curve object
             curve = CurveJV(np.transpose(data_rs[:, 0:2]), attributes_rs, **kwargscurve)
-            curve.swapShowHide()
+            curve.visible(False)
             self.append(curve)
 
         # end of parse data - graph cosmetics - JV
@@ -228,10 +231,10 @@ class GraphJV_Wavelabs(Graph):
         self[-1].update({"label": label + " " + header[3]})
         self.append(Curve(np.transpose(data[:, [0, 1]]), attributes))
         self[-1].update({"label": label + " " + header[1]})
-        self[-1].swapShowHide()
+        self[-1].visible(False)
         self.append(Curve(np.transpose(data[:, [0, 2]]), attributes))
         self[-1].update({"label": label + " " + header[2]})
-        self[-1].swapShowHide()
+        self[-1].visible(False)
         # graph cosmetics
         self.update({"collabels": header})  # not sure it's needed
         self.update({"xlabel": header[0], "ylabel": header[3]})
@@ -248,7 +251,7 @@ class GraphJV_Wavelabs(Graph):
                 date = "20" + date_str[:-2] + ":" + date_str[-2:] + ":00"
                 date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
                 date_str = date.isoformat()
-            except ValueError as e:
+            except ValueError:
                 pass
             label = sample
             if len(label) == 0:

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics,
-Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
@@ -21,9 +20,10 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import file_read_first3lines
 from grapa.database import Database
-from grapa.mathModule import is_number, roundSignificant, strToVar
+from grapa.mathModule import is_number, roundSignificant
+from grapa.utils.string_manipulations import strToVar
 from grapa.colorscale import Colorscale
 from grapa.curve import Curve
 from grapa.curve_subplot import Curve_Subplot
@@ -51,7 +51,7 @@ def dictToListSorted(d):
     return lst
 
 
-class areaDBHandler:
+class AreaDBHandler:
     def __init__(self):
         self._dict = {}
 
@@ -60,29 +60,33 @@ class areaDBHandler:
         if p1 not in self._dict:
             self._dict.update({p1: {}})
         if p2 not in self._dict[p1]:
-            self._dict[p1].update({p2: areaDB(p1, p2)})
+            self._dict[p1].update({p2: AreaDB(p1, p2)})
         return self._dict[p1][p2]
 
 
 #  auxiliary class - add some useful tools to the database class
-class areaDB(Database):
+class AreaDB(Database):
     def __init__(self, folder, sample):
         self.colIdx = 0
         self.folder = folder
         self.sample = sample
         # different possible names for area databases
-        test = []
-        test.append([os.path.join(folder, sample + ".txt"), ""])
-        test.append([os.path.join(folder, sample + "_area.txt"), ""])
-        test.append([os.path.join(folder, sample + "_areas.txt"), ""])
-        test.append([os.path.join(folder, "area.txt"), ""])
-        test.append([os.path.join(folder, "area.xlsx"), sample])
-        test.append([os.path.join(folder, "areas.txt"), ""])
-        test.append([os.path.join(folder, "areas.xlsx"), sample])
+        test = [
+            [os.path.join(folder, sample + ".txt"), ""],
+            [os.path.join(folder, sample + "_area.txt"), ""],
+            [os.path.join(folder, sample + "_areas.txt"), ""],
+            [os.path.join(folder, "area.txt"), ""],
+            [os.path.join(folder, "area.xlsx"), sample],
+            [os.path.join(folder, "areas.txt"), ""],
+            [os.path.join(folder, "areas.xlsx"), sample],
+        ]
         self.flag = False
         self.flagCheat = False
         for t in test:
             print("Area database: look for file ", t[0])
+            if not os.path.exists(t[0]):  # file not found
+                continue
+
             graph = Graph(t[0], complement=t[1], silent=True, config=None)
             if len(graph) == 0:
                 continue
@@ -103,7 +107,7 @@ class areaDB(Database):
         if not self.flag:
             print("areaDB: cannot find area database file.")
 
-    def getArea(self, cell):
+    def get_area(self, cell):
         if not self.flag:  # if database could not be opened
             if self.flagCheat:
                 if cell in self.data:
@@ -113,12 +117,12 @@ class areaDB(Database):
         if np.isnan(out):
             out = self.value(self.colIdx, self.sample + " " + cell)
         if np.isnan(out):
-            msg = "areaDB getArea: row {} not found ({})"
+            msg = "AreaDB get_area: row {} not found ({})"
             print(msg.format(cell, self.rowLabels))
         #        print ('area cell',cell,':', out, '(',self.sample,')')
         return out
 
-    def setArea(self, cell, value):
+    def set_area(self, cell, value):
         if self.flag:
             self.setValue(self.colIdx, cell, value, silent=True)
         else:
@@ -155,7 +159,7 @@ def processJVfolder(
     for file in glob.glob(path):
         fileName, fileExt = os.path.splitext(file)
         fileExt = fileExt.lower()
-        line1, line2, line3 = GraphIO.readDataFileLine123(filename=file)
+        line1, line2, line3 = file_read_first3lines(filename=file)
         if GraphJV.isFileReadable(
             fileName, fileExt, line1=line1, line2=line2, line3=line3
         ):
@@ -187,19 +191,19 @@ def processJVfolder(
             if dark not in cellDict[sample][cell]:
                 cellDict[sample][cell].update({dark: {}})
             if sample not in sampleAreaDict:
-                areaHandler = areaDBHandler()
+                areaHandler = AreaDBHandler()
                 sampleAreaDict.update({sample: areaHandler.get(folder, sample)})
             # open JV file again to correct for cell area
-            area = sampleAreaDict[sample].getArea(cell)
+            area = sampleAreaDict[sample].get_area(cell)
             if (
                 np.isnan(area)
                 and is_number(graphTmp[0].attr("Acquis soft Cell area"))
                 and not np.isnan(graphTmp[0].attr("Acquis soft Cell area"))
             ):
-                sampleAreaDict[sample].setArea(
+                sampleAreaDict[sample].set_area(
                     cell, graphTmp[0].attr("Acquis soft Cell area")
                 )
-                area = sampleAreaDict[sample].getArea(cell)
+                area = sampleAreaDict[sample].get_area(cell)
             cellDict[sample][cell][dark].update({measId: file})
 
             areaformer = graphTmp[0].attr("Acquis soft Cell area")
@@ -265,7 +269,7 @@ def processJVfolder(
                         graph = GraphJVDarkIllum(
                             cellDict[s][c][d][m],
                             "",
-                            area=sampleAreaDict[s].getArea(c),
+                            area=sampleAreaDict[s].get_area(c),
                             complement={
                                 "ylim": ylim,
                                 "saveSilent": True,
@@ -275,7 +279,7 @@ def processJVfolder(
                         )
                         out = out + graph.printShort()
                         filesave = os.path.join(folder, filesave)
-                        graph.plot(filesave, figAx=figAx, pltClose=pltClose)
+                        graph.plot(filesave, fig_ax=figAx, pltClose=pltClose)
                         graphAllJV.append(graph.returnDataCurves())
             else:
                 # if want to restrict 1 msmt dark + 1 illum per cell
@@ -310,7 +314,7 @@ def processJVfolder(
                     graph = GraphJVDarkIllum(
                         fileDark,
                         fileIllum,
-                        area=sampleAreaDict[s].getArea(c),
+                        area=sampleAreaDict[s].get_area(c),
                         complement={
                             "ylim": ylim,
                             "saveSilent": True,
@@ -319,7 +323,7 @@ def processJVfolder(
                         **newGraphKwargs
                     )
                     filesave = os.path.join(folder, filesave)
-                    graph.plot(filesave=filesave, figAx=figAx, pltClose=pltClose)
+                    graph.plot(filesave=filesave, fig_ax=figAx, pltClose=pltClose)
                     # prepare output summary files
                     out = out + graph.printShort()
                     if listDarkIllum[0] == CurveJV.DARK:
@@ -346,7 +350,7 @@ def processJVfolder(
                     graph = GraphJVDarkIllum(
                         fileDark,
                         fileIllum,
-                        area=sampleAreaDict[s].getArea(c),
+                        area=sampleAreaDict[s].get_area(c),
                         complement={
                             "ylim": ylim,
                             "saveSilent": True,
@@ -355,7 +359,7 @@ def processJVfolder(
                         **newGraphKwargs
                     )
                     filesave = os.path.join(folder, filesave)
-                    graph.plot(filesave=filesave, figAx=figAx, pltClose=pltClose)
+                    graph.plot(filesave=filesave, fig_ax=figAx, pltClose=pltClose)
                     # prepare output summary files
                     out = out + graph.printShort()
                     outIllum = outIllum + graph.printShort(onlyIllum=True)
@@ -381,7 +385,7 @@ def processJVfolder(
             except IndexError:
                 pass
         filesave = os.path.join(folder, "export_" + s + "_summary_allJV")
-        graphAllJV.plot(filesave, figAx=figAx)
+        graphAllJV.plot(filesave, fig_ax=figAx)
         if pltClose and figAx is None:
             plt.close()
 
@@ -473,7 +477,7 @@ def writeFileAvgMax(
     for i in range(len(colLbl)):
         if "Eff" in colLbl[i]:
             eff = content[i].y()
-    if eff is not None:
+    if eff is not None and len(eff) > 0:
         idx = np.argmax(eff)
         for c in cols:
             out += str(c[idx]) + "\t"
@@ -554,7 +558,7 @@ def processSampleCellsMap(
     for j in range(len(cols)):
         if cols[j].startswith("Rsquare"):
             rsquare = content[j].y()
-            print("rsquare", j, rsquare)
+            # print("rsquare", j, rsquare)
 
     # combined plots
     graphs = []
@@ -639,7 +643,7 @@ def processSampleCellsMap(
     for graph in graphs:
         for i in range(len(graph) - 1, -1, -1):
             if graph[i] == curveblank:
-                graph.deleteCurve(i)
+                graph.curve_delete(i)
             else:
                 break
         if len(graph) == 1:  # at least 2 subplots, otherwise grapa may not show well
@@ -658,7 +662,7 @@ def processSampleCellsMap(
         )
         filesave = ".".join(file.split(".")[:-1]) + "_" + ["basic", "diode"][0]
         graphs[0].filename = filesave
-        graphs[0].plot(filesave=filesave, figAx=figAx)
+        graphs[0].plot(filesave=filesave, fig_ax=figAx)
         if pltClose:
             plt.close()
         filesummary.append(filesave + ".txt")
@@ -673,7 +677,7 @@ def processSampleCellsMap(
         )
         filesave = ".".join(file.split(".")[:-1]) + "_" + ["basic", "diode"][1]
         graphs[1].filename = filesave
-        graphs[1].plot(filesave=filesave, figAx=figAx)
+        graphs[1].plot(filesave=filesave, fig_ax=figAx)
         if pltClose:
             plt.close()
         filesummary.append(filesave + ".txt")
@@ -704,15 +708,24 @@ def plotSampleCellsMap(
         return False
 
     # check cells are with correct form, i.e. 'a1'
+    ticklabeldash = False
     x, y, val = [], [], []
-    split = [research(r"([a-zA-Z])([0-9]*)", c).groups() for c in cells]
+    split = [research(r"([a-zA-Z#])([0-9]*)", c).groups() for c in cells]
     for i in range(len(split)):
         if len(split[i]) == 2:
-            x.append(float(ord(split[i][0].lower()) - 96))
+            # max(1, ...): to convert "#" into "a"
+            x.append(max(1, float(ord(split[i][0].lower()) - 96)))
             y.append(float(split[i][1]))
             # prefer to work on a copy and not modifying the list values
             val.append(values[i])
+            if split[i][0] == "#":
+                ticklabeldash = True
     x, y, val = np.array(x), np.array(y), np.array(val)
+    transpose = False
+    if max(y) > 2 and max(x) == 1 and ticklabeldash:
+        transpose = True
+        x, y = y, x
+
     if title == "Voc [V]":
         title = "Voc [mV]"
         val *= 1000
@@ -726,15 +739,14 @@ def plotSampleCellsMap(
     title = (
         title.replace("A/cm2", "A cm$^{-2}$")
         .replace("J0 ", "J$_0$ ")
-        .replace("Ohmcm2", "$\Omega$ cm$^2$")
+        .replace("Ohmcm2", "$\\Omega$ cm$^2$")
     )
 
     valNorm = val if not (val == 0).all() and not len(val) == 1 else [0.5] * len(val)
     if isinstance(colorscale, Colorscale):
-        colorscale = colorscale.getColorScale()
-    if isinstance(
-        colorscale, str
-    ):  # 'autumn' is a string, but a color list might not have been recognized as a list
+        colorscale = colorscale.get_colorscale()
+    if isinstance(colorscale, str):
+        # 'autumn' is a string, but a color list might not have been recognized as list
         colorscale = strToVar(colorscale)
     if colorscale is None:
         colorscale = [[1, 0, 0], [1, 1, 0.5], [0, 1, 0]]
@@ -806,21 +818,25 @@ def plotSampleCellsMap(
             "ylim": [min(yticks), max(yticks)],
         }
     )
-    fct = []
-    fct.append(["set_xticks", [list(xticks)], {}])
-    fct.append(["set_yticks", [list(yticks)], {}])
-    fct.append(["set_xticklabels", [[]], {}])
-    fct.append(["set_yticklabels", [[]], {}])
-    fct.append(["set_xticks", [list(xticks[1:] - 0.5)], {"minor": True}])
-    fct.append(["set_yticks", [list(yticks[1:] - 0.5)], {"minor": True}])
-    fct.append(
-        [
-            "set_xticklabels",
-            [[chr(int(i) - 1 + ord("a")) for i in xticks[1:]]],
-            {"minor": True},
-        ]
-    )
-    fct.append(["set_yticklabels", [[int(i) for i in yticks[1:]]], {"minor": True}])
+    fct = [
+        ["set_xticks", [list(xticks)], {}],
+        ["set_yticks", [list(yticks)], {}],
+        ["set_xticklabels", [[]], {}],
+        ["set_yticklabels", [[]], {}],
+        ["set_xticks", [list(xticks[1:] - 0.5)], {"minor": True}],
+        ["set_yticks", [list(yticks[1:] - 0.5)], {"minor": True}],
+    ]
+    letterticks_base = yticks if transpose else xticks
+    letterricks = [[chr(int(i) - 1 + ord("a")) for i in letterticks_base[1:]]]
+    if ticklabeldash:
+        letterricks[0] = "#"
+    if transpose:
+        fct.append(["set_yticklabels", letterricks, {"minor": True}])
+        fct.append(["set_xticklabels", [[int(i) for i in xticks[1:]]], {"minor": True}])
+    else:  # usual case
+        fct.append(["set_xticklabels", letterricks, {"minor": True}])
+        fct.append(["set_yticklabels", [[int(i) for i in yticks[1:]]], {"minor": True}])
+
     fct.append(["tick_params", [], {"axis": "both", "which": "minor", "length": 0}])
     fct.append(["grid", [True], {}])
     graph.update({"arbitraryfunctions": fct})
@@ -830,7 +846,7 @@ def plotSampleCellsMap(
         # graph.plot(filesave, figAx=figAx)  # plot -> would need to plt.close() accordingly
         graph.export(filesave)  # export only txt file, and not the image
     else:
-        graph.plot(figAx=figAx, ifSubPlot=True)
+        graph.plot(fig_ax=figAx, if_subplot=True)
         if pltClose and figAx is None:
             plt.close()
     return graph

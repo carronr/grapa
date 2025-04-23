@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 """
+Defines the different elements of the GUI.
+
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
-import sys
 import os
 import copy
-import numpy as np
+import warnings
+import logging
 import tkinter as tk
 from tkinter import ttk
+from tkinter.colorchooser import askcolor
 from _tkinter import TclError
-import warnings
+
+import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import hex2color, rgb2hex
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 try:
     from matplotlib.backends.backend_tkagg import (
@@ -21,39 +27,47 @@ try:
 except ImportError:
     from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
-path = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-)
-if path not in sys.path:
-    sys.path.append(path)
-from grapa.graph import Graph
-from grapa.curve import Curve
-from grapa.graphIO import FILEIO_GRAPHTYPE_GRAPH
-from grapa.mathModule import (
-    strToVar,
-    varToStr,
-    roundSignificant,
-    is_number,
-    listToString,
-)
-from grapa.colorscale import Colorscale, PhotoImageColorscale
-from grapa.gui.GUImisc import TextWriteable, bind_tree
-from grapa.gui.GUImisc import (
-    imageToClipboard,
+from grapa import KEYWORDS_GRAPH, KEYWORDS_CURVE
+from grapa.curve import Curve, get_point_closest_to_xy
+from grapa.graph import Graph, ConditionalPropertyApplier
+from grapa.mathModule import roundSignificant, is_number
+from grapa.colorscale import Colorscale, PhotoImageColorscale, colorscales_from_config
+
+from grapa.utils.funcgui import FuncGUI, AlterListItem
+from grapa.utils.graphIO import GraphIO
+from grapa.utils.plot_graph import image_to_clipboard
+from grapa.utils.string_manipulations import strToVar, varToStr, listToString
+
+from grapa.datatypes.curveCV import CurveCV
+from grapa.datatypes.curveJscVoc import CurveJscVoc
+
+from grapa.gui.widgets_tooltip import CreateToolTip
+from grapa.gui.widgets_custom import (
+    bind_tree,
+    TextWriteable,
     FrameTitleContentHide,
     FrameTitleContentHideHorizontal,
-)
-from grapa.gui.GUImisc import (
     EntryVar,
     OptionMenuVar,
     CheckbuttonVar,
     ComboboxVar,
     LabelVar,
+    ButtonVar,
 )
-from grapa.gui.createToolTip import CreateToolTip
-from grapa.gui.GUIgraphManager import GraphsTabManager
-from grapa.gui.GUIFuncGUI import FuncGUI
+from grapa.gui.widgets_graphmanager import GraphsTabManager
+from grapa.gui.GUIdataEditor import GuiDataEditor
+from grapa.gui.GUITexts import GuiManagerAnnotations
 from grapa.gui.interface_openbis import GrapaOpenbis
+
+from grapa.scripts.script_correlations import process_file as corr_process_file
+from grapa.scripts.script_JVSummaryToBoxPlots import JVSummaryToBoxPlots
+from grapa.scripts.script_processCVfT import script_process_cvft
+from grapa.scripts.script_processCVCf import script_processCf, script_processCV
+from grapa.scripts.script_processJV import processSampleCellsMap, processJVfolder
+from grapa.scripts.script_processJscVoc import script_processJscVoc
+
+
+logger = logging.getLogger(__name__)
 
 
 class GUIFrameCanvasGraph:
@@ -67,144 +81,155 @@ class GUIFrameCanvasGraph:
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         # store a list of custom canvas event, to easily remove them
-        self.canvasEvents = []
+        self.canvas_events = []
         # mechanism to fire events only when mouse is pressed
-        self._mousePressed = False
-        self.callback_notifyCanvas_registered = []
-        self.createWidgets(self.frame)
-        self.app.master.bind("<Control-w>", lambda e: self.closeTab())
+        self._mouse_pressed = False
+        self.callback_notifycanvas_registered = []
+        self.tabs = None  # will be created later, here to reserve the name
+        self.fig, self.ax = None, None
+        self.canvas = None
+        self._create_widgets(self.frame)
+        self.app.master.bind("<Control-w>", lambda e: self.close_tab())
 
-    def updateUI(self):
+    def update_ui(self):
         """Update plot on canvas"""
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Attempt to set non-positive")
             self.fig.clear()
             self.canvas.draw()
-        tabproperties = self.app.getTabProperties()
         # background color
-        self.setCanvasBackground()
-        # screen DPI: to update before the updateUI() call
-        self.fig.set_dpi(self.app.getTabProperties()["dpi"])
-        # update graph
-        #        try:
-        fig, ax = Graph.plot(self.app.graph(), figAx=[self.fig, None])
+        self.set_canvas_background()
+        # screen DPI: to update before the update_ui() call
+        self.fig.set_dpi(self.app.get_tab_properties()["dpi"])
+        fig, ax = Graph.plot(self.app.graph(), fig_ax=[self.fig, None])
         while isinstance(ax, (list, np.ndarray)) and len(ax) > 0:
             ax = ax[-1]
         self.fig, self.ax = fig, ax
-
-        # except ValueError as e:
-        #     print('Exception ValueError during GUI plot canvas update.')
-        #     print('Exception', type(e), e)
-        #     pass
         # draw canvas
         try:
             self.canvas.show()
         except AttributeError:
-            # handles FigureCanvasTkAgg has no attribute show in later
-            # versions of matplotlib
+            # FigureCanvasTkAgg has no attribute show in later versions of matplotlib
             pass
         self.canvas.draw()
 
-    def createWidgets(self, frame):
-        self.cw_graphSelector(frame)
-        self.cw_canvas(frame)
+    def get_canvas(self):
+        """Returns the canvas"""
+        return self.canvas
 
-    def registerCallback_notifyCanvas(self, func):
-        self.callback_notifyCanvas_registered.append(func)
+    def get_tabs(self):
+        """Returns the tabs element"""
+        return self.tabs
 
-    def cw_graphSelector(self, frame):
+    def registercallback_notifycanvas(self, func):
+        """Register functions to callback when the canvas gets notified of an event"""
+        self.callback_notifycanvas_registered.append(func)
+
+    def _create_widgets(self, frame):
+        """Create widgets"""
+        self._cw_graph_selector(frame)
+        self._cw_canvas(frame)
+
+    def _cw_graph_selector(self, frame):
+        """frame for selection of the graph"""
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X)
         # button close
         fr1 = tk.Frame(fr, width=20, height=20)
-        fr1.propagate(0)
+        fr1.propagate(False)
         fr1.pack(side="right", anchor="n")
-        btn = tk.Button(fr1, text="\u2715", command=self.closeTab)  # 2A2F
+        btn = tk.Button(fr1, text="\u2715", command=self.close_tab)  # 2A2F
         btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=True)
         CreateToolTip(btn, "Close selected tab. Ctrl+W")
         # tabs
-        defdict = {"dpi": self.app.DEFAULT_SCREENDPI}
+        defdict = {
+            "dpi": self.app.DEFAULT_SCREENDPI,
+            "backgroundcolor": self.app.DEFAULT_CANVAS_BACKGROUNDCOLOR,
+        }
         self.tabs = GraphsTabManager(fr, width=200, height=0, defdict=defdict)
         self.tabs.pack(side="left", fill=tk.X, expand=True)
 
-    def cw_canvas(self, frame):
-        # canvas for graph
+    def _cw_canvas(self, frame):
+        """Create widget canvas for graph"""
         dpi = self.app.DEFAULT_SCREENDPI
         defsize = Graph.FIGSIZE_DEFAULT
-        figsize = [defsize[0], defsize[1] * 1.15]
+        figsize = (defsize[0], defsize[1] * 1.15)
         # canvassize = [1.03*defsize[0]*dpi, 1.03*defsize[1]*dpi]
+        # plt.figure create and attr .number, to be recalled elsewhere. Maybe could
+        # use mpl.figure.Figure() but unsure
         self.fig = plt.figure(figsize=figsize, dpi=dpi)
         self.canvas = FigureCanvasTkAgg(self.fig, master=frame)
         # possibly also configure width=canvassize[0], height=canvassize[1]
         self.canvas.get_tk_widget().pack(
             side="top", anchor="w", fill=tk.BOTH, expand=True
         )
-        self.canvas.mpl_connect("resize_event", self.updateUponResizeWindow)
+        self.canvas.mpl_connect("resize_event", self.update_upon_resize_window)
         try:
             self.canvas.show()
         except AttributeError:
             pass  # changes in later versions of FigureCanvasTkAgg
         self.ax = self.fig.add_subplot(111)
 
-    def setCanvasBackground(self):
+    def set_canvas_background(self):
+        """Change background color of the canvas"""
         # check value exists
         color = "white"
         try:
-            color = self.app.getTabProperties()["backgroundcolor"]
+            color = self.app.get_tab_properties()["backgroundcolor"]
         except KeyError:
-            self.app.getTabProperties(backgroundcolor=color)
+            self.app.get_tab_properties(backgroundcolor=color)
         # set value
         try:
             self.canvas.get_tk_widget().configure(background=color)
-        except TclError as e:
+        except TclError:
             msg = (
-                "Illegal color name. Please use either tkinter color names, or RGB "
-                "as #90ee90. Catched Exception {}: {}"
+                "set_canvas_background: illegal color name ({}). Please use either"
+                "tkinter color names, or RGB as #90ee90."
             )
-            print(msg.format(type(e), e))
+            logger.error(msg.format(color), exc_info=True)
             self.canvas.get_tk_widget().configure(background="white")
 
-    def updateUponResizeWindow(self, *args):
-        # updates only when main application is ready
+    def update_upon_resize_window(self, *_args):
+        """Updates the frame including the canvas, but only when main app is ready"""
         if self.app.initiated:
-            # print('updateUponResizeWindow args', args)
-            self.app.frameCentral.updateUI()  # only central part of UI
+            # print('updateUponResizeWindow args', _args)
+            self.app.frame_central.update_ui()  # only central part of UI
 
-    def enableCanvasCallbacks(self):
+    def enable_canvas_callbacks(self):
         """restore suitable list of canvas callbacks, for datapicker"""
 
-        def callback_pressCanvas(event):
-            self._mousePressed = True
-            callback_notifyCanvas(event)
+        def callback_press_canvas(event):
+            self._mouse_pressed = True
+            callback_notify_canvas(event)
 
-        def callback_releaseCanvas(event):
-            self._mousePressed = False
+        def callback_release_canvas(_event):
+            self._mouse_pressed = False
 
-        def callback_notifyCanvas(event):
-            if not self._mousePressed:
+        def callback_notify_canvas(event):
+            if not self._mouse_pressed:
                 return
-            for func in self.callback_notifyCanvas_registered:
+            for func in self.callback_notifycanvas_registered:
                 func(event)
             # print('Clicked at', event.xdata, event.ydata, 'curve')
 
-        self.disableCanvasCallbacks()
-        self.canvasEvents.append(
-            self.canvas.mpl_connect("button_press_event", callback_pressCanvas)
+        self.disable_canvas_callbacks()
+        self.canvas_events.append(
+            self.canvas.mpl_connect("button_press_event", callback_press_canvas)
         )
-        self.canvasEvents.append(
-            self.canvas.mpl_connect("button_release_event", callback_releaseCanvas)
+        self.canvas_events.append(
+            self.canvas.mpl_connect("button_release_event", callback_release_canvas)
         )
-        self.canvasEvents.append(
-            self.canvas.mpl_connect("motion_notify_event", callback_notifyCanvas)
+        self.canvas_events.append(
+            self.canvas.mpl_connect("motion_notify_event", callback_notify_canvas)
         )
 
-    def disableCanvasCallbacks(self):
+    def disable_canvas_callbacks(self):
         """disable all registered canvas callbacks"""
-        for cid in self.canvasEvents:
+        for cid in self.canvas_events:
             self.canvas.mpl_disconnect(cid)
-        self.canvasEvents.clear()
+        self.canvas_events.clear()
 
-    def closeTab(self):
+    def close_tab(self):
         """Closes current tab"""
         self.tabs.pop()
 
@@ -219,208 +244,209 @@ class GUIFrameCentralOptions:
     def __init__(self, master, application, canvas, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame, canvas)
+        self.toolbar = None  # here to reserve the name, will be created later
+        self.alterlistgui = []
+        self._widgets = {}
+        self._create_widgets(self.frame, canvas)
 
-    def updateUI(self):
+    def update_ui(self):
+        """Updates the GUI"""
         graph = self.app.graph()
         # to be called to update the frame:
-        self.alterListGUI = graph.alterListGUI()
+        self.alterlistgui = graph.alterListGUI()
         # Data transform, plottype
-        [idx, display, alter, typePlot] = self.identifyDataTransform()
-        options = [i[0] for i in self.alterListGUI]
-        self.varAlter.resetValues(options, func=self.updateDataTransform)
-        for a in self.alterListGUI:
+        [_idx, display, _alter, typeplot] = self.identify_data_transform()
+        options = [i[0] for i in self.alterlistgui]
+        self._widgets["alter"].reset_values(options, func=self.update_data_transform)
+        for a in self.alterlistgui:
             if a[0] == display:
-                self.varAlter.set(display)
+                self._widgets["alter"].set(display)
                 break
-        self.varTypeplot.set(typePlot)
+        self._widgets["typeplot"].set(typeplot)
         # labels, limits
         xlim = graph.attr("xlim", ["", ""])
         ylim = graph.attr("ylim", ["", ""])
         xlim = [(x if not isinstance(x, str) and not np.isnan(x) else "") for x in xlim]
         ylim = [(y if not isinstance(y, str) and not np.isnan(y) else "") for y in ylim]
-        self.varXlabel.set(varToStr(graph.attr("xlabel")))
-        self.varYlabel.set(varToStr(graph.attr("ylabel")))
-        self.varXlim0.set(varToStr(xlim[0]))
-        self.varXlim1.set(varToStr(xlim[1]))
-        self.varYlim0.set(varToStr(ylim[0]))
-        self.varYlim1.set(varToStr(ylim[1]))
-        # tabs properties DPI and backgroundcolor
-        tabproperties = self.app.getTabProperties()
-        self._varDPI.set(tabproperties["dpi"])
-        self._varBGC.set(tabproperties["backgroundcolor"])
+        self._widgets["xlabel"].set(varToStr(graph.attr("xlabel")))
+        self._widgets["ylabel"].set(varToStr(graph.attr("ylabel")))
+        self._widgets["xlim0"].set(varToStr(xlim[0]))
+        self._widgets["xlim1"].set(varToStr(xlim[1]))
+        self._widgets["ylim0"].set(varToStr(ylim[0]))
+        self._widgets["ylim1"].set(varToStr(ylim[1]))
+        # tabs properties DPI
+        tabproperties = self.app.get_tab_properties()
+        self._widgets["DPI"].set(tabproperties["dpi"])
 
-    def createWidgets(self, frame, canvas):
+    def _create_widgets(self, frame, canvas):
+        """Creates the widgets"""
         # toolbar
         fr0 = tk.Frame(frame)
         fr0.pack(side="top", anchor="w", fill=tk.X)
-        self.cw_toolbar(fr0, canvas)
+        self._cw_toolbar(fr0, canvas)
         # line 1
         fr1 = tk.Frame(frame)
         fr1.pack(side="top", anchor="w", fill=tk.X)
-        self.cw_line1(fr1)
+        self._cw_line1(fr1)
         # line 2
         fr2 = tk.Frame(frame)
         fr2.pack(side="top", anchor="w", fill=tk.X)
-        self.cw_line2(fr2)
+        self._cw_line2(fr2)
 
-    def cw_toolbar(self, frame, canvas):
-        btn0 = tk.Button(frame, text="Refresh GUI", command=self.app.updateUI)
+    def _cw_toolbar(self, frame, canvas):
+        """Creates the widgets of the toolbar"""
+        btn0 = tk.Button(frame, text="Refresh GUI", command=self.app.update_ui)
         btn0.pack(side="left", anchor="center", padx=5, pady=2)
         CreateToolTip(btn0, "Ctrl+R")
         btn1 = tk.Button(
-            frame, text="Save zoom/subplots", command=self._setLimitsSubplots
+            frame, text="Save zoom/subplots", command=self._set_limits_subplots
         )
         btn1.pack(side="left", anchor="center", padx=5, pady=2)
         tk.Label(frame, text="   ").pack(side="left")
-        frame2 = tk.Frame(frame)
         self.toolbar = NavigationToolbar2Tk(canvas, frame)
         self.toolbar.update()
 
-    def cw_line1(self, frame):
+    def _cw_line1(self, frame):
+        """Create widgets Data transfor, plot type, annotation popup"""
         lbl = tk.Label(frame, text="Data transform")
         lbl.pack(side="left", anchor="n", pady=7)
         # varAlter initially empty, gets updated frequently
-        self.varAlter = OptionMenuVar(frame, [""], default="")
-        self.varAlter.pack(side="left", anchor="center")
+        self._widgets["alter"] = OptionMenuVar(frame, ("",), default="")
+        self._widgets["alter"].pack(side="left", anchor="center")
         # button change graph type
         lbl = tk.Label(frame, text="   Plot type")
         lbl.pack(side="left", anchor="n", pady=7)
-        plotTypeList = [
-            "",
-            "plot",
-            "plot norm.",
-            "semilogy",
-            "semilogy norm.",
-            "semilogx",
-            "loglog",
-        ]
-        self.varTypeplot = OptionMenuVar(
-            frame, plotTypeList, default="", func=self.updateTypeplot
+        typeplot_list = AlterListItem.TYPEPLOTS
+        self._widgets["typeplot"] = OptionMenuVar(
+            frame, typeplot_list, default="", func=self.update_typeplot
         )
-        self.varTypeplot.pack(side="left")
+        self._widgets["typeplot"].pack(side="left")
         # popup to handle text annotations
         tk.Label(frame, text="     ").pack(side="left")
         btn = tk.Button(
-            frame, text="Annotations, legend and titles", command=self.popupAnnotations
+            frame,
+            text="Annotations, legend and titles",
+            command=self.open_popup_annotations,
         )
         btn.pack(side="left", anchor="n", pady=5)
         # DPI, background color
         fr = tk.Frame(frame)
         fr.pack(side="right", anchor="center")
-        self.cw_line1_right(fr)
+        self._cw_line1_right(fr)
 
-    def cw_line1_right(self, frame):
-        # background color
-        lbl = tk.Label(frame, text="Background")
-        lbl.pack(side="left")
-        colorlist = ["white", "black", "grey15", "#90ee90"]
-        self._varBGC = ComboboxVar(frame, colorlist, "white", width=7)
-        self._varBGC.pack(side="left")
-        self._varBGC.bind("<Return>", lambda event: self.setBGColorFromEntry())
+    def _cw_line1_right(self, frame):
+        """DPI, button Save"""
         # screen dpi
         lbl = tk.Label(frame, text="  Screen dpi")
         lbl.pack(side="left")
-        self._varDPI = EntryVar(frame, value=self.app.DEFAULT_SCREENDPI, width=5)
-        self._varDPI.pack(side="left", padx=5)
-        self._varDPI.bind("<Return>", lambda event: self.setScreenDPIFromEntry())
+        self._widgets["DPI"] = EntryVar(
+            frame, value=self.app.DEFAULT_SCREENDPI, width=5
+        )
+        self._widgets["DPI"].pack(side="left", padx=5)
+        self._widgets["DPI"].bind(
+            "<Return>", lambda event: self.set_screendpi_from_entry()
+        )
         # button
-        btn = tk.Button(frame, text="Save", command=self.setScreenBGColorDPIFromEntry)
+        btn = tk.Button(
+            frame, text="Save", command=self.set_screendpi_bgcolor_from_entry
+        )
         btn.pack(side="left")
 
-    def cw_line2(self, frame):
-        self.varXlabel = EntryVar(frame, "", width=20)
-        self.varYlabel = EntryVar(frame, "", width=20)
-        self.varXlim0 = EntryVar(frame, "", width=8)
-        self.varXlim1 = EntryVar(frame, "", width=8)
-        self.varYlim0 = EntryVar(frame, "", width=8)
-        self.varYlim1 = EntryVar(frame, "", width=8)
+    def _cw_line2(self, frame):
+        """Create widgets labels, axis limits, data editor"""
+        self._widgets["xlabel"] = EntryVar(frame, "", width=20)
+        self._widgets["ylabel"] = EntryVar(frame, "", width=20)
+        self._widgets["xlim0"] = EntryVar(frame, "", width=8)
+        self._widgets["xlim1"] = EntryVar(frame, "", width=8)
+        self._widgets["ylim0"] = EntryVar(frame, "", width=8)
+        self._widgets["ylim1"] = EntryVar(frame, "", width=8)
         tk.Label(frame, text="xlabel:").pack(side="left", anchor="center")
-        self.varXlabel.pack(side="left", anchor="center")
+        self._widgets["xlabel"].pack(side="left", anchor="center")
         tk.Label(frame, text="   ylabel:").pack(side="left", anchor="center")
-        self.varYlabel.pack(side="left", anchor="center")
+        self._widgets["ylabel"].pack(side="left", anchor="center")
         tk.Label(frame, text="   xlim:").pack(side="left", anchor="center")
-        self.varXlim0.pack(side="left", anchor="center")
+        self._widgets["xlim0"].pack(side="left", anchor="center")
         tk.Label(frame, text="to").pack(side="left", anchor="center")
-        self.varXlim1.pack(side="left", anchor="center")
+        self._widgets["xlim1"].pack(side="left", anchor="center")
         tk.Label(frame, text="   ylim:").pack(side="left", anchor="center")
-        self.varYlim0.pack(side="left", anchor="center")
+        self._widgets["ylim0"].pack(side="left", anchor="center")
         tk.Label(frame, text="to").pack(side="left", anchor="center")
-        self.varYlim1.pack(side="left", anchor="center")
+        self._widgets["ylim1"].pack(side="left", anchor="center")
         tk.Label(frame, text="   ").pack(side="left")
-        btn = tk.Button(frame, text="Save", command=self.updateAttributes)
+        btn = tk.Button(frame, text="Save", command=self.update_attributes)
         btn.pack(side="left", anchor="center")
         tk.Label(frame, text="   ").pack(side="left")
-        self.varXlabel.bind("<Return>", lambda event: self.updateAttributes())
-        self.varYlabel.bind("<Return>", lambda event: self.updateAttributes())
-        self.varXlim0.bind("<Return>", lambda event: self.updateAttributes())
-        self.varXlim1.bind("<Return>", lambda event: self.updateAttributes())
-        self.varYlim0.bind("<Return>", lambda event: self.updateAttributes())
-        self.varYlim1.bind("<Return>", lambda event: self.updateAttributes())
-        bt = tk.Button(frame, text="Data editor", command=self.popupDataEditor)
+        self._widgets["xlabel"].bind("<Return>", lambda event: self.update_attributes())
+        self._widgets["ylabel"].bind("<Return>", lambda event: self.update_attributes())
+        self._widgets["xlim0"].bind("<Return>", lambda event: self.update_attributes())
+        self._widgets["xlim1"].bind("<Return>", lambda event: self.update_attributes())
+        self._widgets["ylim0"].bind("<Return>", lambda event: self.update_attributes())
+        self._widgets["ylim1"].bind("<Return>", lambda event: self.update_attributes())
+        bt = tk.Button(frame, text="Data editor", command=self.open_popup_data_editor)
         bt.pack(side="right", anchor="center")
 
-    def _setLimitsSubplots(self):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        ax = self.app.getAx()
+    def _set_limits_subplots(self):
+        """Called by Button Save zoom/subplots"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        ax = self.app.get_ax()
         xlim = list(ax.get_xlim())
         ylim = list(ax.get_ylim())
         a = ["left", "bottom", "right", "top", "wspace", "hspace"]
-        subplots = [getattr(self.app.getFig().subplotpars, key) for key in a]
-        self.app.callGraphMethod(
+        subplots = [getattr(self.app.get_fig().subplotpars, key) for key in a]
+        self.app.call_graph_method(
             "update", {"xlim": xlim, "ylim": ylim, "subplots_adjust": subplots}
         )
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def updateTypeplot(self, new):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        self.varTypeplot.set(new)
-        self.app.callGraphMethod("update", {"typeplot": new})
-        self.app.updateUI()
+    def update_typeplot(self, new):
+        """handles change of value of data transform"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        self._widgets["typeplot"].set(new)
+        self.app.call_graph_method("update", {"typeplot": new})
+        self.app.update_ui()
 
-    def setScreenDPIFromEntry(self, updateUI=True):
+    def set_screendpi_from_entry(self, update_ui=True):
         """Updates the DPI according to the value stored in the GUI Entry"""
-        if updateUI:
-            self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
+        if update_ui:
+            self.app.store_selected_curves()  # before modifs, to prepare update_ui
         try:
-            self.app.getTabProperties(dpi=float(self._varDPI.get()))
-            self.checkValidScreenDPI()
-        except Exception:  # float() conversion may have failed
+            self.app.get_tab_properties(dpi=float(self._widgets["DPI"].get()))
+            self.check_valid_screendpi()
+        except ValueError:  # float() conversion may have failed
             pass
-        if updateUI:
+        if update_ui:
             if self.app.initiated:
-                self.app.updateUI()
+                self.app.update_ui()
 
-    def checkValidScreenDPI(self):
+    def check_valid_screendpi(self):
         """Checks that the DPI value stored in tab is reasonable"""
-        new = strToVar(self.app.getTabProperties()["dpi"])
+        new = strToVar(self.app.get_tab_properties()["dpi"])
         # print('checkValidScreenDPI', new)
         if new == "":
             new = self.app.DEFAULT_SCREENDPI
         if not is_number(new):
             return False
-        fig = self.app.getFig()
-        figSize = np.array(fig.get_size_inches())
-        minMaxPx = np.array([[10, 10], [1000, 1000]])
-        newMinMax = np.array(
-            [max(minMaxPx[0] / figSize), min(2 * minMaxPx[1] / figSize)]
-        )
-        new = min(max(new, newMinMax[0]), newMinMax[1])
+        fig = self.app.get_fig()
+        figsize = np.array(fig.get_size_inches())
+        min_max_px = np.array([[10, 10], [1000, 1000]])
+        new_min_max = [max(min_max_px[0] / figsize), min(2 * min_max_px[1] / figsize)]
+        new = min(max(new, new_min_max[0]), new_min_max[1])
         new = roundSignificant(new, 2)
         # print('Set screen DPI to '+str(new)+'.')
         # print('   ', new)
-        self.app.getTabProperties(dpi=new)
+        self.app.get_tab_properties(dpi=new)
+        return True
 
-    def setAutoScreenDPI(self):
-        """Provides a best guess for screen DPI"""
+    def set_auto_screendpi(self):
+        """Provides best guess for screen DPI"""
         self.app.master.update_idletasks()
         wh = [
-            self.app.getCanvas().get_tk_widget().winfo_width(),
-            self.app.getCanvas().get_tk_widget().winfo_height(),
+            self.app.get_canvas().get_tk_widget().winfo_width(),
+            self.app.get_canvas().get_tk_widget().winfo_height(),
         ]
         figsize = self.app.graph().attr("figsize", Graph.FIGSIZE_DEFAULT)
         dpimax = min([wh[i] / figsize[i] for i in range(2)])
-        dpi = self.app.getTabProperties()["dpi"]
+        dpi = self.app.get_tab_properties()["dpi"]
         new = None
         if dpi > dpimax * 1.02:  # shall reduce screen dpi
             new = np.max([10, np.round(2 * (dpimax - 3), -1) / 2])
@@ -428,87 +454,84 @@ class GUIFrameCentralOptions:
             new = np.min([180, np.round(2 * (dpimax - 3), -1) / 2])
         # print('   ', new)
         if new is not None and new != dpi:
-            self.app.getTabProperties(dpi=new)
-            self.app.blinkWidget(self._varDPI, 5)
-            self._varDPI.set(new)  # a bit useless, done at next updateUI...
+            self.app.get_tab_properties(dpi=new)
+            self.app.blink_widget(self._widgets["DPI"], 5)
+            self._widgets["DPI"].set(new)  # a bit useless, done at next update_ui...
 
-    def setBGColorFromEntry(self, updateUI=True):
-        if updateUI:
-            self.app.storeSelectedCurves()  # before modifications, to prepare updateUI
-        value = str(self._varBGC.get())
-        self.app.getTabProperties(backgroundcolor=value)
-        if updateUI:
-            if self.app.initiated:
-                self.app.updateUI()
-
-    def setScreenBGColorDPIFromEntry(self):
-        self.app.storeSelectedCurves()  # before modifications, to prepare updateUI
-        self.setBGColorFromEntry(updateUI=False)
-        self.setScreenDPIFromEntry(updateUI=False)
+    def set_screendpi_bgcolor_from_entry(self):
+        """Updates both screen DPI and background color"""
+        self.app.store_selected_curves()  # before modifications, to prepare update_ui
+        self.set_bgcolor_from_entry(update_ui=False)
+        self.set_screendpi_from_entry(update_ui=False)
         if self.app.initiated:
-            self.app.updateUI()
+            self.app.update_ui()
 
-    def updateDataTransform(self, new):
-        [idx, display, alter, typePlot] = self.identifyDataTransform()
+    def update_data_transform(self, new):
+        """Update widget of Data Transform"""
+        [_idx, display, _alter, _] = self.identify_data_transform()
         if display == new:
             return True  # no change
-        for a in self.alterListGUI:
+        for a in self.alterlistgui:
             if new == a[0]:
-                self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-                self.varAlter.set(new)
-                self.varTypeplot.set(a[2])
-                self.app.callGraphMethod("update", {"alter": a[1], "typeplot": a[2]})
-                self.app.updateUI()
+                self.app.store_selected_curves()  # before modifs, to prepare update_ui
+                self._widgets["alter"].set(new)
+                self._widgets["typeplot"].set(a[2])
+                self.app.call_graph_method("update", {"alter": a[1], "typeplot": a[2]})
+                self.app.update_ui()
         return False
 
-    def identifyDataTransform(self):
+    def identify_data_transform(self):
+        """Retrieve the current value of the Data transform widget"""
         # retrieve current alter
         graph = self.app.graph()
         alter = graph.attr("alter")
         if alter == "":
-            alter = self.alterListGUI[0][1]
-        typePlot = graph.attr("typeplot")
+            alter = self.alterlistgui[0][1]
+        typeplot = graph.attr("typeplot")
         # find index in list of allowed alterations
-        for i in range(len(self.alterListGUI)):
-            if alter == self.alterListGUI[i][1]:
-                return [i] + self.alterListGUI[i][0:2] + [typePlot]
-        return [np.nan, "File-defined", alter, typePlot]
+        for i, item in enumerate(self.alterlistgui):
+            if alter == item[1]:
+                return [i] + item[0:2] + [typeplot]
+        return [np.nan, "File-defined", alter, typeplot]
 
-    def updateAttributes(self):
+    def update_attributes(self):
         """update the quick modifs, located below the graph"""
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        xlim = [strToVar(self.varXlim0.get()), strToVar(self.varXlim1.get())]
-        ylim = [strToVar(self.varYlim0.get()), strToVar(self.varYlim1.get())]
-        xlabel = strToVar(self.varXlabel.get())
-        ylabel = strToVar(self.varYlabel.get())
-        self.app.callGraphMethod(
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        xlim = [
+            strToVar(self._widgets["xlim0"].get()),
+            strToVar(self._widgets["xlim1"].get()),
+        ]
+        ylim = [
+            strToVar(self._widgets["ylim0"].get()),
+            strToVar(self._widgets["ylim1"].get()),
+        ]
+        xlabel = strToVar(self._widgets["xlabel"].get())
+        ylabel = strToVar(self._widgets["ylabel"].get())
+        self.app.call_graph_method(
             "update", {"xlabel": xlabel, "ylabel": ylabel, "xlim": xlim, "ylim": ylim}
         )
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def popupAnnotations(self):
-        """Open window for annotation manager"""
-        from gui.GUIpopup import GuiManagerAnnotations
-
+    def open_popup_annotations(self):
+        """Open window for annotation editor"""
         win = tk.Toplevel(self.app.master)
-        GuiManagerAnnotations(win, self.app.graph(), self.catchAnnotations)
+        GuiManagerAnnotations(win, self.app.graph(), self.catch_annotations)
 
-    def catchAnnotations(self, dictupdate):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
+    def catch_annotations(self, dictupdate):
+        """process output of annotation popup editor"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
         self.app.graph().update(dictupdate)
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def popupDataEditor(self):
+    def open_popup_data_editor(self):
         """Open window for data edition"""
         # opens manager
-        from gui.GUIdataEditor import GuiDataEditor
-
         win = tk.Toplevel(self.app.master)
-        GuiDataEditor(win, self.app.graph(), self.catchDataEditor)
+        GuiDataEditor(win, self.app.graph(), self.catch_data_editor)
 
-    def catchDataEditor(self):
-        # modification of the Curve are performed within popup. Little to do
-        self.app.updateUI()
+    def catch_data_editor(self):
+        """Modification of the Curve are performed within popup. Little to do"""
+        self.app.update_ui()
 
 
 class GUIFrameDataPicker:
@@ -521,142 +544,151 @@ class GUIFrameDataPicker:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.varIdx = np.nan  # datapoint index on curve
-        self.varCurvePreviousLabels = []
-        self.createWidgets(self.frame)
-        self.app.master.bind("<Control-m>", lambda e: self.savePoint())
+        self.var_idx = np.nan  # datapoint index on curve
+        self.var_curve_previous_labels = []
+        self.crosshairx, self.crosshairy = None, None
+        self._widgets = {}
+        self._create_widgets(self.frame)
+        self.app.master.bind("<Control-m>", lambda e: self.save_point())
 
-    def updateUI(self):
+    def update_ui(self):
+        """Updates the GUI elements"""
         # drop-down curve list
         graph = self.app.graph()
-        orderLbl = ["label", "sample", "filename"]
+        order_lbl = ["label", "sample", "filename"]
         values, labels = [], []
-        for i in range(len(graph)):
+        for i, curve in enumerate(graph):
             values.append(i)
             lbl = str(i) + " (no label)"
-            for test in orderLbl:
-                tmp = graph[i].attr(test)
+            for test in order_lbl:
+                tmp = curve.attr(test)
                 if tmp != "":
                     lbl = str(i) + " " + str(tmp).replace("'", "'")
                     break
             labels.append(lbl)
-        if labels != self.varCurvePreviousLabels:
-            self.varCurvePreviousLabels = labels
-            default = self.varCurve.get()
-            self.varCurve.resetValues(values, labels=labels, default=default)
+        if labels != self.var_curve_previous_labels:
+            self.var_curve_previous_labels = labels
+            default = self._widgets["curve"].get()
+            self._widgets["curve"].reset_values(values, labels=labels, default=default)
         # crosshair
-        self.updateCrosshair(draw=False)
+        self.update_crosshair(draw=False)
 
-    def createWidgets(self, frame):
+    def _create_widgets(self, frame):
+        """Creates the GUI elements"""
         fr = FrameTitleContentHideHorizontal(
-            frame, self.cw_title, self.cw_datapicker, default="hide", showHideTitle=True
+            frame,
+            self._cw_title,
+            self._cw_datapicker,
+            default="hide",
+            showHideTitle=True,
         )
         fr.pack(side="top", fill=tk.X, anchor="w")
 
-    def cw_title(self, frame):
+    def _cw_title(self, frame):
+        """Create widgets Title"""
         tk.Label(frame, text="Data picker").pack(side="top")
 
-    def cw_datapicker(self, frame):
+    def _cw_datapicker(self, frame):
+        """Prepare creation datapicker"""
         fr0 = tk.Frame(frame)
         fr0.pack(side="top", anchor="w", fill=tk.X)
-        self.cw_datapickerUp(fr0)
+        self._cw_datapicker_up(fr0)
         fr1 = tk.Frame(frame)
         fr1.pack(side="top", anchor="w", fill=tk.X)
-        self.cw_datapickerDown(fr1)
+        self._cw_datapicker_down(fr1)
 
-    def cw_datapickerUp(self, frame):
+    def _cw_datapicker_up(self, frame):
         tk.Label(frame, text="Click on graph").pack(side="left", anchor="center")
-        tk.Label(frame, text="x").pack(side="left", anchor="c")
-        self.varX = EntryVar(frame, 0, width=10, varType=tk.DoubleVar)
-        self.varX.pack(side="left", anchor="center")
+        tk.Label(frame, text="x").pack(side="left", anchor="w")
+        self._widgets["x"] = EntryVar(frame, 0, width=10, varType=tk.DoubleVar)
+        self._widgets["x"].pack(side="left", anchor="center")
         tk.Label(frame, text="y").pack(side="left", anchor="center")
-        self.varY = EntryVar(frame, 0, width=10, varType=tk.DoubleVar)
-        self.varY.pack(side="left", anchor="center")
-        self.varRestrict = CheckbuttonVar(frame, "Restrict to data", False)
-        self.varRestrict.pack(side="left", anchor="center")
+        self._widgets["y"] = EntryVar(frame, 0, width=10, varType=tk.DoubleVar)
+        self._widgets["y"].pack(side="left", anchor="center")
+        self._widgets["restrict"] = CheckbuttonVar(frame, "Restrict to data", False)
+        self._widgets["restrict"].pack(side="left", anchor="center")
         tk.Label(frame, text="curve").pack(side="left", anchor="center")
-        self.varCurve = OptionMenuVar(frame, [0], 0, varType=tk.IntVar)
-        self.varCurve.pack(side="left", anchor="center")
+        self._widgets["curve"] = OptionMenuVar(frame, ("0",), "0", varType=tk.IntVar)
+        self._widgets["curve"].pack(side="left", anchor="center")
         try:
-            self.varCurve.var.trace_add("write", self.selectCurve)
+            self._widgets["curve"].var.trace_add("write", self.select_curve)
         except AttributeError:  # IntVar has no attribute 'trace_add'
-            self.varCurve.var.trace("w", self.selectCurve)
-        self.varCrosshair = CheckbuttonVar(
-            frame, "Crosshair", False, command=self.updateCrosshair
+            self._widgets["curve"].var.trace("w", self.select_curve)
+        self._widgets["crosshair"] = CheckbuttonVar(
+            frame, "Crosshair", False, command=self.update_crosshair
         )
-        self.varCrosshair.pack(side="left", anchor="center")
+        self._widgets["crosshair"].pack(side="left", anchor="center")
 
-    def cw_datapickerDown(self, frame):
+    def _cw_datapicker_down(self, frame):
         btn0 = tk.Button(
-            frame, text="Create text with coordinates", command=self.createTextbox
+            frame, text="Create text with coordinates", command=self.create_textbox
         )
         btn0.pack(side="left", anchor="center")
         tk.Label(frame, text=" or ").pack(side="left")
-        btn1 = tk.Button(frame, text="Save point", command=self.savePoint)
+        btn1 = tk.Button(frame, text="Save point", command=self.save_point)
         btn1.pack(side="left", anchor="center")
         CreateToolTip(btn1, "Ctrl+M")
-        self.varIfTransform = CheckbuttonVar(frame, "screen data", True)
-        self.varIfTransform.pack(side="left", anchor="center")
-        self.varIfCurveSpec = CheckbuttonVar(frame, "Curve specific", False)
-        self.varIfCurveSpec.pack(side="left", anchor="center")
+        self._widgets["ifTransform"] = CheckbuttonVar(frame, "screen data", True)
+        self._widgets["ifTransform"].pack(side="left", anchor="center")
+        self._widgets["ifCurveSpec"] = CheckbuttonVar(frame, "Curve specific", False)
+        self._widgets["ifCurveSpec"].pack(side="left", anchor="center")
         # explanatory text for checkbox
-        self.varExplain = LabelVar(frame, "")
-        self.varExplain.pack(side="left", anchor="center")
+        self._widgets["explain"] = LabelVar(frame, "")
+        self._widgets["explain"].pack(side="left", anchor="center")
 
-    def selectCurve(self, *args):
+    def select_curve(self, *_args):
         """Called when user selects another Curve in data picker"""
-        c = self.varCurve.get()
+        c = self._widgets["curve"].get()
         lbl = self.app.graph()[c].getDataCustomPickerXY(0, strDescription=True)
-        self.varExplain.set(lbl)
+        self._widgets["explain"].set(lbl)
 
-    def getXY(self):
+    def get_x_y_attrupd(self):
         """retrieve (and transform) data in x and y Entry."""
         # default is data in datapicker textbox
-        x = self.varX.get()
-        y = self.varY.get()
-        attrUpd = {}
-        if self.varRestrict.get():
+        x = self._widgets["x"].get()
+        y = self._widgets["y"].get()
+        attrupd = {}
+        if self._widgets["restrict"].get():
             # if datapicker was restricted to existing data point
             graph = self.app.graph()
-            c = self.varCurve.get()
-            print("getXY c", type(c), c)
+            c = self._widgets["curve"].get()
+            print("get_x_y_attrupd c", type(c), c)
             if c >= 0:
-                idx = self.varIdx
-                alter = graph.attr("alter")
+                idx = self.var_idx
+                alter = graph.get_alter()
                 # if user want data transform instead if raw data
-                if self.varIfTransform.get():
+                if self._widgets["ifTransform"].get():
                     # raw data is displayed in checkbox, need transform
-                    if isinstance(alter, str):
-                        alter = ["", alter]
                     x = graph[c].x_offsets(index=idx, alter=alter[0])[0]
                     y = graph[c].y_offsets(index=idx, alter=alter[1])[0]
                 # if user want curve-specific data picker
-                if self.varIfCurveSpec.get():
+                if self._widgets["ifCurveSpec"].get():
                     # default will be transformed & offset modified data
                     # maybe the Curve object overrides the default method ?
                     # case for CurveCf at least
-                    x, y, attrUpd = graph[c].getDataCustomPickerXY(idx, alter=alter)
-        return x, y, attrUpd
+                    x, y, attrupd = graph[c].getDataCustomPickerXY(idx, alter=alter)
+        return x, y, attrupd
 
-    def createTextbox(self):
+    def create_textbox(self):
         """Create a new text annotation on Graph"""
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        x, y, attrUpd = self.getXY()
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        x, y, _ = self.get_x_y_attrupd()
         text = (
             "x: " + str(roundSignificant(x, 5)) + "\ny: " + str(roundSignificant(y, 5))
         )
         textxy = ""
         textargs = {"textcoords": "data", "xytext": [x, y], "fontsize": 8}
-        self.app.callGraphMethod("addText", text, textxy, textargs=textargs)
-        if not self.app.ifPrintCommands():
+        self.app.call_graph_method("text_add", text, textxy, textargs=textargs)
+        if not self.app.if_print_commands():
             print("New text annotation:", text.replace("\n", "\\n"))
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def savePoint(self):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
+    def save_point(self):
+        """Save point"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
         attr = {"linespec": "x", "color": "k", "_dataPicker": True}
-        x, y, attrUpd = self.getXY()
-        attr.update(attrUpd)
+        x, y, attrupd = self.get_x_y_attrupd()
+        attr.update(attrupd)
         # implement in curve results
         graph = self.app.graph()
         c = graph.curves("_dataPicker", True)
@@ -671,72 +703,67 @@ class GUIFrameDataPicker:
         else:
             # datapicker Curve exists already
             c[0].appendPoints([x], [y])
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def updateCrosshair(self, draw=True):
+    def update_crosshair(self, draw=True):
         """
-        draw the canvas including crosshair, except if called from updateUI
+        draw the canvas including crosshair, except if called from update_ui
         which handles draw() by itself
         """
         # first, delete existing crosshair
-        try:
+        if self.crosshairx is not None:
             self.crosshairx.remove()
-            del self.crosshairx
-        except Exception:
-            pass
-        try:  # first delete existing crosshair
+            self.crosshairx = None
+        if self.crosshairy is not None:
             self.crosshairy.remove()
-            del self.crosshairy
-        except Exception:
-            pass
+            self.crosshairy = None
         # then makes new ones
-        if self.varCrosshair.get():
-            self.app.enableCanvasCallbacks()
-            xdata = self.varX.get()
-            ydata = self.varY.get()
-            curve = self.varCurve.get()
-            restrict = self.varRestrict.get()
-            idx = self.varIdx
+        if self._widgets["crosshair"].get():
+            self.app.enable_canvas_callbacks()
+            xdata = self._widgets["x"].get()
+            ydata = self._widgets["y"].get()
+            curve = self._widgets["curve"].get()
+            restrict = self._widgets["restrict"].get()
+            idx = self.var_idx
             graph = self.app.graph()
-            alter = graph.attr("alter")
+            alter = graph.get_alter()
             if curve >= 0 and curve >= len(graph):
                 curve = len(graph) - 1
-                self.varCurve.set(curve)
-            if isinstance(alter, str):
-                alter = ["", alter]
+                self._widgets["curve"].set(curve)
             posx, posy = xdata, ydata
             if restrict and curve >= 0 and not np.isnan(idx):
                 posx = graph[curve].x_offsets(index=idx, alter=alter[0])
                 posy = graph[curve].y_offsets(index=idx, alter=alter[1])
                 # print('crosshair', xdata, ydata, posx, posy)
-            ax = self.app.getAx()
+            ax = self.app.get_ax()
             self.crosshairx = ax.axvline(posx, 0, 1, color=[0.5, 0.5, 0.5])
             self.crosshairy = ax.axhline(posy, 0, 1, color=[0.5, 0.5, 0.5])
         else:
-            self.app.disableCanvasCallbacks()
+            self.app.disable_canvas_callbacks()
         if draw:
-            self.app.getCanvas().draw()
+            self.app.get_canvas().draw()
 
-    def eventMouseMotion(self, event):
+    def event_mouse_motion(self, event):
+        """identifies datapoint closest to mouse click"""
         xdata, ydata = event.xdata, event.ydata
-        self.varIdx = np.nan
+        self.var_idx = np.nan
         if (
             event.xdata is not None
-            and self.varRestrict.get()
-            and self.varCurve.get() > -1
+            and self._widgets["restrict"].get()
+            and self._widgets["curve"].get() > -1
         ):
             graph = self.app.graph()
-            curve = graph[self.varCurve.get()]
+            curve = graph[self._widgets["curve"].get()]
             if curve is not None:
-                xdata, ydata, idx = curve.getPointClosestToXY(
-                    xdata, ydata, alter=graph.attr("alter")
+                xdata, ydata, idx = get_point_closest_to_xy(
+                    curve, xdata, ydata, alter=graph.attr("alter")
                 )
-                self.varIdx = idx
+                self.var_idx = idx
         if xdata is not None:
-            self.varX.set(xdata)
+            self._widgets["x"].set(xdata)
         if ydata is not None:
-            self.varY.set(ydata)
-        self.updateCrosshair()
+            self._widgets["y"].set(ydata)
+        self.update_crosshair()
 
 
 class GUIFrameCentral:
@@ -749,29 +776,45 @@ class GUIFrameCentral:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
-        self.frameGraph.registerCallback_notifyCanvas(
-            self.frameDataPicker.eventMouseMotion
+        self._widgets = {}
+        self._create_widgets(self.frame)
+        self._widgets["frameGraph"].registercallback_notifycanvas(
+            self._widgets["frameDataPicker"].event_mouse_motion
         )
 
-    def updateUI(self):
-        self.frameGraph.updateUI()
-        self.frameOptions.updateUI()
-        self.frameDataPicker.updateUI()
+    def update_ui(self):
+        """Update GUI"""
+        self._widgets["frameGraph"].update_ui()
+        self._widgets["frameOptions"].update_ui()
+        self._widgets["frameDataPicker"].update_ui()
 
-    def createWidgets(self, frame):
+    def get_frame_graph(self):
+        """Returns: Frame frameGraph"""
+        return self._widgets["frameGraph"]
+
+    def get_frame_options(self):
+        """Returns the Frame Options"""
+        return self._widgets["frameOptions"]
+
+    def get_tabs(self):
+        """Returns the tabs"""
+        return self.get_frame_graph().get_tabs()
+
+    def _create_widgets(self, frame):
+        """Creates widgets"""
         fr = tk.Frame(frame)
         fr.pack(side="bottom", fill=tk.X)
         # Canvas dor Graph
-        self.frameGraph = GUIFrameCanvasGraph(frame, self.app)
-        self.frameGraph.frame.pack(side="top", fill=tk.BOTH, expand=True)
-        canvas = self.frameGraph.canvas
+        self._widgets["frameGraph"] = GUIFrameCanvasGraph(frame, self.app)
+        self._widgets["frameGraph"].frame.pack(side="top", fill=tk.BOTH, expand=True)
+        # note: cannot use self.app.getCanvas(), instantiation of self not finished
+        canvas = self._widgets["frameGraph"].get_canvas()
         # Datatransform, annotations, labels, limits
-        self.frameOptions = GUIFrameCentralOptions(fr, self.app, canvas)
-        self.frameOptions.frame.pack(side="top", fill=tk.X)
+        self._widgets["frameOptions"] = GUIFrameCentralOptions(fr, self.app, canvas)
+        self._widgets["frameOptions"].frame.pack(side="top", fill=tk.X)
         # Datapicker
-        self.frameDataPicker = GUIFrameDataPicker(fr, self.app)
-        self.frameDataPicker.frame.pack(side="top", fill=tk.X)
+        self._widgets["frameDataPicker"] = GUIFrameDataPicker(fr, self.app)
+        self._widgets["frameDataPicker"].frame.pack(side="top", fill=tk.X)
 
 
 class GUIFrameConsole:
@@ -782,73 +825,86 @@ class GUIFrameConsole:
     """
 
     def __init__(self, master, application, **kwargs):
-        self._consoleHeightRoll = [8, 20, 0]
+        self._consoleheight_roll = [8, 20, 0]
+        self._consoleheight = self._consoleheight_roll[0]
 
         self.app = application
         self.frame = tk.Frame(master, **kwargs)
-        self.createWidgets(self.frame)
+        self._widgets = {}
+        self._create_widgets(self.frame)
 
-    def updateUI(self):
-        self.varFile.set(self._shorten(self.app.getFile()))
-        self.varFolder.set(self._shorten(self.app.getFolder()))
+    def update_ui(self):
+        """Update widgets"""
+        self._widgets["file"].set(self._shorten(self.app.get_file()))
+        self._widgets["folder"].set(self._shorten(self.app.get_folder()))
 
-    def createWidgets(self, frame):
+    def get_console(self):
+        """Returns the Console widget"""
+        return self._widgets["console"]
+
+    def _create_widgets(self, frame):
+        """Creates the widgets"""
         # fr = FrameTitleContentHide(frame, self.cw_linefile, self.cw_frconsole,
         #                            default='show', horizLineFrame=True,
         #                            contentpackkwargs={'expand': True})
         # fr.pack(side='top', fill=tk.X, anchor='w')
         title = tk.Frame(frame)
-        self.cw_linefile(title)
+        self._cw_linefile(title)
         title.pack(side="top", fill=tk.X, anchor="w")
-        self.content = tk.Frame(frame)
-        self.cw_frconsole(self.content)
-        self.content.pack(side="top", fill=tk.X, anchor="w")
+        self._widgets["framecontent"] = tk.Frame(frame)
+        self._cw_frconsole(self._widgets["framecontent"])
+        self._widgets["framecontent"].pack(side="top", fill=tk.X, anchor="w")
 
-    def cw_linefile(self, frame):
+    def _cw_linefile(self, frame):
+        """upper line of widgets"""
         # current file
-        self.varFile = LabelVar(frame, value="")
-        self.varFile.pack(side="left", anchor="center")
+        self._widgets["file"] = LabelVar(frame, value="")
+        self._widgets["file"].pack(side="left", anchor="center")
         # current folder
-        self.varFolder = LabelVar(frame, value="")
-        # self.varFolder.pack(side='top', anchor='w')  # DO NOT DISPLAY
+        self._widgets["folder"] = LabelVar(frame, value="")
+        # self._widgets["folder"].pack(side='top', anchor='w')  # DO NOT DISPLAY
         # button, horizontal line
         fr = tk.Frame(frame, width=20, height=20)
-        fr.propagate(0)
+        fr.propagate(False)
         btn = tk.Button(fr, text="\u21F3")
         btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=1)
         fr.pack(side="left", anchor="center")
         line = FrameTitleContentHide.frameHline(frame)
         line.pack(side="left", anchor="center", fill=tk.X, expand=1, padx=5)
-        bind_tree(frame, "<Button-1>", self._changeTextHeight)
+        bind_tree(frame, "<Button-1>", self._change_text_height)
 
-    def _changeTextHeight(self, *args):
-        old = int(self._consoleHeight)
+    def _change_text_height(self, *_args):
+        """Toggle height of the console between different values"""
+        old = int(self._consoleheight)
         try:
-            idx = self._consoleHeightRoll.index(self._consoleHeight) + 1
-            if idx == len(self._consoleHeightRoll):
+            idx = self._consoleheight_roll.index(self._consoleheight) + 1
+            if idx == len(self._consoleheight_roll):
                 idx = 0
         except ValueError:
             idx = 0
-        self._consoleHeight = self._consoleHeightRoll[idx]
-        self.console.configure(height=self._consoleHeight)
-        if self._consoleHeight == 0:
-            self.content.pack_forget()
-        elif old == 0:  # if was hidden, need to .pack() it again
-            self.content.pack(
-                side="top", fill=tk.X, anchor="w"
-            )  # expand=True, fill=tk.X)
+        self._consoleheight = self._consoleheight_roll[idx]
+        self._widgets["console"].configure(height=self._consoleheight)
+        if self._consoleheight == 0:
+            self._widgets["framecontent"].pack_forget()
+        elif old == 0:
+            # if was hidden, need to .pack() it again
+            self._widgets["framecontent"].pack(side="top", fill=tk.X, anchor="w")
+            # expand=True, fill=tk.X)
 
-    def cw_frconsole(self, frame):
+    def _cw_frconsole(self, frame):
+        """Create widgets console"""
         frame.columnconfigure(0, weight=1)
         # console
-        self._consoleHeight = self._consoleHeightRoll[0]
-        self.console = TextWriteable(frame, wrap="word", height=self._consoleHeight)
-        scroll_y = tk.Scrollbar(frame, orient="vertical", command=self.console.yview)
+        console = TextWriteable(frame, wrap="word", height=self._consoleheight)
+        scroll_y = tk.Scrollbar(frame, orient="vertical", command=console.yview)
         scroll_y.grid(row=0, column=1, sticky=tk.E + tk.N + tk.S)
-        self.console.grid(row=0, column=0, sticky=tk.W + tk.E)
-        self.console.configure(yscrollcommand=scroll_y.set)
+        console.grid(row=0, column=0, sticky=tk.W + tk.E)
+        console.configure(yscrollcommand=scroll_y.set)
+        self._widgets["console"] = console
 
-    def _shorten(self, string):
+    @staticmethod
+    def _shorten(string):
+        """Cuts a long string into a shorter one"""
         if len(string) > 150:
             string = string[:60] + " ... " + string[-60:]
         return string
@@ -864,23 +920,30 @@ class GUIFrameMenuMain:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
-        self.bindKeystrokes()
+        self.showhide = None  # defined later, here reserve the variable
+        self._widgets = {}
+        self._create_widgets(self.frame)
+        self._bind_keystrokes()
 
-    def bindKeystrokes(self):
+    def _bind_keystrokes(self):
         """Bind keystrokes to the behavior of the main application"""
         frame = self.app.master
-        frame.bind("<Control-s>", lambda e: self.saveGraph())
-        frame.bind("<Control-Shift-S>", lambda e: self.saveGraphAs())
-        frame.bind("<Control-o>", lambda e: self.openFile())
-        frame.bind("<Control-Shift-O>", lambda e: self.mergeFile())
+        frame.bind("<Control-s>", lambda e: self.save_graph())
+        frame.bind("<Control-Shift-S>", lambda e: self.save_graph_as())
+        frame.bind("<Control-o>", lambda e: self.open_file())
+        frame.bind("<Control-Shift-O>", lambda e: self.merge_file())
         # too larges chances to mess up with that one
         # self.master.bind('<Control-v>', lambda e: self.openClipboard())
-        frame.bind("<Control-Shift-V>", lambda e: self.mergeClipboard())
-        frame.bind("<Control-Shift-N>", lambda e: self.insertCurveEmpty())
+        frame.bind("<Control-Shift-V>", lambda e: self.merge_clipboard())
+        frame.bind("<Control-Shift-N>", lambda e: self.insert_curve_empty())
 
-    def createWidgets(self, frame):
-        self.showHide = FrameTitleContentHide(
+    def if_print_commands(self):
+        """Returns status of checkbox printCommands"""
+        return self._widgets["printCommands"].get()
+
+    def _create_widgets(self, frame):
+        """Creates the widgets"""
+        self.showhide = FrameTitleContentHide(
             frame,
             None,
             None,
@@ -890,13 +953,13 @@ class GUIFrameMenuMain:
             createButtons=False,
             horizLineFrame=False,
         )
-        self.showHide.pack(side="top", fill=tk.BOTH, expand=True)
-        self.cw_allHide(self.showHide.getFrameTitle())
-        self.cw_allShow(self.showHide.getFrameContent())
-        self.showHide.getFrameTitle().pack_forget()
+        self.showhide.pack(side="top", fill=tk.BOTH, expand=True)
+        self._cw_all_hide(self.showhide.get_frame_title())
+        self._cw_all_show(self.showhide.get_frame_content())
+        self.showhide.get_frame_title().pack_forget()
 
-    def cw_allHide(self, frame):
-        fr, _ = self.showHide.createButton(frame, symbol="\u25B6", size="auto")
+    def _cw_all_hide(self, frame):
+        fr, _ = self.showhide.createButton(frame, symbol="\u25B6", size="auto")
         fr.pack(side="top", anchor="w")
         canvas = tk.Canvas(frame, width=20, height=40)
         canvas.pack(side="top", anchor="w")
@@ -904,16 +967,17 @@ class GUIFrameMenuMain:
             6, 40, text="Menu", angle=90, anchor="w", font=self.app.fonts["bold"]
         )
 
-    def cw_allShow(self, frame):
-        # top inner frame
-        self.cw_openMerge(frame)
-        self.cw_save(frame)
+    def _cw_all_show(self, frame):
+        """Top inner frame"""
+        self._cw_open_merge(frame)
+        self._cw_save(frame)
         fr = tk.Frame(frame)
         fr.pack(side="bottom", fill="both", expand=True)
-        self.cw_scripts(fr)
-        self.cw_bottom(fr)
+        self._cw_scripts(fr)
+        self._cw_bottom(fr)
 
-    def cw_sectionTitle(self, frame, title):
+    def _cw_section_title(self, frame, title):
+        """Widgets of section title"""
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X)
         lbl = tk.Label(fr, text=title, font=self.app.fonts["bold"])
@@ -922,22 +986,22 @@ class GUIFrameMenuMain:
         hline.pack(side="left", anchor="center", fill=tk.X, expand=1, padx=5)
         return fr
 
-    def cw_openMerge(self, frame):
-        # Section open & merge
-        fr = self.cw_sectionTitle(frame, "Open or merge files")
-        fr_, _ = self.showHide.createButton(fr, symbol="\u25C1", size="auto")
+    def _cw_open_merge(self, frame):
+        """Section open & merge"""
+        fr = self._cw_section_title(frame, "Open or merge files")
+        fr_, _ = self.showhide.createButton(fr, symbol="\u25C1", size="auto")
         fr_.pack(side="right", anchor="center")
         # buttons
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
         tk.Label(fr, text="Open").grid(sticky="w", row=0, column=0)
-        of = tk.Button(fr, text="File  ", command=self.openFile)
-        oc = tk.Button(fr, text="Clipboard", command=self.openClipboard)
+        of = tk.Button(fr, text="File  ", command=self.open_file)
+        oc = tk.Button(fr, text="Clipboard", command=self.open_clipboard)
         of.grid(sticky="w", row=0, column=1, padx=5)
         oc.grid(sticky="w", row=0, column=2)
         tk.Label(fr, text="Merge with").grid(sticky="w", column=0, row=1)
-        mf = tk.Button(fr, text="File  ", command=self.mergeFile)
-        mc = tk.Button(fr, text="Clipboard", command=self.mergeClipboard)
+        mf = tk.Button(fr, text="File  ", command=self.merge_file)
+        mc = tk.Button(fr, text="Clipboard", command=self.merge_clipboard)
         mf.grid(sticky="w", column=1, row=1, padx=5)
         mc.grid(sticky="w", column=2, row=1)
         CreateToolTip(of, "Ctrl+O")
@@ -946,16 +1010,16 @@ class GUIFrameMenuMain:
         # Misc - open folders, etc
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        u = tk.Button(fr, text="Open all in folder", command=self.openFolder)
+        u = tk.Button(fr, text="Open all in folder", command=self.open_folder)
         # u.grid(column=1, row=1, sticky='w')
         u.pack(side="left")
-        self.varOpenSubfolders = CheckbuttonVar(fr, "subfolders", 0)
-        # self.varOpenSubfolders.grid(column=2, row=1)
-        self.varOpenSubfolders.pack(side="left")
+        self._widgets["openSubfolders"] = CheckbuttonVar(fr, "subfolders", 0)
+        # self._widgets["openSubfolders"].grid(column=2, row=1)
+        self._widgets["openSubfolders"].pack(side="left")
         # new curve, close
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        v = tk.Button(fr, text="Insert", command=self.insertCurveEmpty)
+        v = tk.Button(fr, text="Insert", command=self.insert_curve_empty)
         # v.grid(column=1, row=2, sticky='w')
         v.pack(side="left")
         tk.Label(fr, text="new empty Curve").pack(side="left")
@@ -963,48 +1027,50 @@ class GUIFrameMenuMain:
         CreateToolTip(u, "Open all files in a given folder")
         CreateToolTip(v, explain)
 
-        ### Grapa Openbis integration
+        # ### Grapa Openbis integration
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
         grapaopenbis = GrapaOpenbis(self.app)
         grapaopenbis.create_widgets(fr)
-        ### End of Grapa Openbis integration
+        # ### End of Grapa Openbis integration
 
-    def cw_save(self, frame):
+    def _cw_save(self, frame):
+        """Widgets Save data and graphs"""
         fr = tk.Label(frame, text="")
         fr.pack(side="top")
         # Section Save title
-        self.cw_sectionTitle(frame, "Save data & graph")
+        self._cw_section_title(frame, "Save data & graph")
         # Buttons
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        s_ = tk.Button(fr, text="Save", command=self.saveGraph)
+        s_ = tk.Button(fr, text="Save", command=self.save_graph)
         s_.pack(side="left", anchor="n")
-        sa = tk.Button(fr, text="Save as...", command=self.saveGraphAs)
+        sa = tk.Button(fr, text="Save as...", command=self.save_graph_as)
         sa.pack(side="left", anchor="n", padx=5)
-        sc = tk.Button(fr, text="Copy image", command=self.saveImageToClipboard)
+        sc = tk.Button(fr, text="Copy image", command=self.save_image_to_clipboard)
         sc.pack(side="left", anchor="n")
         CreateToolTip(s_, "Ctrl+S")
         CreateToolTip(sa, "Ctrl+Shift+S")
+        CreateToolTip(sc, "Copy image to clipboard (Windows only)")
         # options
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        self.varSaveScreen = CheckbuttonVar(fr, "Screen data (better not)", 0)
-        self.varSaveScreen.pack(side="top", anchor="w", padx=5)
-        self.varSaveSepara = CheckbuttonVar(fr, "Keep separated x columns", 0)
-        self.varSaveSepara.pack(side="top", anchor="w", padx=5)
+        self._widgets["saveScreen"] = CheckbuttonVar(fr, "Screen data (better not)", 0)
+        self._widgets["saveScreen"].pack(side="top", anchor="w", padx=5)
+        self._widgets["saveSepara"] = CheckbuttonVar(fr, "Keep separated x columns", 0)
+        self._widgets["saveSepara"].pack(side="top", anchor="w", padx=5)
 
-    def cw_scripts(self, frame):
-        # Section Scripts
+    def _cw_scripts(self, frame):
+        """Section Scripts"""
         fr = tk.Label(frame, text="")
         fr.pack(side="top")
-        self.cw_sectionTitle(frame, "Data processing scripts")
-        self.cw_scripts_JVfit(frame)
-        self.cw_scripts_JVsummary(frame)
-        self.cw_scripts_CVCdJscVoc(frame)
+        self._cw_section_title(frame, "Data processing scripts")
+        self._cw_scripts_jvfit(frame)
+        self._cw_scripts_jvsummary(frame)
+        self._cw_scripts_cv_cf_jscvoc(frame)
 
-    def cw_scripts_JVfit(self, frame):
-        # Section Scripts JV
+    def _cw_scripts_jvfit(self, frame):
+        """Section Scripts JV"""
         lbl = tk.Label(frame, text="JV curves (files in 1 folder):")
         lbl.pack(side="top", anchor="w", padx=0, pady=2)
         # diode weights
@@ -1012,52 +1078,71 @@ class GUIFrameMenuMain:
         fr.pack(side="top", fill=tk.X, padx=10)
         lbl = tk.Label(fr, text="Fit weight diode region")
         lbl.pack(side="left", anchor="n")
-        self.varJVDiodeweight = EntryVar(fr, "5", width=6)
-        self.varJVDiodeweight.pack(side="left", anchor="n")
+        self._widgets["JVDiodeweight"] = EntryVar(fr, "5", width=6)
+        self._widgets["JVDiodeweight"].pack(side="left", anchor="n")
         CreateToolTip(lbl, "1 neutral, 10 increased weight")
-        CreateToolTip(self.varJVDiodeweight, "1 neutral, 10 increased weight")
+        CreateToolTip(self._widgets["JVDiodeweight"], "1 neutral, 10 increased weight")
         # buttons
         btn0 = tk.Button(
-            frame, text="Fit cell-by-cell", command=self.scriptFitJVCombined
+            frame, text="Fit cell-by-cell", command=self.script_fit_jv_combined
         )
         btn1 = tk.Button(
-            frame, text="Fit curves separately", command=self.scriptFitJVAll
+            frame, text="Fit curves separately", command=self.script_fit_jv_all
         )
         btn0.pack(side="top", anchor="w", padx=10)
         btn1.pack(side="top", anchor="w", padx=10)
+        doc = (
+            "Process J-V files in a folder, including area correction and graphical "
+            "summaries. Considers only 1 dark and 1 illuminated per cell (pixel)."
+        )
+        CreateToolTip(btn0, doc)
+        doc = (
+            "Process J-V files in a folder, including area correction. Process each "
+            "file independently. Cannot create graphical summaries."
+        )
+        CreateToolTip(btn1, doc)
 
-    def cw_scripts_JVsummary(self, frame):
+    def _cw_scripts_jvsummary(self, frame):
+        """JV summaries"""
         lbl = tk.Label(frame, text="Operations on JV summaries:")
         btn0 = tk.Button(
-            frame, text="JV sample maps (1 file)", command=self.scriptJVSampleMaps
+            frame, text="JV sample maps (1 file)", command=self.script_jv_sample_maps
         )
         btn1 = tk.Button(
-            frame, text="Boxplots (files in 1 folder)", command=self.scriptJVBoxplots
+            frame, text="Boxplots (files in 1 folder)", command=self.script_jv_boxplots
         )
         lbl.pack(side="top", anchor="w", padx=0, pady=2)
         btn0.pack(side="top", anchor="w", padx=10)
         btn1.pack(side="top", anchor="w", padx=10)
+        doc = "Create graphical summaries from a summary file of IV measurement."
+        CreateToolTip(btn0, doc)
+        doc = (
+            "Create boxplots from data table files located in a folder. Custom"
+            "processing if files are summary of IV measurement."
+        )
+        CreateToolTip(btn1, doc)
 
-    def cw_scripts_CVCdJscVoc(self, frame):
+    def _cw_scripts_cv_cf_jscvoc(self, frame):
+        """GUI for scripts C-V, C-f and Jsc-Voc"""
         lbl = tk.Label(frame, text="C-V, C-f, Jsc-Voc data processing")
         lbl.pack(side="top", anchor="w", padx=0, pady=2)
         # CV
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        btn = tk.Button(fr, text="C-V (1 folder)", command=self.scriptCV)
+        btn = tk.Button(fr, text="C-V (1 folder)", command=self.script_cv)
         btn.pack(side="left", pady=2)
         lbl = tk.Label(fr, text="ROI")
         lbl.pack(side="left", pady=2)
-        from grapa.datatypes.curveCV import CurveCV
-
-        valuedefCV = listToString(CurveCV.CST_MottSchottky_Vlim_def)
-        self.varCVROI = EntryVar(fr, valuedefCV, width=10)
-        self.varCVROI.pack(side="left", pady=2)
+        valuedef_cv = listToString(CurveCV.CST_MottSchottky_Vlim_def)
+        self._widgets["CVROI"] = EntryVar(fr, valuedef_cv, width=10)
+        self._widgets["CVROI"].pack(side="left", pady=2)
+        CreateToolTip(btn, "Parse a folder containing C-V files and process them.")
         # Cf
-        btn0 = tk.Button(frame, text="C-f (1 folder)", command=self.scriptCf)
+        btn0 = tk.Button(frame, text="C-f (1 folder)", command=self.script_cf)
         btn0.pack(side="top", anchor="w", padx=10)
+        CreateToolTip(btn0, "Parse a folder containing C-f files and process them")
         # CVf-T
-        btn = tk.Button(frame, text="CVf-T maps(1 folder)", command=self.scriptCVfT)
+        btn = tk.Button(frame, text="CVf-T maps(1 folder)", command=self.script_cvft)
         btn.pack(side="top", anchor="w", padx=10)
         tooltiplbl = (
             "Parse folder and 1 subfolder level for Cf files according to V "
@@ -1067,199 +1152,195 @@ class GUIFrameMenuMain:
         # Jsc-Voc
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        btn = tk.Button(fr, text="Jsc-Voc (1 file)", command=self.scriptJscVoc)
+        btn = tk.Button(fr, text="Jsc-Voc (1 file)", command=self.script_jsc_voc)
         btn.pack(side="left", pady=2)
         lbl = tk.Label(fr, text="Jsc min")
         lbl.pack(side="left", pady=2)
-        from grapa.datatypes.curveJscVoc import CurveJscVoc
-
-        valuedefVocJsc = str(CurveJscVoc.CST_Jsclim0)
-        self.varJscVocROI = EntryVar(fr, valuedefVocJsc, width=6)
-        self.varJscVocROI.pack(side="left", pady=2)
+        valuedef_voc_jsc = str(CurveJscVoc.CST_Jsclim0)
+        self._widgets["jscVocROI"] = EntryVar(fr, valuedef_voc_jsc, width=6)
+        self._widgets["jscVocROI"].pack(side="left", pady=2)
         tooltiplbl = "fit range of interest (min value or range), in mA/cm2"
         CreateToolTip(lbl, tooltiplbl)
-        CreateToolTip(self.varJscVocROI, tooltiplbl)
+        CreateToolTip(self._widgets["jscVocROI"], tooltiplbl)
+        doc = "Performs data treatment on a cile containing Jsc-Voc pairs."
+        CreateToolTip(btn, doc)
         # Correlation plots - e.g. SCAPS
         lbl = tk.Label(frame, text="Correlations")
         lbl.pack(side="top", anchor="w", padx=0, pady=2)
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, padx=10)
-        btn = tk.Button(fr, text="(1 file)", command=self.scriptCorrelations)
+        btn = tk.Button(fr, text="(1 file)", command=self.script_correlations)
         btn.pack(side="left", pady=2)
         tk.Label(fr, text="e.g. SCAPS batch result").pack(side="left")
+        doc = (
+            "Select a file containing e.g. list of experiments according to 2 (or "
+            "more) parameter variations."
+        )
+        CreateToolTip(btn, doc)
 
-    def cw_bottom(self, frame):
+    def _cw_bottom(self, frame):
+        """Widgets to the bottom of the menu"""
         fr0 = tk.Frame(frame)
         fr0.pack(side="bottom", fill=tk.X)
         # bottom section
-        self.cw_sectionTitle(fr0, "")
+        self._cw_section_title(fr0, "")
         # contentkwargs
         fr = tk.Frame(fr0)
         fr.pack(side="top", fill=tk.X)
-        self.varPrintCommands = CheckbuttonVar(
+        self._widgets["printCommands"] = CheckbuttonVar(
             fr,
             "Commands in console",
             False,
             command=lambda: print("Commands printing is not fully tested yet"),
         )
-        self.varPrintCommands.pack(side="left", anchor="center")
-        btn = tk.Button(fr, text="QUIT", fg="red", command=self.quitMain)
+        self._widgets["printCommands"].pack(side="left", anchor="center")
+        btn = tk.Button(fr, text="QUIT", fg="red", command=self.quit_main)
         btn.pack(side="right", anchor="n", pady=2, padx=5)
 
     # methods
-    def openFile(self):
+    def open_file(self):
         """Open a file chosen by user"""
-        file = self.app.promptFile(multiple=True)
+        file = self.app.prompt_file(multiple=True)
         if file != "" and file is not None:
-            self.app.openFile(file)
+            self.app.open_file(file)
 
-    def mergeFile(self):
+    def merge_file(self):
         """Merge data with file chosen by user"""
-        file = self.app.promptFile(multiple=True)
+        file = self.app.prompt_file(multiple=True)
         if file != "" and file is not None:
-            self.app.mergeGraph(file)
+            self.app.merge_graph(file)
 
-    def openFolder(self):
+    def open_folder(self):
         """Open all files in a folder given by user"""
-        folder = self.app.promptFolder()
+        folder = self.app.prompt_folder()
         if folder is not None and folder != "":
-            files = self._listFilesinFolder(folder)
-            self.app.openFile(files)
+            files = self._list_files_in_folder(folder)
+            self.app.open_file(files)
 
-    def openClipboard(self):
+    def open_clipboard(self):
         """Retrieve the content of clipboard and create a graph with it"""
-        folder = self.app.getFolder()
-        dpi = self.app.getTabProperties()["dpi"]
-        tmp = self.app.getClipboard()
-        graph = Graph(tmp, {"isfilecontent": True}, **self.app.newGraphKwargs)
+        folder = self.app.get_folder()
+        dpi = self.app.get_tab_properties()["dpi"]
+        tmp = self.app.get_clipboard()
+        graph = Graph(tmp, {"isfilecontent": True}, **self.app.newgraph_kwargs)
         print("Import data from clipboard (" + str(len(graph)) + " Curves found).")
         self.app.graph(graph, title="from clipboard", folder=folder, dpi=dpi)
-        # updateUI will be triggered by change in tabs
+        # update_ui will be triggered by change in tabs
 
-    def mergeClipboard(self):
+    def merge_clipboard(self):
         """Retrieves the content of clipboard, and appends it to the graph"""
-        tmp = self.app.getClipboard()
+        tmp = self.app.get_clipboard()
         graph = Graph(tmp, {"isfilecontent": True})
         print("Import data from clipboard (" + str(len(graph)) + " Curves found).")
-        self.app.mergeGraph(graph)
+        self.app.merge_graph(graph)
 
-    def saveGraph(self, filename=""):
+    def save_graph(self):
         """Saves the graph (image & data) with same filename as last time"""
-        if self.app.graph().attr("meastype") not in ["", FILEIO_GRAPHTYPE_GRAPH]:
-            print(
-                "ERROR when saving data: are you sure you are not",
-                "overwriting a graph file?",
+        if self.app.graph().attr("meastype") not in ["", GraphIO.GRAPHTYPE_GRAPH]:
+            msg = (
+                "WARNING saving data: are you sure you are not overwriting a graph "
+                "file?\nClick on Save As... to save the current graph (or delete "
+                "property 'Misc.'->'meastype')."
             )
-            print(
-                "Click on Save As... to save the current graph (or delete",
-                'attribute "meastype").',
-            )
-            self.saveGraphAs(filesave="")
+            print(msg)
+            self.save_graph_as(filesave="")
         else:
-            filesave = self.app.getFile()
-            self.saveGraphAs(filesave=filesave)
+            filesave = self.app.get_file()
+            self.save_graph_as(filesave=filesave)
 
-    def saveGraphAs(self, filesave=""):
+    def save_graph_as(self, filesave=""):
         """saves the graph to image + data file, asks for a new filename"""
-        # TODO
         defext = ""
         if filesave == "":
             defext = copy.copy(self.app.graph().config("save_imgformat", ".png"))
             if isinstance(defext, list):
                 defext = defext[0]
-            filesave = self.app.promptFile(type="save", defaultextension=defext)
+            filesave = self.app.prompt_file(type_="save", defaultextension=defext)
         if filesave is None or filesave == "":
             # asksaveasfile return `None` if dialog closed with "cancel".
             return
-        # retrive info from GUI
-        saveAltered = self.varSaveScreen.get()
-        ifCompact = not self.varSaveSepara.get()
-        # some checks to avoid erasig something important
+        # retrieve info from GUI
+        save_altered = self._widgets["saveScreen"].get()
+        if_compact = not self._widgets["saveSepara"].get()
+        # some checks to avoid erasing something important
         filesave, fileext = os.path.splitext(filesave)
         fileext = fileext.lower()
-        forbiddenExt = ["py", "txt", ".py", ".txt"]
-        for ext in forbiddenExt:
+        forbidden_ext = ["py", "txt", ".py", ".txt"]
+        for ext in forbidden_ext:
             fileext = fileext.replace(ext, "")
         if fileext == defext:
             fileext = ""
-        self.app.saveGraph(
-            filesave, fileext=fileext, saveAltered=saveAltered, ifCompact=ifCompact
+        self.app.save_graph(
+            filesave, fileext=fileext, save_altered=save_altered, if_compact=if_compact
         )
 
-    def _listFilesinFolder(self, folder):
+    def _list_files_in_folder(self, folder):
         # returns a list with all files in folder. Look for subfolders status
-        subfolders = self.varOpenSubfolders.get()
-        nMax = 1000
+        subfolders = self._widgets["openSubfolders"].get()
+        n_max = 1000
         out = []
         if subfolders:
-            for root, subdirs, files in os.walk(folder):
+            for root, _subdirs, files in os.walk(folder):
                 for file in files:
-                    fileName, fileExt = os.path.splitext(file)
-                    if len(out) < nMax:
+                    if len(out) < n_max:
                         out.append(str(os.path.join(root, file)))
         else:  # not subfolders
             for file in os.listdir(folder):
-                fileName, fileExt = os.path.splitext(file)
-                if os.path.isfile(os.path.join(folder, file)) and len(out) < nMax:
+                if os.path.isfile(os.path.join(folder, file)) and len(out) < n_max:
                     out.append(str(os.path.join(folder, file)))
         return out
 
-    def insertCurveEmpty(self):
+    def insert_curve_empty(self):
         """Append an empty Curve in current Graph"""
-        curve = Curve([[0], [np.nan]], {})
-        self.app.insertCurveToGraph(curve)
+        curve = Curve([[0], [0]], {})
+        self.app.insert_curve_to_graph(curve)
 
-    def saveImageToClipboard(self):
+    def save_image_to_clipboard(self):
         """Copy an image of current graph into the clipboard"""
-        return imageToClipboard(self.app.graph())
+        folder = self.app.get_folder()
+        return image_to_clipboard(self.app.graph(), folder=folder)
 
-    def scriptFitJVCombined(self, groupCell=True):
-        """
-        Script JV process, grouped by cells
-        - groupCell: True to group results by cell, False for independent
-          processing for each cell
-        """
-        from grapa.scripts.script_processJV import processJVfolder
+    def script_fit_jv_combined(self, group_cell: bool = True):
+        """Script JV process, grouped by cells or not.
 
-        folder = self.app.promptFolder()
+        :param group_cell: True to group results by cell, False for independent
+               processing for each individual JV file.
+        """
+        folder = self.app.prompt_folder()
         if folder != "":
             print("... Processing folder ...")
-            weight = strToVar(self.varJVDiodeweight.get())
-            ngkw = self.app.newGraphKwargs
+            weight = strToVar(self._widgets["JVDiodeweight"].get())
+            ngkw = self.app.newgraph_kwargs
             graph = processJVfolder(
                 folder,
                 ylim=(-np.inf, np.inf),
-                groupCell=groupCell,
+                groupCell=group_cell,
                 fitDiodeWeight=weight,
                 newGraphKwargs=ngkw,
             )
-            self.app.openFile(graph)
+            self.app.open_file(graph)
 
-    def scriptFitJVAll(self):
+    def script_fit_jv_all(self):
         """Script JV process, each file indepedently"""
-        self.scriptFitJVCombined(groupCell=False)
+        self.script_fit_jv_combined(group_cell=False)
 
-    def scriptJVSampleMaps(self):
+    def script_jv_sample_maps(self):
         """Script JV sample maps"""
-        from grapa.scripts.script_processJV import processSampleCellsMap
-
-        file = self.app.promptFile()
+        file = self.app.prompt_file()
         if file is not None and file != "":
             print("...creating sample maps...")
-            ngkw = self.app.newGraphKwargs
+            ngkw = self.app.newgraph_kwargs
             filelist, fileout = processSampleCellsMap(file, newGraphKwargs=ngkw)
             if len(fileout) > 0:
                 graph = Graph(fileout[0])
-                self.app.openFile(graph)
+                self.app.open_file(graph)
             elif len(filelist) > 0:
                 graph = Graph(filelist[-1])
-                self.app.openFile(graph)
+                self.app.open_file(graph)
 
-    def scriptJVBoxplots(self):
+    def script_jv_boxplots(self):
         """Script boxplots"""
-        from grapa.scripts.script_JVSummaryToBoxPlots import JVSummaryToBoxPlots
-
-        folder = self.app.promptFolder()
+        folder = self.app.prompt_folder()
         if folder is not None and folder != "":
             print("...creating boxplots...")
             tmp = JVSummaryToBoxPlots(
@@ -1267,64 +1348,55 @@ class GUIFrameMenuMain:
                 exportPrefix="boxplots_",
                 replace=[],
                 silent=True,
-                newGraphKwargs=self.app.newGraphKwargs,
+                newGraphKwargs=self.app.newgraph_kwargs,
             )
-            self.app.openFile(tmp)
+            self.app.open_file(tmp)
 
-    def scriptJscVoc(self):
+    def script_jsc_voc(self):
         """Script JscVoc"""
-        from grapa.scripts.script_processJscVoc import script_processJscVoc
-
-        file = self.app.promptFile()
+        file = self.app.prompt_file()
         if file is not None and file != "":
-            ROIJsclim = strToVar(self.varJscVocROI.get())
-            ngkw = self.app.newGraphKwargs
-            graph = script_processJscVoc(file, ROIJsclim=ROIJsclim, newGraphKwargs=ngkw)
-            self.app.openFile(graph)
-
-    def scriptCV(self):
-        """Script CV"""
-        from grapa.scripts.script_processCVCf import script_processCV
-
-        folder = self.app.promptFolder()
-        if folder is not None and folder != "":
-            ROIfit = strToVar(self.varCVROI.get())
-            graph = script_processCV(
-                folder, ROIfit=ROIfit, newGraphKwargs=self.app.newGraphKwargs
+            roi_jsclim = strToVar(self._widgets["jscVocROI"].get())
+            ngkw = self.app.newgraph_kwargs
+            graph = script_processJscVoc(
+                file, ROIJsclim=roi_jsclim, newGraphKwargs=ngkw
             )
-            self.app.openFile(graph)
+            self.app.open_file(graph)
 
-    def scriptCf(self):
-        """Script Cf"""
-        from grapa.scripts.script_processCVCf import script_processCf
-
-        folder = self.app.promptFolder()
+    def script_cv(self):
+        """Script CV"""
+        folder = self.app.prompt_folder()
         if folder is not None and folder != "":
-            ngkw = self.app.newGraphKwargs
+            roi_fit = strToVar(self._widgets["CVROI"].get())
+            ngkw = self.app.newgraph_kwargs
+            graph = script_processCV(folder, ROIfit=roi_fit, newGraphKwargs=ngkw)
+            self.app.open_file(graph)
+
+    def script_cf(self):
+        """Script Cf"""
+        folder = self.app.prompt_folder()
+        if folder is not None and folder != "":
+            ngkw = self.app.newgraph_kwargs
             graph = script_processCf(folder, newGraphKwargs=ngkw)
-            self.app.openFile(graph)
+            self.app.open_file(graph)
 
-    def scriptCVfT(self):
-        """Script Cf"""
-        from grapa.scripts.script_processCVfT import script_process_cvft
-
-        folder = self.app.promptFolder()
+    def script_cvft(self):
+        """Script C-V-f-T"""
+        folder = self.app.prompt_folder()
         if folder is not None and folder != "":
-            ngkw = self.app.newGraphKwargs
+            ngkw = self.app.newgraph_kwargs
             graph = script_process_cvft(folder, newGraphKwargs=ngkw)
-            self.app.openFile(graph)
+            self.app.open_file(graph)
 
-    def scriptCorrelations(self):
+    def script_correlations(self):
         """Script processing of SCAPS output IV, CV, Cf QE files"""
-        from grapa.scripts.script_correlations import process_file as corr_process_file
-
-        file = self.app.promptFile()
+        file = self.app.prompt_file()
         if file is not None and file != "":
-            ngkw = self.app.newGraphKwargs
+            ngkw = self.app.newgraph_kwargs
             graph = corr_process_file(file, newGraphKwargs=ngkw)
-            self.app.openFile(graph)
+            self.app.open_file(graph)
 
-    def quitMain(self):
+    def quit_main(self):
         """Quits main application"""
         self.app.quit()
 
@@ -1339,156 +1411,250 @@ class GUIFrameTemplateColorize:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
+        self.colorlist = None  # defined later, here to reserve variable name
+        self.photoimages = None  # defined later, here to reserve variable name
+        self._widgets = {}
+        self._create_widgets(self.frame)
 
-    def updateUI(self):
-        pass
+    def update_ui(self):
+        """Update widgets"""
+        # update conditional formatting
+        graph = self.app.graph()
+        property_list = []
+        for curve in graph:
+            for key in curve.get_attributes():
+                if key not in property_list:
+                    property_list.append(key)
+        property_list.sort()
+        property_list.insert(0, "linestyle")
+        self._widgets["conTestProp"].reset_values(property_list)
+        self._widgets["conApplyProp"].reset_values(property_list)
+        tab_properties = self.app.get_tab_properties()
+        self._widgets["BGC"].set(tab_properties["backgroundcolor"])
 
-    def createWidgets(self, frame):
+    def _create_widgets(self, frame):
+        """Create widgets"""
         fr = FrameTitleContentHide(
             frame,
-            self.cw_title,
-            self.cw_content,
+            self._cw_title,
+            self._cw_content,
             default="hide",
-            contentkwargs={"padx": 10},
+            contentkwargs={"padx": 5},
         )
         fr.pack(side="top", fill=tk.X, anchor="w")
 
-    def cw_title(self, frame):
-        lbl = tk.Label(frame, text="Template & Colorize", font=self.app.fonts["bold"])
+    def _cw_title(self, frame):
+        """Create widgets title"""
+        text = "Background, Template, Colorize, Conditional formatting"
+        lbl = tk.Label(frame, text=text, font=self.app.fonts["bold"])
         lbl.pack(side="left")
 
-    def cw_content(self, frame):
-        self.cw_content_template(frame)
-        self.cw_content_colors(frame)
+    def _cw_content(self, frame):
+        """Create widgets content of show-hide"""
+        self._cw_content_background(frame)
+        self._cw_content_template(frame)
+        self._cw_content_colors(frame)
+        self._cw_content_conditional(frame)
 
-    def cw_content_template(self, frame):
-        # templates
+    def _cw_content_background(self, frame):
+        # background color
         fr = tk.Frame(frame)
-        fr.pack(side="top", fill=tk.X, anchor="w", pady=5)
-        btn0 = tk.Button(fr, text="Load & apply template", command=self.loadTemplate)
-        btn0.pack(side="left", anchor="n")
-        self.varTplCrvProp = CheckbuttonVar(fr, "also Curves properties", 1)
-        self.varTplCrvProp.pack(side="left")
-        btn1 = tk.Button(fr, text="Save template", command=self.saveTemplate)
-        btn1.pack(side="right", anchor="n")
+        fr.pack(side="top", fill=tk.X, anchor="w", pady=3)
+        btn = tk.Button(fr, text="Save", command=self.set_bgcolor_from_entry)
+        btn.pack(side="left")
+        lbl = tk.Label(fr, text="Background")
+        lbl.pack(side="left")
+        colorlist = ["white", "black", "grey15", "#90ee90"]
+        self._widgets["BGC"] = ComboboxVar(fr, colorlist, "white", width=7)
+        self._widgets["BGC"].pack(side="left")
+        self._widgets["BGC"].bind(
+            "<Return>", lambda event: self.set_bgcolor_from_entry()
+        )
 
-    def cw_content_colors(self, frame):
-        # line 1
+    def _cw_content_template(self, frame):
+        """Templates"""
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.X, anchor="w")
-        btn0 = tk.Button(fr, text="Colorize", command=self.colorizeGraph)
-        btn0.pack(side="left")
-        self.varColEmpty = CheckbuttonVar(fr, "repeat if no label  ", False)
-        self.varColEmpty.pack(side="left")
-        self.varColInvert = CheckbuttonVar(fr, "invert", False)
-        self.varColInvert.pack(side="left")
-        self.varColAvoidWhite = CheckbuttonVar(fr, "avoid white", False)
-        self.varColAvoidWhite.pack(side="left")
-        self.varColCurveSelect = CheckbuttonVar(fr, "curve selection", False)
-        self.varColCurveSelect.pack(side="left")
-        # line 2
-        fr = tk.Frame(frame)
-        fr.pack(side="top", anchor="w")
-        self.varColChoice = EntryVar(fr, "", width=70)
-        self.varColChoice.pack(side="left")
-        # line 3
-        fr = tk.Frame(frame)
-        fr.pack(side="top", anchor="w")
-        self.cw_content_colSamples(fr)
+        btn0 = tk.Button(fr, text="Load & apply template", command=self.load_template)
+        btn0.pack(side="left", anchor="n")
+        self._widgets["tplCrvProp"] = CheckbuttonVar(fr, "also Curves properties", 1)
+        self._widgets["tplCrvProp"].pack(side="left")
+        btn1 = tk.Button(fr, text="Save template", command=self.save_template)
+        btn1.pack(side="right", anchor="n")
 
-    def cw_content_colSamples(self, frame):
-        nPerLine = 12
-        self.colorList = Colorscale.GUIdefaults(**self.app.newGraphKwargs)
+    def _cw_content_colors(self, frame):
+        """Create widgets options for Colorscales"""
+        frmain = tk.Frame(frame)
+        frmain.pack(side="top", fill=tk.X, anchor="w", pady=3)
+        # line 1
+        fr = tk.Frame(frmain)
+        fr.pack(side="top", fill=tk.X, anchor="w")
+        btn0 = tk.Button(fr, text="Colorize", command=self.colorize_graph)
+        btn0.pack(side="left")
+        self._widgets["colEmpty"] = CheckbuttonVar(fr, "repeat if no label  ", False)
+        self._widgets["colEmpty"].pack(side="left")
+        self._widgets["colInvert"] = CheckbuttonVar(fr, "invert", False)
+        self._widgets["colInvert"].pack(side="left")
+        self._widgets["colAvoidWhite"] = CheckbuttonVar(fr, "avoid white", False)
+        self._widgets["colAvoidWhite"].pack(side="left")
+        self._widgets["colCurveSelect"] = CheckbuttonVar(fr, "curve selection", False)
+        self._widgets["colCurveSelect"].pack(side="left")
+        # line 2
+        fr = tk.Frame(frmain)
+        fr.pack(side="top", anchor="w")
+        self._widgets["colChoice"] = EntryVar(fr, "", width=70)
+        self._widgets["colChoice"].pack(side="left")
+        # line 3
+        fr = tk.Frame(frmain)
+        fr.pack(side="top", anchor="w")
+        self._cw_content_photoimages(fr)
+
+    def _cw_content_photoimages(self, frame):
+        """Create widgets photoimages"""
+        n_per_line = 12
+        graphtest = Graph(**self.app.newgraph_kwargs)
+        self.colorlist = colorscales_from_config(graphtest)
         # need to keep reference of images, otherwise tk.Button loose it
-        self._colImgs = [None] * len(self.colorList)
+        self.photoimages = []  # None] * len(self.colorList)
         width, height = 30, 15
         j = 0  # for display purpose, number of widgets actually created
-        for i in range(len(self.colorList)):
-            self._colImgs[i] = PhotoImageColorscale(width=width, height=height)
+        for i, color in enumerate(self.colorlist):
+            photoimage = PhotoImageColorscale(width=width, height=height)
             try:
-                self._colImgs[i].fillColorscale(self.colorList[i])
+                photoimage.fill_colorscale(color)
             except ValueError:
                 # if python does not recognize values (e.g. inferno, viridis)
                 continue  # does NOT create widget
             widget = tk.Button(
                 frame,
-                image=self._colImgs[i],
-                command=lambda i_=i: self._setColChoice(i_),
+                image=photoimage,
+                command=lambda i_=i: self._set_col_choice(i_),
             )
-            widget.grid(column=int(j % nPerLine), row=int(np.floor(j / nPerLine)))
+            widget.grid(column=int(j % n_per_line), row=int(np.floor(j / n_per_line)))
+            self.photoimages.append(photoimage)
             j += 1
 
-    def loadTemplate(self):
+    def _cw_content_conditional(self, frame):
+        """Create widgets cnoditionall formatting"""
+        fr = tk.Frame(frame)
+        fr.pack(side="top", anchor="w")
+
+        modes = ConditionalPropertyApplier.MODES_VALUES
+        command = self.conditional_format
+        btn0 = tk.Button(fr, text="Save", command=command)
+        btn0.pack(side="left")
+        tk.Label(fr, text="if").pack(side="left")
+        self._widgets["conTestProp"] = ComboboxVar(fr, [], "label", width=9)
+        self._widgets["conTestProp"].pack(side="left")
+        self._widgets["conTestMode"] = ComboboxVar(fr, modes, "contains", width=8)
+        self._widgets["conTestMode"].pack(side="left")
+        self._widgets["conTestValue"] = EntryVar(fr, "", width=9)
+        self._widgets["conTestValue"].pack(side="left")
+        tk.Label(fr, text=", apply").pack(side="left")
+        self._widgets["conApplyProp"] = ComboboxVar(fr, [], "color", width=9)
+        self._widgets["conApplyProp"].pack(side="left")
+        self._widgets["conApplyValue"] = EntryVar(fr, "", width=9)
+        self._widgets["conApplyValue"].pack(side="left")
+        self._widgets["conTestProp"].bind("<Return>", lambda event: command())
+        self._widgets["conTestMode"].bind("<Return>", lambda event: command())
+        self._widgets["conTestValue"].bind("<Return>", lambda event: command())
+        self._widgets["conApplyProp"].bind("<Return>", lambda event: command())
+        self._widgets["conApplyValue"].bind("<Return>", lambda event: command())
+
+    def conditional_format(self):
+        """Apply conditional formatting"""
+        graph = self.app.graph()
+        test_prop = self._widgets["conTestProp"].get()
+        test_mode = self._widgets["conTestMode"].get()
+        test_value = self._widgets["conTestValue"].get()
+        apply_prop = self._widgets["conApplyProp"].get()
+        apply_value = self._widgets["conApplyValue"].get()
+        if test_mode not in ConditionalPropertyApplier.MODES_BYINPUTTYPE["str"]:
+            test_value = strToVar(test_value)
+        apply_value = strToVar(apply_value)
+        ConditionalPropertyApplier.apply(
+            graph, test_prop, test_mode, test_value, apply_prop, apply_value
+        )
+        self.app.update_ui()
+
+    def load_template(self):
         """load and apply template on current Graph"""
-        file = self.app.promptFile()
+        file = self.app.prompt_file()
         if file != "" and file is not None:
             print("Open template file:", file)
-            self.app.storeSelectedCurves()  # before modifs to prepare updateUI
+            self.app.store_selected_curves()  # before modifs to prepare update_ui
             template = Graph(file, complement={"label": ""})
-            alsoCurves = self.varTplCrvProp.get()
-            self.app.graph().applyTemplate(template, alsoCurves=alsoCurves)
-            self.app.updateUI()
+            also_curves = self._widgets["tplCrvProp"].get()
+            self.app.graph().apply_template(template, also_curves=also_curves)
+            self.app.update_ui()
 
-    def saveTemplate(self):
+    def save_template(self):
         """save template file from current Graph"""
-        file = self.app.promptFile(type="save", defaultextension=".txt")
+        file = self.app.prompt_file(type_="save", defaultextension=".txt")
         if file is not None and file != "":
-            file, fileext = os.path.splitext(file)
-            fileext = fileext.replace("py", "")
-            self.app.graph().export(filesave=file, ifTemplate=True)
+            file, _fileext = os.path.splitext(file)
+            # fileext = fileext.replace("py", "")
+            self.app.graph().export(filesave=file, if_template=True)
             # no need to refresh UI
 
-    def colorizeGraph(self):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        col = strToVar(self.varColChoice.get())
+    def colorize_graph(self):
+        """Colorize the Curves in the Graph"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        col = strToVar(self._widgets["colChoice"].get())
         if len(col) == 0:
-            col = self.colorList[0].getColorScale()
-            self._setColChoice(0)
-        invert = self.varColInvert.get()
+            col = self.colorlist[0].get_colorscale()
+            self._set_col_choice(0)
+        invert = self._widgets["colInvert"].get()
         kwargs = {
-            "avoidWhite": self.varColAvoidWhite.get(),
-            "sameIfEmptyLabel": self.varColEmpty.get(),
+            "avoidWhite": self._widgets["colAvoidWhite"].get(),
+            "sameIfEmptyLabel": self._widgets["colEmpty"].get(),
         }
-        if self.varColCurveSelect.get():
-            curves = self.app.getSelectedCurves(multiple=True)
+        if self._widgets["colCurveSelect"].get():
+            curves = self.app.get_selected_curves(multiple=True)
             if len(curves) > 0 and curves[0] >= 0:
                 # if no curve is selected, colorize all curves
                 kwargs.update({"curvesselection": curves})
         try:
             colorscale = Colorscale(col, invert=invert)
             self.app.graph().colorize(colorscale, **kwargs)
-        except ValueError as e:
+        except ValueError:
             # error to be printed in GUI console, and not hidden in terminal
-            print("ValueError colorizeGraph:", e)
-        if self.app.ifPrintCommands():  # to explicit creation of colorscale
-            print(
-                "colorscale = Colorscale(" + str(col) + ", invert=" + str(invert) + ")"
-            )
-            print(
-                "graph.colorize(colorscale, "
-                + ", ".join(["{}={!r}".format(k, v) for k, v in kwargs.items()])
-                + ")"
-            )
-        self.app.updateUI()
+            logger.error("colorize_graph:", exc_info=True)
+        if self.app.if_print_commands():  # to explicit creation of colorscale
+            msg = "colorscale = Colorscale({}, invert={})"
+            print(msg.format(col, invert))
+            msg = "graph.colorize(colorscale, {})"
+            arg = ", ".join(["{}={!r}".format(k, v) for k, v in kwargs.items()])
+            print(msg.format(arg))
+        self.app.update_ui()
 
-    def _setColChoice(self, i):
-        # reads variable (Colorscale object), extract colors (np.array),
-        # converts into string
+    def _set_col_choice(self, i):
+        """Reads variable (Colorscale object), extract colors (np.array),
+        converts into string"""
         # print('_setColChoice', i, self.colorList[i].getColorScale())
-        if isinstance(self.colorList[i].getColorScale(), str):
-            scale = self.colorList[i].getColorScale()  # eg. viridis
+        if isinstance(self.colorlist[i].get_colorscale(), str):
+            scale = self.colorlist[i].get_colorscale()  # eg. viridis
         else:
             lst = []
-            for elem in self.colorList[i].getColorScale():
+            for elem in self.colorlist[i].get_colorscale():
                 if not isinstance(elem, str):
-                    toStr = [str(nb if not nb.is_integer() else int(nb)) for nb in elem]
-                    lst.append("[" + ",".join(toStr) + "]")
+                    tostr = [str(nb if not nb.is_integer() else int(nb)) for nb in elem]
+                    lst.append("[" + ",".join(tostr) + "]")
                     # print("_setColChoice, elem,", elem)
                 else:
                     lst.append("'" + elem + "'")
             scale = "[" + ", ".join(lst) + "]"
-        self.varColChoice.set(scale)
+        self._widgets["colChoice"].set(scale)
+
+    def set_bgcolor_from_entry(self, update_ui=True):
+        """Set background color of the canvas"""
+        if update_ui:
+            self.app.store_selected_curves()  # before modifications, prepare update_ui
+        value = str(self._widgets["BGC"].get())
+        self.app.get_tab_properties(backgroundcolor=value)
+        if update_ui:
+            if self.app.initiated:
+                self.app.update_ui()
 
 
 class GUIFrameActionsGeneric:
@@ -1503,53 +1669,62 @@ class GUIFrameActionsGeneric:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
+        self._widgets = {}
+        self._create_widgets(self.frame)
         # bind keys
-        self.app.master.bind("<Control-Delete>", lambda e: self.deleteCurve())
-        self.app.master.bind("<Control-Shift-C>", lambda e: self.copyCurveToClipboard())
-        self.app.master.bind("<Control-h>", lambda e: self.showHideCurve())
+        self.app.master.bind("<Control-Delete>", lambda e: self.delete_curve())
+        self.app.master.bind(
+            "<Control-Shift-C>", lambda e: self.copy_curve_to_clipboard()
+        )
+        self.app.master.bind("<Control-h>", lambda e: self.show_hide_curve())
 
-    def updateUI(self):
+    def update_ui(self):
+        """Update widgets"""
         # ShowHide: handled by Observable
         # cast curve optionmenu: handled by Observable
         pass
 
-    def createWidgets(self, frame):
-        fr = FrameTitleContentHide(frame, self.cw_title, self.cw_content)
+    def _create_widgets(self, frame):
+        """Create widgets"""
+        fr = FrameTitleContentHide(frame, self._cw_title, self._cw_content)
         fr.pack(side="top", fill=tk.X, anchor="w")
 
-    def cw_title(self, frame):
+    def _cw_title(self, frame):
+        """Create widgets Title"""
         lbl = tk.Label(frame, text="Actions on Curves", font=self.app.fonts["bold"])
         lbl.pack(side="left", anchor="n")
 
-    def cw_content(self, frame):
-        def toGrid(row, column, func, **kwargs):
+    def _cw_content(self, frame):
+        """Create widgets content"""
+
+        def to_grid(row, column, func, **kwargs):
             kw = {"sticky": "w"}
             kw.update(kwargs)
             fr = tk.Frame(frame)
             fr.grid(row=row, column=column, **kw)
             func(fr)
 
-        toGrid(0, 0, self.cw_reorder, padx=5)
-        toGrid(1, 0, self.cw_delete, padx=5)
-        toGrid(2, 0, self.cw_duplicate, padx=5)
-        toGrid(3, 0, self.cw_showHide, padx=5)
-        toGrid(0, 1, self.cw_clipboard)
-        toGrid(1, 1, self.cw_cast)
-        toGrid(2, 1, self.cw_quickAttr)
-        toGrid(3, 1, self.cw_labelReplace)
+        to_grid(0, 0, self._cw_reorder, padx=5)
+        to_grid(1, 0, self._cw_delete, padx=5)
+        to_grid(2, 0, self._cw_duplicate, padx=5)
+        to_grid(3, 0, self._cw_show_hide, padx=5)
+        to_grid(0, 1, self._cw_clipboard)
+        to_grid(1, 1, self._cw_cast)
+        to_grid(2, 1, self._cw_quick_attr)
+        to_grid(3, 1, self._cw_label_replace)
 
-    def cw_reorder(self, frame):
+    def _cw_reorder(self, frame):
+        """Create widgets reorder"""
         tk.Label(frame, text="Reorder").pack(side="left")
-        b0 = tk.Button(frame, text=" \u21E7 ", command=self.shiftCurveTop)
+        b0 = tk.Button(frame, text=" \u21E7 ", command=self.shift_curve_top)
         b0.pack(side="left", padx=1)
-        b1 = tk.Button(frame, text=" \u21D1 ", command=self.shiftCurveUp)
+        b1 = tk.Button(frame, text=" \u21D1 ", command=self.shift_curve_up)
         b1.pack(side="left", padx=1)
-        b2 = tk.Button(frame, text=" \u21F5 ", command=self.shiftCurveReverse)
+        b2 = tk.Button(frame, text=" \u21F5 ", command=self.shift_curve_reverse)
         b2.pack(side="left", padx=1)
-        b3 = tk.Button(frame, text=" \u21D3 ", command=self.shiftCurveDown)
+        b3 = tk.Button(frame, text=" \u21D3 ", command=self.shift_curve_down)
         b3.pack(side="left", padx=1)
-        b4 = tk.Button(frame, text=" \u21E9 ", command=self.shiftCurveBottom)
+        b4 = tk.Button(frame, text=" \u21E9 ", command=self.shift_curve_bottom)
         b4.pack(side="left", padx=1)
         CreateToolTip(b0, "Selection to Top")
         CreateToolTip(b1, "Selection Up")
@@ -1557,183 +1732,197 @@ class GUIFrameActionsGeneric:
         CreateToolTip(b3, "Selection Down")
         CreateToolTip(b4, "Selection Bottom")
 
-    def cw_delete(self, frame):
+    def _cw_delete(self, frame):
+        """Create widgets Delete"""
         tk.Label(frame, text="Delete Curve").pack(side="left")
-        b0 = tk.Button(frame, text="Curve", command=self.deleteCurve)
+        b0 = tk.Button(frame, text="Curve", command=self.delete_curve)
         b0.pack(side="left", padx=3)
-        b1 = tk.Button(frame, text="All hidden", command=self.deleteCurvesHidd)
+        b1 = tk.Button(frame, text="All hidden", command=self.delete_curves_hidden)
         b1.pack(side="left")
         CreateToolTip(b0, "Ctrl+Delete")
 
-    def cw_duplicate(self, frame):
+    def _cw_duplicate(self, frame):
+        """Create widgets Duplicate"""
         tk.Label(frame, text="Duplicate Curve").pack(side="left")
-        btn = tk.Button(frame, text="Duplicate", command=self.duplicateCurve)
+        btn = tk.Button(frame, text="Duplicate", command=self.duplicate_curve)
         btn.pack(side="left")
 
-    def cw_showHide(self, frame):
-        def updateVarSH(curve, key):
+    def _cw_show_hide(self, frame):
+        """Create widgets Show Hide"""
+
+        def update_var_sh(curve, _key):
             if not isinstance(curve, Curve):
                 val = "Show Curve"  # -1 if no curve selected
             else:
-                val = "Show Curve" if curve.isHidden() else "Hide Curve"
-            self.varShowHide.set(val)
+                val = "Hide Curve" if curve.visible() else "Show Curve"
+            self._widgets["showHide"].set(val)
 
-        self.app.observables["focusTree"].register(updateVarSH)
-        self.varShowHide = tk.StringVar()
-        self.varShowHide.set("Show Curve")
-        b0 = tk.Button(frame, textvariable=self.varShowHide, command=self.showHideCurve)
+        self.app.observables["focusTree"].register(update_var_sh)
+        b0 = ButtonVar(frame, "Show Curve", command=self.show_hide_curve)
+        self._widgets["showHide"] = b0
         b0.pack(side="left")
-        b1 = tk.Button(frame, text="All", command=self.showHideAll)
+        b1 = tk.Button(frame, text="All", command=self.show_hide_all)
         b1.pack(side="left", padx="5")
-        b2 = tk.Button(frame, text="Invert", command=self.showHideInvert)
+        b2 = tk.Button(frame, text="Invert", command=self.show_hide_invert)
         b2.pack(side="left")
         CreateToolTip(b0, "Ctrl+H")
 
-    def cw_clipboard(self, frame):
+    def _cw_clipboard(self, frame):
+        """Create widgets Clipboard"""
         tk.Label(frame, text="Copy to clipboard").pack(side="left")
-        b0 = tk.Button(frame, text="Curve", command=self.copyCurveToClipboard)
+        b0 = tk.Button(frame, text="Curve", command=self.copy_curve_to_clipboard)
         b0.pack(side="left", padx="5")
-        b1 = tk.Button(frame, text="Graph", command=self.copyGraphToClipboard)
+        b1 = tk.Button(frame, text="Graph", command=self.copy_graph_to_clipboard)
         b1.pack(side="left")
-        vals = ["raw", "with properties", "screen data", "screen data, prop."]
-        self.varClipboardOpts = OptionMenuVar(frame, vals, default="options", width=6)
-        self.varClipboardOpts.pack(side="left")
+        vals = ("raw", "with properties", "screen data", "screen data, prop.")
+        omv = OptionMenuVar(frame, vals, default=vals[1], width=6)
+        self._widgets["clipboardOpts"] = omv
+        self._widgets["clipboardOpts"].pack(side="left")
         CreateToolTip(b0, "Ctrl+Shift+C")
 
-    def cw_cast(self, frame):
-        def updateVarCast(curve, key):
+    def _cw_cast(self, frame):
+        """Create widgets Cast Curve"""
+
+        def update_var_cast(curve, _key):
             # update GUI cast action: empy menu and refill it
-            self.varCastCurve["menu"].delete(0, "end")
-            self.varCastCurve.set("")
-            castList = []
+            self._widgets["castCurve"]["menu"].delete(0, "end")
+            self._widgets["castCurve"].set("")
             if isinstance(curve, Curve):
-                castList = curve.castCurveListGUI(onlyDifferent=False)
-                values = [cast[0] for cast in castList]
+                cast_list = curve.castCurveListGUI(onlyDifferent=False)
+                values = [cast[0] for cast in cast_list]
                 default = curve.classNameGUI()
-                for key in self.CASTCURVERENAMEGUI:
-                    values = [
-                        v.replace(key, self.CASTCURVERENAMEGUI[key]) for v in values
-                    ]
+                for key, value in self.CASTCURVERENAMEGUI.items():
+                    values = [v.replace(key, value) for v in values]
                     if default == key:
-                        default = self.CASTCURVERENAMEGUI[key]
-                self.varCastCurve.resetValues(values, default=default)
+                        default = value
+                self._widgets["castCurve"].reset_values(values, default=default)
 
-        self.app.observables["focusTree"].register(updateVarCast)
+        self.app.observables["focusTree"].register(update_var_cast)
         tk.Label(frame, text="Change Curve type").pack(side="left")
-        self.varCastCurve = OptionMenuVar(frame, [""], "")
-        self.varCastCurve.pack(side="left", padx="2")
-        tk.Button(frame, text="Save", command=self.castCurve).pack(side="left")
+        self._widgets["castCurve"] = OptionMenuVar(frame, ("",), "")
+        self._widgets["castCurve"].pack(side="left", padx="2")
+        tk.Button(frame, text="Save", command=self.cast_curve).pack(side="left")
 
-    def cw_quickAttr(self, frame):
-        def updateQA(curve, key):
+    def _cw_quick_attr(self, frame):
+        """Create widgets Quick attr: label, color"""
+
+        def update_qa(curve, _key):
             if isinstance(curve, Curve):
-                self.varQALabel.set(varToStr(curve.attr("label")))
-                self.varQAColor.set(varToStr(curve.attr("color")))
+                self._widgets["QALabel"].set(varToStr(curve.attr("label")))
+                self._widgets["QAColor"].set(varToStr(curve.attr("color")))
 
-        self.app.observables["focusTree"].register(updateQA)
+        self.app.observables["focusTree"].register(update_qa)
         tk.Label(frame, text="Label").pack(side="left")
-        self.varQALabel = EntryVar(frame, "", width=15)
-        self.varQALabel.pack(side="left")
+        self._widgets["QALabel"] = EntryVar(frame, "", width=15)
+        self._widgets["QALabel"].pack(side="left")
         tk.Label(frame, text="Color").pack(side="left")
-        btn0 = tk.Button(frame, text="Pick", command=self.chooseColor)
+        btn0 = tk.Button(frame, text="Pick", command=self.choose_color)
         btn0.pack(side="left")
-        self.varQAColor = EntryVar(frame, "", width=8)
-        self.varQAColor.pack(side="left")
-        btn1 = tk.Button(frame, text="Save", command=self.setQuickAttr)
+        self._widgets["QAColor"] = EntryVar(frame, "", width=8)
+        self._widgets["QAColor"].pack(side="left")
+        btn1 = tk.Button(frame, text="Save", command=self.set_quick_attr)
         btn1.pack(side="left")
-        self.varQALabel.bind("<Return>", lambda event: self.setQuickAttr())
-        self.varQAColor.bind("<Return>", lambda event: self.setQuickAttr())
+        self._widgets["QALabel"].bind("<Return>", lambda event: self.set_quick_attr())
+        self._widgets["QAColor"].bind("<Return>", lambda event: self.set_quick_attr())
 
-    def cw_labelReplace(self, frame):
+    def _cw_label_replace(self, frame):
+        """Create widgets Replace str in label"""
         tk.Label(frame, text="Replace in labels").pack(side="left")
-        self.varLabelOld = EntryVar(frame, "old string", width=10)
-        self.varLabelOld.pack(side="left")
-        self.varLabelNew = EntryVar(frame, "new string", width=10)
-        self.varLabelNew.pack(side="left")
-        btn = tk.Button(frame, text="Replace", command=self.replaceLabels)
+        self._widgets["labelOld"] = EntryVar(frame, "old string", width=10)
+        self._widgets["labelOld"].pack(side="left")
+        self._widgets["labelNew"] = EntryVar(frame, "new string", width=10)
+        self._widgets["labelNew"].pack(side="left")
+        btn = tk.Button(frame, text="Replace", command=self.replace_labels)
         btn.pack(side="left")
-        self.varLabelOld.bind("<Return>", lambda event: self.replaceLabels())
-        self.varLabelNew.bind("<Return>", lambda event: self.replaceLabels())
+        self._widgets["labelOld"].bind("<Return>", lambda event: self.replace_labels())
+        self._widgets["labelNew"].bind("<Return>", lambda event: self.replace_labels())
 
-    def shiftCurve(self, upDown, relative=True):
-        curves = self.app.getSelectedCurves(multiple=True)
-        curves.sort(reverse=(True if (upDown > 0) else False))
+    def shift_curve(self, up_down, relative=True):
+        """Chift a Curve within the Graph"""
+        curves = self.app.get_selected_curves(multiple=True)
+        test = up_down > 0
+        curves.sort(reverse=test)
         selected = []
         graph = self.app.graph()
         for curve in curves:
-            idx2 = upDown
+            idx2 = up_down
             if curve == 0:
                 idx2 = max(idx2, 0)
             if curve == len(graph) - 1 and relative:
                 idx2 = min(idx2, 0)
             if relative:
-                self.app.callGraphMethod("swapCurves", curve, idx2, relative=True)
+                self.app.call_graph_method("curves_swap", curve, idx2, relative=True)
                 selected.append(curve + idx2)
             else:
-                self.app.callGraphMethod("moveCurveToIndex", curve, idx2)
+                self.app.call_graph_method("curve_move_to_index", curve, idx2)
                 selected.append(idx2)
                 # print('moveCurve', curve, idx2, upDown)
                 if idx2 < curve or (idx2 == curve and curve == 0):
-                    upDown += 1
+                    up_down += 1
                 elif idx2 > curve or (idx2 == curve and curve >= len(graph) - 1):
-                    upDown -= 1
+                    up_down -= 1
         for i in range(len(selected)):
             selected[i] = max(0, min(len(graph) - 1, selected[i]))
         if len(selected) > 0:
             sel = [graph[c] for c in selected]
             keys = [""] * len(sel)
-            self.app.getTabProperties(
+            self.app.get_tab_properties(
                 selectionCurvesKeys=(sel, keys), focusCurvesKeys=([sel[0]], [""])
             )
         # print(self.app.getTabProperties())
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def shiftCurveDown(self):
-        self.shiftCurve(1)
+    def shift_curve_down(self):
+        """Shift Curve down in the Graph"""
+        self.shift_curve(1)
 
-    def shiftCurveUp(self):
-        self.shiftCurve(-1)
+    def shift_curve_up(self):
+        """Shift a Curve up in the Graph"""
+        self.shift_curve(-1)
 
-    def shiftCurveTop(self):
-        self.shiftCurve(0, relative=False)
+    def shift_curve_top(self):
+        """Shift Curve in the position in the graph"""
+        self.shift_curve(0, relative=False)
 
-    def shiftCurveBottom(self):
-        self.shiftCurve(len(self.app.graph()) - 1, relative=False)
+    def shift_curve_bottom(self):
+        """hift Curve at the end of a Graph"""
+        self.shift_curve(len(self.app.graph()) - 1, relative=False)
 
-    def shiftCurveReverse(self):
-        self.app.graph().reverseCurves()
-        self.app.updateUI()
+    def shift_curve_reverse(self):
+        """Reverse the order of  the Curves within the Graph"""
+        self.app.graph().curves_reverse()
+        self.app.update_ui()
 
-    def deleteCurve(self):
+    def delete_curve(self):
         """Delete the currently selected curve."""
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        curves = list(self.app.getSelectedCurves(multiple=True))
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        curves = list(self.app.get_selected_curves(multiple=True))
         curves.sort(reverse=True)
         for curve in curves:
             if not is_number(curve):
                 break
-                # can happen if someone presses the delete button twice in arow
-            elif curve > -1:
-                self.app.callGraphMethod("deleteCurve", curve)
-        self.app.updateUI()
+                # can happen if someone presses the delete button twice in a row
+            if curve > -1:
+                self.app.call_graph_method("curve_delete", curve)
+        self.app.update_ui()
 
-    def deleteCurvesHidd(self):
+    def delete_curves_hidden(self):
         """Delete all the hidden curves."""
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        toDel = []
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
         graph = self.app.graph()
-        for c in range(len(graph)):
-            if graph[c].isHidden():
-                toDel.append(c)
-        toDel.sort(reverse=True)
-        for c in toDel:
-            self.app.callGraphMethod("deleteCurve", c)
-        self.app.updateUI()
+        to_del = []
+        for c, curve in enumerate(graph):
+            if not curve.visible():
+                to_del.append(c)
+        to_del.sort(reverse=True)
+        for c in to_del:
+            self.app.call_graph_method("curve_delete", c)
+        self.app.update_ui()
 
-    def duplicateCurve(self):
+    def duplicate_curve(self):
         """Duplicate the currently selected curve."""
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        curves = list(self.app.getSelectedCurves(multiple=True))
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        curves = list(self.app.get_selected_curves(multiple=True))
         curves.sort(reverse=True)
         selected = []
         for curve in curves:
@@ -1741,64 +1930,71 @@ class GUIFrameActionsGeneric:
                 # can happen if someone presses the delete button twice in arow
                 break
             if curve > -1:
-                self.app.callGraphMethod("duplicateCurve", curve)
+                self.app.call_graph_method("curve_duplicate", curve)
                 selected = [s + 1 for s in selected]
                 selected.append(curve)
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def showHideCurve(self):
-        self.app.storeSelectedCurves()
-        curves = self.app.getSelectedCurves(multiple=True)
-        for curve in curves:
-            if curve > -1 and curve < len(self.app.graph()):
-                self.app.callCurveMethod(curve, "swapShowHide")
-        self.app.updateUI()
+    def show_hide_curve(self):
+        """Toggle if Curve is displayed or not"""
+        self.app.store_selected_curves()
+        curves = self.app.get_selected_curves(multiple=True)
+        graph = self.app.graph()
+        for c in curves:
+            if -1 < c < len(graph):
+                graph[c].visible(not graph[c].visible())
+                if self.app.if_print_commands():
+                    print("graph[{}].visible(not graph[{}].visible())".format(c, c))
+        self.app.update_ui()
 
-    def showHideAll(self):
+    def show_hide_all(self):
+        """Toggle if displayed or not, for all Curves with same value"""
         graph = self.app.graph()
         if len(graph) > 0:
-            self.app.storeSelectedCurves()  # before modifs to prepare updateUI
-            new = "" if graph[0].isHidden() else "none"
+            self.app.store_selected_curves()  # before modifs to prepare update_ui
+            new = False if graph[0].visible() else True
             for curve in graph:
-                curve.update({"linestyle": new})
-            if self.app.ifPrintCommands():
+                curve.visible(new)
+            if self.app.if_print_commands():
                 print("for curve in graph:")
-                print("    curve.update({'linestyle': '" + new + "'})")
-            self.app.updateUI()
+                print("    curve.visible({})".format(new))
+        self.app.update_ui()
 
-    def showHideInvert(self):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
+    def show_hide_invert(self):
+        """Toggle if displayed or not, for all Curves independently"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
         for curve in self.app.graph():
-            curve.swapShowHide()
-        if self.app.ifPrintCommands():
+            curve.visible(not curve.visible())
+        if self.app.if_print_commands():
             print("for curve in graph:")
-            print("    curve.swapShowHide()")
-        self.app.updateUI()
+            print("    curve.visible(not curve.visible())")
+        self.app.update_ui()
 
-    def copyCurveToClipboard(self):
+    def copy_curve_to_clipboard(self):
+        """Cpy the Curve into the clipboard"""
         graph = self.app.graph()
-        curves = self.app.getSelectedCurves(multiple=True)
+        curves = self.app.get_selected_curves(multiple=True)
         if len(curves) == 0:
             return
         content = ""
-        opts = self.varClipboardOpts.get()
-        ifAttrs = "prop" in opts
-        ifTrans = "screen" in opts
-        # print("opts", opts, ifAttrs, ifTrans)
-        if not ifAttrs:
+        opts = self._widgets["clipboardOpts"].get()
+        if_attrs = "prop" in opts
+        if_trans = "screen" in opts
+        # print("opts", opts, if_attrs, if_trans)
+        if not if_attrs:
             labels = [varToStr(graph[c].attr("label")) for c in curves]
             content += "\t" + "\t\t\t".join(labels) + "\n"
         else:
             keys = []
             for c in curves:
-                for key in graph[c].getAttributes():
+                for key in graph[c].get_attributes():
                     if key not in keys:
                         keys.append(key)
             keys.sort()
             for key in keys:
                 labels = [varToStr(graph[c].attr(key)) for c in curves]
                 content += key + "\t" + "\t\t\t".join(labels) + "\n"
-        data = [graph.getCurveData(c, ifAltered=ifTrans) for c in curves]
+        data = [graph.getCurveData(c, ifAltered=if_trans) for c in curves]
         length = max([d.shape[1] for d in data])
         for le in range(length):
             tmp = []
@@ -1808,78 +2004,81 @@ class GUIFrameActionsGeneric:
                 else:
                     tmp.append("\t".join([""] * d.shape[0]))
             content += "\t\t".join(tmp) + "\n"
-        self.app.setClipboard(content)
+        self.app.set_clipboard(content)
 
-    def copyGraphToClipboard(self):
-        opts = self.varClipboardOpts.get()
-        ifAttrs = "prop" in opts
-        ifTrans = "screen" in opts
+    def copy_graph_to_clipboard(self):
+        """Copy the content of a Graph into the clipboard"""
+        opts = self._widgets["clipboardOpts"].get()
+        if_attrs = "prop" in opts
+        if_trans = "screen" in opts
         graph = self.app.graph()
         data = graph.export(
-            ifClipboardExport=True, ifOnlyLabels=(not ifAttrs), saveAltered=ifTrans
+            if_clipboard_export=True,
+            if_only_labels=(not if_attrs),
+            save_altered=if_trans,
         )
-        self.app.setClipboard(data)
+        self.app.set_clipboard(data)
 
-    def castCurve(self):
+    def cast_curve(self):
+        """Cast (change the type of) a Curve"""
         graph = self.app.graph()
-        curves = self.app.getSelectedCurves(multiple=True)
-        newType = self.varCastCurve.get()
-        for key in self.CASTCURVERENAMEGUI:
-            if newType == self.CASTCURVERENAMEGUI[key]:
-                newType = key
+        curves = self.app.get_selected_curves(multiple=True)
+        type_new = self._widgets["castCurve"].get()
+        for key, value in self.CASTCURVERENAMEGUI.items():
+            if type_new == value:
+                type_new = key
         selected = []
         for curve in curves:
-            if curve > -1 and curve < len(graph):
-                test = self.app.callGraphMethod("castCurve", newType, curve)
+            if -1 < curve < len(graph):
+                test = self.app.call_graph_method("castCurve", type_new, curve)
                 selected.append(curve)
                 if not test:
-                    print("castCurve impossible.")
+                    logger.error("castCurve impossible.")
             else:
-                print("castCurve impossible (", newType, curve, ")")
+                logger.error("castCurve impossible ({}, {})".format(type_new, curve))
         if len(selected) > 0:
             sel = [graph[c] for c in selected]
             keys = [""] * len(sel)
-            self.app.getTabProperties(
+            self.app.get_tab_properties(
                 selectionCurvesKeys=(sel, keys), focusCurvesKeys=([sel[0]], [""])
             )
-        self.app.updateUI()
+        self.app.update_ui()
 
-    def chooseColor(self):
-        from tkinter.colorchooser import askcolor
-
-        curves = self.app.getSelectedCurves(multiple=False)
+    def choose_color(self):
+        """Prompts the user to choose a color"""
+        curves = self.app.get_selected_curves(multiple=False)
         if curves[0] != -1:
-            from matplotlib.colors import hex2color, rgb2hex
-
             try:
-                colorcurrent = rgb2hex(strToVar(self.varQAColor.get()))
+                colorcurrent = rgb2hex(strToVar(self._widgets["QAColor"].get()))
             except Exception:
                 colorcurrent = None
             ans = askcolor(color=colorcurrent)
             if ans[0] is not None:
-                self.varQAColor.set(
+                self._widgets["QAColor"].set(
                     listToString([np.round(a, 3) for a in hex2color(ans[1])])
                 )  # [np.round(val/256,3) for val in ans[0]]
 
-    def setQuickAttr(self):
-        self.app.storeSelectedCurves()
-        curves = self.app.getSelectedCurves(multiple=True)
+    def set_quick_attr(self):
+        """Updates the values of the keywords label, and color"""
+        self.app.store_selected_curves()
+        curves = self.app.get_selected_curves(multiple=True)
         for c in curves:
             arg = {
-                "label": strToVar(self.varQALabel.get()),
-                "color": strToVar(self.varQAColor.get()),
+                "label": strToVar(self._widgets["QALabel"].get()),
+                "color": strToVar(self._widgets["QAColor"].get()),
             }
-            self.app.callCurveMethod(c, "update", arg)
-        self.app.updateUI()
+            self.app.call_curve_method(c, "update", arg)
+        self.app.update_ui()
 
-    def replaceLabels(self):
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
-        old = self.varLabelOld.get()
-        new = self.varLabelNew.get()
-        self.app.callGraphMethod("replaceLabels", old, new)
-        self.varLabelOld.set("")
-        self.varLabelNew.set("")
-        self.app.updateUI()
+    def replace_labels(self):
+        """Replace labels graph.replace_labels(old, new)"""
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
+        old = self._widgets["labelOld"].get()
+        new = self._widgets["labelNew"].get()
+        self.app.call_graph_method("replace_labels", old, new)
+        self._widgets["labelOld"].set("")
+        self._widgets["labelNew"].set("")
+        self.app.update_ui()
 
 
 class GUIFramePropertyEditor:
@@ -1894,134 +2093,139 @@ class GUIFramePropertyEditor:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
+        self._widgets = {}
+        self._create_widgets(self.frame)
 
-    def updateUI(self):
+    def update_ui(self):
+        """Update the widgets"""
         pass
 
-    def createWidgets(self, frame):
-        fr = FrameTitleContentHide(frame, self.cw_title, self.cw_content)
+    def _create_widgets(self, frame):
+        """Create the widgets"""
+        fr = FrameTitleContentHide(frame, self._cw_title, self._cw_content)
         fr.pack(side="top", fill=tk.X, anchor="w")
 
-    def cw_title(self, frame):
+    def _cw_title(self, frame):
+        """Create the widgets Title"""
         lbl = tk.Label(frame, text="Property editor", font=self.app.fonts["bold"])
         lbl.pack(side="top", anchor="w")
 
-    def cw_content(self, frame):
+    def _cw_content(self, frame):
+        """Create the widgets of the frame Content"""
         fr = tk.Frame(frame)
         fr.pack(side="top", anchor="w", fill=tk.X, padx=5)
-        self.cw_contentEdit(fr)
+        self.cw_content_edit(fr)
         tk.Label(frame, text="\n").pack(side="left", anchor="w", padx=5)
         # self.NewPropExample = tk.StringVar()
         # self.NewPropExample.set('')
-        self.varExample = LabelVar(frame, "", justify="left")
-        self.varExample.pack(side="left", anchor="w")
+        self._widgets["example"] = LabelVar(frame, "", justify="left")
+        self._widgets["example"].pack(side="left", anchor="w")
 
-    def cw_contentEdit(self, frame):
+    def cw_content_edit(self, frame):
+        """Create the widgets to edit"""
         tk.Label(frame, text="Property:").pack(side="left")
-        self.varKey = OptionMenuVar(frame, [], "")
-        self.varKey.pack(side="left")
-        self.varKey.var.trace("w", self.selectKey)
-        self.app.observables["focusTree"].register(self.imposeKey)
-        self.varValue = ComboboxVar(frame, [], "", width=self.VARVALUEWIDTH)
-        self.varValue.pack(side="left")
-        self.varValue.bind("<Return>", lambda event: self.saveKeyValue())
+        self._widgets["key"] = OptionMenuVar(frame, (), "")
+        self._widgets["key"].pack(side="left")
+        self._widgets["key"].var.trace("w", self.select_key)
+        self.app.observables["focusTree"].register(self.impose_key)
+        self._widgets["value"] = ComboboxVar(frame, [], "", width=self.VARVALUEWIDTH)
+        self._widgets["value"].pack(side="left")
+        self._widgets["value"].bind("<Return>", lambda event: self.save_key_value())
 
-        btn = tk.Button(frame, text="Save", command=self.saveKeyValue)
+        btn = tk.Button(frame, text="Save", command=self.save_key_value)
         btn.pack(side="right")
 
-    def imposeKey(self, curve, key):
+    def impose_key(self, curve, key):
         """triggers by observable when user selects a property in the Tree"""
         # print('imposekey curve', curve, 'key', key)
         if curve == -1:
-            keyList = Graph.KEYWORDS_GRAPH["keys"]
+            key_list = KEYWORDS_GRAPH["keys"]
         else:
-            keyList = Graph.KEYWORDS_CURVE["keys"]
-        self.varKey.resetValues(keyList)
+            key_list = KEYWORDS_CURVE["keys"]
+        self._widgets["key"].reset_values(key_list)
         if key != "":
-            self.varKey.set(key, force=True)
+            self._widgets["key"].set(key, force=True)
             # set() triggers .selectKey() that updates varExamples and varValue
         else:
             # keep same key, try to refresh in case user selected another curve
-            self.varKey.set(self.varKey.get(), force=True)
+            self._widgets["key"].set(self._widgets["key"].get(), force=True)
 
-    def selectKey(self, *args, **kwargs):
-        """User selects a item on the drop-down menu"""
-        # print('selectKey args', args, 'kwargs', kwargs)
-        key = self.varKey.get()
-        curves = self.app.getSelectedCurves(multiple=False)
+    def select_key(self, *_args, **_kwargs):
+        """User selects an item on the drop-down menu"""
+        # print('selectKey args', _args, 'kwargs', _kwargs)
+        key = self._widgets["key"].get()
+        curves = self.app.get_selected_curves(multiple=False)
         if len(curves) == 0:
             curve = -1
         else:
             curve = curves[0]
         if curve == -1:
-            keywords = Graph.KEYWORDS_GRAPH
-            currentVal = self.app.graph().attr(key)
+            keywords = KEYWORDS_GRAPH
+            current_val = self.app.graph().attr(key)
         else:
-            keywords = Graph.KEYWORDS_CURVE
-            currentVal = self.app.graph()[curve].attr(key)
+            keywords = KEYWORDS_CURVE
+            current_val = self.app.graph()[curve].attr(key)
         try:
             # set text with examples, and populate Combobox values field
             i = keywords["keys"].index(key)
-            self.varValue["values"] = [str(v) for v in keywords["guiexamples"][i]]
-            self.varExample.set(keywords["guitexts"][i])
+            valuesnew = [str(v) for v in keywords["guiexamples"][i]]
+            self._widgets["value"]["values"] = valuesnew
+            self._widgets["example"].set(keywords["guitexts"][i])
         except ValueError:
-            self.varValue["values"] = []
-            self.varExample.set("")
+            self._widgets["value"]["values"] = []
+            self._widgets["example"].set("")
         # set values, cosmetics
-        self.varValue.set(varToStr(currentVal))
+        self._widgets["value"].set(varToStr(current_val))
         state = "disabled" if key.startswith("==") else "normal"
-        self.varValue.configure(state=state)
+        self._widgets["value"].configure(state=state)
         width = self.VARVALUEWIDTH
-        if len(key) > 20:  # reduce widget's width to try prevent window resize
+        if len(key) > 20:  # reduce widget's width to try to prevent window resize
             width = max(
                 int(self.VARVALUEWIDTH / 2),
                 int(self.VARVALUEWIDTH - (len(key) - 20) * 2 / 3),
             )
-        self.varValue.configure(width=width)
+        self._widgets["value"].configure(width=width)
 
-    def saveKeyValue(self):
+    def save_key_value(self):
         """
         New property on current curve: catch values, send to dedicated function
         Handles interface. Calls updateProperty to act on graph
         """
-        curves = self.app.getSelectedCurves(multiple=True)
-        key = self.varKey.get()
-        val = self.varValue.get()  # here .get(), strToVar done later
+        curves = self.app.get_selected_curves(multiple=True)
+        key = self._widgets["key"].get()
+        val = self._widgets["value"].get()  # here .get(), strToVar done later
         if key == "['key', value]":
             val = strToVar(val)
             if not isinstance(val, (list, tuple)) or len(val) < 2:
-                print(
-                    "ERROR GUI.GUIFramePropertyEditor.saveKeyValue. Input",
-                    "must be a list or a tuple with 2 elements (",
-                    val,
-                    type(val),
-                    ")",
+                msg = (
+                    "GUI.GUIFramePropertyEditor.save_key_value. Input must be a "
+                    "list or a tuple with 2 elements ({}, {})"
                 )
+                logger.error(msg.format(val, type(val)))
                 return
             key, val = val[0], val[1]
-        self._updateKey(curves, key, val)  # triggers updateUI
+        self._update_key(curves, key, val)  # triggers update_ui
         # Tree may be still stuck on another key. Triggers change of varValue
         # and varExample
-        self.varKey.set(key, force=True)
+        self._widgets["key"].set(key, force=True)
 
-    def _updateKey(self, curve, key, val, ifUpdate=True, varType="auto"):
+    def _update_key(self, curve, key, val, if_update=True, vartype="auto"):
         """
         Input was filtered by setPropValue()
         perform curve(curve).update({key: strToVar(val)})
         curve -1: update() on graph
-        ifUpdate: by default update the GUI- if False, does not. Assumes the
+        ifUpdate: by default update the GUI. if False, does not. Assumes the
             update will be performed only once, later
-        varType: changes type of val into varType. Otherwise try best guess.
+        varType: changes type of val into varType. Otherwise, try best guess.
         """
         if key == "Property" or key.startswith("--") or key.startswith("=="):
             return
-        self.app.storeSelectedCurves()  # before modifs, to prepare updateUI
+        self.app.store_selected_curves()  # before modifs, to prepare update_ui
         # print ('Property edition: curve',curve,', key', key,', value', val,
         #        '(',type(val),')')
         # possibly force variable type
-        if varType in [str, int, float, list, dict]:
-            val = varType(val)
+        if vartype in [str, int, float, list, dict]:
+            val = vartype(val)
         else:
             val = strToVar(val)
         # curve identification
@@ -2030,15 +2234,16 @@ class GUIFramePropertyEditor:
         for c_ in curve:
             try:
                 c = int(c_)
-            except Exception:
-                print("Cannot edit property: curve", c_, ", key", key, ", value", val)
+            except (ValueError, TypeError):
+                msg = "Cannot edit property: curve {}, key {}, value {}."
+                logger.error(msg.format(c_, key, val))
                 return
             if c < 0:
-                self.app.callGraphMethod("update", {key: val})
+                self.app.call_graph_method("update", {key: val})
             else:
-                self.app.callCurveMethod(c, "update", {key: val})
-        if ifUpdate:
-            self.app.updateUI()
+                self.app.call_curve_method(c, "update", {key: val})
+        if if_update:
+            self.app.update_ui()
 
 
 class GUIFrameTree:
@@ -2051,104 +2256,110 @@ class GUIFrameTree:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
+        self._widgets = {}
+        self._create_widgets(self.frame)
         # self.prevTreeSelect = [-1]  # to be used upon refresh
 
-    def updateUI(self):
+    def update_ui(self):
         """Update content of Treeview"""
         graph = self.app.graph()
+        tree = self._widgets["tree"]
         select = {"toFocus": [], "toSelect": []}
         try:
-            props = self.app.getTabProperties()
+            props = self.app.get_tab_properties()
             select["focus"] = props["focusCurvesKeys"]
             select["selec"] = props["selectionCurvesKeys"]
         except KeyError:  # expected at initialisation
             select["focus"] = ([], [])
             select["selec"] = ([], [])
-        # print('updateUI prepare selection', select)
+        # print('update_ui prepare selection', select)
         # clear displayed content
-        self.Tree.delete(*self.Tree.get_children())
+        tree.delete(*tree.get_children())
         # tree: update graphinfo
-        attr = graph.graphInfo
-        idx0 = self.Tree.insert("", "end", text="Graph", tag="-1", values=(""))
-        self._updateUI_checkSelect(idx0, -1, "", select)
-        self._updateUI_addTreeBranch(idx0, attr, -1, select)
-        # tree: update headers & sampleinfo
-        attr = dict(graph.headers)
-        attr.update(graph.sampleInfo)
+        attr = graph.graphinfo.values()
+        idx0 = tree.insert("", "end", text="Graph", tag="-1", values=("",))
+        self._update_ui_check_select(idx0, -1, "", select)
+        self._update_ui_add_treebranch(idx0, attr, -1, select)
+        # tree: update headers
+        attr = graph.headers.values()
         if len(attr) > 0:
-            idx = self.Tree.insert("", "end", text="Misc.", tag="-1", values=(""))
-            self._updateUI_addTreeBranch(idx, attr, -1, select)
+            idx = tree.insert("", "end", text="Misc.", tag="-1", values=("",))
+            self._update_ui_add_treebranch(idx, attr, -1, select)
         # tree & list of curves
-        orderLbl = ["label", "sample", "filename"]
-        for i in range(len(graph)):
-            curve = graph[i]
+        order_lbl = ["label", "sample", "filename"]
+        for i, curve in enumerate(graph):
             # decide for label
             lbl = "(no label)"
-            for test in orderLbl:
+            for test in order_lbl:
                 tmp = curve.attr(test)
                 if tmp != "":
                     lbl = varToStr(tmp)
                     break
             # tree
             tx = "Curve " + str(i) + " " + lbl
-            idx = self.Tree.insert("", "end", tag=str(i), values=(""), text=tx)
-            self._updateUI_checkSelect(idx, curve, "", select)
-            color = "grey" if curve.isHidden() else self.app.fonts["fg_default"]
-            self.Tree.tag_configure(str(i), foreground=color)
+            idx = tree.insert("", "end", tag=str(i), values=("",), text=tx)
+            self._update_ui_check_select(idx, curve, "", select)
+            color = self.app.fonts["fg_default"] if curve.visible() else "grey"
+            tree.tag_configure(str(i), foreground=color)
             # attributes
-            attr = curve.getAttributes()
-            self._updateUI_addTreeBranch(idx, attr, curve, select)
+            attr = curve.get_attributes()
+            self._update_ui_add_treebranch(idx, attr, curve, select)
         # set focus and selection to previously selected element
         if len(select["toSelect"]) > 0:
-            # print('UpdateUI selection_set', tuple(select['toSelect']))
-            self.Tree.selection_set(tuple(select["toSelect"]))
+            # print('Update_ui selection_set', tuple(select['toSelect']))
+            tree.selection_set(tuple(select["toSelect"]))
             for iid in select["toSelect"]:
-                self.Tree.see(iid)
+                tree.see(iid)
         if len(select["toFocus"]) > 0:
-            # print('UpdateUI focus', select['toFocus'][0])
-            self.Tree.focus(select["toFocus"][0])
-            self.Tree.see(select["toFocus"][0])
-        self.forgetSelectedCurves()
+            # print('Update_ui focus', select['toFocus'][0])
+            tree.focus(select["toFocus"][0])
+            tree.see(select["toFocus"][0])
+        self.forget_selected_curves()
 
-    def _updateUI_checkSelect(self, id, curve, key, select):
+    @staticmethod
+    def _update_ui_check_select(id_, curve, key, select):
+        """part of widget update"""
         for i in range(len(select["focus"][0])):
             if select["focus"][0][i] == curve and select["focus"][1][i] == key:
-                select["toFocus"].append(id)
+                select["toFocus"].append(id_)
         for i in range(len(select["selec"][0])):
             if select["selec"][0][i] == curve and select["selec"][1][i] == key:
-                select["toSelect"].append(id)
+                select["toSelect"].append(id_)
 
-    def _updateUI_addTreeBranch(self, idx, attr, curve, select):
-        # select: TODO
-        keyList = []
+    def _update_ui_add_treebranch(self, idx, attr, curve, select):
+        """part of widget update, add a branch in the tree widget"""
+        tree = self._widgets["tree"]
+        key_list = []
         for key in attr:
-            keyList.append(key)
-        keyList.sort()
-        for key in keyList:
+            key_list.append(key)
+        key_list.sort()
+        for key in key_list:
             val = varToStr(attr[key])
             # val = varToStr(val)  # echap a second time to go to Treeview
             try:
-                id = self.Tree.insert(idx, "end", text=key, values=(val,), tag=key)
-                self._updateUI_checkSelect(id, curve, key, select)
-            except Exception as e:
-                print("Exception _updateUI_addTreeBranch key", key, "values:")
-                print("   ", type(attr[key]), attr[key])
-                print("   ", type(varToStr(attr[key])), varToStr(attr[key]))
-                print("   ", type(val), val)
+                id_ = tree.insert(idx, "end", text=key, values=(val,), tag=key)
+                self._update_ui_check_select(id_, curve, key, select)
+            except Exception:
+                msg = "_update_ui_add_treebranch: key {}:\n  {} {}\n  {} {}\n  {} {}"
+                msgargs = [key, type(attr[key]), attr[key], type(varToStr(attr[key]))]
+                msgargs += [varToStr(attr[key]), type(val), val]
+                logger.error(msg.format(*msgargs), exc_info=True)
                 # for v in val:
                 #     print('   ', v)
-                print(type(e), e)
 
-    def createWidgets(self, frame):
-        fr = FrameTitleContentHide(frame, self.cw_title, self.cw_content)
+    def _create_widgets(self, frame):
+        """Create widgets"""
+        fr = FrameTitleContentHide(frame, self._cw_title, self._cw_content)
         fr.pack(side="top", fill=tk.X, anchor="w")
 
-    def cw_title(self, frame):
+    def _cw_title(self, frame):
+        """Create widgets Title"""
         lbl = tk.Label(frame, text="List of properties", font=self.app.fonts["bold"])
         lbl.pack(side="top", anchor="w")
 
-    def cw_content(self, frame):
+    def _cw_content(self, frame):
+        """Create widgets of Content"""
+
         # START OF FIX: because of change in tk. Baseically added the following
         def fixed_map(option):
             # Returns the style map for 'option' with any styles starting with
@@ -2168,54 +2379,57 @@ class GUIFrameTree:
             background=fixed_map("background"),
         )
         # END OF FIX
-        self.Tree = ttk.Treeview(frame, columns=("#1"))
-        self.Tree.pack(side="left", anchor="n")
-        self.Treeysb = ttk.Scrollbar(frame, orient="vertical", command=self.Tree.yview)
-        self.Treeysb.pack(side="right", anchor="n", fill=tk.Y)
-        self.Tree.configure(yscroll=self.Treeysb.set)
-        self.Tree.column("#0", width=170)
-        self.Tree.heading("#0", text="Name")
-        self.Tree.column("#1", width=290)
-        self.Tree.heading("#1", text="Value")
-        self.Tree.bind("<<TreeviewSelect>>", self._selectTreeItem)
+        tree = ttk.Treeview(frame, columns=("#1",))
+        tree.pack(side="left", anchor="n")
+        treeysb = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+        treeysb.pack(side="right", anchor="n", fill=tk.Y)
+        tree.configure(yscroll=treeysb.set)
+        tree.column("#0", width=170)
+        tree.heading("#0", text="Name")
+        tree.column("#1", width=290)
+        tree.heading("#1", text="Value")
+        tree.bind("<<TreeviewSelect>>", self._select_tree_item)
+        self._widgets["tree"] = tree
+        self._widgets["treeysb"] = treeysb
 
-    def getTreeActiveCurve(self, multiple=True):
+    def get_tree_active_curve(self, multiple=True):
         """
-        Return 2 lists with following structure:
-        [idx0, idx1, ...], [key0, key1, ...]
+        Return 2 lists with following structure: [idx0, idx1, ...], [key0, key1, ...]
         Each element corresponds to a selected line in the Treeview.
         idx: curve index, -1 for header
         key: selected attribute
-        multiple=False: only info related to the line returned by .focus()
-            is returned, not to the .selection()
+
+        :param multiple: if True, returns information related to the line returned by
+               .selection(). If False, return multiple, according to .focus().
+        :return: 2 lists with following structure: [idx0, idx1, ...], [key0, key1, ...]
         """
-        interest = self.Tree.focus()
+        interest = self._widgets["tree"].focus()
         if multiple:
-            interest = self.Tree.selection()
-        idxs, keys = self._getTreeItemIdKey(interest)
+            interest = self._widgets["tree"].selection()
+        idxs, keys = self._get_tree_item_id_key(interest)
         return idxs, keys
 
-    def _selectTreeItem(self, a):
-        idxs, keys = self.getTreeActiveCurve(multiple=False)
+    def _select_tree_item(self, _a):
+        idxs, keys = self.get_tree_active_curve(multiple=False)
         #  self.prevTreeSelect = sorted(list(set(idxs)))  # remove duplicates
         # update observable related to selected curve
         if len(idxs) > 0:
             # provides - Curve if possible, index otherwise
             graph = self.app.graph()
             curve = idxs[0]
-            if curve > -1 and curve < len(graph):
+            if -1 < curve < len(graph):
                 curve = graph[curve]
             # print('observable focustree', curve, keys[0])
             self.app.observables["focusTree"].update_observers(curve, keys[0])
 
-    def _getTreeItemIdKey(self, item=None):
+    def _get_tree_item_id_key(self, item=None):
         # handle several selected items
         if item is None:
-            item = self.Tree.focus()
+            item = self._widgets["tree"].focus()
         if isinstance(item, tuple):
             idxs, keys = [], []
             for it in item:
-                idx, key = self._getTreeItemIdKey(it)
+                idx, key = self._get_tree_item_id_key(it)
                 if len(idx) > 0:
                     idxs.append(idx[0])
                     keys.append(key[0])
@@ -2224,17 +2438,17 @@ class GUIFrameTree:
         # handle single element
         if len(item) == 0:
             return [], []
-        selected = self.Tree.item(item)
-        parentId = self.Tree.parent(item)
-        if parentId == "":  # selected a main line (with no parentId)-> no attr
+        selected = self._widgets["tree"].item(item)
+        parent_id = self._widgets["tree"].parent(item)
+        if parent_id == "":  # selected a main line (with no parent_id)-> no attr
             idx = selected["tags"]
             key = ""
         else:  # selected a line presenting an attribute
-            parent = self.Tree.item(parentId)
+            parent = self._widgets["tree"].item(parent_id)
             idx = parent["tags"]
             key = selected["text"]
             if not parent["open"]:
-                # print('wont select that one, parent not open', parentId)
+                # print('wont select that one, parent not open', parent_id)
                 return [], []
         if isinstance(key, list):
             key = key[0]
@@ -2242,25 +2456,26 @@ class GUIFrameTree:
             idx = idx[0]
         return [idx], [key]
 
-    def storeSelectedCurves(self):
-        """Store selected Curves and attributes to restore upon updateUI"""
+    def store_selected_curves(self):
+        """Store selected Curves and attributes to restore upon update_ui"""
         # store Curve instead of indices, because indices can change
         graph = self.app.graph()
-        idxs, keys = self.getTreeActiveCurve(multiple=False)
+        idxs, keys = self.get_tree_active_curve(multiple=False)
         for i in range(len(idxs)):
             # print('storeSelectedCurves false', idxs[i], '.', keys[i], '.')
-            if idxs[i] >= 0 and idxs[i] < len(graph):
+            if 0 <= idxs[i] < len(graph):
                 idxs[i] = graph[idxs[i]]
-        self.app.getTabProperties(focusCurvesKeys=(idxs, keys))
-        idxs, keys = self.getTreeActiveCurve(multiple=True)
+        self.app.get_tab_properties(focusCurvesKeys=(idxs, keys))
+        idxs, keys = self.get_tree_active_curve(multiple=True)
         for i in range(len(idxs)):
             # print('storeSelectedCurves true', idxs[i], '.', keys[i], '.')
-            if idxs[i] >= 0 and idxs[i] < len(graph):
+            if 0 <= idxs[i] < len(graph):
                 idxs[i] = graph[idxs[i]]
-        self.app.getTabProperties(selectionCurvesKeys=(idxs, keys))
+        self.app.get_tab_properties(selectionCurvesKeys=(idxs, keys))
 
-    def forgetSelectedCurves(self):
-        self.app.getTabProperties(
+    def forget_selected_curves(self):
+        """Empty memory wich Curves were actually sold"""
+        self.app.get_tab_properties(
             focusCurvesKeys=([], []), selectionCurvesKeys=([], [])
         )
 
@@ -2275,18 +2490,22 @@ class GUIFrameActionsCurves:
     def __init__(self, master, application, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.createWidgets(self.frame)
+        self.list_callinfos = []
+        self.frame_action = None  # define later, here only defines the name
+        self._widgets = []
+        self._create_widgets(self.frame)
         self.previous = {"curve": None, "type": None, "le": None}
-        self.app.observables["focusTree"].register(self.cw_frameAction)
+        self.app.observables["focusTree"].register(self._cw_frame_action)
 
-    def updateUI(self):
-        curve = self.app.getSelectedCurves(multiple=False)
+    def update_ui(self):
+        """Update widgets"""
+        curve = self.app.get_selected_curves(multiple=False)
         if len(curve) > 0 and curve[0] > -1:
             curve = self.app.graph()[curve[0]]
-        self.cw_frameAction(curve, force=True)
+        self._cw_frame_action(curve, force=True)
 
-    def createWidgets(self, frame):
-        # title frame
+    def _create_widgets(self, frame):
+        """Create widgets: itle frame"""
         fr = tk.Frame(frame)
         fr.pack(side="top", anchor="w", fill=tk.X)
         lbl = tk.Label(
@@ -2296,63 +2515,193 @@ class GUIFrameActionsCurves:
         hline = FrameTitleContentHide.frameHline(fr)
         hline.pack(side="left", anchor="center", fill=tk.X, expand=1, padx=5)
         # content
-        self.listCallinfos = []
-        self.listWidgets = []
-        self.frameAction = tk.Frame(frame)
-        self.frameAction.pack(side="top", fill=tk.X, padx=5)
+        self.frame_action = tk.Frame(frame)
+        self.frame_action.pack(side="top", fill=tk.X, padx=5)
         # argsFunc=[-1])
 
-    def cw_frameAction(self, curve, *args, force=False):
+    def _cw_frame_action(self, curve, *_args, force=False):
         # identify index of active curve
         graph = self.app.graph()
         graph_i = None
-        for c in range(len(graph)):
-            if graph[c] == curve:
+        for c, curve2 in enumerate(graph):
+            if curve2 == curve:
                 graph_i = c
                 break
         # retrieve list of actions
-        funcList = []
+        func_list = []
         if graph_i is not None:
-            funcList = curve.funcListGUI(graph=graph, graph_i=graph_i)
+            try:
+                func_list = curve.funcListGUI(graph=graph, graph_i=graph_i)
+            except Exception:
+                msg = "{}.funcListGUI, graph_i {}, graph {}."
+                logger.error(msg.format(type(curve), graph_i, graph), exc_info=True)
+                return
         # args: specific attribute selected. Useless here
         if (
             not force
             and curve == self.previous["curve"]
-            and type(curve) == self.previous["type"]
-            and len(funcList) == self.previous["le"]
+            and isinstance(curve, self.previous["type"])
+            and len(func_list) == self.previous["le"]
         ):
             # no need to change anything, do not update anything
             # print('GUIFrameActionsCurves: can think to not update actions')
             pass
-        self.previous = {"curve": curve, "type": type(curve), "le": len(funcList)}
+        self.previous = {"curve": curve, "type": type(curve), "le": len(func_list)}
         # destroy all existing widgets
-        for line in self.listWidgets:  # widgets
+        for line in self._widgets:  # widgets
             for widget in line:
                 widget.destroy()
-        self.listCallinfos = []
-        self.listWidgets = []
+        self.list_callinfos = []
+        self._widgets = []
         # create new widgets
-        for j in range(len(funcList)):
-            line = funcList[j]
+        for j, line in enumerate(func_list):
             if not isinstance(line, FuncGUI):
-                line = FuncGUI(None, None).initLegacy(line)
+                line = FuncGUI(None, None).init_legacy(line)
             # create widgets
-            callinfo, widgets = line.create_widgets(
-                self.frameAction, self.callAction, j
+            callinfo, widgets = self._define_widgets_funcgui(
+                line, self.frame_action, self.call_action, j
             )
-            self.listCallinfos.append(callinfo)
-            self.listWidgets.append(widgets)
-        if len(self.listCallinfos) == 0:
-            widget = tk.Label(self.frameAction, text="No possible action.")
+            self.list_callinfos.append(callinfo)
+            self._widgets.append(widgets)
+        if len(self.list_callinfos) == 0:
+            widget = tk.Label(self.frame_action, text="No possible action.")
             widget.pack(side="top", anchor="w")
-            self.listWidgets.append([widget])
+            self._widgets.append([widget])
 
-    def callAction(self, j):
+    @staticmethod
+    def _define_widgets_funcgui(funcgui, frame, callback, callbackarg):
+        """
+        Creates a frame and widgets inside. Returns:
+        callinfo: [func, StringVar1, StringVar2, ..., {hiddenvars}]
+        widgets: [innerFrame, widget1, widget2, ...]
+        frame: where the widgets are created. substructure will be provided
+        callback: function to call when user validates his input
+        callbackarg: index of guiAction. callback(callbackarg)
+        """
+        callinfo = {
+            "func": funcgui.func,
+            "args": [],
+            "kwargs": dict(funcgui.hiddenvars),
+        }
+        widgets = []  # list of widgets, to be able to destroy later
+        # create inner frame
+        fr = tk.Frame(frame)
+        fr.pack(side="top", anchor="w", fill=tk.X)
+        widgets.append(fr)
+        # validation button
+        if funcgui.func is None:
+            widget = tk.Label(fr, text=funcgui.textsave)
+        else:
+            widget = tk.Button(
+                fr, text=funcgui.textsave, command=lambda j_=callbackarg: callback(j_)
+            )
+        widget.pack(side="left", anchor="w")
+        widgets.append(widget)
+        if len(funcgui.tooltiptext) > 0:
+            CreateToolTip(widget, funcgui.tooltiptext)
+        # list of widgets
+        lookuppreviouswidget = {}
+        for field in funcgui.fields:
+            options = dict(field["options"])
+            widgetclass = field["widgetclass"]
+
+            # first, a Label widget for to help the user
+            widget = tk.Label(fr, text=field["label"])
+            widget.pack(side="left", anchor="w", fill=tk.X)
+            widgets.append(widget)
+
+            if widgetclass is None:
+                # do not create any widget; purpose: show the label
+                continue
+            # widgetname: tranform into reference to class
+            try:
+                if widgetclass in ["Combobox"]:  # Combobox
+                    widgetclass = getattr(ttk, widgetclass)
+                else:
+                    widgetclass = getattr(tk, widgetclass)
+            except Exception as e:
+                msg = (
+                    "ERROR FuncGUI.create_widgets, cannot create widget of class {"
+                    "}. Exception {} {}"
+                )
+                print(msg.format(widgetclass, type(e), e))
+                continue
+
+            # Frame: interpreted as to create a new line
+            if widgetclass == tk.Frame:
+                fr = tk.Frame(frame)
+                fr.pack(side="top", anchor="w", fill=tk.X)
+                widgets.append(fr)  # inner Frame
+                continue  # stop there, go to next widget
+
+            # create stringvar
+            if widgetclass == tk.Checkbutton:
+                stringvar = tk.BooleanVar()
+                stringvar.set(bool(field["value"]))
+            else:
+                stringvar = tk.StringVar()
+                stringvar.set(str(field["value"]))
+
+            if field["keyword"] is None:
+                callinfo["args"].append(stringvar)
+            else:
+                callinfo["kwargs"].update({field["keyword"]: stringvar})
+            # default size if widgetclass is Entry
+            if widgetclass == tk.Entry and "width" not in options:
+                widthtest = int(
+                    (40 - len(field["label"]) / 3 - len(funcgui.textsave) / 2)
+                    / len(funcgui.fields)
+                )
+                width = max(8, widthtest)
+                if len(stringvar.get()) < 2:
+                    width = int(0.3 * width + 0.7)
+                options.update({"width": width})
+            # link to StringVar
+            if widgetclass == tk.Checkbutton:
+                options.update({"variable": stringvar})
+            else:
+                options.update({"textvariable": stringvar})
+            # create widget
+            try:
+                widget = widgetclass(fr, **options)
+            except Exception as e:
+                print("Exception", type(e), e)
+                msg = "Could not create widget {}, {}, {}"
+                print(msg.format(field["label"], widgetclass.__name__, options))
+                continue
+            widget.pack(side="left", anchor="w")
+            widgets.append(widget)
+            # bind
+            bind = field["bind"]
+            if bind is not None:
+                if bind == "beforespace":
+                    widget.bind(
+                        "<<ComboboxSelected>>",
+                        lambda event: event.widget.set(
+                            event.widget.get().split(" ")[0]
+                        ),
+                    )
+                elif bind == "previouswidgettogglereadonly":
+                    # -1 is itfuncgui, -2 its Label, previous widget is -3
+                    lookuppreviouswidget.update({stringvar._name: widgets[-3]})
+                    stringvar.trace_add(
+                        "write",
+                        lambda w, _1, _2: lookuppreviouswidget[w].config(
+                            state="readonly" if int(frame.getvar(w)) else "normal"
+                        ),
+                    )
+                else:
+                    widget.bind("<<ComboboxSelected>>", bind)
+            widget.bind("<Return>", lambda event, j_=callbackarg: callback(j_))
+        # end of loop, return
+        return callinfo, widgets
+
+    def call_action(self, j):
         """when user validates his input for curve action"""
-        self.app.storeSelectedCurves()
-        curve = self.app.getSelectedCurves(multiple=False)[0]
+        self.app.store_selected_curves()
+        curve = self.app.get_selected_curves(multiple=False)[0]
         graph = self.app.graph()
-        info = self.listCallinfos[j]
+        info = self.list_callinfos[j]
         # retrieve function to call
         func, args, kwargs = info["func"], info["args"], dict(info["kwargs"])
         # retrieve values of user-adjustable parameters
@@ -2360,17 +2709,24 @@ class GUIFrameActionsCurves:
         for key in kwargs:
             if isinstance(kwargs[key], tk.StringVar):
                 kwargs[key] = strToVar(kwargs[key].get())
+            elif isinstance(kwargs[key], tk.BooleanVar):
+                kwargs[key] = strToVar(kwargs[key].get())
             # else: hiddenvars
         # check if func is method of Graph object and not of the Curve
         if not hasattr(func, "__self__"):
             args = [self.app.graph()] + args
             # to get call as Graph.func(graph, *args)
 
-        def executeFunc(curve, func, args, kwargs):
+        def execute_func(curve, func, args, kwargs):
             # execute curve action
             graph = self.app.graph()
-            res = func(*args, **kwargs)
-            if self.app.ifPrintCommands():
+            try:
+                res = func(*args, **kwargs)
+            except Exception:
+                msg = "While executing function {} with args {} kwargs {}."
+                logger.error(msg.format(func, args, kwargs), exc_info=True)
+                return
+            if self.app.if_print_commands():
                 try:
                     subject = func.__module__
                     if "graph" in subject:
@@ -2378,23 +2734,13 @@ class GUIFrameActionsCurves:
                     elif "curve" in subject:
                         subject = "graph[" + str(curve) + "]"
                     else:
-                        print(
-                            "WARNING callAction print commands: subject not",
-                            "determined (",
-                            subject,
-                            func.__name__,
-                            j,
-                            ")",
-                        )
-                    print(
-                        "curve = "
-                        + subject
-                        + "."
-                        + func.__name__
-                        + "("
-                        + self.app.argsToStr(*args, **kwargs)
-                        + ")"
+                        msg = "callAction print: subject not determined ({}, {}, {})"
+                        logger.warning(msg.format(subject, func.__name__, j))
+                    msg = "curve = {}.{}({})"
+                    msgformat = msg.format(
+                        subject, func.__name__, self.app.args_to_str(*args, **kwargs)
                     )
+                    print(msgformat)
                 except Exception:
                     pass  # error while doing useless output does not matter
             # where to place new Curves
@@ -2406,39 +2752,39 @@ class GUIFrameActionsCurves:
                 idx += 1
             # insert newly created Curves
             if isinstance(res, Curve):
-                self.app.callGraphMethod("append", res, idx=idx)
+                self.app.call_graph_method("append", res, idx=idx)
             elif (
                 isinstance(res, list)  # if list of Curves
                 and np.array([isinstance(c, Curve) for c in res]).all()
             ):
-                self.app.callGraphMethod("append", res, idx=idx)
+                self.app.call_graph_method("append", res, idx=idx)
             elif isinstance(res, Graph):  # if returns a Graph, create a new one
-                folder = self.app.getFolder()
-                dpi = self.app.getTabProperties()["dpi"]
+                folder = self.app.get_folder()
+                dpi = self.app.get_tab_properties()["dpi"]
                 self.app.graph(res, title="Curve action output", folder=folder, dpi=dpi)
-            elif res != True:
+            elif not isinstance(res, bool) or res is not True:  # don't, only if "True"
                 print("Curve action output:")
                 print(res)
             # TO CHECK: if want to print anything if True, etc.
 
         # handling actions on multiple Curves
-        toExecute = {curve: func}
-        curves = self.app.getSelectedCurves(multiple=True)
+        to_execute = {curve: func}
+        curves = self.app.get_selected_curves(multiple=True)
         if len(curves) > 1:
-            funcGUI0 = graph[curve].funcListGUI(graph=graph, graph_i=curve)[j]
-            if not isinstance(funcGUI0, FuncGUI):
-                funcGUI0 = FuncGUI(None, None).initLegacy(funcGUI0)
+            func_gui0 = graph[curve].funcListGUI(graph=graph, graph_i=curve)[j]
+            if not isinstance(func_gui0, FuncGUI):
+                func_gui0 = FuncGUI(None, None).init_legacy(func_gui0)
             for c in curves:
                 if c != curve:
                     # check that function is offered by other selected curves
                     list1 = graph[c].funcListGUI(graph=graph, graph_i=c)
                     if len(list1) > j:
-                        funcGUI1 = list1[j]
-                        if not isinstance(funcGUI1, FuncGUI):
-                            funcGUI1 = FuncGUI(None, None).initLegacy(funcGUI1)
-                        if funcGUI0.isSimilar(funcGUI1):
-                            toExecute.update({c: funcGUI1.func})
-        keys = list(toExecute.keys())
+                        func_gui1 = list1[j]
+                        if not isinstance(func_gui1, FuncGUI):
+                            func_gui1 = FuncGUI(None, None).init_legacy(func_gui1)
+                        if func_gui0.is_similar(func_gui1):
+                            to_execute.update({c: func_gui1.func})
+        keys = list(to_execute.keys())
         keys.sort(reverse=True)
         # start execution by last one - to handle new curves
         for c in keys:
@@ -2447,6 +2793,6 @@ class GUIFrameActionsCurves:
                 if len(lbl) > 0:
                     lbl = "(" + lbl + ")"
                 print("Action on Curve", c, lbl)
-            executeFunc(c, toExecute[c], args, kwargs)
+            execute_func(c, to_execute[c], args, kwargs)
         # after execution
-        self.app.updateUI()
+        self.app.update_ui()

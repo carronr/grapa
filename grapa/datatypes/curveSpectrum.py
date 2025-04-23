@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 13 15:44:58 2016
+"""Curve subclass to provide analysis function for spectra. For example spectrometers,
+UV-VIS, PL spectra.
 
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.curve import Curve
-from grapa.mathModule import is_number
+from grapa.curve import Curve, math_on_curves
+from grapa.mathModule import is_number, roundSignificantRange, MathOperator
 from grapa.constants import CST
+from grapa.datatypes.curveTRPL import integrate
 
 # TODO: better parse perkin elmer Reflectnce/transmittance
 # TODO: substract absorption in substrate
@@ -78,20 +79,18 @@ class CurveSpectrum(Curve):
         if self.attr("_spectrumGUIdark"):
             iddark = []
             if "graph" in kwargs:
-                for c in range(kwargs["graph"].length()):
-                    iddark.append(
-                        str(c) + " " + kwargs["graph"].curve(c).attr("label")[:6]
-                    )
+                for c in range(len(kwargs["graph"])):
+                    iddark.append(str(c) + " " + kwargs["graph"][c].attr("label")[:6])
             else:
                 print("graph must be provided to funcListGUI")
                 kwargs["graph"] = None
             out.append(
                 [
                     self.substractBG,
-                    "Substract dark",
+                    "Subtract dark",
                     ["id dark", "", "", ""],
                     ["0", "1 interpolate both", "1 new curve", "0 ignore offset"],
-                    {"graph": kwargs["graph"], "operator": "sub"},
+                    {"graph": kwargs["graph"], "operator": MathOperator.SUB},
                     [
                         {
                             "field": "Combobox",
@@ -124,7 +123,6 @@ class CurveSpectrum(Curve):
         # integration
         try:
             from grapa.datatypes.curveTRPL import CurveTRPL
-            from grapa.mathModule import roundSignificantRange
 
             alter = (
                 str(kwargs["graph"].attr("alter")) if "graph" in kwargs else "['', '']"
@@ -132,11 +130,10 @@ class CurveSpectrum(Curve):
             ROI = roundSignificantRange([min(self.x()), max(self.x())], 2)
             out.append(
                 [
-                    CurveTRPL.integrate,
+                    self.integrate,
                     "Integrate",
                     ["ROI", "data transform"],
                     [ROI, alter],
-                    {"curve": self},
                     [{}, {"field": "Combobox", "values": ["raw", alter]}],
                 ]
             )
@@ -146,13 +143,13 @@ class CurveSpectrum(Curve):
         if subclass is not None and hasattr(subclass, "funcListGUISpecific"):
             out += subclass.funcListGUISpecific(self, **kwargs)
         # help
-        out.append([self.printHelp, "Help!", [], []])  # one line per function
+        out.append([self.print_help, "Help!", [], []])  # one line per function
         return out
 
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
-        out += [["nm <-> eV", ["nmeV", ""], ""]]
-        out += [["nm <-> cm-1", ["nmcm-1", ""], ""]]
+        out += [["nm <-> eV", [self.ALTER_NM_EV, ""], ""]]
+        out += [["nm <-> cm-1", [self.ALTER_NM_CM, ""], ""]]
         return out
 
     def getSubclass(self):
@@ -163,13 +160,13 @@ class CurveSpectrum(Curve):
                 return s
         return None
 
-    def setSubclass(self, newtype, unit):
-        """
-        Spectrum type: set the Spectrum spectrum, affecting the GUI actions.
-        Parameters:
-        - newtype: subclass of CurveSpectrum. Examples:
-          'CurveSpectrumReflectance', 'CurveSpectrumTransmittance', etc.
-        - unit: empty, or '%' if data are in percent units.
+    def setSubclass(self, newtype, unit) -> bool:
+        """Spectrum type: set the Spectrum spectrum, affecting the GUI actions.
+
+        :param newtype: subclass of CurveSpectrum. Examples:
+               'CurveSpectrumReflectance', 'CurveSpectrumTransmittance', etc.
+        :param unit: empty, or '%' if data are in percent units.
+        :return: True for success, False otherwise.
         """
         # set unit
         if unit != "(no unit)":
@@ -211,8 +208,8 @@ class CurveSpectrum(Curve):
         in spectrumSubstrates.txt
         """
         if CurveSpectrum.LIST_SUBSTRATES is None:
-            file = cls.fileSubstrates()
-            lbls = [c.attr("label") for c in file.iterCurves()]
+            graph = cls.fileSubstrates()
+            lbls = [curve.attr("label") for curve in graph]
             subsdict = {}
             for lbl in lbls:
                 key = lbl[:-2]
@@ -248,19 +245,22 @@ class CurveSpectrum(Curve):
     def dataModifySwapNmEv(self):
         self.setX(CST.nm_eV / self.x())
 
-    def substractBG(self, idDark, interpolate, ifnew, offsets, graph=None, **kwargs):
-        """
-        Substract dark: substract a curve to the data.
-        Parameters:')
-        - idDark: index of of the Curve containing the dark spectrum.
-        - interpolate:
-            0: performs element-wise substraction,
-            1: output on x points of both data and dark, interpolate both,
-            2: output on selected Curve x points, interpolate the dark Curve.
-        - ifnew: 1: create a new Curve, 0: modify existing data.
-        - offsets: 0: ignore offset and muloffset information.
-            1: substract data after offset and muloffset operation.
-        - graph: Graph object containing the dark Curve referred by idDark
+    def substractBG(self, id_dark, interpolate, if_new, offsets, graph=None, **kwargs):
+        """Substract dark: substract a curve to the data.
+
+        :param id_dark: index of the Curve containing the dark spectrum.
+        :param interpolate:
+
+               - 0: performs element-wise substraction,
+
+               - 1: output on x points of both data and dark, interpolate both,
+
+               - 2: output on selected Curve x points, interpolate the dark Curve.
+
+        :param if_new: 1: create a new Curve, 0: modify existing data.
+        :param offsets: 0: ignore offset and muloffset information.
+               1: substract data after offset and muloffset operation.
+        :param graph: Graph object containing the dark Curve referred by idDark
         """
         # clean input from GUI: interpolate
         if interpolate in [0, 1, 2, "0", "1", "2"]:
@@ -288,34 +288,32 @@ class CurveSpectrum(Curve):
             return in_
 
         # clean input from GUI: ifNew, offsets
-        ifnew = cleanInputBool(ifnew, default=True)
+        if_new = cleanInputBool(if_new, default=True)
         offsets = cleanInputBool(offsets, default=False)
-        idDark = min(int(idDark), graph.length() - 1)
-        j = None  # index of 'curve' in graph
-        for c in range(graph.length()):
-            if graph.curve(c) == self:
-                j = c
+        id_dark = min(int(id_dark), len(graph) - 1)
+        id_self = None  # index of 'curve' in graph
+        for c in range(len(graph)):
+            if graph[c] == self:
+                id_self = c
                 break
-        out = self.__add__(
-            graph.curve(idDark), interpolate=interpolate, offsets=offsets, **kwargs
+
+        if "operator" not in kwargs:
+            kwargs["operator"] = MathOperator.SUB
+        out = math_on_curves(
+            self, graph[id_dark], interpolate=interpolate, offsets=offsets, **kwargs
         )
         key = "_sub"
-        msg = (
-            "{Curve "
-            + (str(j) if j is not None else "")
-            + ": "
-            + self.attr("label")
-            + "} - "
-            + "{Curve "
-            + str(idDark)
-            + ": "
-            + graph.curve(idDark).attr("label")
-            + "}"
+        msg = "{{Curve {}: {}}} - {{Curve {}: {}}}"
+        msgfmt = msg.format(
+            (str(id_self) if id_self is not None else ""),
+            self.attr("label"),
+            str(id_dark),
+            graph[id_dark].attr("label"),
         )
-        out.update({key: msg})
-        if not ifnew:
-            if j is not None:
-                graph.replaceCurve(out, j)
+        out.update({key: msgfmt})
+        if not if_new:
+            if id_self is not None:
+                graph.curve_replace(out, id_self)
                 print("CurveSpectrum.substractBG: modified Curve data.")
                 return True
             print(
@@ -325,7 +323,7 @@ class CurveSpectrum(Curve):
         print("CurveSpectrum.substractBG: created new Curve.")
         return out
 
-    def correctInstrumentalResponse(self, instrresp, *args, **kwargs):
+    def correctInstrumentalResponse(self, instrresp, *_args, **_kwargs):
         """
         Correct for the instrumental response, using an instrumental response
         provided in file grapa/datatypes/spectrumInstrumentalResponses.txt
@@ -334,7 +332,7 @@ class CurveSpectrum(Curve):
         - instrresp: label of the desired instr. resp. Curve in the file
         """
         file = self.fileInstrResp()
-        for curve in file.iterCurves():
+        for curve in file:
             if curve.attr("label") == instrresp:
                 out = self / curve
                 val = self.attr("_spectrumCorrected")
@@ -350,21 +348,23 @@ class CurveSpectrum(Curve):
             "Curve Spectrum instrumental response not found (required",
             instrresp,
             ", available",
-            ", ".join([c.attr("label") for c in file.iterCurves()]),
+            ", ".join([curve.attr("label") for curve in file]),
             ")",
         )
 
-    def computeAbsorptance(self, auxcurve, graph=None, **kwargs):
+    def computeAbsorptance(self, auxcurve, graph=None, **kwargs) -> Curve:
         """
-        Compute absorptance: computes an absorptance curve, defined as
-            A% = 1 - R% - T%.
-        Parameters:
-        - auxcurve: index to a transmittance/reflectance curve,
-        - graph: a graph containing the curve refered as auxcurve
+        Compute absorptance: computes an absorptance curve, defined as A% = 1 - R% - T%.
+
+        :param auxcurve: index to a transmittance/reflectance curve,
+        :param graph: a graph containing the curve refered as auxcurve
+        :return: a Curve, or False if failure
         """
         out = self.computeAlpha(
             auxcurve, None, None, alpha=False, graph=graph, **kwargs
         )
+        if out is False:
+            return out
         out.update(
             {
                 "_spectrumalpha": "",
@@ -374,65 +374,63 @@ class CurveSpectrum(Curve):
         return out
 
     def computeAlpha(
-        self, auxcurve, thickness, substrate, alpha=True, graph=None, **kwargs
-    ):
+        self, auxcurve, thickness, substrate, alpha=True, graph=None, **_kwargs
+    ) -> Curve:
         """
         Estimate alpha: estimates the optical absorption spectrum of a layer,
-        using the formula
-            alpha[cm-1] = - 1 / d[cm] * ln(T / (1-R)
+        alpha, or absrptance,
+        alpha uses the formula ``alpha[cm-1] = - 1 / d[cm] * ln(T / (1-R)``
         This formula is a reasonable approximation, assuming a few assumptions
         detailed in the manual. Notably, the substrate should be transparent,
-        and most of the reflections occurs at the air-layer interface. A
-        substrate with low refractive index is to be preferred.
-        Parameters:
-        - auxcurve: index to a transmittance/reflectance curve,
-        - thickness: thickness of the layer, in [nm],
-        - substrate: a simple model can be used to account for the absorption
-          in the substrate. The formula becomes:
-            alpha[cm-1] = - 1 / d * ln(T / (1-R) * (1-Rsub) / Tsub).
-        - graph: a graph containing the curve refered as auxcurve
+        and most of the reflections occurs at the air-layer interface.
+        A substrate with low refractive index is to be preferred.
+
+        :param auxcurve: index to a transmittance/reflectance curve,
+        :param thickness: thickness of the layer, in [nm],
+        :param substrate: a simple model can be used to account for the absorption
+               in the substrate. The formula becomes:
+               ``alpha[cm-1] = - 1 / d * ln(T / (1-R) * (1-Rsub) / Tsub)``
+        :param alpha: if True, computes alpha. If False, compute absorptance
+        :param graph: a graph containing the curve refered as auxcurve
+        :return: a CurveSpectrum
         """
         if not isinstance(graph, Graph):
             print('Curve Spectrum computeAbsorptance, keyword "graph" not', "provided")
             return False
+
         if alpha:
             Rsub, Tsub = None, None
             if substrate not in ["", "none"]:
                 filesubs = self.fileSubstrates()
                 Rsub, Tsub = None, None
-                for c in filesubs.iterCurves():
-                    lbl = c.attr("label")
+                for curve in filesubs:
+                    lbl = curve.attr("label")
                     if lbl == substrate + " R":
-                        Rsub = c
+                        Rsub = curve
                     if lbl == substrate + " T":
-                        Tsub = c
+                        Tsub = curve
                 if Rsub is None or Tsub is None:
-                    print(
-                        "Curve Spectrum computeAbsorptance (alpha), cannot",
-                        "find substrate curves (",
-                        substrate,
-                        "), substrate",
-                        "ignored.",
+                    msg = (
+                        "Curve Spectrum computeAbsorptance (alpha), cannot find "
+                        "substrate curves ({}), substrate ignored."
                     )
+                    print(msg.format(substrate))
                     Rsub, Tsub = None, None
         aux = None
         if isinstance(auxcurve, float):
             auxcurve = int(auxcurve)
-            if auxcurve >= 0 and auxcurve < len(graph):
+            if 0 <= auxcurve < len(graph):
                 aux = graph[auxcurve]
         else:
-            for c in range(len(graph)):
-                if auxcurve == str(c) + " " + graph[c].attr("label"):
-                    aux = graph[c]
+            for curve in range(len(graph)):
+                if auxcurve == str(curve) + " " + graph[curve].attr("label"):
+                    aux = graph[curve]
                     break
         if aux is None:
-            print(
-                "Curve Spectrum computeAbsorptance, auxiliary curve not",
-                "found (",
-                auxcurve,
-                ")",
-            )
+            msg = "Curve Spectrum computeAbsorptance, auxiliary curve not found ({})"
+            print(msg.format(auxcurve))
             return False
+
         # determination R or T
         if (
             self.attr("_spectrumSubclass") == "CurveSpectrumTransmittance"
@@ -484,11 +482,18 @@ class CurveSpectrum(Curve):
         )
         return out
 
-    def printHelp(self):
+    def integrate(self, ROI=None, alter=None):
+        """Integrate: returns the integral of the curve, within ROI.
+
+        :param ROI: example [xmin, xmax]
+        :param alter: 'raw', or any Graph 'alter' value including (mul-)offsets.
+        """
+        return integrate(self, roi=ROI, alter=alter)
+
+    def print_help(self):
         print("*** *** ***")
         print(
-            "CurveSpectrum offers some capabilities to process optical",
-            "spectrum data.",
+            "CurveSpectrum offers some capabilities to process optical spectrum data."
         )
         print("Curve transforms:")
         print(
@@ -504,11 +509,11 @@ class CurveSpectrum(Curve):
             CST.nm_eV,
             "/ nm),",
         )
-        self.printHelpFunc(CurveSpectrum.setSubclass)
+        self.print_help_func(CurveSpectrum.setSubclass)
         if self.attr("_spectrumGUIoffset", True):
-            self.printHelpFunc(CurveSpectrum.addOffset)
+            self.print_help_func(CurveSpectrum.addOffset)
         if self.attr("_spectrumGUIdark", True):
-            self.printHelpFunc(CurveSpectrum.substractBG)
+            self.print_help_func(CurveSpectrum.substractBG)
         sub = self.getSubclass()
         if sub is not None and hasattr(sub, "printHelp_"):
             sub.printHelp_(self)
@@ -521,11 +526,11 @@ class CurveSpectrumReflectance(CurveSpectrum):
 
     def funcListGUISpecific(self, **kwargs):
         out = []
-        file = self.fileInstrResp()
+        graph_instrresp = self.fileInstrResp()
         graph = kwargs["graph"] if "graph" in kwargs else None
         # instrumental response
         corr = "(already done) " if self.attr("_spectrumCorrected") else ""
-        lbls = [c.attr("label") for c in file.iterCurves()]
+        lbls = [curve.attr("label") for curve in graph_instrresp]
         out.append(
             [
                 self.correctInstrumentalResponse,
@@ -539,7 +544,7 @@ class CurveSpectrumReflectance(CurveSpectrum):
         # compute absorptance, alpha
         if graph is not None:
             poss = []
-            for c in range(graph.length()):
+            for c in range(len(graph)):
                 if isinstance(graph[c], CurveSpectrum):
                     if (
                         graph[c].attr("_spectrumSubclass")
@@ -576,9 +581,9 @@ class CurveSpectrumReflectance(CurveSpectrum):
 
     def printHelp_(self):
         print("CurveSpectrumReflectance offers 3 additional processing", "functions.")
-        self.printHelpFunc(CurveSpectrum.correctInstrumentalResponse)
-        self.printHelpFunc(CurveSpectrum.computeAbsorptance)
-        self.printHelpFunc(CurveSpectrum.computeAlpha)
+        self.print_help_func(CurveSpectrum.correctInstrumentalResponse)
+        self.print_help_func(CurveSpectrum.computeAbsorptance)
+        self.print_help_func(CurveSpectrum.computeAlpha)
 
 
 class CurveSpectrumTransmittance(CurveSpectrum):
@@ -587,11 +592,11 @@ class CurveSpectrumTransmittance(CurveSpectrum):
 
     def funcListGUISpecific(self, **kwargs):
         out = []
-        file = self.fileInstrResp()
+        graph_instrresp = self.fileInstrResp()
         graph = kwargs["graph"] if "graph" in kwargs else None
         # instrumental response
         corr = "(already) " if self.attr("_spectrumCorrected") else ""
-        lbls = [c.attr("label") for c in file.iterCurves()]
+        lbls = [curve.attr("label") for curve in graph_instrresp]
         value = "Transmittance (specular)"
         if value not in lbls:
             if "Transmittance (diffuse)" in lbls:
@@ -645,9 +650,9 @@ class CurveSpectrumTransmittance(CurveSpectrum):
 
     def printHelp_(self):
         print("CurveSpectrumTransmittance offers 3 additional processing", "functions.")
-        self.printHelpFunc(CurveSpectrum.correctInstrumentalResponse)
-        self.printHelpFunc(CurveSpectrum.computeAbsorptance)
-        self.printHelpFunc(CurveSpectrum.computeAlpha)
+        self.print_help_func(CurveSpectrum.correctInstrumentalResponse)
+        self.print_help_func(CurveSpectrum.computeAbsorptance)
+        self.print_help_func(CurveSpectrum.computeAlpha)
 
 
 class CurveSpectrumAbsorptance(CurveSpectrum):

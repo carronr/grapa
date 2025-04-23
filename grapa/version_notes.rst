@@ -1,14 +1,65 @@
-TFPV data reading software
 GRAPA: GRAphing and Photovoltaics Analysis
+===========================================
+Empa TFPV data reading software
 
-KNOWND BUGS
+** KNOWN BUGS **
+
 - A few are there for sure, please announce them - romain.carron@empa.ch
+- CurveTRPL fit with fixed tau parameters.
+- Bug can prevent ERE to complete (to do: find a dataset that reproduces the error)
 
 
 
-Version 0.6.4.0
-Released 07.11.2024
-Additions
+
+
+**Version 0.7.0.0
+
+Release 23.04.2025
+
+*Additions*
+
+- Documentation of Grapa code, using sphinx.
+- Added a conditional formatting mechanisms, available in the GUI just under the Template and Colorize. The behavior follows the pattenr "for each curve in graph, if [property] [==, contains etc.] [value], then [property] = [value]. Use "linestyle" "none" to hide a curve.
+- Added a mechanisms to be able to easily provide fitting functionalities to specific Curve types, in a customizable manner (utils.py class FitHandler). The parametrization anc hcoice of pre-set fit setting are outsourced to an external configuration file, leaving much more freedom to the user. Should be rather easy to reuse for other use cases.
+- Added the fit mechanisms into the CurveMCA used for XRF .mca data fit. A number of pre-defined fit settings are pre-configured in file XRF_fitparameters.txt, to suit the Abt207 XRF instrument and typical data. X-ray energy values can be specified: the Curve will lookup the correct channels using internal channel-kev conversion.
+- Rewrote the xml parser into something that may be useful in the future. It can be configured from an external text file to tailor to specific formats. Hopefully the approach is generic enough to be useful.
+- Added possibility to read data and metadata from xrdml files, using the xml parser.
+- Added a Curve type, Curve XRD. Functionalities are extremely basic - please use dedicated software for anything more than plotting and fitting with gaussian (see new mechanisms above, and new configuration file XRD_fitparameters.txt).
+- Curve TRPL: Added action, fit piece-wise. Performs a series of fits on the data. Use case: extract instantenous tau vs signal. Can be configured: # of exponentials in each fit, ROI tiume window, ROI of first fit, multiplier applied to the first ROI window (geometric progression along time axis)
+- Curve TRPL: Added action, fit with spline. Can be configured: linear or semilogx, number of knots, minimum number of points between knots, maximum x span between knots.
+- Curve JV: Supports the modified naming format of JV software. Handles the corresponding illumination spectrum and scan sweep directions.
+- Curve plot type "bar" and "barh": added Curve Actions quick modifications: width/height, align, bottom/left. For keyword bottom/left, special keywords are implemented to refer to first, previous, next and last bar Curve.
+- Curve plot type "bar" and "barh": added Curve Actions quick modifications: list of labels (xtickslabels or ytickslabels).
+- Curve EQE, CurveCV, CurveCf, CurveTRPL, CurveMCA, CurveSIMS, GraphPLQY, GraphJscVoc: Added a mechanism to suggest graph axis labels, in case current labels appear not appropriate (e.g. following data transform).
+- Script JV, can now process JV series where cells are identified by #1, #2 etc.
+
+*Modifications*
+
+- CurveMCA: the default scaling values offset and mult to compute energy from channel are now parsed from a text file, and not hard-coded anymore.
+- CurveTRPL: Added option to restrict fit curve onto time range of interest ROI data. Slightly revised initial fit parameters.
+- config.txt: revised default color palettes
+
+*Other*
+
+- Improved compatibility with numpy >=2.0. Please report remaining difficulties.
+- Added logfile to locate possible bugs and errors: grapalog.log
+- Cleanup of docstrings for the automatic documentation of grapa.
+- Solved glitches with excess printed information
+- Solved issue with graph to clipboard that prevented good operation of the feature
+- Solved (hopefully) a bug with export and copy_to_clipboard, when alter keywords was specified.
+- Reworked a number of internals, various refactoring. New python files curve_subclasses_utils.py, plot_curve.py, plot_graph.py, metadata.py
+- Created tests, a bit for practical purpose but more to see how to make tests at all - but it is a start.
+
+
+
+
+
+**Version 0.6.4.0**
+
+*Released 07.11.2024*
+
+*Additions*
+
 - GUI: Added an option to modify the graph background color for visualization purpose. The output image remains with a transparent background, to be provided separately.
 - GUI: Added a button to reverse the curve order. Ignores curve selection.
 - Curve EQE: Bandgap derivative, added calculation of the bandgap PV by Rau (https://doi.org/10.1103/PhysRevApplied.7.044016), by averaging the energy weighted by EQE derivative value, over the derivative FWHM. Its value is slightly more sensitive to experimental noise than the derivative method. When the derivative peak is asymmetric, the value tends to be slightly higher than the derivative peak (up to 30meV ?).
@@ -20,7 +71,9 @@ Additions
 - Script CVfT: From a set of C-f data acquired at different voltages and temperatures, provides C-V-f maps for each temperatures indicating low values for phase, as well as C-f, C-V with T and C-V with Hz plots.
 - Script Cf: added Bode plot, |Z| and impedance angle versus log(frequency)
 - Script Boxplot: Added summary graph presenting all generated boxplots
-Modifications
+
+*Modifications*
+
 - General: Conversion nm-eV is now calculated from Plank and c constants (previously: 1239.5, now about 1239.8419)
 - General: graph colorize modifed behavior: if sameIfEmptyLabel, same colors are also applied in case label is hidden (labelhide)
 - Curve EQE: Revised parametrization of bandgap by derivative peak method. The fit is now parametrized in unit of eV.
@@ -31,13 +84,17 @@ Modifications
 - Script JV: Rsquare fit quality restricted to the diode region is reported in the summary files and in graphical summary (diode). The marker size of the other fit parameters shrinks in case poor Rsquare values were obtained.
 - Script Correlation: Improved detection of input parameters varied in a logarithmic manner.
 - Script Correlation: Revised colorscale of plot "parseddata" for datasets with 2 input parameters
-Bug corrections
+
+*Bug corrections*
+
 - General: Solved a bug that prevented making figures with a unique subplot
 - General: The property xtickslabels and ytickslabels can now be used also in conjunction with the property alter.
 - General: Plot type fill_between and fill_betweenx now have more proper behavior.
 - GUI: Small adjustments against MacOS dark mode
 - GUI: Solved a bug that appeared when a tab was closed before the figure drawing was finished. Graphs drawn later on were not drawn correctly if contained several axes.
-Miscellaneous
+
+*Miscellaneous*
+
 - General: Centralized physical constants in a unique file constants.py. Hopefully everything works as before.
 - Implementation: new text files to store content of (now renamed) variables Graph.dataInfoKeysGraphData, Graph.graphInfoKeysData, Graph.headersKeys
 - Implementation: tidy up the code at a number of places
@@ -48,13 +105,18 @@ Miscellaneous
 
 
 
-Version 0.6.3.1
-Released 17.05.2024
+**Version 0.6.3.1**
+
+*Released 17.05.2024*
+
 - GraphCf: parsing of Cf data more tolerant to variations in file format
 
 
-Version 0.6.3.0
-Released 21.04.2024
+
+**Version 0.6.3.0**
+
+*Released 21.04.2024*
+
 - New type of file supported, TinyTusker
 - Can now open files directly from Openbis. This require the external library pybis, and access to the Empa-developped code openbis uploader 207.
 - Added Curve action Autolabel: Curve labels can be generated based on a template, using the attributes values. Example: ${sample} ${cell}". Curve types: SIMS, Cf, CV, EQE, JV
@@ -66,34 +128,53 @@ Released 21.04.2024
 - Curve JV: added data transform Sites' method, dV/dJ vs 1/(J-Jsc)
 - Curve Subplot: added Curve Actions for easier modification of axis limits and labels
 - Curve TRPL: revised parsing of acquisition time values. Should work with spectroscopic dataset as well.
-Bugs & code cleaning
+
+*Bugs & code cleaning*
+
 - Solved issue with leftovers on the canvas when changing figure e.g. size.
 - Improved auto screen dpi. When opening a file, the graph should be displayed witih a size close to the maximum displayable value
 - Refactored code for boxplot and violinplot
 - Solved small bugs here and there, likely added a few new ones...
 
 
-Version 0.6.2.2
-Released 12.10.2023
-New data file format supported:
+
+
+**Version 0.6.2.2**
+
+*Released 12.10.2023*
+
+*New data file format supported:*
+
 - PLQY file Abt207
 - GraphJV_Wavelabs: new file format to parse JV as well as MPP data files
-New features
+
+*New features*
+
 - Curve TRPL: new data processing function, Curve_differential_lifetime_vs_signal
 - CurveSIMS: formatted for the Label, using python string template mechanisms and curve properties as variables. Maybe more useful than CurveSIMS..
-Bug corrections
+
+*Bug corrections*
+
 - CurveSIMS, bug recently introduced that prevented opening files under some conditions.
 
 
 
-Version 06.2.1
-Released 11.09.2023
-BUGS
+
+
+**Version 06.2.1**
+
+*Released 11.09.2023*
+
+*BUGS*
 - Solved a bug in CurveJV that was preventing proper recognition of dark and illuminated curves in some cases, e.g. for scripts.
 
 
-Version 0.6.2.0
-Released 30.08.2023
+
+
+**Version 0.6.2.0**
+
+*Released 30.08.2023*
+
 - New file format: grapa can extract part of the data contained in a set of SCAPS software output data (.iv, .cv, .cf, .qe).
 - New script: show correlation graphs between quantities taken from da tables, excel files. For Scaps simulation batches, shows the simulated curves as well as correlations between sweep variables and PV parameters.
 - Curve Images: added conversion function, to convert matrix data into 3-column xyz format and conversely. The data is displayed in a new Graph.
@@ -107,18 +188,24 @@ Released 30.08.2023
 - Curve JV: axvline and axhline are created with with thinner lines
 - Curve JV: identification of sample and cell performed at opening; fields to edit available. Goal: identify challenging cases with new setup.
 - Script JV: the "_allJV" now has axis labels
-BUGS
+
+*BUGS*
+
 - SIMS: solved a bug that was failing to perform quantification of SIMS relative yield. There was no indication that the normalization failed on the GUI, only in the command line window. As a result, curve ratios (e.g. GGI) ma have beed calculated in an erroneous manner
 - A bug with Curve actions with widgets of type Checkbox. They values were always displayed as False.
 - Script JV: returns a different graph (JVall). The other graphs could not be "saved" due to a technicality.
 - Script JV: solved a bug that prevented parsing a datafile that was created after a first execution of the JV script which did not find that file.
-and a few minor bugs here and there
+- and a few minor bugs here and there
 
 
 
-Version 0.6.1.0
-Released 19.04.2023
-Features
+
+**Version 0.6.1.0**
+
+*Released 19.04.2023*
+
+*Features*
+
 - GUI: it is now possible to open several files at once (finally!)
 - Axis labels and graph title can now be entered as ['Quantity', 'symbol', 'unit'], with optional formatting additional dict element
 - File format: grapa can now open JV files from Ossila sofware, rather primitive data parser.
@@ -129,16 +216,24 @@ Features
 - Curve TRPL fit procedure: recondition the fitting problem, the fitting should be more robust and less prone to reaching max iterations
 - Curve XRF MCA: retro-compatiblity of element labelling features
 - Curve XRF: does not anymore overwrite spectral calibration if already set
-General
+
+*General*
+
 - Ensured forward compatibility up to Winpython 3.10.40
-Bugs correction
+
+*Bugs correction*
+
 - Curve JV, can read date time.
 
 
 
-Version 0.6.0.0
-Released 20.05.2022
-Additions
+
+**Version 0.6.0.0**
+
+*Released 20.05.2022*
+
+*Additions*
+
 - Main GUI now handles several graphs at the same time, thanks to a tab mechanism. Hope this will be useful!
 - Change in handling of escape sequences: \n, \t, etc. Should be compatible with some special characters with different charsets (e.g. alt+230 "µ" in both ascii and utf-8 file encoding) and latex commands with 2 backslashes (e.g. "\\alpha"). "\alpha" would fail due to the escaped "\a" special character, but "\gamma" should succeed). Possible loss of compatiblity with previous graphs, esp. with latex symbols - hence, new major version number.
 - Axis limits: when axes limits cannot be computed with data transforms, the user input is used to set the axis limit. It is now possible to define axes limit values, when previously this could not be done. The default behavior remains that the user input for axis limits are transformed the same way as the plotted data.
@@ -152,10 +247,14 @@ Additions
 - CurveTRPL: fitted curves can now be normalized with same parameters as the input data
 - CurveArrhenius: added possibility to fit using a power law
 - GUI: a major rework of the organisation of the GUI code. Possibilities to hide different panels. Little visible changes, but many possibilities for new bugs. Please let me know if you notice any!
-Bugs
+
+*Bugs*
 - Solved a certain number of those. Did not keep track.
 - scriptJV: solved a bug with _JVall when processing several samples simultaneously
 - Certainly added quite a few new bugs. Enjoy, my pleasure
+
+
+
 
 
 
@@ -855,10 +954,10 @@ Various
 Version 0.3.6
 Release 23.12.2016
 - Added capability: EQE current
-	(button available for EQE Curves)
+    (button available for EQE Curves)
 - Improved default data processing of VJ curve series:
-	- Cells parameters mapping revised
-	- Added composite images of cells parameters mappings
+    - Cells parameters mapping revised
+    - Added composite images of cells parameters mappings
 
 
 
@@ -866,7 +965,7 @@ Version 0.3.5.1
 Release 15.12.2016
 - Solved bugs in batch processing of JV files (script was not processing to the end)
 - Solved bug when saving files, when first column was not the one with most datapoints.
-     Some saved files since version 0.3.4 might be corrupted. Files can be opened in a spreadsheet and the data column structure can be restored manually.
+    Some saved files since version 0.3.4 might be corrupted. Files can be opened in a spreadsheet and the data column structure can be restored manually.
 
 
 

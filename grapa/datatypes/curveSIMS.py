@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2018, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
@@ -9,6 +9,7 @@ import copy
 
 from grapa.curve import Curve
 from grapa.mathModule import roundSignificant
+from grapa.utils.funcgui import FuncListGUIHelper, AlterListItem
 
 
 def findXAtValuePolynom(datax, datay, target, ifPlot=False):
@@ -69,7 +70,24 @@ def selectDataEdge(curve, ROI, targetRel=None, threshRel=None, ifTrailingEdge=Fa
 
 
 class CurveSIMS(Curve):
+    """CurveSIMS offer some basic processing of SIMS data.
+    One can notably compute ratios of curves, for which relative yields have to be
+    provided or can be calculated using known integral ratios.
+
+    Curves ratios are noted with keywords such as "ggi" (notation shortcuts), or
+    explicitly as "[['^71Ga+'], ['^71Ga+', '^113In+']]", to be interpreted as ratio of
+    sums of curve values mutliplied by their individual yields.
+    An empty top or bottom list is replaced by 1."
+    """
+
     CURVE = "Curve SIMS"
+
+    ALTER_SIMS_TIME_DEPTH = "SIMSdepth"
+
+    AXISLABELS_X = {
+        "": ["Sputter time", "t", "s"],
+        ALTER_SIMS_TIME_DEPTH: ["Depth", "", "nm"],
+    }
 
     FORMAT_AUTOLABEL = ["${_simselement}", "${sample} ${_simselement}"]
 
@@ -104,7 +122,7 @@ class CurveSIMS(Curve):
         # auto-label
         out.append(
             [
-                self.autoLabel,
+                self.label_auto,
                 "Auto label",
                 ["template"],
                 [self.FORMAT_AUTOLABEL[0]],
@@ -199,13 +217,23 @@ class CurveSIMS(Curve):
             ]
         )
         out.append([self.cropDataROI, "Crop trace inside ROI", ["ROI"], [ROI]])
-        out.append([self.printHelp, "Help!", [], []])
+        out.append([self.print_help, "Help!", [], []])
+
+        lookup_x = {self.ALTER_SIMS_TIME_DEPTH: "nm"}
+        out += FuncListGUIHelper.graph_axislabels(self, lookup_x=lookup_x, **kwargs)
+
+        self._funclistgui_memorize(out)
         return out
 
     def alterListGUI(self):
         out = Curve.alterListGUI(self)
-        out += [["Semilogy", ["", "idle"], "semilogy"]]
-        out += [["Raw <-> Depth", ["SIMSdepth", ""], "semilogy"]]
+        doc = "sputter time as default x coordinate"
+        out.append(AlterListItem("Semilogy", ["", "idle"], "semilogy", doc))
+        doc = "depth as x axis, provided depth was calibrated (see analysis functions)."
+        item = AlterListItem(
+            "Raw <-> Depth", [self.ALTER_SIMS_TIME_DEPTH, ""], "semilogy", doc
+        )
+        out.append(item)
         return out
 
     # alter: s to z, normalized (in toggle switch?)
@@ -256,6 +284,15 @@ class CurveSIMS(Curve):
         return [root, idx]
 
     def localizeEdgeFromGUI(self, ROI, targetRel, threshRel, ifTrailingEdge):
+        """Auto-detect edges in the selected curve.
+
+        :param ROI: range of interest, in units of input x data. [x_min, x_max]
+        :param targetRel: value relative to max within ROI the edge is defined.
+               Default 0.5
+        :param threshRel: threshold for data to consider relative to maximum,
+               default [0.3, 0.7].
+        :param ifTrailingEdge: 0 if leading edge, 1 if trailing edge.
+        """
         # assumes ROI is in the form [sputterTimeMin, sputterTimeMax]
         if ifTrailingEdge == "trailing":
             ifTrailingEdge = True
@@ -306,17 +343,23 @@ class CurveSIMS(Curve):
         return posInterfGaIn
 
     def cropDataROI(self, ROI):
-        """
-        Crop trace inside ROI: delete datapoints with x value outside specified
-        range.
+        """Delete datapoints with x value outside specified range.
+
+        :param ROI: Range of interest, in units of x data. [x_min, x_max].
         """
         x, y = self.x(), self.y()
         mask = (x >= np.min(ROI)) * (x <= np.max(ROI))
         self.data = np.array([x[mask], y[mask]])
 
-    def printHelp(self):
+    def print_help(self):
+        super().print_help()
         from grapa.datatypes.graphSIMS import GraphSIMS
 
+        print("\nList of existing ratioCurves keywords:")
+        for short in GraphSIMS.SHORTCUTS:
+            print(" - {}: {}".format(short["aliases"][0], short["short"]))
+
+        """
         print("*** *** ***")
         print("CurveSIMS offer some basic processing of SIMS data.")
         print(
@@ -325,9 +368,9 @@ class CurveSIMS(Curve):
         print(
             "Curves ratios are noted with keywords such as \"ggi\", or as \"[['^71Ga+'],['^71Ga+', '^113In+']]\". For 1st and 2nd list the curves multiplied by their yield are summed, and the ratio is finally computed. An empty top or bottom list is replaced by 1."
         )
-        print("List of existing keywords:")
-        for short in GraphSIMS.SHORTCUTS:
-            print("   " + short["aliases"][0] + ":", str(short["short"]))
+        """
+
+        """
         print("Curve transforms:")
         print("- Semilogy, with etching time as default x coordinate,")
         print(
@@ -368,7 +411,8 @@ class CurveSIMS(Curve):
         print(
             "  prior to combination, using window and degree. No effect if w 1 d 1, possibly w 21 d 3."
         )
-        self.printHelpFunc(self.cropDataROI, leadingstrings=None)
+        self.printHelpFunc(self.cropDataROI)
         self.printHelpFunc(self.autoLabel)
         print("   ")
+        """
         return True

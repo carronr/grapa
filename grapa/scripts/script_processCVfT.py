@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics,
-Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -19,7 +18,7 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.graphIO import GraphIO
+from grapa.utils.graphIO import file_read_first3lines
 from grapa.curve import Curve
 from grapa.curve_image import Curve_Image
 from grapa.curve_subplot import Curve_Subplot
@@ -86,13 +85,19 @@ def close_enough(value, array, tolerance=3):
     return value
 
 
-def compute_levels(dataset, numberapprox=15, minvalue="auto", minfractionpositive=None):
+def compute_levels(
+    dataset, numberapprox=15, minvalue="auto", minfractionpositive=None
+) -> list:
     """
     Determines human-friendly levels in view of contourf plot, imposing a minvalue and
     approximate number of bins.
-    minfractionpositive: minimal fraction of the colorscale with positive value, in
-       case min and maxhave different signs. None: no effect. e.g. 2/3, 1/2
-    The returned level values should be human-friendly
+
+    :param dataset: something that np.quantile can act on
+    :param numberapprox: number of targetted discrete levels
+    :param minvalue: if given, imposes the min value of the levels.
+    :param minfractionpositive: minimal fraction of the colorscale with positive value,
+           in case min and maxhave different signs. None: no effect. e.g. 2/3, 1/2
+    :return: level values, hopefully human-friendly
     """
     p = [0.01, 0.05, 0.95, 0.99]
     quant = np.quantile(dataset, p)
@@ -126,7 +131,7 @@ def is_file_suitable(folder, file):
     fileExt = fileExt.lower()
     if fileExt in [".png", ".py"]:
         return False  # to speed up by avoid actually opening the files
-    line1, line2, line3 = GraphIO.readDataFileLine123(os.path.join(folder, file))
+    line1, line2, line3 = file_read_first3lines(os.path.join(folder, file))
     if GraphCf.isFileReadable(fileName, fileExt, line1=line1, line2=line2, line3=line3):
         return True
     return False
@@ -464,7 +469,7 @@ def plot_graphs_cv(
             modulo = int(np.ceil(len(graph) / number_graphs))
             for c in range(len(graph)):
                 if c % modulo:
-                    graph[c].swapShowHide()
+                    graph[c].visible(False)
                 else:
                     curve = graph[c]
                     frequency = curve.attr("frequency [hz]")
@@ -474,7 +479,7 @@ def plot_graphs_cv(
         graph.update(attrscv)
         xflat = []
         for curve in graph:
-            if not curve.isHidden():
+            if curve.visible():
                 x = curve.x(alter=attrscv["alter"][0])
                 xflat.append(x)
         xflat = np.sort(np.array(xflat).flatten())

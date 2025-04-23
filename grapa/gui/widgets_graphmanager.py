@@ -6,15 +6,14 @@ Created on Sun Jan 24 13:30:42 2021
 """
 
 import os
-import sys
 import tkinter as tk
 from tkinter import ttk
 
-path = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-)
-if path not in sys.path:
-    sys.path.append(path)
+# path = os.path.normpath(
+#     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+# )
+# if path not in sys.path:
+#     sys.path.append(path)
 from grapa.graph import Graph
 from grapa.gui.observable import Observable
 
@@ -140,20 +139,22 @@ class CustomNotebook(ttk.Notebook):
 
 class GraphHandler:
     """
-    A container to store a graph as well as "satellite" data.
-    Contains:
-    _title: title of the tab
-    _child: eg ref to tk.Frame
-    _propdict: a dict, including graph, filename, folder, etc.
-    Input:
-    strOrGraph: a str, or a Graph object. Graph has precedence over filename.
-        In such case, filename is interpreted as title
-    title: the title, as a "satellite" information
+    A container to store a `child`, a 'title', as well as other data (as a dict).
+    The class has a rather generic implementation, its use within grapa is more
+    specific.
+
+    :param: title: title of the tab (str)
+    :param child: e.g. a tk.Frame
+    :param kwargs: will be stored in an internal dict. to be used to store e.g. a graph,
+           a filename, folder etc.
     """
 
     DEFAULT_PROPDICT = {}
 
-    def __init__(self, title, child, **kwargs):
+    def __init__(self, title: str, child, **kwargs):
+        self._title = str(title)
+        self._child = child  # stores info for container, eg ref to tk.Frame
+        self._propdict = {}  # other properties
         self.reset(title, child, **kwargs)
 
     def reset(self, title, child, **kwargs):
@@ -212,8 +213,8 @@ class GraphsTabManager:
             defaultdict.update(defdict)
         self._itemtype.DEFAULT_PROPDICT = defaultdict
         # bind events
-        self._notebook.bind("<<NotebookTabClosed>>", self._popEvent)
-        self._notebook.bind("<<NotebookTabChanged>>", self._reactTabChanged)
+        self._notebook.bind("<<NotebookTabClosed>>", self._pop_event)
+        self._notebook.bind("<<NotebookTabChanged>>", self._react_tab_changed)
 
     # to forward tkinter placement methods
     def pack(self, *args, **kwargs):
@@ -227,8 +228,8 @@ class GraphsTabManager:
         """Register callbacks for event <<NotebookTabChanged>>"""
         self.observableTabChanged.register(func)
 
-    def _reactTabChanged(self, event):
-        self._checkConsistency()
+    def _react_tab_changed(self, event):
+        self._check_consistency()
         self.observableTabChanged.update_observers(event)
 
     # To know current selected tab
@@ -239,19 +240,23 @@ class GraphsTabManager:
         return self._items[self.index()]
 
     # creation or removal of tabs
-    def appendNew(
-        self, strOrGraph, title=None, child=None, filename=None, folder=None, **kwargs
+    def append_new(
+        self, str_or_graph, title=None, child=None, filename=None, folder=None, **kwargs
     ):
-        """
-        strOrGraph: can be a str or a Graph from which an item can be
-            instanciated
-        if child is None, empty Frame will be automatically created
-        if title is None, its value will be guessed
+        """Append new item into the internal notebook, by creating a GraphHandler item.
+
+        :param str_or_graph: can be a str or a Graph from which an item can be
+               instanciated
+        :param title: (str) if title is None, its value will be guessed
+        :param child: if child is None, an empty Frame will be automatically created
+        :param filename: (str) in case cannot be retrieved from str_or_graph or a
+               graph stemming from
+        :param folder: (str) same use-case as filename
         """
         if child is None:
             child = tk.Frame(self._notebook)
         title, kwargs = self._process(
-            strOrGraph=strOrGraph,
+            str_or_graph=str_or_graph,
             title=title,
             filename=filename,
             folder=folder,
@@ -268,7 +273,7 @@ class GraphsTabManager:
         self._items.append(item)
         # print('   ', item.title())
         self._notebook.add(item.child(), text=item.title())
-        self._checkConsistency()
+        self._check_consistency()
 
     # insert: not yet implemented
 
@@ -285,31 +290,31 @@ class GraphsTabManager:
 
     def pop(self, idx=None):
         """
-        Removes a element from both tab and item list. If None, the selected
+        Removes an element from both tab and item list. If None, the selected
         tab is deleted.
         """
         if idx is None:
             idx = self.index()
         item = self._items.pop(idx)
         self._notebook.forget(idx)
-        self._checkConsistency()
-        self._checkAtLeast1Element()
+        self._check_consistency()
+        self._check_at_least_1_element()
         return item
         # no need for callbackTabChanged,event NotebookTabChanged would follow
 
     # Technicalities
-    def _popEvent(self, event):
+    def _pop_event(self, _event):
         """
         Triggered by mouse-induced tab closure.
         Notebook.forget already done.
         """
         self._items.pop(self._notebook._active)
-        self._checkConsistency()
-        self._checkAtLeast1Element()
+        self._check_consistency()
+        self._check_at_least_1_element()
         # no need for callbackTabChanged,event NotebookTabChanged would follow
 
     def _process(
-        self, strOrGraph=None, title=None, filename=None, folder=None, **kwargs
+        self, str_or_graph=None, title=None, filename=None, folder=None, **kwargs
     ):
         """Return title, kw{'graph', 'filename', 'folder'}"""
         if "graph" in kwargs and not isinstance(kwargs["graph"], Graph):
@@ -317,11 +322,11 @@ class GraphsTabManager:
             del kwargs["graph"]
         kw = {}
         # graph
-        if isinstance(strOrGraph, Graph):
-            kw["graph"] = strOrGraph
-        elif strOrGraph is not None:
-            kw["graph"] = Graph(strOrGraph)
-            kw["filename"] = strOrGraph
+        if isinstance(str_or_graph, Graph):
+            kw["graph"] = str_or_graph
+        elif str_or_graph is not None:
+            kw["graph"] = Graph(str_or_graph)
+            kw["filename"] = str_or_graph
         elif "graph" in kwargs:
             kw["graph"] = kwargs["graph"]
         # else graph will not be in kw
@@ -331,9 +336,9 @@ class GraphsTabManager:
         elif "filename" not in kw:
             if "graph" in kw:
                 if hasattr(kw["graph"], "fileexport"):
-                    kw["filename"] = strOrGraph.fileexport
+                    kw["filename"] = str_or_graph.fileexport
                 elif hasattr(kw["graph"], "filename"):
-                    kw["filename"] = strOrGraph.filename
+                    kw["filename"] = str_or_graph.filename
             # else filename not in kw
         # else filename is already in kw
         # folder
@@ -368,7 +373,9 @@ class GraphsTabManager:
         # title may be returned None - for updates. to check when reset and new
         return title, kw
 
-    def updateCurrent(self, title=None, filename=None, folder=None, dpi=None, **kwargs):
+    def update_current(
+        self, title=None, filename=None, folder=None, dpi=None, **kwargs
+    ):
         """
         Update selected tab and corresponding information
         kwargs: etc.
@@ -381,36 +388,12 @@ class GraphsTabManager:
         self._items[idx].update(**kw)
         self._notebook.tab(idx, text=self._items[idx].title())
 
-    def resetCurrent(
-        self, strOrGraph, title=None, filename=None, folder=None, **kwargs
-    ):
-        """
-        Resets information conencted to the selected tab
-        - strOrGraph: can be a str (filename) or a Graph
-        - title: overrides the filename or automatic title detection
-        - kwargs: filename, folder, dpi, etc.
-        """
-        idx = self.index()
-        title, kw = self._process(
-            strOrGraph=strOrGraph,
-            title=title,
-            filename=filename,
-            folder=folder,
-            **kwargs
-        )
-        if title is None:
-            title = "no name"
-        self.item[idx].reset(title, tk.Frame(self._notebook), **kw)
-        if "folder" not in self.item[idx].properties():
-            self.item[idx].update(folder=os.getcwd())
-        self._notebook.tab(idx, text=self._items[idx].title())
-
-    def _checkAtLeast1Element(self):
+    def _check_at_least_1_element(self):
         # always at least 1 tab
         if len(self._items) == 0:
-            self.appendNew(Graph())  # empty element
+            self.append_new(Graph())  # empty element
 
-    def _checkConsistency(self):
+    def _check_consistency(self):
         """Checks consistency of tabs and items: identical text/titles"""
         # checks
         tabs = [self._notebook.tab(tab)["text"] for tab in self._notebook.tabs()]
@@ -433,44 +416,44 @@ class GraphsTabManager:
         return True
 
     # Return properties of active item. Shortcut notation specific to item type
-    def getTitle(self):
+    def get_title(self):
         """Returns current selected title"""
         return self.item().title()
 
-    def getChild(self):
+    def get_child(self):
         """Returns current selected child (Frame)"""
         return self.item().child()
 
-    def getGraph(self):
+    def get_graph(self):
         """Returns current selected Graph"""
         return self.item().property("graph")
 
-    def getFilename(self):
+    def get_filename(self):
         """Returns current selected filename"""
         return self.item().property("filename")
 
-    def getFolder(self):
+    def get_folder(self):
         """Returns current selected folder"""
         return self.item().property("folder")
 
-    def getProperties(self):
+    def get_properties(self):
         """Returns current selected propdict dict of properties"""
         return self.item().properties()
 
 
-def testAll():
+def test_all():
     import random
 
     root = tk.Tk()
     h = GraphsTabManager(root, width=200, height=50)
     h.pack(side="top", fill="x", expand=True)
     for color in ("red", "orange", "green", "blue", "violet"):
-        h.appendNew("", title=color)
+        h.append_new("", title=color)
 
     def new1():
         colors = ["black", "magenta", "cyan", "yellow"]
         random.shuffle(colors)
-        h.appendNew(
+        h.append_new(
             "", title=colors[0], child=tk.Frame(h._notebook, background=colors[0])
         )
 
@@ -480,39 +463,38 @@ def testAll():
             Graph("./../examples/subplots_examples.txt"),
         ]
         random.shuffle(obj)
-        h.appendNew(obj[0])
+        h.append_new(obj[0])
 
     def new3():
-        h.appendNew(Graph("./../examples/fancyAnnotations.txt"), title="my title")
+        h.append_new(Graph("./../examples/fancyAnnotations.txt"), title="my title")
 
-    def delCurrent():
+    def del_current():
         h.pop(h.index())
 
-    def delFirst():
+    def del_first():
         h.pop(0)
 
-    def changeCurrentText():
-        h.updateCurrent(title=h.getTitle() + " *")
+    def change_current_text():
+        h.update_current(title=h.get_title() + " *")
 
-    def selectNext():
+    def select_next():
         h.select(h.index() + 1)
 
     def print_():
-        print(h.getProperties()["graph"])
+        print(h.get_properties()["graph"])
 
-    tk.Button(root, text="New colored", command=new1).pack(side="top", anchor="w")
-    tk.Button(root, text="New 2", command=new2).pack(side="top", anchor="w")
-    tk.Button(root, text="New with title", command=new3).pack(side="top", anchor="w")
-    # tk.Button(root, text='Get active?', command=getActive).pack(side="top", anchor='w')
-    tk.Button(root, text="Change text current", command=changeCurrentText).pack(
-        side="top", anchor="w"
-    )
-    tk.Button(root, text="Del current", command=delCurrent).pack(side="top", anchor="w")
-    tk.Button(root, text="Del first", command=delFirst).pack(side="top", anchor="w")
-    tk.Button(root, text="Select next", command=selectNext).pack(side="top", anchor="w")
-    tk.Button(root, text="print", command=print_).pack(side="top", anchor="w")
+    tw = {"side": "top", "anchor": "w"}
+    tk.Button(root, text="New colored", command=new1).pack(**tw)
+    tk.Button(root, text="New 2", command=new2).pack(**tw)
+    tk.Button(root, text="New with title", command=new3).pack(**tw)
+    # tk.Button(root, text='Get active?', command=getActive).pack(**tw)
+    tk.Button(root, text="Change text current", command=change_current_text).pack(**tw)
+    tk.Button(root, text="Del current", command=del_current).pack(**tw)
+    tk.Button(root, text="Del first", command=del_first).pack(**tw)
+    tk.Button(root, text="Select next", command=select_next).pack(**tw)
+    tk.Button(root, text="print", command=print_).pack(**tw)
     root.mainloop()
 
 
 if __name__ == "__main__":
-    testAll()
+    test_all()

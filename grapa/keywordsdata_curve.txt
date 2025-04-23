@@ -69,6 +69,7 @@
     ["markerfacecolor", "Marker inner color. Example:", ["r", [0.5, 0, 0]]],
     ["markeredgecolor", "Marker border color. Example:", ["r", [0.5, 0, 0]]],
     ["markeredgewidth", "Marker border width, in points. Example:", [1.5]],
+	["markevery", "Mark only selected datapoints\nUse '(0,3)' instead of '3' because technical reason.\nExamples:", ["(0, 5)", "0.1"]],
     [
         "zorder",
         "Determines the drawing order (float), highest is drawn on top.\nExample:",

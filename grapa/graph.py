@@ -1,221 +1,177 @@
 ﻿# -*- coding: utf-8 -*-
-"""
-Created on Fri Jul 15 15:46:13 2016
+"""Graph class, most important in grapa together with Curve.
+A Graph stores a list of Curves, as well as metadata (plotting information, other)
 
 @author: Romain Carron
-Copyright (c) 2024, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 import os
-import numpy as np
 from copy import deepcopy
 from re import findall as refindall
+import importlib
+import logging
+
+import numpy as np
 import matplotlib as mpl
-import json
 
+from grapa import KEYWORDS_GRAPH, KEYWORDS_CURVE, KEYWORDS_HEADERS
+from grapa.mathModule import is_number
+from grapa.colorscale import colorize_graph
 from grapa.curve import Curve
-from grapa.mathModule import is_number, strToVar
+from grapa.utils.string_manipulations import strToVar, TextHandler
+from grapa.utils.funcgui import AlterListItem
+from grapa.utils.metadata import MetadataContainer
+from grapa.utils.graphIO import GraphIO, export
 
-
-def load_kw(filename):
-    # data contained in json file structured as:
-    # [
-    #     ["== Figure ==", "", []],
-    #     ["figsize", "Figure size (inch).\nExample:", [[6.0, 4.0]]],
-    #     ...
-    # ]
-    out = {}
-    # open file with json
-    with open(filename, "r") as file:
-        datalist = json.load(file)
-    # process data
-    out["keys"] = [line[0] for line in datalist]
-    # textual help, concatenate with examples if appropriate
-    out["guitexts"] = []
-    for line in datalist:
-        out["guitexts"].append(line[1])
-        if line[1].endswith("Example:") or line[1].endswith("Examples:"):
-            aux = [
-                str(li) if not isinstance(li, str) else '"' + li + '"' for li in line[2]
-            ]
-            out["guitexts"][-1] += " " + ", ".join(aux)
-    # lists of examples - NOT cast into str()
-    out["guiexamples"] = [line[2] for line in datalist]
-    ## test if needed
-    # for i in range(len(out["keys"])):
-    # print(out["keys"][i])
-    # print(out["guitexts"][i])
-    # for example in out["guiexamples"][i]:
-    # print("   ", example)
-    return out
+logger = logging.getLogger(__name__)
 
 
 class Graph:
-    """
-        Arguments:
-        filename: filename to open (str), or list of str. Default ''
-        complement: dict, the elements will be stored as graph attributes.
-          Example: {'xlim':[1,'']
-          - 'isfilecontent' = True: filename interpreted as data
-          - 'readas' in ['database', 'generic']). 'database' can be
-              useful. You may consider using pandas instead
-        silent: to get more details on what is going on. Default True
-        config: configuration datafile. Default 'config.txt'
+    """A Graph can be though as containing a list of Curves, and is a convenient way to
+    read, store and manipulate data, as well as export plot as images and text files.
 
-    ## TO UPDATE
-         content of the class
-        'filename': str
-        'data': list of Curve
-        'headers': dict containing various information about the data
-        'graphInfo': dict containing information related to graph.
-                     Example: xlim, xlabel, etc.
-        'sampleInfo': Deprecated. Dict containing various information about the
-                      sample. Generally is empty, as the relevant data are stored
-                      in the Curve object.
+    :param filename: str filename to open, or list[str] (filenames), or
+           list of data series [xseries, yseries [, zseries...]].
+           Default '' (graph empty).
+    :param complement: dict, the elements will be stored as graph attributes.
+           Example: {'xlim': [1, '']}. Special values:
 
-        List of useful methods
-        __init__(self, filename, complement='', silent=False)
-        __str__(self)
+           - 'isfilecontent' = True: content of variable filename is interpreted as data
 
-        length(self)
-        merge(self, graph)
-        append(self, curve)
+           - 'readas' in ['database', 'generic']. 'database' can be useful. You may
+             consider using pandas instead
 
-        curve(self, index)
-        curves(self, attr, value, strLower=False, strStartWith=False):
-        iterCurves(self)
-        deleteCurve(self, i)
-        replaceCurve(self, newCurve, idx)
-        swapCurves(self, idx1, idx2, relative=False)
-        duplicateCurve(self, idx1)
-        castCurve(self, newType, idx, silentSuccess=False)
-
-        update(self, attributes, ifAll=False)
-        getAttribute(self, attr, default='')
-        replaceLabels(self, old, new)
-        colorize(self, colorscale, sameIfEmptyLabel=False, avoidWhite=False)
-        applyTemplate(self, graph)
-
-        formatAxisLabel(self, default)
-
-        config(self, key, default='', astype='auto')
-
-        export(self, filesave='', saveAltered=False, ifTemplate=False,
-               ifCompact=True, ifClipboardExport=False)
-        plot(self, filesave='', imgFormat='', figsize=(0, 0), ifSave=True,
-             ifExport=True, figAx=None, ifSubPlot=False)
+    :param silent: to get more details on what is going on. Default True
+    :param config: configuration datafile. Default 'config.txt'
     """
 
-    # some class constants
+    # Class constants
     FIGSIZE_DEFAULT = (6.0, 4.0)
     FILEIO_DPI = 80
     DEFAULT = {"subplots_adjust": 0.15, "fontsize": mpl.rcParams["font.size"]}
     # Default axis labels. Normally not used, but can be overridden and used in
     # subclasses. Possible data formats are:
-    # ['x axis label [unit]', 'y axis label [unit]']
-    # [['Quantity x', 'Q', 'unit'], ['Quantity y', 'Q', 'unit']]. Q will be placed in between $ $
+    # ['x-axis label [unit]', 'y-axis label [unit]']
+    # [['Quantity x', 'Q', 'unit'], ['y', 'Q', 'unit']]. Q will be placed in between $ $
     AXISLABELS = ["", ""]
 
-    CONFIG_FILENAME = None
-    CONFIG_GRAPH = None
+    CONFIG_FILENAME_DEFAULT = "config.txt"
+    CONFIG_FILES = {}  # to store config files, to avoid multiple loadings
 
-    _folder = os.path.dirname(os.path.realpath(__file__))
-    KEYWORDS_GRAPH = load_kw(os.path.join(_folder, "keywordsdata_graph.txt"))
-    KEYWORDS_CURVE = load_kw(os.path.join(_folder, "keywordsdata_curve.txt"))
-    KEYWORDS_HEADERS = load_kw(os.path.join(_folder, "keywordsdata_headers.txt"))
+    # list of child classes of Graph
+    _list_subclasses_parse = None
 
     # constructor
-    def __init__(self, filename="", complement="", silent=True, config="config.txt"):
+    def __init__(
+        self,
+        filename="",  # str, list[str], or list[xseries, yseries]
+        complement: dict = "",  # OR EBTTER A DICT???
+        silent: bool = True,
+        config: str = CONFIG_FILENAME_DEFAULT,  # or None
+    ):
         """default constructor. Calls method reset."""
-        # load preferences
-        if config is not None:
-            if config == "config.txt":
-                config = os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), config
-                )
-            if Graph.CONFIG_GRAPH is not None and Graph.CONFIG_FILENAME == config:
-                self._config = Graph.CONFIG_GRAPH
-            else:
-                self._config = Graph(
-                    config, complement={"readas": "database"}, config=None
-                )
-                if self.CONFIG_FILENAME is None:
-                    Graph.CONFIG_FILENAME = config
-                    Graph.CONFIG_GRAPH = self._config
+        self.filename = None
+        self.silent = None
+        self.data = []
+        self.headers = MetadataContainer()
+        self.graphinfo = MetadataContainer()
+        self._config = None
+        self._init_config(config)
         # actually load the file
         self.reset(filename, complement=complement, silent=silent)
 
-    def reset(self, filename, complement="", silent=True):
+    def reset(self, filename, complement: dict = "", silent: bool = True):
+        """Reset a Graph: empty its list of Curves, and metadata."""
         # complement: special keywords: 'readas', 'isfilecontent'
         # default values
-        from grapa.graphIO import GraphIO
-
         self.filename = filename
         self.silent = silent
         self.data = []
-        self.headers = {}
-        self.graphInfo = {}
-        self.sampleInfo = {}
-        # try identify and parse the datafile
+        self.headers.clear()
+        self.graphinfo.clear()
+        # try to identify and parse the datafile
         if isinstance(filename, str) and filename == "":
             if not self.silent:
                 print("Empty Graph object created")
             return
+
         if isinstance(filename, str):
             # if single file was provided - a string, or if filename is the
             # content if the file - complement['isfilecontent'] must be true
             GraphIO.readDataFile(self, complement=complement)
+        elif (
+            len(filename) == 2
+            and len(filename[0]) == len(filename[1])
+            and is_number(filename[0][0])
+        ):
+            # filename is actually the data, as [xseries, yseries]
+            if not self.silent:
+                print('Class Graph: interpret "filename" as data content')
+            self.filename = ""
+            GraphIO.append_curve_from_datainput(self, filename, attributes=complement)
         else:
-            if (
-                len(filename) == 2
-                and len(filename[0]) == len(filename[1])
-                and is_number(filename[0][0])
-            ):
-                # filename is actually the data, filename is a list
-                if not self.silent:
-                    print('Class Graph: interpret "filename" as data content')
-                self.filename = ""
-                GraphIO.dataFromVariable(self, filename, attributes=complement)
-            else:
-                # if a list was provided - open first file, then merge the
-                # others one by one
-                if not isinstance(complement, list):
-                    if complement != "":
-                        msg = (
-                            "WARNING class Graph: complement must be a list if "
-                            "filename is a list. Filename {} elements, complement:"
-                            " {}."
-                        )
-                        print(msg.format(len(filename), complement))
-                    complement = [complement] * len(filename)
-                self.filename = filename[0]
-                GraphIO.readDataFile(self, complement[0])
-                if len(filename) > 1:
-                    for i in range(1, len(filename)):
-                        if len(complement) > 1:
-                            self.merge(Graph(filename[i], complement=complement[i]))
-                        else:
-                            self.merge(Graph(filename[i]))
+            # if a list was provided - open first file, then merge the
+            # others one by one
+            if not isinstance(complement, list):
+                if complement != "":
+                    msg = (
+                        "Graph: complement must be a list if filename is a list."
+                        " Filename {} elements, complement: {}."
+                    )
+                    logger.warning(msg.format(len(filename), complement))
+                complement = [complement] * len(filename)
+            self.filename = filename[0]
+            GraphIO.readDataFile(self, complement[0])
+            if len(filename) > 1:
+                for i in range(1, len(filename)):
+                    if len(complement) > 1:
+                        self.merge(Graph(filename[i], complement=complement[i]))
+                    else:
+                        self.merge(Graph(filename[i]))
         # last: want to have abspath and not relative
         if hasattr(self, "filename"):
             self.filename = os.path.abspath(self.filename)
 
+    def _init_config(self, config: str) -> None:
+        """Initialize the configuration file. Tries to recycle if possible"""
+        if config is not None:
+            if config == self.CONFIG_FILENAME_DEFAULT:
+                folder = os.path.dirname(os.path.realpath(__file__))
+                config = os.path.join(folder, config)
+            if config not in Graph.CONFIG_FILES:
+                graph = Graph(config, complement={"readas": "database"}, config=None)
+                if len(graph) > 0:
+                    Graph.CONFIG_FILES[config] = graph
+                else:
+                    msg = (
+                        "Graph.init_config not found, or not properly"
+                        "formatted (2-columns key-values). Cannot use it."
+                    )
+                    logger.warning(msg)
+            if config in Graph.CONFIG_FILES:
+                self._config = Graph.CONFIG_FILES[config]
+
     # RELATED TO GUI
-    def alterListGUI(self):
+    def alterListGUI(self) -> list:
+        """Compiles a list of possible data transforms, retrieved from all Curves"""
         out = []
-        out.append(["no transform", ["", ""], ""])  # default: normal plot
-        for c in range(self.length()):
-            for j in self.curve(c).alterListGUI():
-                if j not in out:
-                    out.append(j)
+        for curve in self:
+            for item in curve.alterListGUI():
+                if item not in out:
+                    out.append(item)
+        neutral = AlterListItem.item_neutral()
+        if neutral not in out:
+            out.insert(0, neutral)
+        out = [(AlterListItem(*o) if isinstance(o, list) else o) for o in out]
         return out
 
     # "USUAL" CLASS METHODS
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns some information about the class instance."""
-        out = "Content of Graph stored in file " + self.filename + "\n"
-        out += "Content of headers:" + "\n"
+        out = "Content of Graph stored in file {}\n".format(self.filename)
+        out += "Content of headers:\n"
         out += str(self.headers)
-        out += "\nNumber of Curves: " + str(self.length())
+        out += "\nNumber of Curves: " + str(len(self))
         return out
 
     # interactions with other Graph objects
@@ -226,72 +182,66 @@ class Graph:
         for x in graph.data:
             self.data.append(x)
         # copy headers, unless already exists (is so, info is lost)
-        for key in graph.headers:
+        for key, value in graph.headers.items():
             if key not in self.headers:
-                self.headers.update({key: graph.headers[key]})
+                self.headers.update({key: value})
         # copy graphInfo, unless already exists (is so, info is lost)
-        for key in graph.graphInfo:
-            if key not in self.graphInfo:
-                self.graphInfo.update({key: graph.graphInfo[key]})
-        # copy sampleInfo, unless already exists (is so, info is lost)
-        for key in graph.sampleInfo:
-            if key not in self.sampleInfo:
-                self.sampleInfo.update({key: graph.sampleInfo[key]})
+        for key, value in graph.graphinfo.items():
+            if key not in self.graphinfo:
+                self.graphinfo.update({key: value})
 
     # methods handling the bunch of curves
     def __len__(self):
         """Returns the number of Curves."""
         return len(self.data)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Curve:
         """Returns a Curve object at index key."""
         return self.data[key]
 
+    def __iter__(self):
+        return self.data.__iter__()
+
     def __delitem__(self, key):
         """Deletes the Curve at index key."""
-        self.deleteCurve(key)
-
-    def length(self):
-        """Returns the number of Curve objects in the list."""
-        return len(self.data)
+        self.curve_delete(key)
 
     def curve(self, index):
-        """Returns the Curve object at index i in the list."""
+        """Returns the Curve object at index i in the list. Can also use graph[index]"""
         if index >= len(self) or len(self) == 0:
-            msg = "ERROR Class Graph method Curve: cannot find Curve (index {}, max possible {})."
-            print(msg.format(index, len(self)))
-            return
+            msg = "Graph.curve: cannot find Curve (index {}, len(self) {})."
+            logger.error(msg.format(index, len(self)))  # raise ?
+            return None
         return self.data[index]
 
-    def curves(self, attr, value, strLower=False, strStartWith=False):
-        """
-        Returns a list of Curves which attribute attr == value (also same type)
-        attr: the attribute to check. By default, 'label'.
-        strLower: if True,
-        strStartWith: is both value and the attribute are str, only look at the
-            first characters
+    def curves(
+        self, key: str, value, str_lower: bool = False, str_startswith: bool = False
+    ) -> list:
+        """Returns a list of Curves for which curve.attr(key) value (type and value
+        equality)
+
+        :param key: the attribute to check. By default, 'label'.
+        :param value: the value to test
+        :param str_lower: if True, performs .lower() onto value and curve.attr(key)
+               before comparison, in case each are str.
+        :param str_startswith: is both value and the attribute are str, only look at the
+               first characters
+        :return: a list of Curves
         """
         out = []
-        for c in self.iterCurves():
-            lbl = c.getAttribute(attr)
-            if isinstance(lbl, type(value)):
-                if strLower:
-                    if isinstance(lbl, str):
-                        lbl = lbl.lower()
+        for curve in self:
+            val = curve.attr(key)
+            if isinstance(val, type(value)):
+                if str_lower:
+                    if isinstance(val, str):
+                        val = val.lower()
                     if isinstance(value, str):
                         value = value.lower()
-                if lbl == value:
-                    out.append(c)
-                elif (
-                    isinstance(lbl, str) and strStartWith and lbl[: len(value)] == value
-                ):
-                    out.append(c)
+                if val == value:
+                    out.append(curve)
+                elif isinstance(val, str) and str_startswith and val.startswith(value):
+                    out.append(curve)
         return out
-
-    def iterCurves(self):
-        """Returns an iterator over the different Curves"""
-        for c in range(self.length()):
-            yield self.curve(c)
 
     def append(self, curve, idx=None):
         """
@@ -300,39 +250,33 @@ class Graph:
         """
         insert = False if idx is None else True
         if isinstance(curve, Graph):
-            for c in curve.iterCurves():
+            for curv_ in curve:  # "curve" is a Graph, can iterate
                 if insert:
-                    self.data.insert(idx, c)
+                    self.data.insert(idx, curv_)
                     idx += 1
                 else:
-                    self.data.append(c)  # c are Curves, we can do like that
+                    self.data.append(curv_)  # curv_ is a Curve, we can directly append
         elif isinstance(curve, list):
-            for c in curve:
+            for curv_ in curve:
                 if insert:
-                    self.data.insert(idx, c)
+                    self.append(curv_, idx)
                     idx += 1
                 else:
-                    self.append(c)  # call itself, must check if c is a Curve
+                    self.append(curv_)  # call itself, to ensure curv_ is a Curve
         elif isinstance(curve, Curve):
             if insert:
                 self.data.insert(idx, curve)
             else:
                 self.data.append(curve)
-        elif isinstance(curve, str) and curve == "empty":
-            curve = Curve([[np.inf], [np.inf]], {})
-            if insert:
-                self.data.insert(idx, curve)
-            else:
-                self.data.append(curve)
         else:
-            print("Graph.append: failed (type:", type(curve), ")")
+            logger.error("Graph.append: failed (type: {})".format(type(curve)))
 
-    def deleteCurve(self, i):
+    def curve_delete(self, i):
         """Delete a Curve at index i from the Graph object."""
         if isinstance(i, (list, tuple)):
             i = list(np.sort(i)[::-1])
             for k in i:
-                self.deleteCurve(k)
+                self.curve_delete(k)
         else:
             le0 = len(self.data)
             if is_number(i) and i < le0:
@@ -350,201 +294,203 @@ class Graph:
                         if i < len(self.headers["collabelsdetail"][j]):
                             del self.headers["collabelsdetail"][j][i]
                 # nothing to delete in graphInfo
-                # nothing to delete in sampleInfo
 
-    def replaceCurve(self, newCurve, idx):
+    def curve_replace(self, new_curve, idx):
         """Replaces a Curve with another."""
-        if isinstance(newCurve, Curve):
+        if isinstance(new_curve, Curve):
             try:
-                self.data[idx] = newCurve
+                self.data[idx] = new_curve
                 return True
             except Exception:
-                print("Graph.replaceCurve: cannot add Curve at index", idx, ".")
+                msg = "Graph.curve_replace: cannot add Curve at index {}."
+                logger.warning(msg.format(idx))  # , exc_info=True
         else:
-            print(
-                "Graph.replaceCurve: newCurve is not a Curve (type", type(newCurve), ")"
-            )
+            msg = "Graph.curve_replace: new_curve is not a Curve (type {})"
+            logger.warning(msg.format(type(new_curve)))
         return False
 
-    def swapCurves(self, idx1, idx2, relative=False):
-        """
-        Exchange the Curves at index idx1 and idx2.
-        For example useful to modify the plot order (and order in the legend)
-        """
-        if idx1 < -self.length() or idx1 >= self.length():
-            print("Graph.swapCurves: idx1 not valid (value", idx1, ").")
-            return False
-        if relative:
-            idx2 = idx1 + idx2
-        if idx2 == idx1:  # swap with itself
-            return True
-        if idx2 < -self.length() or idx2 >= self.length():
-            print("Graph.swapCurves: idx2 not valid (value", idx2, ").")
-            return False
-        swap = deepcopy(self.curve(idx1))
-        self.data[idx1] = self.curve(idx2)
-        self.data[idx2] = swap
-        return True
-
-    def moveCurveToIndex(self, idxsource, idxtarget):
+    def curve_move_to_index(self, idxsource, idxtarget):
         """Change the position of a Curve in the list"""
         tmp = self.data.pop(idxsource)
         self.data.insert(idxtarget, tmp)
         return True
 
-    def reverseCurves(self):
+    def curve_duplicate(self, idx1):
+        """
+        Duplicate (clone) an existing curve and append it in the curves list.
+        """
+        if idx1 < -len(self) or idx1 >= len(self):
+            msg = "Graph.curve_duplicate: idx1 not valid ({})."
+            logger.error(msg.format(idx1))
+            return False
+        curve = deepcopy(self[idx1])
+        self.data.insert(idx1 + 1, curve)
+        return True
+
+    def curves_swap(self, idx1, idx2, relative=False):
+        """
+        Exchange the Curves at index idx1 and idx2.
+        For example useful to modify the plot order (and order in the legend)
+        """
+        if idx1 < -len(self) or idx1 >= len(self):
+            msg = "Graph.curves_swap: idx1 not valid ({})."
+            logger.error(msg.format(idx1))
+            return False
+        if relative:
+            idx2 = idx1 + idx2
+        if idx2 == idx1:  # swap with itself
+            return True
+        if idx2 < -len(self) or idx2 >= len(self):
+            msg = "Graph.curves_swap: idx2 not valid ({})."
+            logger.error(msg.format(idx2))
+            return False
+        swap = deepcopy(self[idx1])
+        self.data[idx1] = self[idx2]
+        self.data[idx2] = swap
+        return True
+
+    def curves_reverse(self):
         """Reverse the order of the Curves."""
         self.data.reverse()
         return True
 
-    def duplicateCurve(self, idx1):
-        """
-        Duplicate (clone) an existing curve and append it in the curves list.
-        """
-        if idx1 < -self.length() or idx1 >= self.length():
-            print("Graph.duplicateCurve: idx1 not valid (value", idx1, ").")
-            return False
-        curve = deepcopy(self.curve(idx1))
-        self.data.insert(idx1 + 1, curve)
-
     # methods handling content of curves
     def getCurveData(self, idx, ifAltered=True):
         if ifAltered:
-            alter = self._getAlter()
-            x = self.curve(idx).x_offsets(alter=alter[0])
-            y = self.curve(idx).y_offsets(alter=alter[1])
+            alter = self.get_alter()
+            x = self[idx].x_offsets(alter=alter[0])
+            y = self[idx].y_offsets(alter=alter[1])
         else:
-            x = self.curve(idx).x(alter="")
-            y = self.curve(idx).y(alter="")
+            x = self[idx].x(alter="")
+            y = self[idx].y(alter="")
         return np.array([x, y])
 
-    def update(self, attributes, ifAll=False, forceGraphInfo=False):
+    def attr(self, key, default=MetadataContainer.VALUE_DEFAULT):
+        """Retrieve an attribute value in header, graphInfo or in curve[0]"""
+        if key in self.headers:
+            return self.headers[key]
+        if key in self.graphinfo:
+            return self.graphinfo[key]
+        if len(self) > 0:
+            return self[0].attr(key, default=default)
+        return default
+
+    def get_attributes(self, keys_list: list = None) -> dict:
+        """Returns a dict containing the content of both headers and graphInfo"""
+        # TODO: test Graph.get_attributes
+        out = {}
+        # need to merge several dicts. Can erase meaningless values, we should not erase
+        # meaningful ones. The data input methods should prevent risk of duplicated keys
+        if keys_list is None:
+            for container in [self.headers, self.graphinfo]:
+                out.update(container.values())  # only contain meaningful values
+        else:
+            keys_list = [MetadataContainer.format(key) for key in keys_list]
+            for key in keys_list:
+                for container in [self.headers, self.graphinfo]:
+                    if container.has_attr(key):  # only add if meaningful content
+                        out[key] = container.get(key)
+                if key not in out:
+                    out[key] = MetadataContainer.VALUE_DEFAULT
+        return out
+
+    def has_attr(self, key):
+        """Check if graph has attribute key"""
+        if self.graphinfo.has_attr(key):
+            return True
+        return self.headers.has_attr(key)
+
+    def update(self, attributes: dict, if_all=False) -> None:
         """Update the properties of the Graph object.
         The properties are stored in dict objects, so update works similarly as
         the dict.update() method.
         If a property is not known to belong to the Graph object, it is
-        attributed to the 1st Curve object (unless ifAll=True), or if
-        forceGraphInfo is True (then the undetermined keys are inserted in
-        self.graphInfo)
+        attributed to the 1st Curve object (unless if_all=True)
         """
-        for key in attributes:
-            k = key.lower().replace("ï»¿", "")
-            try:
-                if k in self.KEYWORDS_HEADERS["keys"]:
-                    if attributes[key] != "":
-                        self.headers.update({k: attributes[key]})
-                    elif k in self.headers:
-                        del self.headers[k]
-                elif (
-                    k in self.KEYWORDS_GRAPH["keys"]
-                    or forceGraphInfo
-                    or k.startswith("subplots")
-                ):
-                    if attributes[key] != "":
-                        self.graphInfo.update({k: attributes[key]})
-                    elif k in self.graphInfo:
-                        del self.graphInfo[k]
-                    # by default nothing in sampleInfo, everything in curves
+        for key, value in attributes.items():
+            k = MetadataContainer.format(key)
+            if k in KEYWORDS_HEADERS["keys"]:
+                self.headers.update({k: value})
+            elif k in KEYWORDS_GRAPH["keys"] or k.startswith("subplots"):
+                self.graphinfo.update({k: value})
+            # put into one or several Curves
+            elif if_all:
+                for curve in self:
+                    curve.update({k: value})
+            else:
+                if len(self) > 0:
+                    self[-1].update({k: value})
                 else:
-                    if ifAll:
-                        for i in range(self.length()):
-                            self.curve(i).update({k: attributes[key]})
-                    else:
-                        self.curve(-1).update({k: attributes[key]})
-            except Exception as e:
-                msg = "Error Graph.update: key {}, attributes {}, exception {}"
-                print(msg.format(key, attributes, e))
+                    msg = "Graph.update: cannot process ({}, {})."
+                    logger.error(msg.format(key, value))
 
     def updateValuesDictkeys(self, *args, **kwargs):
-        """
-        Performs update({key1: value1, key2: value2, ...}) with
-        arguments value1, value2, ... , (*args) and
-        kwargument key=['key1', 'key2', ...]
+        """Update the graph using a specific data input, for GUI purposes.
+        Falls back onto ({key1: value1, key2: value2, ...}).
+        Mandatory: len(args) == len(kwargs["keys"]).
+
+        :param args: value1, value2, ...
+        :param kwargs: key=['key1', 'key2', ...]
         """
         if "keys" not in kwargs:
-            print(
-                'Error Graph updateValuesDictkeys: "keys" key must be',
-                "provided, must be a list of keys corresponding to the",
-                "values provided in *args.",
+            msg = (
+                "Graph.updateValuesDictkeys: 'keys' key must be provided, must be a "
+                "list of keys corresponding to the values provided in *args."
             )
+            logger.error(msg)
             return False
         if len(kwargs["keys"]) != len(args):
-            print(
-                'WARNING Graph updateValuesDictkeys: len of list "keys"'
-                "argument must match the number of provided values (",
-                len(args),
-                " args provided, ",
-                len(kwargs["keys"]),
-                " keys)",
+            msg = (
+                "WARNING Graph updateValuesDictkeys: len of list 'keys' argument "
+                "must match the number of provided values ({} args provided, {} keys)"
             )
+            logger.error(msg.format(len(args), len(kwargs["keys"])))
         lenmax = min(len(kwargs["keys"]), len(args))
         for i in range(lenmax):
             self.update({kwargs["keys"][i]: args[i]})
         return True
 
-    def delete(self, key, ifAll=False):
+    def attr_pop(self, key: str) -> dict:
         """
         Delete an attribute of the Graph.
         Return the deleted attribute as a dict
         """
-        k = key.lower()
+        k = MetadataContainer.format(key)
         out = {k: self.attr(k)}
         self.update({k: ""})
         return out
-        # if k in self.headersKeys:
-        #     if k in self.headers:
-        #         out.update({key: self.headers[k]})
-        #         del self.headers[k]
-        # elif k in self.graphInfoKeys:  # KEYWORDS_GRAPH["keys"]
-        #     if k in self.graphInfo:
-        #         out.update({key: self.graphInfo[k]})
-        #         del self.graphInfo[k]
-        # else:
-        #     if ifAll:
-        #         for i in range(self.length()):
-        #             # cannot export in this case
-        #             self.data[i].delete(key)
-        #     else:
-        #         out.update(self.curve(-1).delete(key))
-        # return out
 
-    def getAttribute(self, key, default=""):
-        """Legacy alias to attr."""
-        return self.attr(key, default=default)
+    @classmethod
+    def _get_alter_to_format(cls, alter):
+        """Return a formatted alter instruction"""
+        if alter == "":
+            alter = ["", ""]
+        if isinstance(alter, str):  # nothing to do if it is dict
+            alter = ["", alter]
+        return alter
 
-    def attr(self, key, default=""):
-        k = key.lower()
-        if k in self.headers:
-            return self.headers[k]
-        if k in self.graphInfo:
-            return self.graphInfo[k]
-        if k in self.sampleInfo:
-            return self.sampleInfo[k]
-        if len(self) > 0:
-            return self[0].attr(k, default=default)
-        return default
+    def get_alter(self):
+        """returns the formatted alter instruction of self"""
+        return self._get_alter_to_format(self.attr("alter"))
 
     def castCurve(self, newtype, idx, silentSuccess=False):
         """
-        Replace a Curve with another type of Curve with identical data and
-        properties.
+        Replace a Curve with another type of Curve with identical data and properties.
         """
-        if idx >= -len(self) and idx < len(self):
-            newCurve = self.curve(idx).castCurve(newtype)
+        if -len(self) <= idx < len(self):
+            newCurve = self[idx].castCurve(newtype)
             if isinstance(newCurve, Curve):
-                flag = self.replaceCurve(newCurve, idx)
+                flag = self.curve_replace(newCurve, idx)
                 if flag:
                     if not silentSuccess:
-                        print(
-                            "Graph.castCurve: new Curve type:",
-                            self.curve(idx).classNameGUI() + ".",
-                        )
+                        msg = "Graph.castCurve: new Curve type: {} {}."
+                        print(msg.format(self[idx].classNameGUI(), type(self[idx])))
                 else:
                     print("Graph.castCurve")
                 return flag
         else:
             msg = "Graph.castCurve: idx not in suitable range ({}, max {})."
-            print(msg.format(idx, len(self)))
+            logger.error(msg.format(idx, len(self)))
         return False
 
     def colorize(
@@ -553,219 +499,73 @@ class Graph:
         """
         Colorize a graph, by coloring each Curve along a colorscale gradient.
         """
-        from grapa.colorscale import Colorscale
-
-        if not isinstance(colorscale, Colorscale):
-            colorscale = Colorscale(colorscale)
-        # determines which curves on want to colorize
-        curves = range(self.length())
-        if curvesselection is not None:
-            try:
-                curves = [int(c) for c in curvesselection]
-            except Exception:
-                print(
-                    "Graph.colorize Exception, please provide list of",
-                    "curves index to colorize",
-                )
-        # special cases
-        if len(curves) < 1:
-            return
-        if len(curves) == 1:
-            col = colorscale.valuesToColor(0.0, avoidWhite=avoidWhite)
-            self[curves[0]].update({"color": col})
-            return
-        # general case
-        show = np.arange(len(curves))
-        if sameIfEmptyLabel:  # if needs to have several curves with same color
-            show = np.array([0.0] * len(curves))
-            val = 0.0
-            for i in range(len(curves)):
-                show[i] = val
-                labelhide = self[curves[i]].attr("labelhide")
-                if (
-                    self[curves[i]].attr("label") != ""
-                    and not labelhide
-                    and not self[curves[i]].isHidden()
-                ):
-                    val += 1.0
-                elif i > 0:
-                    show[i] = show[i - 1]
-        # colorsize
-        cols = colorscale.valuesToColor(
-            show / max(max(show), 1.0), avoidWhite=avoidWhite
+        return colorize_graph(
+            self,
+            colorscale,
+            same_if_empty_label=sameIfEmptyLabel,
+            avoid_white=avoidWhite,
+            curvesselection=curvesselection,
         )
-        for i in range(len(curves)):
-            self[curves[i]].update({"color": cols[i]})
 
-    def applyTemplate(self, graph, alsoCurves=True):
+    def apply_template(self, graph, also_curves=True):
         """
-        Apply a template to the Graph object. The template is a Graph object
-        which contains:
-        - self.getAttributes listed in KEYWORDS_GRAPH["keys"]
-        - self.curve(i).getAttributes listed in KEYWORDS_CURVE["keys"]
-        alsoCurves: True also apply Curves properties, False only apply Graph
-        properties
+        Apply a template to the Graph object. The template is a Graph object which
+        contains:
+
+        - self.get_attributes listed in KEYWORDS_GRAPH["keys"]
+
+        - self[i].get_attributes listed in KEYWORDS_CURVE["keys"]
+
+        :param also_curves: True also apply Curves properties, False only apply Graph
+               properties
         """
         # strip default attributes
         for key in Graph.DEFAULT:
-            if graph.getAttribute(key) == Graph.DEFAULT[key]:
+            if graph.attr(key) == Graph.DEFAULT[key]:
                 graph.update({key: ""})
-        for key in graph.KEYWORDS_GRAPH["keys"]:
-            val = graph.getAttribute(key)
-            if val != "":
+        for key in KEYWORDS_GRAPH["keys"]:
+            val = graph.attr(key)
+            if not MetadataContainer.is_attr_value_default(val):
                 self.update({key: val})
-        if alsoCurves:
+        if also_curves:
             for c in range(len(self)):
                 if c >= len(graph):
                     break
-                for key in self.KEYWORDS_CURVE["keys"]:
-                    val = graph[c].getAttribute(key)
-                    if val != "":
+                for key in KEYWORDS_CURVE["keys"]:
+                    val = graph[c].attr(key)
+                    if not MetadataContainer.is_attr_value_default(val):
                         self[c].update({key: val})
 
-    def replaceLabels(self, old, new):
+    def replace_labels(self, old, new):
         """
         Modify all labels of the Graph, by replacing 'old' by 'new'
         """
-        for c in self.iterCurves():
-            c.update({"label": c.getAttribute("label").replace(old, new)})
+        for curve in self:
+            curve.update({"label": curve.attr("label").replace(old, new)})
 
-    def checkValidText(self):
-        text = self.attr("text", None)
-        texy = self.attr("textxy", "")
-        targ = self.attr("textargs", {})
-        if text is None:
-            self.update({"textxy": "", "textargs": ""})
-            return
-        onlyfirst = False if isinstance(text, list) else True
-        # transform everything into lists
-        text, texy, targ = self._checkValidTextInput(text, texy, targ)
-        if onlyfirst:
-            text, texy, targ = text[0], texy[0], targ[0]
-        if text != self.attr("text"):
-            print("Corrected attribute text", text, "(former", self.attr("text"), ")")
-        if texy != self.attr("textxy") and self.attr("textxy", None) is not None:
-            msg = "Corrected attribute textxy {} (former {})."
-            print(msg.format(texy, self.attr("textxy")))
-        if targ != self.attr("textargs"):
-            msg = "Corrected attribute textargs {} (former {})."
-            print(msg.format(targ, self.attr("textargs")))
-        self.update({"text": text, "textxy": texy, "textargs": targ})
+    def text_check_valid(self):
+        """Call TextHandler.checkValidText, to make sure the text annotation
+        attributes are consistent"""
+        return TextHandler.check_valid(self)
 
-    def _checkValidTextInput(self, text, texy, targ):
-        if not isinstance(text, list):
-            text = [text]
-        if not isinstance(targ, list):
-            targ = [targ]
-        if not isinstance(texy, list):
-            texy = [texy]
-        # print('_checkValidTextInput texy', texy, text[0])
-        if (
-            len(texy) == 2
-            and not isinstance(texy[0], (list, tuple))
-            and texy[0] != ""
-            and texy[1] != ""
-        ):
-            texy = [texy]  # if texy was like (0.5,0.8)
-        for i in range(len(targ)):
-            if not isinstance(targ[i], dict):
-                targ[i] = {}
-        for i in range(len(texy)):
-            if not isinstance(texy[i], (tuple, list)):
-                texy[i] = ""
-        while len(texy) < len(text):
-            texy.append(texy[-1])
-        while len(targ) < len(text):
-            targ.append(targ[-1])
-        return text, texy, targ
+    def text_add(self, text, textxy, textargs=None):
+        """Adds a text to be annotated in the plot, handling the not-so-nice internal
+        implementation.
 
-    def addText(self, text, textxy, textargs=None):
+        :param text: as single element, or as list (1 item per annotation)
+        :param textxy: as single element, or as list (1 item per annotation)
+        :param textargs: as single element, or as list (1 item per annotation)
+        :return: initial values of self.attr("text"), "textxy", "textargs"
         """
-        Adds a text to be annotated in the plot, handling the not-so-nice
-        internal implementation
-        text, textxy, textargs: as single elements, or as lists (1 item per
-        annotation)
+        return TextHandler.add(self, text, textxy, textargs=textargs)
+
+    def text_remove(self, by_id=-1):
+        """By default, removes the last text annotation in the list (pop)
+
+        :param by_id: index of the annotation to remove
+        :returns: a dict with initial text values, prior to removal (use case: restore)
         """
-        if textargs is None:
-            textargs = {}
-        restore = []
-        restore.append(
-            {
-                "text": self.attr("text"),
-                "textxy": self.attr("textxy"),
-                "textargs": self.attr("textargs"),
-            }
-        )
-        text, textxy, textargs = self._checkValidTextInput(text, textxy, textargs)
-        attrs = {"text": text, "textxy": textxy, "textargs": textargs}
-        if self.attr("text", None) is None:
-            self.update(attrs)
-        else:  # need to merge existing with new
-            self.checkValidText()  # makes sure existing info are as lists
-            for key in attrs:
-                self.update({key: self.attr(key) + attrs[key]})
-        self.checkValidText()
-        return restore
-
-    def removeText(self, byId=-1):
-        """
-        By default, removes the last text annotation in the list
-        If byId is provided, removes the annotation with corresponding index
-        """
-        restore = [
-            {
-                "text": self.attr("text"),
-                "textxy": self.attr("textxy"),
-                "textargs": self.attr("textargs"),
-            }
-        ]
-        attrs = ["text", "textxy", "textargs"]
-        self.checkValidText()
-        if self.attr("text", None) is None:
-            pass
-        else:
-            for key in attrs:
-                tmp = self.attr(key)
-                del tmp[byId]
-                self.update({key: tmp})
-        return restore
-
-    # some mathemetical operation on curves
-    def curvesAdd(self, idx0, idx1, interpolate=0, **kwargs):
-        """addition operation when only knowing curves indices"""
-        kwargs.update({"interpolate": interpolate, "sub": False})
-        return self.curve(idx0).__add__(self.curve(idx1), **kwargs)
-
-    def curvesSub(self, idx0, idx1, interpolate=0, **kwargs):
-        """substraction operation when only knowing curves indices"""
-        kwargs.update({"interpolate": interpolate, "sub": True})
-        return self.curve(idx0).__add__(self.curve(idx1), **kwargs)
-
-    def _curveMethod_graphRef(self, *args, **kwargs):
-        """
-        Allows operations on the graph to be executed from inside the Curve
-        object. See for example CurveMath.
-        Expect argument 'curve': a Curve object
-        Expect argument 'method': will call curve.method
-        """
-        if "curve" in kwargs and "method" in kwargs:
-            curve = kwargs["curve"]
-            m = kwargs["method"]
-            del kwargs["curve"], kwargs["method"]
-            return getattr(curve, m)(*args, graph=self, **kwargs)
-
-    def _getAlter(self):
-        """returns the formatted alter instruction of self"""
-        return self._getAlterToFormat(self.attr("alter"))
-
-    @classmethod
-    def _getAlterToFormat(cls, alter):
-        """Return a formatted alter instruction"""
-        if alter == "":
-            alter = ["", ""]
-        if isinstance(alter, str):  # nothing to do if it is dict
-            alter = ["", alter]
-        return alter
+        return TextHandler.remove(self, by_id=by_id)
 
     def formatAxisLabel(self, label):
         """
@@ -793,32 +593,42 @@ class Graph:
                 label += [""]
             out = label[0]
             if symbol and len(label[1]) > 0:
-                out += " $" + label[1] + "$"
-            if label[2] not in [None, " "]:
+                out += " ${}$".format(label[1])
+            if label[2] not in [None, ""]:
                 if units == "/":
-                    out += " / " + label[2]
+                    out += " / {}".format(label[2])
                 elif units == "()":
-                    out += " (" + label[2] + ")"
+                    out += " ({})".format(label[2])
                 else:
-                    out += " [" + label[2] + "]"
+                    out += " [{}]".format(label[2])
             return out.replace("  ", " ")
         return label
 
-    def config(self, key, default="", astype="auto"):
+    # Configuration file
+    def config(self, key: str, default=MetadataContainer.VALUE_DEFAULT, astype="auto"):
         """
-        returns the value corresponding to key in the configuration file.
-        If key is not defined, returns default.
+        Returns the value corresponding to key in the configuration file.
+        If 'key' is not defined in config file, returns default.
         """
-        if hasattr(self, "_config") and self._config.length() > 0:
-            out = self._config.curve(0).getAttribute(key, default=default)
+        if self._config is not None and len(self._config) > 0:
+            out = self._config[0].attr(key, default=default)
             if astype in [str, "str"]:
                 return str(out)
             else:
                 return strToVar(out)
         return default
 
+    def config_all(self) -> (dict, str):
+        """Returns all key-value pairs in config file, and filename"""
+        if self._config is not None and len(self._config) > 0:
+            return {
+                "attributes": self._config[0].get_attributes(),
+                "filename": self._config.filename,
+            }
+        return {"attributes": {}, "filename": None}
+
     def filenamewithpath(self, filename):
-        # if relative, join the path of the file with
+        # if filename is relative, join the path of the file with
         if os.path.isabs(filename):
             return filename
         path = ""
@@ -830,87 +640,292 @@ class Graph:
             path = os.path.dirname(os.path.abspath(self.filename))
         return os.path.join(path, filename)
 
-    # For convenience, we offer a shortcut to GraphIO.export
+    # For convenience, a shortcut to graphIO export
     def export(
         self,
         filesave="",
-        saveAltered=False,
-        ifTemplate=False,
-        ifCompact=True,
-        ifOnlyLabels=False,
-        ifClipboardExport=False,
+        save_altered=False,
+        if_template=False,
+        if_compact=True,
+        if_only_labels=False,
+        if_clipboard_export=False,
     ):
-        """
-        Exports content of Grah object into a human- and machine- readable
-        format.
-        """
-        from grapa.graphIO import GraphIO
-
-        return GraphIO.export(
+        """Exports content of Grah object into a human- and machine-readable format."""
+        return export(
             self,
             filesave=filesave,
-            saveAltered=saveAltered,
-            ifTemplate=ifTemplate,
-            ifCompact=ifCompact,
-            ifOnlyLabels=ifOnlyLabels,
-            ifClipboardExport=ifClipboardExport,
+            save_altered=save_altered,
+            if_template=if_template,
+            if_compact=if_compact,
+            if_only_labels=if_only_labels,
+            if_clipboard_export=if_clipboard_export,
         )
 
-    # For convenience, we offer a shortcut to GraphIO.plot
+    # For convenience, we offer a shortcut to plot
     def plot(
         self,
         filesave="",
-        imgFormat="",
+        img_format="",
         figsize=(0, 0),
-        ifSave="auto",
-        ifExport="auto",
-        figAx=None,
-        ifSubPlot="auto",
+        if_save="auto",
+        if_export="auto",
+        fig_ax=None,
+        if_subplot="auto",
     ):
         """
-        Plot the content of the object.
-        filesave: filename for the saved graph image and export text
-            file.
-        imgFormat: by default image format will be .png. Possible formats are
-            the ones supported by plt.savefig() and possibly .emf
-        figsize: figure size in inch. The actual default value is from a class
-            constant
-        ifSave: [True/False/'auto'] if True, save the Graph as an image. If
-            left to default, saves the image only if filesave is provided
-        ifExport: [True/False/'auto'] if True, create a human- and machine-
-            readable .txt file containing all information of the graph.
-            By default, only export if filesave is provided
-        figAx as [fig, ax]: the graph will be plotted in the provided figure
-            and ax.
-            Providing [fig, None] will erase all existing axes and create what
-            is needed
-        ifSubPlot: [True/False/'auto'] If True, prevents deletion of the
-            existing axes in the figure.
-            By default, keeps axes if axes are provided in figAx.
+        Plot the content of the Graph object.
 
+        :param filesave: filename for the saved graph image and export text file.
+        :param img_format: by default image format will be .png. Possible formats are
+               the ones supported by plt.savefig() and possibly .emf
+        :param figsize: figure size in inch. The actual default value is from a class
+               constant
+        :param if_save: [True/False/'auto'] if True, save the Graph as an image. If
+               left to default, saves the image only if filesave is provided
+        :param if_export: [True/False/'auto'] if True, create a human- and machine-
+               readable .txt file containing all information of the graph.
+               By default, export only if filesave is provided.
+        :param fig_ax: [fig, ax]. the graph will be plotted in the provided figure
+               and ax.
+               Providing None or [fig, None] will erase all existing axes and create
+               what is needed
+        :param if_subplot: [True/False/'auto'] If True, prevents deletion of the
+               existing axes in the figure.
+               By default, keeps axes if axes are provided in figAx.
         """
-        if ifSave not in [True, False]:
-            ifSave = False if filesave == "" else True
-        if ifExport not in [True, False]:
-            ifExport = False if filesave == "" else True
-        from grapa.graphIO import GraphIO
+        from grapa.utils.plot_graph import plot_graph  # otherwise circular dependency
 
-        if ifSubPlot not in [True, False]:
-            ifSubPlot = False
+        if if_save not in [True, False]:
+            if_save = False if filesave == "" else True
+        if if_export not in [True, False]:
+            if_export = False if filesave == "" else True
+
+        if if_subplot not in [True, False]:
+            if_subplot = False
             if (
-                figAx is not None
-                and isinstance(figAx, list)
-                and len(figAx) > 1
-                and figAx[1] is not None
+                fig_ax is not None
+                and isinstance(fig_ax, list)
+                and len(fig_ax) > 1
+                and fig_ax[1] is not None
             ):
-                ifSubPlot = True
-        return GraphIO.plot(
+                if_subplot = True
+        return plot_graph(
             self,
             filesave=filesave,
-            imgFormat=imgFormat,
+            img_format=img_format,
             figsize=figsize,
-            ifSave=ifSave,
-            ifExport=ifExport,
-            figAx=figAx,
-            ifSubPlot=ifSubPlot,
+            if_save=if_save,
+            if_export=if_export,
+            fig_ax=fig_ax,
+            if_subplot=if_subplot,
         )
+
+    @classmethod
+    def get_list_subclasses_parse(cls):
+        """
+        Returns the child classes of Graph which have implemented the methods required
+        to parse files "isFileReadable", "readDataFromFile", and class attribute
+        FILEIO_GRAPHTYPE.
+        Seeps through files in folder datatypes whose filename start with 'curve' or
+        'graph', check the presence of a class with appropriate name and required
+        methods, and returns a list of Graph child class.
+        """
+        # do not reimport everything each time, only first time
+        if cls._list_subclasses_parse is not None:
+            return cls._list_subclasses_parse
+
+        folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datatypes")
+        required = ["FILEIO_GRAPHTYPE", "isFileReadable", "readDataFromFile"]
+        subclasses = []
+        for filestart in ["graph", "curve"]:
+            for file in os.listdir(folder):
+                fname, fext = os.path.splitext(file)
+                if (
+                    fext == ".py"
+                    and fname.startswith(filestart)
+                    and len(fname) > len(filestart)
+                ):
+                    end = fname[len(filestart) :]
+                    module = importlib.import_module("grapa.datatypes." + fname)
+                    if not hasattr(module, "Graph" + end):
+                        continue
+
+                    class_to_test = getattr(module, "Graph" + end)
+                    is_valid = True
+                    for attr in required:
+                        if not hasattr(class_to_test, attr):
+                            is_valid = False
+                            break
+                    if is_valid:
+                        subclasses.append(class_to_test)
+        cls._list_subclasses_parse = subclasses  # stored as class variable
+        return subclasses
+
+    # DEPRECATED METHODS, mostly renamed
+    def length(self):
+        """Returns the number of Curve objects in the list. Can also use len(graph)
+
+        :meta private:
+        """
+        return len(self.data)
+
+    def iterCurves(self):
+        """. Deprecated. Returns an iterator over the different Curves.
+        Not great, deprecateds. Rather use: for curve in graph:
+
+        :meta private:
+        """
+        for curve in self:
+            yield curve
+
+    def getAttribute(self, key: str, default=MetadataContainer.VALUE_DEFAULT) -> dict:
+        """. Deprecated. alias to attr.
+
+        :meta private:"""
+        return self.attr(key, default=default)
+
+    def getAttributes(self, keys_list: list = None) -> dict:
+        """. Deprecated. Use get_attributes
+
+        :meta private:"""
+        return self.get_attributes(keys_list=keys_list)
+
+    def deleteCurve(self, i):
+        """. Deprecated. Use curve_delete instead.
+
+        :meta private:
+        """
+        return self.curve_delete(i)
+
+    def replaceCurve(self, new_curve, idx):
+        """. Deprecated. Use curve_replace instead
+
+        :meta private:
+        """
+        return self.curve_replace(new_curve, idx)
+
+    def moveCurveToIndex(self, idxsource, idxtarget):
+        """. Deprecated. Use curve_move_to_index instread.
+
+        :meta private:
+        """
+        return self.curve_move_to_index(idxsource, idxtarget)
+
+    def duplicateCurve(self, idx1):
+        """. Deprecated. Use curve_duplicate instead
+
+        :meta private:
+        """
+        return self.curve_duplicate(idx1)
+
+    def swapCurves(self, idx1, idx2, relative=False):
+        """. Deprecated. Use curves_swap instead
+
+        :meta private:
+        """
+        return self.curves_swap(idx1, idx2, relative=relative)
+
+    def reverseCurves(self):
+        """. Deprecated. Use curves_reverse instead
+
+        :meta private:
+        """
+        return self.curves_reverse()
+
+    # def delete(self, key: str) -> dict:
+    #     """Alias of attr_pop. Historical reasons. Should remove.
+    #
+    #     :meta private:"""
+    #     return self.attr_pop(key)
+
+
+class ConditionalPropertyApplier:
+    """
+    Apply changes to attributes of Curves within a Graph, for the Curves that satisfy a
+    test
+    """
+
+    MODES_BYINPUTTYPE = {
+        "any": ["==", "!=", ">", ">=", "<", "<="],
+        "str": [
+            "startswith",
+            "endswith",
+            "contains",
+            "not startswith",
+            "not endswith",
+            "not contains",
+        ],
+    }
+    # flatten in a single list
+    MODES_VALUES = [x for _, xs in MODES_BYINPUTTYPE.items() for x in xs]
+
+    @staticmethod
+    def _evaluate_values(valref, valtest, mode):
+        if mode == "==":
+            return valref == valtest
+        elif mode == "!=":
+            return valref != valtest
+        elif mode == ">":
+            return valref > valtest
+        elif mode == ">=":
+            return valref >= valtest
+        elif mode == "<":
+            return valref < valtest
+        elif mode == "<=":
+            return valref <= valtest
+        elif mode == "startswith":
+            return str(valref).startswith(str(valtest))
+        elif mode == "endswith":
+            return str(valref).endswith(str(valtest))
+        elif mode == "contains":
+            return str(valtest) in str(valref)
+        elif mode == "not startswith":
+            return not str(valref).startswith(str(valtest))
+        elif mode == "not endswith":
+            return not str(valref).endswith(str(valtest))
+        elif mode == "not contains":
+            return str(valtest) not in str(valref)
+        msg = (
+            "GraphConditionalPropertyApplier._evaluate_values: unsupported mode "
+            "{}, return False. Input values {}, {}."
+        )
+        logger.warning(msg.format(mode, valref, valtest))
+        return False
+
+    @classmethod
+    def _coerce_mode(cls, mode):
+        if mode in cls.MODES_VALUES:
+            return mode
+        new = "=="
+        msg = (
+            "GraphConditionalProperty: unsupported mode, changed '{}' for '{}'. "
+            "Possible values: {}."
+        )
+        logger.warning(msg.format(mode, new, cls.MODES_VALUES))
+        return new
+
+    @classmethod
+    def apply(
+        cls, graphorcurve, test_prop, test_mode, test_value, apply_prop, apply_value
+    ):
+        """Changes values of property to a given value, for all curves satisfying
+        test condition."""
+        mode = cls._coerce_mode(test_mode)
+        # if Graph: loop and execute over the curves
+        if isinstance(graphorcurve, Graph):
+            for curve in graphorcurve:
+                cls.apply(curve, test_prop, mode, test_value, apply_prop, apply_value)
+            return
+        # supposedly a Curve object: execute behavior
+        val = graphorcurve.attr(test_prop)
+        try:
+            test = cls._evaluate_values(val, test_value, mode)
+        except (AttributeError, TypeError) as e:
+            msg = (
+                "GraphConditionalProperty.apply: Error during evaluation: {}. "
+                "Comparison: {} ({}), {}, {}."
+            )
+            logger.warning(msg.format(e, val, test_prop, mode, test_value))
+        else:
+            if test:
+                graphorcurve.update({apply_prop: apply_value})
