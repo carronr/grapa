@@ -1,0 +1,33 @@
+grapa.datatypes.graphMCAfit.GraphMCAfit
+=======================================
+
+.. currentmodule:: grapa.datatypes.graphMCAfit
+
+.. autoclass:: GraphMCAfit
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphMCAfit.isFileReadable
+       ~GraphMCAfit.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphMCAfit.AXISLABELS
+      ~GraphMCAfit.FILEIO_GRAPHTYPE
+   
+   

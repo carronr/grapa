@@ -1,0 +1,6 @@
+grapa.colorscale.colorize\_graph
+================================
+
+.. currentmodule:: grapa.colorscale
+
+.. autofunction:: colorize_graph

@@ -1,0 +1,42 @@
+grapa.datatypes.curveMCA.FitHandlerXRF
+======================================
+
+.. currentmodule:: grapa.datatypes.curveMCA
+
+.. autoclass:: FitHandlerXRF
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FitHandlerXRF.__init__
+       ~FitHandlerXRF.compute_amplitude
+       ~FitHandlerXRF.compute_amplitude_actual
+       ~FitHandlerXRF.fit_explicit
+       ~FitHandlerXRF.funcListGUI_ifnewline
+       ~FitHandlerXRF.funcListGUI_notafit_preset
+       ~FitHandlerXRF.func_gaussa
+       ~FitHandlerXRF.func_interp
+       ~FitHandlerXRF.func_interp_2gaussaratiodeltadx
+       ~FitHandlerXRF.func_interp_gaussa
+       ~FitHandlerXRF.func_linbg
+       ~FitHandlerXRF.func_linbg_2gaussa
+       ~FitHandlerXRF.func_linbg_2gaussaratiodelta
+       ~FitHandlerXRF.func_linbg_2gaussaratiodelta_3gaussaratiodelta
+       ~FitHandlerXRF.func_linbg_3gaussaratiodelta
+       ~FitHandlerXRF.func_linbg_4gaussaratiodelta
+       ~FitHandlerXRF.func_linbg_gaussa
+       ~FitHandlerXRF.updateFitParam_after
+   
+   
+
+   
+   
+   

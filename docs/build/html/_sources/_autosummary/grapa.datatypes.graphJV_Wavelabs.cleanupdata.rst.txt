@@ -1,0 +1,6 @@
+grapa.datatypes.graphJV\_Wavelabs.cleanupdata
+=============================================
+
+.. currentmodule:: grapa.datatypes.graphJV_Wavelabs
+
+.. autofunction:: cleanupdata

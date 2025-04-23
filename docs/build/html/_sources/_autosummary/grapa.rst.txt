@@ -1,0 +1,66 @@
+﻿grapa
+=====
+
+.. automodule:: grapa
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      grapa
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      GUI
+   
+      colorscale
+   
+      constants
+   
+      curve
+   
+      curve_image
+   
+      curve_inset
+   
+      curve_subplot
+   
+      database
+   
+      datatypes
+   
+      graph
+   
+      gui
+   
+      mathModule
+   
+      scripts
+   
+      utils
+

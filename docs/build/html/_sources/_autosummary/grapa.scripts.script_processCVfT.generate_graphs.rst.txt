@@ -1,0 +1,6 @@
+grapa.scripts.script\_processCVfT.generate\_graphs
+==================================================
+
+.. currentmodule:: grapa.scripts.script_processCVfT
+
+.. autofunction:: generate_graphs

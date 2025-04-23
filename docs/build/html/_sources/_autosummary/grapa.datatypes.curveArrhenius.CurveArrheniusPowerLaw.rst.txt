@@ -1,0 +1,43 @@
+grapa.datatypes.curveArrhenius.CurveArrheniusPowerLaw
+=====================================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrheniusPowerLaw
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrheniusPowerLaw.BUTTONFitLabel
+       ~CurveArrheniusPowerLaw.BUTTONFitROI
+       ~CurveArrheniusPowerLaw.alterListGUIspecific
+       ~CurveArrheniusPowerLaw.func_Arrhenius
+       ~CurveArrheniusPowerLaw.get_help
+       ~CurveArrheniusPowerLaw.popt
+       ~CurveArrheniusPowerLaw.x_1000overK
+       ~CurveArrheniusPowerLaw.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrheniusPowerLaw.attr
+      ~CurveArrheniusPowerLaw.dataLabel
+      ~CurveArrheniusPowerLaw.dataLabelArrhenius
+      ~CurveArrheniusPowerLaw.name
+      ~CurveArrheniusPowerLaw.poptLabel
+      ~CurveArrheniusPowerLaw.switchModel
+   
+   

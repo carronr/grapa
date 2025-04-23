@@ -1,0 +1,37 @@
+grapa.gui.widgets\_graphmanager.GraphHandler
+============================================
+
+.. currentmodule:: grapa.gui.widgets_graphmanager
+
+.. autoclass:: GraphHandler
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphHandler.__init__
+       ~GraphHandler.child
+       ~GraphHandler.properties
+       ~GraphHandler.property
+       ~GraphHandler.reset
+       ~GraphHandler.title
+       ~GraphHandler.update
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphHandler.DEFAULT_PROPDICT
+   
+   

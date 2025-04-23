@@ -1,0 +1,31 @@
+grapa.utils.plot\_graph\_aux.PlotterBoxplot
+===========================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: PlotterBoxplot
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~PlotterBoxplot.add_curve
+       ~PlotterBoxplot.plot
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

@@ -1,0 +1,48 @@
+grapa.scripts.script\_processCVfT
+=================================
+
+.. automodule:: grapa.scripts.script_processCVfT
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      close_enough
+      compute_levels
+      fs_spa_spnc
+      generate_graphs
+      is_file_suitable
+      parse_folder
+      plot_graphs_cf
+      plot_graphs_cv
+      plot_graphs_cvf
+      script_process_cvft
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveGet
+      WarningCollector
+   
+   
+
+   
+   
+   
+
+
+

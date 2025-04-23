@@ -1,0 +1,33 @@
+grapa.datatypes.graphPGZ.GraphPGZ
+=================================
+
+.. currentmodule:: grapa.datatypes.graphPGZ
+
+.. autoclass:: GraphPGZ
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphPGZ.isFileReadable
+       ~GraphPGZ.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphPGZ.AXISLABELS
+      ~GraphPGZ.FILEIO_GRAPHTYPE
+   
+   

@@ -1,0 +1,50 @@
+grapa.scripts.script\_correlations
+==================================
+
+.. automodule:: grapa.scripts.script_correlations
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      colorize_graph
+      filter_pvals
+      guess_is_logarithm_quantity
+      plot_correlations
+      plot_parameters_1D
+      plot_parameters_2D
+      plot_pearson
+      process_datatable
+      process_file
+      values_to_lim
+      writefile_datatable
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Helper
+      HelperDatatable
+      HelperScaps
+   
+   
+
+   
+   
+   
+
+
+

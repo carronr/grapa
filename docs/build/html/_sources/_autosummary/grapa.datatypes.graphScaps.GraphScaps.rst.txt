@@ -1,0 +1,32 @@
+grapa.datatypes.graphScaps.GraphScaps
+=====================================
+
+.. currentmodule:: grapa.datatypes.graphScaps
+
+.. autoclass:: GraphScaps
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphScaps.isFileReadable
+       ~GraphScaps.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphScaps.FILEIO_GRAPHTYPE
+   
+   

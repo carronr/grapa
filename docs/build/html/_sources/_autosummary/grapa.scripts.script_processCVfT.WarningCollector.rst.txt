@@ -1,0 +1,26 @@
+grapa.scripts.script\_processCVfT.WarningCollector
+==================================================
+
+.. currentmodule:: grapa.scripts.script_processCVfT
+
+.. autoclass:: WarningCollector
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~WarningCollector.__init__
+       ~WarningCollector.append
+   
+   
+
+   
+   
+   

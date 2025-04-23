@@ -1,0 +1,553 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.datatypes.curveJV.CurveJV &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.datatypes.curveJscVoc" href="grapa.datatypes.curveJscVoc.html" />
+    <link rel="prev" title="grapa.datatypes.curveJV" href="grapa.datatypes.curveJV.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveArrhenius.html">grapa.datatypes.curveArrhenius</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCV.html">grapa.datatypes.curveCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCf.html">grapa.datatypes.curveCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveEQE.html">grapa.datatypes.curveEQE</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.datatypes.curveJV.html">grapa.datatypes.curveJV</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.datatypes.curveJV.CurveJV</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJscVoc.html">grapa.datatypes.curveJscVoc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMCA.html">grapa.datatypes.curveMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMath.html">grapa.datatypes.curveMath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSIMS.html">grapa.datatypes.curveSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSpectrum.html">grapa.datatypes.curveSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveTRPL.html">grapa.datatypes.curveTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveXRD.html">grapa.datatypes.curveXRD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCV.html">grapa.datatypes.graphCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCf.html">grapa.datatypes.graphCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE.html">grapa.datatypes.graphEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html">grapa.datatypes.graphEQE_CSU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV.html">grapa.datatypes.graphJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJVDarkIllum.html">grapa.datatypes.graphJVDarkIllum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Ossila.html">grapa.datatypes.graphJV_Ossila</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Wavelabs.html">grapa.datatypes.graphJV_Wavelabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBE_TinyTusker.html">grapa.datatypes.graphMBE_TinyTusker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBElog.html">grapa.datatypes.graphMBElog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCA.html">grapa.datatypes.graphMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCAfit.html">grapa.datatypes.graphMCAfit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPAIOS.html">grapa.datatypes.graphPAIOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPGZ.html">grapa.datatypes.graphPGZ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPLQY.html">grapa.datatypes.graphPLQY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSIMS.html">grapa.datatypes.graphSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSPE.html">grapa.datatypes.graphSPE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphScaps.html">grapa.datatypes.graphScaps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSpectrum.html">grapa.datatypes.graphSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSquidAdmiral.html">grapa.datatypes.graphSquidAdmiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphTRPL.html">grapa.datatypes.graphTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXLS.html">grapa.datatypes.graphXLS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXML.html">grapa.datatypes.graphXML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.html">grapa.datatypes</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.curveJV.html">grapa.datatypes.curveJV</a></li>
+      <li class="breadcrumb-item active">grapa.datatypes.curveJV.CurveJV</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.datatypes.curveJV.CurveJV.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-datatypes-curvejv-curvejv">
+<h1>grapa.datatypes.curveJV.CurveJV<a class="headerlink" href="#grapa-datatypes-curvejv-curvejv" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.datatypes.curveJV.</span></span><span class="sig-name descname"><span class="pre">CurveJV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataJV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['V',</span> <span class="pre">'mAcm-2']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">illumPower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifCalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">Curve</span></code></a></p>
+<p>CurveJV offer basic treatment of J-V curves of solar cells.
+Input units are [V] and [mA] (or [mA cm-2]).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataJV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['V',</span> <span class="pre">'mAcm-2']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">illumPower</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifCalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.CurveJVFromFit" title="grapa.datatypes.curveJV.CurveJV.CurveJVFromFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveJVFromFit</span></code></a>([fitRange, diodeFitWeight, ...])</p></td>
+<td><p>Returns a CurveJV object, a fit to the self object on the same Voltage points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.CurveJVFromFit_print" title="grapa.datatypes.curveJV.CurveJV.CurveJVFromFit_print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveJVFromFit_print</span></code></a>([fitRange, fitDiodeWeight])</p></td>
+<td><p>fits the J-V curve with the diode equation with 1 diode and 2 resistors model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">J</span></code>([idx])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">JlSuchAsJ0VJsc</span></code>(Jsc, n, J0, Rs, Rp)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">V</span></code>([idx])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.__init__" title="grapa.datatypes.curveJV.CurveJV.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(dataJV, attributes[, units, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.alterListGUI" title="grapa.datatypes.curveJV.CurveJV.alterListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alterListGUI</span></code></a>()</p></td>
+<td><p>Determines the possible curve visualisations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">area</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcJsc</span></code>([V, J])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcResiduals</span></code>([diodeFit, ifPlot])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcRp</span></code>([V, J])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP" title="grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcVocJscFFEffMPP</span></code></a>()</p></td>
+<td><p>Computes the values of basic PV parameters Voc, Jsc, FF, MPP</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP_print" title="grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP_print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calcVocJscFFEffMPP_print</span></code></a>()</p></td>
+<td><p>Computes and print the values of basic PV parameters Voc, Jsc, FF, MPP</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell</span></code>([forceCalc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.cleanDataVJ" title="grapa.datatypes.curveJV.CurveJV.cleanDataVJ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanDataVJ</span></code></a>([V, J])</p></td>
+<td><p>Return data stripped of saturated datapoints.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">darkOrIllum</span></code>([ifText, forceCalc, ifJscBelow])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.diodeFit" title="grapa.datatypes.curveJV.CurveJV.diodeFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diodeFit</span></code></a>([fitRange, ifPlot, silent])</p></td>
+<td><p>V has to be should be sorted, increasing</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">diodeFitCheckQuality</span></code>(sqResiduals[, threshold])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.diodeFit_BestGuess" title="grapa.datatypes.curveJV.CurveJV.diodeFit_BestGuess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diodeFit_BestGuess</span></code></a>([V, J, alsoVShift])</p></td>
+<td><p>Returns the initial guess for fit of the J-V curve.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.extractJscVoc" title="grapa.datatypes.curveJV.CurveJV.extractJscVoc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extractJscVoc</span></code></a>(graph)</p></td>
+<td><p>Extract Jsc-Voc: extracts Jsc, Voc and T datapoints of selected JV curve, and appends the results to new/existing Curves identified with keywords &quot;_extractJscVoc_Jsc&quot; and &quot;_extractJscVoc_T&quot;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_func_diodeResistors_AbsLog</span></code>(V, logJ, n, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.fit_resampleX" title="grapa.datatypes.curveJV.CurveJV.fit_resampleX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_resampleX</span></code></a>(Vspacing)</p></td>
+<td><p>Specifies new basis for datapoints for the x data, and recomputes the fitted values on the new basis of points</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.funcListGUI" title="grapa.datatypes.curveJV.CurveJV.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(**kwargs)</p></td>
+<td><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which elements are instances of <cite>FuncGUI</cite>, or (old style): ::.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeIdeal</span></code>(V, n, Jl, J0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeIdealAbsLog</span></code>(V, n, Jl, J0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeIdealAbsLog10</span></code>(V, n, Jl, J0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeResistors</span></code>(V, n, Jl, J0, Rs, Rp)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeResistorsAbsLog</span></code>(V, n, Jl, J0, Rs, Rp)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeResistorsAbsLog10</span></code>(V, n, Jl, J0, Rs, Rp)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeResistorsAbsLog10_modParam</span></code>(V, n, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeResistorsAbsLog10_modParam_red</span></code>(V, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_diodeResistors_Jsc</span></code>(V, n, Jl, J0, Rs, Rp)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fwd_bwd</span></code>([forceCalc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.idxFitHighSensitivityNJ0" title="grapa.datatypes.curveJV.CurveJV.idxFitHighSensitivityNJ0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxFitHighSensitivityNJ0</span></code></a>(V, dJLogAbsdV[, ...])</p></td>
+<td><p>threshold: criterion to select datapoint is that derivative is &gt; threshold*max(deriv) also winimal voltage width for example [-0.05, 0.1]</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">idxRange</span></code>(V[, fitRange])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">illumspectrum</span></code>([forceCalc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpJ</span></code>(V)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">measId</span></code>([forceCalc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.parse_filename" title="grapa.datatypes.curveJV.CurveJV.parse_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_filename</span></code></a>([to_attr])</p></td>
+<td><p>Parse the filename to extract information contained in it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">printShort</span></code>([header])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample</span></code>([forceCalc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.selectJVdataForFit" title="grapa.datatypes.curveJV.CurveJV.selectJVdataForFit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selectJVdataForFit</span></code></a>([V, J, fitRange])</p></td>
+<td><p>Returns dataseet suitable for fitting, taking into account a fit range given by user.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.setArea" title="grapa.datatypes.curveJV.CurveJV.setArea"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setArea</span></code></a>(area[, ifCalc])</p></td>
+<td><p>Normalize the cell area, and modifies the data accordingly.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">simpleLabel</span></code>([forceCalc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.update" title="grapa.datatypes.curveJV.CurveJV.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(attributes)</p></td>
+<td><p>Override default update method, to handle the case where a new area or temperature would be set.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.xinversejminusjsc" title="grapa.datatypes.curveJV.CurveJV.xinversejminusjsc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xinversejminusjsc</span></code></a>([index, xyValue])</p></td>
+<td><p>To be used for Sites method, dV/dJ vs 1/(J-Jsc) Returns value in [A-1 cm2]</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveJV.CurveJV.yDifferentialR" title="grapa.datatypes.curveJV.CurveJV.yDifferentialR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">yDifferentialR</span></code></a>([index, xyValue])</p></td>
+<td><p>Returns differential resistance of the J-V curve R = dV/dI</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS_X</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS_Y</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CURVE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DARK</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DARK_ILLUM</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DARK_ILLUM_VALUESLIST</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FILENAMEPARSE_EXPR</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FILENAMEPARSE_KEYS</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FORMAT_AUTOLABEL</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ILLUM</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">defaultIllumPower</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.CurveJVFromFit">
+<span class="sig-name descname"><span class="pre">CurveJVFromFit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitRange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diodeFitWeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.CurveJVFromFit" title="Link to this definition"></a></dt>
+<dd><p>Returns a CurveJV object, a fit to the self object on the same Voltage points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fitRange</strong> – if None, auto-detect.</p></li>
+<li><p><strong>diodeFitWeight</strong> – 0 for no change, otherwise divide the fit sigma in the
+diode behavior region. Values such as 10 significantly improve the
+fittin in this region.</p></li>
+<li><p><strong>V</strong> – alternative V datapoints on which evaluate function after the fit.
+Default is full set of V datapoints.</p></li>
+<li><p><strong>silent</strong> – if False, prints more information</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.CurveJVFromFit_print">
+<span class="sig-name descname"><span class="pre">CurveJVFromFit_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitRange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitDiodeWeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.CurveJVFromFit_print" title="Link to this definition"></a></dt>
+<dd><p>fits the J-V curve with the diode equation with 1 diode and 2 resistors model.
+The fit is performed using the log(J) values instead of J.
+The fit quality should be assessed visually on linear and logarithmic plots.</p>
+<ul class="simple">
+<li><p>J0: good values are typically &lt; 1e-4.</p></li>
+<li><p>n: is ideality factor. Good values are &lt; 1.7.</p></li>
+<li><p>Jl: grapa implements the difference of the Jl to Jsc. Jl is not a fit
+parameter, but is adjusted so that J(V=0) = Jsc.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fitRange</strong> – [V_min, V_max]</p></li>
+<li><p><strong>fitDiodeWeight</strong> – increased fit weight for the datapoints in the diode
+region of the J-V curve. Can improve the accuracy of the fit near MPP.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a CurveJV fitted curve.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.alterListGUI">
+<span class="sig-name descname"><span class="pre">alterListGUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.alterListGUI" title="Link to this definition"></a></dt>
+<dd><p>Determines the possible curve visualisations. One element has the form:
+AlterListItem(‘Label GUI’, [‘alter_x’, ‘alter_y’], ‘semilogx’, “print help doc”)
+By default only neutral (i.e. raw data) is provided</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP">
+<span class="sig-name descname"><span class="pre">calcVocJscFFEffMPP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP" title="Link to this definition"></a></dt>
+<dd><p>Computes the values of basic PV parameters Voc, Jsc, FF, MPP</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP_print">
+<span class="sig-name descname"><span class="pre">calcVocJscFFEffMPP_print</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.calcVocJscFFEffMPP_print" title="Link to this definition"></a></dt>
+<dd><p>Computes and print the values of basic PV parameters Voc, Jsc, FF, MPP</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.cleanDataVJ">
+<span class="sig-name descname"><span class="pre">cleanDataVJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.cleanDataVJ" title="Link to this definition"></a></dt>
+<dd><p>Return data stripped of saturated datapoints.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.diodeFit">
+<span class="sig-name descname"><span class="pre">diodeFit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitRange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifPlot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.diodeFit" title="Link to this definition"></a></dt>
+<dd><p>V has to be should be sorted, increasing</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.diodeFit_BestGuess">
+<span class="sig-name descname"><span class="pre">diodeFit_BestGuess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alsoVShift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.diodeFit_BestGuess" title="Link to this definition"></a></dt>
+<dd><p>Returns the initial guess for fit of the J-V curve.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.extractJscVoc">
+<span class="sig-name descname"><span class="pre">extractJscVoc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.extractJscVoc" title="Link to this definition"></a></dt>
+<dd><p>Extract Jsc-Voc: extracts Jsc, Voc and T datapoints of selected JV
+curve, and appends the results to new/existing Curves identified with
+keywords “_extractJscVoc_Jsc” and “_extractJscVoc_T”.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.fit_resampleX">
+<span class="sig-name descname"><span class="pre">fit_resampleX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Vspacing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.fit_resampleX" title="Link to this definition"></a></dt>
+<dd><p>Specifies new basis for datapoints for the x data, and recomputes the fitted
+values on the new basis of points</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.funcListGUI">
+<span class="sig-name descname"><span class="pre">funcListGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.funcListGUI" title="Link to this definition"></a></dt>
+<dd><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which
+elements are instances of <cite>FuncGUI</cite>, or (old style):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">func</span><span class="p">,</span>
+ <span class="s1">&#39;Button text&#39;</span><span class="p">,</span>
+ <span class="p">[</span><span class="s1">&#39;label 1&#39;</span><span class="p">,</span> <span class="s1">&#39;label 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">[</span><span class="s1">&#39;value 1&#39;</span><span class="p">,</span> <span class="s1">&#39;value 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">{</span><span class="s1">&#39;hiddenvar1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">},</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+ <span class="p">[</span><span class="n">dictFieldAttributes</span><span class="p">,</span> <span class="p">{},</span> <span class="o">...</span><span class="p">]]</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, returns quick modifs for offset and muloffset (if already set), and
+a help for some plot types (errorbar, scatter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – this function should be called specifying kwargs[‘graph’] the
+graph self is embedded in, and kwargs[‘graph_i’] as position of self in
+graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.idxFitHighSensitivityNJ0">
+<span class="sig-name descname"><span class="pre">idxFitHighSensitivityNJ0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dJLogAbsdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.idxFitHighSensitivityNJ0" title="Link to this definition"></a></dt>
+<dd><p>threshold: criterion to select datapoint is that derivative is &gt; threshold*max(deriv)
+also winimal voltage width for example [-0.05, 0.1]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.parse_filename">
+<span class="sig-name descname"><span class="pre">parse_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.parse_filename" title="Link to this definition"></a></dt>
+<dd><p>Parse the filename to extract information contained in it.
+Parsing regexp: see CurveJV.FILENAMEPARSE_EXPR and CurveJV.FILENAMEPARSE_KEYS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>to_attr</strong> – if True, update the Curve attributes: ‘sample’, ‘cell’,
+‘direction’, ‘illumspectrum’, ‘measid’, ‘additional’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.selectJVdataForFit">
+<span class="sig-name descname"><span class="pre">selectJVdataForFit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitRange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.selectJVdataForFit" title="Link to this definition"></a></dt>
+<dd><p>Returns dataseet suitable for fitting, taking into account a fit range given by user.
+Saturated datapoints are striped.
+Caution: the value of Jsc return in only computed on the fitRange.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.setArea">
+<span class="sig-name descname"><span class="pre">setArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifCalc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.setArea" title="Link to this definition"></a></dt>
+<dd><p>Normalize the cell area, and modifies the data accordingly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.update" title="Link to this definition"></a></dt>
+<dd><p>Override default update method, to handle the case where a new area
+or temperature would be set.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.xinversejminusjsc">
+<span class="sig-name descname"><span class="pre">xinversejminusjsc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyValue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.xinversejminusjsc" title="Link to this definition"></a></dt>
+<dd><p>To be used for Sites method, dV/dJ vs 1/(J-Jsc)
+Returns value in [A-1 cm2]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveJV.CurveJV.yDifferentialR">
+<span class="sig-name descname"><span class="pre">yDifferentialR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyValue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveJV.CurveJV.yDifferentialR" title="Link to this definition"></a></dt>
+<dd><p>Returns differential resistance of the J-V curve R = dV/dI</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.datatypes.curveJV.html" class="btn btn-neutral float-left" title="grapa.datatypes.curveJV" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.datatypes.curveJscVoc.html" class="btn btn-neutral float-right" title="grapa.datatypes.curveJscVoc" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

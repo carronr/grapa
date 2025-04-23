@@ -1,0 +1,630 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.graph.Graph &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.gui" href="grapa.gui.html" />
+    <link rel="prev" title="grapa.graph.ConditionalPropertyApplier" href="grapa.graph.ConditionalPropertyApplier.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.graph.html">grapa.graph</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.graph.ConditionalPropertyApplier.html">grapa.graph.ConditionalPropertyApplier</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.graph.Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grapa.graph.Graph"><code class="docutils literal notranslate"><span class="pre">Graph</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.graph.html">grapa.graph</a></li>
+      <li class="breadcrumb-item active">grapa.graph.Graph</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.graph.Graph.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-graph-graph">
+<h1>grapa.graph.Graph<a class="headerlink" href="#grapa-graph-graph" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.graph.Graph">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.graph.</span></span><span class="sig-name descname"><span class="pre">Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'config.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A Graph can be though as containing a list of Curves, and is a convenient way to
+read, store and manipulate data, as well as export plot as images and text files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – str filename to open, or list[str] (filenames), or
+list of data series [xseries, yseries [, zseries…]].
+Default ‘’ (graph empty).</p></li>
+<li><p><strong>complement</strong> – <p>dict, the elements will be stored as graph attributes.
+Example: {‘xlim’: [1, ‘’]}. Special values:</p>
+<ul>
+<li><p>’isfilecontent’ = True: content of variable filename is interpreted as data</p></li>
+<li><p>’readas’ in [‘database’, ‘generic’]. ‘database’ can be useful. You may
+consider using pandas instead</p></li>
+</ul>
+</p></li>
+<li><p><strong>silent</strong> – to get more details on what is going on. Default True</p></li>
+<li><p><strong>config</strong> – configuration datafile. Default ‘config.txt’</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'config.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.__init__" title="Link to this definition"></a></dt>
+<dd><p>default constructor. Calls method reset.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.__init__" title="grapa.graph.Graph.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([filename, complement, silent, config])</p></td>
+<td><p>default constructor.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.alterListGUI" title="grapa.graph.Graph.alterListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alterListGUI</span></code></a>()</p></td>
+<td><p>Compiles a list of possible data transforms, retrieved from all Curves</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.append" title="grapa.graph.Graph.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(curve[, idx])</p></td>
+<td><p>Add into the object list a Curve, a list or Curves, or every Curve in a Graph object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.apply_template" title="grapa.graph.Graph.apply_template"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_template</span></code></a>(graph[, also_curves])</p></td>
+<td><p>Apply a template to the Graph object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.attr" title="grapa.graph.Graph.attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr</span></code></a>(key[, default])</p></td>
+<td><p>Retrieve an attribute value in header, graphInfo or in curve[0]</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.attr_pop" title="grapa.graph.Graph.attr_pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attr_pop</span></code></a>(key)</p></td>
+<td><p>Delete an attribute of the Graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.castCurve" title="grapa.graph.Graph.castCurve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">castCurve</span></code></a>(newtype, idx[, silentSuccess])</p></td>
+<td><p>Replace a Curve with another type of Curve with identical data and properties.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.colorize" title="grapa.graph.Graph.colorize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorize</span></code></a>(colorscale[, sameIfEmptyLabel, ...])</p></td>
+<td><p>Colorize a graph, by coloring each Curve along a colorscale gradient.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.config" title="grapa.graph.Graph.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a>(key[, default, astype])</p></td>
+<td><p>Returns the value corresponding to key in the configuration file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.config_all" title="grapa.graph.Graph.config_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_all</span></code></a>()</p></td>
+<td><p>Returns all key-value pairs in config file, and filename</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve" title="grapa.graph.Graph.curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve</span></code></a>(index)</p></td>
+<td><p>Returns the Curve object at index i in the list.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_delete" title="grapa.graph.Graph.curve_delete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_delete</span></code></a>(i)</p></td>
+<td><p>Delete a Curve at index i from the Graph object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_duplicate" title="grapa.graph.Graph.curve_duplicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_duplicate</span></code></a>(idx1)</p></td>
+<td><p>Duplicate (clone) an existing curve and append it in the curves list.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_move_to_index" title="grapa.graph.Graph.curve_move_to_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_move_to_index</span></code></a>(idxsource, idxtarget)</p></td>
+<td><p>Change the position of a Curve in the list</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_replace" title="grapa.graph.Graph.curve_replace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_replace</span></code></a>(new_curve, idx)</p></td>
+<td><p>Replaces a Curve with another.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curves" title="grapa.graph.Graph.curves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curves</span></code></a>(key, value[, str_lower, str_startswith])</p></td>
+<td><p>Returns a list of Curves for which curve.attr(key) value (type and value equality)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curves_reverse" title="grapa.graph.Graph.curves_reverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curves_reverse</span></code></a>()</p></td>
+<td><p>Reverse the order of the Curves.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curves_swap" title="grapa.graph.Graph.curves_swap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curves_swap</span></code></a>(idx1, idx2[, relative])</p></td>
+<td><p>Exchange the Curves at index idx1 and idx2.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deleteCurve</span></code>(i)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">duplicateCurve</span></code>(idx1)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.export" title="grapa.graph.Graph.export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code></a>([filesave, save_altered, ...])</p></td>
+<td><p>Exports content of Grah object into a human- and machine-readable format.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filenamewithpath</span></code>(filename)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.formatAxisLabel" title="grapa.graph.Graph.formatAxisLabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">formatAxisLabel</span></code></a>(label)</p></td>
+<td><p>Returns a string for label according to user preference.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getAttribute</span></code>(key[, default])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getAttributes</span></code>([keys_list])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCurveData</span></code>(idx[, ifAltered])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.get_alter" title="grapa.graph.Graph.get_alter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_alter</span></code></a>()</p></td>
+<td><p>returns the formatted alter instruction of self</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.get_attributes" title="grapa.graph.Graph.get_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_attributes</span></code></a>([keys_list])</p></td>
+<td><p>Returns a dict containing the content of both headers and graphInfo</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.get_list_subclasses_parse" title="grapa.graph.Graph.get_list_subclasses_parse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_list_subclasses_parse</span></code></a>()</p></td>
+<td><p>Returns the child classes of Graph which have implemented the methods required to parse files &quot;isFileReadable&quot;, &quot;readDataFromFile&quot;, and class attribute FILEIO_GRAPHTYPE.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.has_attr" title="grapa.graph.Graph.has_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_attr</span></code></a>(key)</p></td>
+<td><p>Check if graph has attribute key</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterCurves</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">length</span></code>()</p></td>
+<td><p>Returns the number of Curve objects in the list.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.merge" title="grapa.graph.Graph.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(graph)</p></td>
+<td><p>Add in a Graph object the content of another Graph object</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveCurveToIndex</span></code>(idxsource, idxtarget)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.plot" title="grapa.graph.Graph.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([filesave, img_format, figsize, ...])</p></td>
+<td><p>Plot the content of the Graph object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">replaceCurve</span></code>(new_curve, idx)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.replace_labels" title="grapa.graph.Graph.replace_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_labels</span></code></a>(old, new)</p></td>
+<td><p>Modify all labels of the Graph, by replacing 'old' by 'new'</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.reset" title="grapa.graph.Graph.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a>(filename[, complement, silent])</p></td>
+<td><p>Reset a Graph: empty its list of Curves, and metadata.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reverseCurves</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapCurves</span></code>(idx1, idx2[, relative])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.text_add" title="grapa.graph.Graph.text_add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">text_add</span></code></a>(text, textxy[, textargs])</p></td>
+<td><p>Adds a text to be annotated in the plot, handling the not-so-nice internal implementation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.text_check_valid" title="grapa.graph.Graph.text_check_valid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">text_check_valid</span></code></a>()</p></td>
+<td><p>Call TextHandler.checkValidText, to make sure the text annotation attributes are consistent</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.text_remove" title="grapa.graph.Graph.text_remove"><code class="xref py py-obj docutils literal notranslate"><span class="pre">text_remove</span></code></a>([by_id])</p></td>
+<td><p>By default, removes the last text annotation in the list (pop)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.update" title="grapa.graph.Graph.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(attributes[, if_all])</p></td>
+<td><p>Update the properties of the Graph object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.updateValuesDictkeys" title="grapa.graph.Graph.updateValuesDictkeys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateValuesDictkeys</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Update the graph using a specific data input, for GUI purposes.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONFIG_FILENAME_DEFAULT</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONFIG_FILES</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FIGSIZE_DEFAULT</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FILEIO_DPI</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.alterListGUI">
+<span class="sig-name descname"><span class="pre">alterListGUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.graph.Graph.alterListGUI" title="Link to this definition"></a></dt>
+<dd><p>Compiles a list of possible data transforms, retrieved from all Curves</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.append" title="Link to this definition"></a></dt>
+<dd><p>Add into the object list a Curve, a list or Curves, or every Curve in a
+Graph object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.apply_template">
+<span class="sig-name descname"><span class="pre">apply_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_curves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.apply_template" title="Link to this definition"></a></dt>
+<dd><p>Apply a template to the Graph object. The template is a Graph object which
+contains:</p>
+<ul class="simple">
+<li><p>self.get_attributes listed in KEYWORDS_GRAPH[“keys”]</p></li>
+<li><p>self[i].get_attributes listed in KEYWORDS_CURVE[“keys”]</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>also_curves</strong> – True also apply Curves properties, False only apply Graph
+properties</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.attr">
+<span class="sig-name descname"><span class="pre">attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.attr" title="Link to this definition"></a></dt>
+<dd><p>Retrieve an attribute value in header, graphInfo or in curve[0]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.attr_pop">
+<span class="sig-name descname"><span class="pre">attr_pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.graph.Graph.attr_pop" title="Link to this definition"></a></dt>
+<dd><p>Delete an attribute of the Graph.
+Return the deleted attribute as a dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.castCurve">
+<span class="sig-name descname"><span class="pre">castCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silentSuccess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.castCurve" title="Link to this definition"></a></dt>
+<dd><p>Replace a Curve with another type of Curve with identical data and properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.colorize">
+<span class="sig-name descname"><span class="pre">colorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colorscale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sameIfEmptyLabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoidWhite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curvesselection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.colorize" title="Link to this definition"></a></dt>
+<dd><p>Colorize a graph, by coloring each Curve along a colorscale gradient.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.config">
+<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">astype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.config" title="Link to this definition"></a></dt>
+<dd><p>Returns the value corresponding to key in the configuration file.
+If ‘key’ is not defined in config file, returns default.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.config_all">
+<span class="sig-name descname"><span class="pre">config_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'dict'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.config_all" title="Link to this definition"></a></dt>
+<dd><p>Returns all key-value pairs in config file, and filename</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curve">
+<span class="sig-name descname"><span class="pre">curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve" title="Link to this definition"></a></dt>
+<dd><p>Returns the Curve object at index i in the list. Can also use graph[index]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curve_delete">
+<span class="sig-name descname"><span class="pre">curve_delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_delete" title="Link to this definition"></a></dt>
+<dd><p>Delete a Curve at index i from the Graph object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curve_duplicate">
+<span class="sig-name descname"><span class="pre">curve_duplicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_duplicate" title="Link to this definition"></a></dt>
+<dd><p>Duplicate (clone) an existing curve and append it in the curves list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curve_move_to_index">
+<span class="sig-name descname"><span class="pre">curve_move_to_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idxsource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idxtarget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_move_to_index" title="Link to this definition"></a></dt>
+<dd><p>Change the position of a Curve in the list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curve_replace">
+<span class="sig-name descname"><span class="pre">curve_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_replace" title="Link to this definition"></a></dt>
+<dd><p>Replaces a Curve with another.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curves">
+<span class="sig-name descname"><span class="pre">curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_lower</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_startswith</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.graph.Graph.curves" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of Curves for which curve.attr(key) value (type and value
+equality)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – the attribute to check. By default, ‘label’.</p></li>
+<li><p><strong>value</strong> – the value to test</p></li>
+<li><p><strong>str_lower</strong> – if True, performs .lower() onto value and curve.attr(key)
+before comparison, in case each are str.</p></li>
+<li><p><strong>str_startswith</strong> – is both value and the attribute are str, only look at the
+first characters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of Curves</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curves_reverse">
+<span class="sig-name descname"><span class="pre">curves_reverse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curves_reverse" title="Link to this definition"></a></dt>
+<dd><p>Reverse the order of the Curves.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.curves_swap">
+<span class="sig-name descname"><span class="pre">curves_swap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curves_swap" title="Link to this definition"></a></dt>
+<dd><p>Exchange the Curves at index idx1 and idx2.
+For example useful to modify the plot order (and order in the legend)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_altered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_only_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_clipboard_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.export" title="Link to this definition"></a></dt>
+<dd><p>Exports content of Grah object into a human- and machine-readable format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.formatAxisLabel">
+<span class="sig-name descname"><span class="pre">formatAxisLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.formatAxisLabel" title="Link to this definition"></a></dt>
+<dd><p>Returns a string for label according to user preference.
+‘Some quantity [unit]’ may become ‘Some quantify (unit)’
+Other possible input is [‘This is a Quantity’, ‘Q’, ‘unit’]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.get_alter">
+<span class="sig-name descname"><span class="pre">get_alter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.get_alter" title="Link to this definition"></a></dt>
+<dd><p>returns the formatted alter instruction of self</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.get_attributes">
+<span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.graph.Graph.get_attributes" title="Link to this definition"></a></dt>
+<dd><p>Returns a dict containing the content of both headers and graphInfo</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.get_list_subclasses_parse">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_list_subclasses_parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.get_list_subclasses_parse" title="Link to this definition"></a></dt>
+<dd><p>Returns the child classes of Graph which have implemented the methods required
+to parse files “isFileReadable”, “readDataFromFile”, and class attribute
+FILEIO_GRAPHTYPE.
+Seeps through files in folder datatypes whose filename start with ‘curve’ or
+‘graph’, check the presence of a class with appropriate name and required
+methods, and returns a list of Graph child class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.has_attr">
+<span class="sig-name descname"><span class="pre">has_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.has_attr" title="Link to this definition"></a></dt>
+<dd><p>Check if graph has attribute key</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.merge">
+<span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.merge" title="Link to this definition"></a></dt>
+<dd><p>Add in a Graph object the content of another Graph object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.plot" title="Link to this definition"></a></dt>
+<dd><p>Plot the content of the Graph object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filesave</strong> – filename for the saved graph image and export text file.</p></li>
+<li><p><strong>img_format</strong> – by default image format will be .png. Possible formats are
+the ones supported by plt.savefig() and possibly .emf</p></li>
+<li><p><strong>figsize</strong> – figure size in inch. The actual default value is from a class
+constant</p></li>
+<li><p><strong>if_save</strong> – [True/False/’auto’] if True, save the Graph as an image. If
+left to default, saves the image only if filesave is provided</p></li>
+<li><p><strong>if_export</strong> – [True/False/’auto’] if True, create a human- and machine-
+readable .txt file containing all information of the graph.
+By default, export only if filesave is provided.</p></li>
+<li><p><strong>fig_ax</strong> – [fig, ax]. the graph will be plotted in the provided figure
+and ax.
+Providing None or [fig, None] will erase all existing axes and create
+what is needed</p></li>
+<li><p><strong>if_subplot</strong> – [True/False/’auto’] If True, prevents deletion of the
+existing axes in the figure.
+By default, keeps axes if axes are provided in figAx.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.replace_labels">
+<span class="sig-name descname"><span class="pre">replace_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.replace_labels" title="Link to this definition"></a></dt>
+<dd><p>Modify all labels of the Graph, by replacing ‘old’ by ‘new’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset a Graph: empty its list of Curves, and metadata.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.text_add">
+<span class="sig-name descname"><span class="pre">text_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.text_add" title="Link to this definition"></a></dt>
+<dd><p>Adds a text to be annotated in the plot, handling the not-so-nice internal
+implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> – as single element, or as list (1 item per annotation)</p></li>
+<li><p><strong>textxy</strong> – as single element, or as list (1 item per annotation)</p></li>
+<li><p><strong>textargs</strong> – as single element, or as list (1 item per annotation)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>initial values of self.attr(“text”), “textxy”, “textargs”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.text_check_valid">
+<span class="sig-name descname"><span class="pre">text_check_valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.text_check_valid" title="Link to this definition"></a></dt>
+<dd><p>Call TextHandler.checkValidText, to make sure the text annotation
+attributes are consistent</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.text_remove">
+<span class="sig-name descname"><span class="pre">text_remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">by_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.text_remove" title="Link to this definition"></a></dt>
+<dd><p>By default, removes the last text annotation in the list (pop)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>by_id</strong> – index of the annotation to remove</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dict with initial text values, prior to removal (use case: restore)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grapa.graph.Graph.update" title="Link to this definition"></a></dt>
+<dd><p>Update the properties of the Graph object.
+The properties are stored in dict objects, so update works similarly as
+the dict.update() method.
+If a property is not known to belong to the Graph object, it is
+attributed to the 1st Curve object (unless if_all=True)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.updateValuesDictkeys">
+<span class="sig-name descname"><span class="pre">updateValuesDictkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.updateValuesDictkeys" title="Link to this definition"></a></dt>
+<dd><p>Update the graph using a specific data input, for GUI purposes.
+Falls back onto ({key1: value1, key2: value2, …}).
+Mandatory: len(args) == len(kwargs[“keys”]).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – value1, value2, …</p></li>
+<li><p><strong>kwargs</strong> – key=[‘key1’, ‘key2’, …]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.graph.ConditionalPropertyApplier.html" class="btn btn-neutral float-left" title="grapa.graph.ConditionalPropertyApplier" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.gui.html" class="btn btn-neutral float-right" title="grapa.gui" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

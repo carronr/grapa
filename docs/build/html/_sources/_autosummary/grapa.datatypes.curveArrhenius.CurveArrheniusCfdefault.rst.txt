@@ -1,0 +1,39 @@
+grapa.datatypes.curveArrhenius.CurveArrheniusCfdefault
+======================================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrheniusCfdefault
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrheniusCfdefault.func_Arrhenius
+       ~CurveArrheniusCfdefault.get_help
+       ~CurveArrheniusCfdefault.popt
+       ~CurveArrheniusCfdefault.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrheniusCfdefault.attr
+      ~CurveArrheniusCfdefault.dataLabel
+      ~CurveArrheniusCfdefault.dataLabelArrhenius
+      ~CurveArrheniusCfdefault.name
+      ~CurveArrheniusCfdefault.poptLabel
+      ~CurveArrheniusCfdefault.switchModel
+   
+   

@@ -1,0 +1,656 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.datatypes.curveEQE.CurveEQE &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.datatypes.curveEQE.FileLoaderOnDemandAM0" href="grapa.datatypes.curveEQE.FileLoaderOnDemandAM0.html" />
+    <link rel="prev" title="grapa.datatypes.curveEQE.bandgap_tauc" href="grapa.datatypes.curveEQE.bandgap_tauc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveArrhenius.html">grapa.datatypes.curveArrhenius</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCV.html">grapa.datatypes.curveCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCf.html">grapa.datatypes.curveCf</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.datatypes.curveEQE.html">grapa.datatypes.curveEQE</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveEQE.bandgap_tauc.html">grapa.datatypes.curveEQE.bandgap_tauc</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.datatypes.curveEQE.CurveEQE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveEQE.FileLoaderOnDemandAM0.html">grapa.datatypes.curveEQE.FileLoaderOnDemandAM0</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJV.html">grapa.datatypes.curveJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJscVoc.html">grapa.datatypes.curveJscVoc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMCA.html">grapa.datatypes.curveMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMath.html">grapa.datatypes.curveMath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSIMS.html">grapa.datatypes.curveSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSpectrum.html">grapa.datatypes.curveSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveTRPL.html">grapa.datatypes.curveTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveXRD.html">grapa.datatypes.curveXRD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCV.html">grapa.datatypes.graphCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCf.html">grapa.datatypes.graphCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE.html">grapa.datatypes.graphEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html">grapa.datatypes.graphEQE_CSU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV.html">grapa.datatypes.graphJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJVDarkIllum.html">grapa.datatypes.graphJVDarkIllum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Ossila.html">grapa.datatypes.graphJV_Ossila</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Wavelabs.html">grapa.datatypes.graphJV_Wavelabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBE_TinyTusker.html">grapa.datatypes.graphMBE_TinyTusker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBElog.html">grapa.datatypes.graphMBElog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCA.html">grapa.datatypes.graphMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCAfit.html">grapa.datatypes.graphMCAfit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPAIOS.html">grapa.datatypes.graphPAIOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPGZ.html">grapa.datatypes.graphPGZ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPLQY.html">grapa.datatypes.graphPLQY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSIMS.html">grapa.datatypes.graphSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSPE.html">grapa.datatypes.graphSPE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphScaps.html">grapa.datatypes.graphScaps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSpectrum.html">grapa.datatypes.graphSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSquidAdmiral.html">grapa.datatypes.graphSquidAdmiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphTRPL.html">grapa.datatypes.graphTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXLS.html">grapa.datatypes.graphXLS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXML.html">grapa.datatypes.graphXML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.html">grapa.datatypes</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.curveEQE.html">grapa.datatypes.curveEQE</a></li>
+      <li class="breadcrumb-item active">grapa.datatypes.curveEQE.CurveEQE</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.datatypes.curveEQE.CurveEQE.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-datatypes-curveeqe-curveeqe">
+<h1>grapa.datatypes.curveEQE.CurveEQE<a class="headerlink" href="#grapa-datatypes-curveeqe-curveeqe" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.datatypes.curveEQE.</span></span><span class="sig-name descname"><span class="pre">CurveEQE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">Curve</span></code></a></p>
+<p>CurveEQE offer basic treatment of (external) quantum efficiency curves of
+solar cells.
+Input units should be in [nm] and values within [0-1]. If needed,
+CurveSpectrum can convert [eV] in [nm].</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_absorptionEdge" title="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_absorptionEdge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveEQE_absorptionEdge</span></code></a>(thickness, intensity0)</p></td>
+<td><p>CdS estimate: returns a Curve for quick-and-dirty estimate layer thickness, e.g. CdS.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapLog" title="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapLog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveEQE_bandgapLog</span></code></a>([ylim, silent])</p></td>
+<td><p>Performs fit of the low-energy side of EQE with modified Tauc formula (linear relation in (eV * ln(1 - EQE))^2 vs eV.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapTauc" title="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapTauc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveEQE_bandgapTauc</span></code></a>([ylim, silent])</p></td>
+<td><p>Performs fit of the low-energy side of EQE with Tauc formula (linear relation</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis" title="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveEQE_derivativeanalysis</span></code></a>([sgwidth, ...])</p></td>
+<td><p>Bandgap derivative: Computes the bandgap and other derived data based on the Savitzky–Golay derivative dEQE/dE.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveUrbachEnergy" title="grapa.datatypes.curveEQE.CurveEQE.CurveUrbachEnergy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveUrbachEnergy</span></code></a>(roi_ev)</p></td>
+<td><p>Exponential decay: to obtain a measure of the sub-bandgap disorder tails.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.ERE" title="grapa.datatypes.curveEQE.CurveEQE.ERE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ERE</span></code></a>(voc, T[, Emin, EminUnit, fg, bandgap, ...])</p></td>
+<td><p>ERE: Computes the External Radiative Efficiency from the EQE curve and the cell Voc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.ERE_GUI" title="grapa.datatypes.curveEQE.CurveEQE.ERE_GUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ERE_GUI</span></code></a>(voc, T[, Emin, EminUnit, fg, bandgap])</p></td>
+<td><p>Computes the External Radiative Efficiency from the EQE curve and the cell Voc.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.__init__" title="grapa.datatypes.curveEQE.CurveEQE.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(data, attributes[, silent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.alterListGUI" title="grapa.datatypes.curveEQE.CurveEQE.alterListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alterListGUI</span></code></a>()</p></td>
+<td><p>Determines the possible curve visualisations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.currentCalc" title="grapa.datatypes.curveEQE.CurveEQE.currentCalc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">currentCalc</span></code></a>([roi, interpolatekind, ...])</p></td>
+<td><p>Computes the current EQE current using AM1.5 spectrum (or another if selected).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">deltavocrad_sigma</span></code>(sigma[, T])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax" title="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_bandgapmax</span></code></a>([sgwidth, sgdegree, ...])</p></td>
+<td><p>Computes the bandgap based on the Savitzky–Golay derivative peak of derivative.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgappvrau" title="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgappvrau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_bandgappvrau</span></code></a>([sgwidth, sgdegree, ...])</p></td>
+<td><p>PV bandgap based on Rau et al. PRA 2017 (weighted energy over peak FWHM) <a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a> Assumes input energy data actually given in nm Returns: bandgap value (float), x, y (base for calculation).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_savgol" title="grapa.datatypes.curveEQE.CurveEQE.derivative_savgol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_savgol</span></code></a>([sgwidth, sgdegree, roi])</p></td>
+<td><p>Returns a reduced x,y range and the Savitzky–Golay derivative sgwidth, sgdegree: width and degree of Savitzky–Golay roi: range of interest [nmmin, nmmax]</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_sigmabestguess</span></code>([sgwidth, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_resamplex</span></code>(deltax)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.funcListGUI" title="grapa.datatypes.curveEQE.CurveEQE.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(**kwargs)</p></td>
+<td><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which elements are instances of <cite>FuncGUI</cite>, or (old style): ::.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_absorptionedge</span></code>(nm, thickness, intensity0)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_bandgapTaucCurve</span></code>(nm, *bandgap)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_bandgapTaucCurveLog</span></code>(nm, *bandgap)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a" title="grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a"><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_gaussian_a</span></code></a>(x, a, x0, sigma, *_args)</p></td>
+<td><p>A simple gaussian formula to fit the derivative peak The amplitude parameter is peak value i.e. not the function integral _args will be ignored.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a_ev" title="grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a_ev"><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_gaussian_a_ev</span></code></a>(xnm, a, x0ev, sigmaev, *_args)</p></td>
+<td><p>A simple gaussian formula to fit the derivative peak.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.print_popt_func_gaussian_a_ev" title="grapa.datatypes.curveEQE.CurveEQE.print_popt_func_gaussian_a_ev"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_popt_func_gaussian_a_ev</span></code></a>(popt[, text])</p></td>
+<td><p>formatted printout of bandgap, sigma, Vocrad loss based on _popt</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.reference_curve" title="grapa.datatypes.curveEQE.CurveEQE.reference_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reference_curve</span></code></a>(file)</p></td>
+<td><p>Returns a reference spectrum (spectral photon irradiance) based on the provided file name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.updateFitParam" title="grapa.datatypes.curveEQE.CurveEQE.updateFitParam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParam</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Override.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.updateFitParamFormatPopt" title="grapa.datatypes.curveEQE.CurveEQE.updateFitParamFormatPopt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParamFormatPopt</span></code></a>(f, param)</p></td>
+<td><p>override, for func_absorptionedge</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.vocloss_shortcircuit" title="grapa.datatypes.curveEQE.CurveEQE.vocloss_shortcircuit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vocloss_shortcircuit</span></code></a>([bandgap, jsc, T, silent])</p></td>
+<td><p>Calculation of DeltaV_{OC}^{JSc}, short-circuit loss term to Voc, as Jsc &lt; JscSQ According to equation inline, slightly after Eq 11 in paper Rau PRA 2017 <a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a> - bandgap: unit eV.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS_X</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS_Y</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BB_FG</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CURVE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FORMAT_AUTOLABEL</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">REF_AM0</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">REF_AM0_FILE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">REF_AM15</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">REF_AM15_FILE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">REF_SPECTRA</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">REF_SPECTRA_FILE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SG_DEGREE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SG_WIDTH</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SHOCKLEYQUEISSER</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SHOCKLEYQUEISSER_FILE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNIT_LOOKUP_Y</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_absorptionEdge">
+<span class="sig-name descname"><span class="pre">CurveEQE_absorptionEdge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'CdS'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_absorptionEdge" title="Link to this definition"></a></dt>
+<dd><p>CdS estimate: returns a Curve for quick-and-dirty estimate layer thickness,
+e.g. CdS. The Curve represents the light transmitted through the layer and is
+computed from Beer-Lambert law as intensity0 * exp(-alpha * thickness),
+with alpha computed from k imaginary refractive index of material.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>thickness</strong> – layer thickness, in nm</p></li>
+<li><p><strong>intensity0</strong> – amount of light entering the layer. Default: 1</p></li>
+<li><p><strong>material</strong> – data is provided for ‘CdS’. A file path might be provided
+instead, with a file containing k data in a 2-column file (nm, k)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Curve for crude estimation of the absorption in an optical layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapLog">
+<span class="sig-name descname"><span class="pre">CurveEQE_bandgapLog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapLog" title="Link to this definition"></a></dt>
+<dd><p>Performs fit of the low-energy side of EQE with modified Tauc formula
+(linear relation in (eV * ln(1 - EQE))^2 vs eV.
+In principle more exact, however highly sensitive to reflective and collection
+losses, therefore less robust than (eV * EQE)^2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ylim</strong> – Relative fractions of EQE values to consider for the fit. By
+default, [0.25, 0.70].</p></li>
+<li><p><strong>silent</strong> – if False, prints additional information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Curve with fit parameters and fitted datapoints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapTauc">
+<span class="sig-name descname"><span class="pre">CurveEQE_bandgapTauc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_bandgapTauc" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Performs fit of the low-energy side of EQE with Tauc formula (linear relation</dt><dd><p>(eV * EQE)**2 vs eV)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ylim</strong> – Relative fractions of EQE values to consider for the fit.
+By default, [0.25, 0.70].</p></li>
+<li><p><strong>silent</strong> – if False, prints additional information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Curve with fit parameters and fitted datapoints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis">
+<span class="sig-name descname"><span class="pre">CurveEQE_derivativeanalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis" title="Link to this definition"></a></dt>
+<dd><p>Bandgap derivative: Computes the bandgap and other derived data based on the
+Savitzky–Golay derivative dEQE/dE. Are implemented:</p>
+<ul class="simple">
+<li><p>Peak of derivative, based on a gaussian fit to few points around the peak,</p></li>
+<li><p>PV bandgap based on Rau et al. PRA 2017 (weighted energy over peak FWHM)
+<a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a></p></li>
+<li><p>Best guess for sigma value, based on gaussian fit with wider fit range</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sgwidth</strong> – width of Savitzky–Golay filter. Default 5.</p></li>
+<li><p><strong>sgdegree</strong> – degree of Savitzky–Golay filter. Default 3.
+Parameter values (w,d) = (3,1) fall back onto the symmetrical discrete
+difference.</p></li>
+<li><p><strong>roi</strong> – range of interest. [nm_min, nm_max]</p></li>
+<li><p><strong>silent</strong> – if False, prints additional information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of Curves: the derivative, as well as auxiliary Curves showing
+the data on which the bandgap is computed. The computed bandgap values
+can be retrieved in the last Curve attributes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.CurveUrbachEnergy">
+<span class="sig-name descname"><span class="pre">CurveUrbachEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi_ev</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.CurveUrbachEnergy" title="Link to this definition"></a></dt>
+<dd><p>Exponential decay: to obtain a measure of the sub-bandgap disorder tails.
+The values are typically fitted at too high energies to be the Urbach tail as
+can be characterized from high-sensitivity PL spectroscopy. Instead, one obtains
+slightly higher values, with a contribution from bandgap distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roi_ev</strong> – limits to the fitted data, in eV. [ev_min, eV_max]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the fit as a Curve, giving exponential decay (proxy to Urbach energy).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.ERE">
+<span class="sig-name descname"><span class="pre">ERE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Emin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EminUnit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.ERE" title="Link to this definition"></a></dt>
+<dd><p>ERE: Computes the External Radiative Efficiency from the EQE curve and the
+cell Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476
+The more complete calculation is also provided from Rau et al., Phys. Rev.
+Applied 7, 044016 (2017)
+<a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a>
+Returns ERE, and a Curve showing the integrant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>voc</strong> – cell Voc voltage in [V]</p></li>
+<li><p><strong>T</strong> – temperature in [K]</p></li>
+<li><p><strong>Emin</strong> – min energy on which the integral is computed. Unit: nm or eV.</p></li>
+<li><p><strong>EminUnit</strong> – ‘eV’ if Emin is given in eV, ‘nm’ otherwise. Default ‘nm’</p></li>
+<li><p><strong>fg</strong> – Ruhle’s geometrical factor. 2 for initial Shockley-Queisser
+derivation, 1 for hemispherical emission (i.e. back reflector)</p></li>
+<li><p><strong>bandgap</strong> – in eV. if not provided, determines bandgap by derivative method</p></li>
+<li><p><strong>silent</strong> – if False, prints additional information</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ERE, qe_led, and a list of Curves - the last one contains all values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.ERE_GUI">
+<span class="sig-name descname"><span class="pre">ERE_GUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Emin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EminUnit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.ERE_GUI" title="Link to this definition"></a></dt>
+<dd><p>Computes the External Radiative Efficiency from the EQE curve and the cell
+Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476
+The more complete calculation is also provided from Rau et al., Phys. Rev.
+Applied 7, 044016 (2017)
+<a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>voc</strong> – cell Voc voltage in [V]</p></li>
+<li><p><strong>T</strong> – temperature in [K]</p></li>
+<li><p><strong>Emin</strong> – min energy on which the integral is computed. Unit: nm or eV.</p></li>
+<li><p><strong>EminUnit</strong> – ‘eV’ if Emin is given in eV, ‘nm’ otherwise. Default ‘nm’</p></li>
+<li><p><strong>fg</strong> – Ruhle’s geometrical factor. 2 for initial Shockley-Queisser
+derivation, 1 for hemispherical emission (i.e. back reflector)</p></li>
+<li><p><strong>bandgap</strong> – in eV. if not provided, determines PV bandgap by derivative.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of Curves - the last one contains all values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.alterListGUI">
+<span class="sig-name descname"><span class="pre">alterListGUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.alterListGUI" title="Link to this definition"></a></dt>
+<dd><p>Determines the possible curve visualisations. One element has the form:
+AlterListItem(‘Label GUI’, [‘alter_x’, ‘alter_y’], ‘semilogx’, “print help doc”)
+By default only neutral (i.e. raw data) is provided</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.currentCalc">
+<span class="sig-name descname"><span class="pre">currentCalc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolatekind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectralPhotonIrrad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showintegratedcurrent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_gui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.currentCalc" title="Link to this definition"></a></dt>
+<dd><p>Computes the current EQE current using AM1.5 spectrum (or another if selected).
+Assumes the EQE values are in range [0,1] and NOT [0,100].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roi</strong> – [nm_min, nm_max]</p></li>
+<li><p><strong>interpolatekind</strong> – order for interpolation of EQE data. default ‘linear’.</p></li>
+<li><p><strong>spectralPhotonIrrad</strong> – filename in folder datatypes. If None, uses AM1.5G.</p></li>
+<li><p><strong>showintegratedcurrent</strong> – returns the integrated current versus wavelength.</p></li>
+<li><p><strong>silent</strong> – If False, prints additional information.</p></li>
+<li><p><strong>if_gui</strong> – True will print the value, False will return the value.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax">
+<span class="sig-name descname"><span class="pre">derivative_bandgapmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_y_savgol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax" title="Link to this definition"></a></dt>
+<dd><p>Computes the bandgap based on the Savitzky–Golay derivative peak of derivative.
+The peak is located based on a gaussian fit to few points near peak values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sgwidth</strong> – <ol class="arabic simple" start="5">
+<li><p>Parameters of Savitzky–Golay filtering</p></li>
+</ol>
+</p></li>
+<li><p><strong>sgdegree</strong> – 3</p></li>
+<li><p><strong>x_y_savgol</strong> – (optional) to avoid calculating twice if already computed
+somewhere else</p></li>
+<li><p><strong>roi</strong> – [nmmin, nmmax]</p></li>
+<li><p><strong>silent</strong> – if False, prints additional information</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>fit results popt, x in fit range</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgappvrau">
+<span class="sig-name descname"><span class="pre">derivative_bandgappvrau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_y_savgol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgappvrau" title="Link to this definition"></a></dt>
+<dd><p>PV bandgap based on Rau et al. PRA 2017 (weighted energy over peak FWHM)
+<a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a>
+Assumes input energy data actually given in nm
+Returns: bandgap value (float), x, y (base for calculation)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.derivative_savgol">
+<span class="sig-name descname"><span class="pre">derivative_savgol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_savgol" title="Link to this definition"></a></dt>
+<dd><p>Returns a reduced x,y range and the Savitzky–Golay derivative
+sgwidth, sgdegree: width and degree of Savitzky–Golay
+roi: range of interest [nmmin, nmmax]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.funcListGUI">
+<span class="sig-name descname"><span class="pre">funcListGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.funcListGUI" title="Link to this definition"></a></dt>
+<dd><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which
+elements are instances of <cite>FuncGUI</cite>, or (old style):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">func</span><span class="p">,</span>
+ <span class="s1">&#39;Button text&#39;</span><span class="p">,</span>
+ <span class="p">[</span><span class="s1">&#39;label 1&#39;</span><span class="p">,</span> <span class="s1">&#39;label 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">[</span><span class="s1">&#39;value 1&#39;</span><span class="p">,</span> <span class="s1">&#39;value 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">{</span><span class="s1">&#39;hiddenvar1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">},</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+ <span class="p">[</span><span class="n">dictFieldAttributes</span><span class="p">,</span> <span class="p">{},</span> <span class="o">...</span><span class="p">]]</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, returns quick modifs for offset and muloffset (if already set), and
+a help for some plot types (errorbar, scatter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – this function should be called specifying kwargs[‘graph’] the
+graph self is embedded in, and kwargs[‘graph_i’] as position of self in
+graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">func_gaussian_a</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a" title="Link to this definition"></a></dt>
+<dd><p>A simple gaussian formula to fit the derivative peak
+The amplitude parameter is peak value i.e. not the function integral
+_args will be ignored. Because GUI may send more than required parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a_ev">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">func_gaussian_a_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xnm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0ev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaev</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.func_gaussian_a_ev" title="Link to this definition"></a></dt>
+<dd><p>A simple gaussian formula to fit the derivative peak.
+Amplitude parameter is peak value i.e. not the function integral
+args: will be ignored. Because GUI may send more than required parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.print_popt_func_gaussian_a_ev">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">print_popt_func_gaussian_a_ev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">popt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bandgap'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.print_popt_func_gaussian_a_ev" title="Link to this definition"></a></dt>
+<dd><p>formatted printout of bandgap, sigma, Vocrad loss based on _popt</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.reference_curve">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reference_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.reference_curve" title="Link to this definition"></a></dt>
+<dd><p>Returns a reference spectrum (spectral photon irradiance) based on the provided
+file name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> – (str) The name of the file containing the reference spectrum data.
+The file should be located in the same directory as the script.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Curve object containing the reference spectrum data, or
+None if file not found or an error occurs while loading the file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.updateFitParam">
+<span class="sig-name descname"><span class="pre">updateFitParam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.updateFitParam" title="Link to this definition"></a></dt>
+<dd><p>Override. Additional behavior when changing gaussian fit to derivative</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.updateFitParamFormatPopt">
+<span class="sig-name descname"><span class="pre">updateFitParamFormatPopt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.updateFitParamFormatPopt" title="Link to this definition"></a></dt>
+<dd><p>override, for func_absorptionedge</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.vocloss_shortcircuit">
+<span class="sig-name descname"><span class="pre">vocloss_shortcircuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.vocloss_shortcircuit" title="Link to this definition"></a></dt>
+<dd><p>Calculation of DeltaV_{OC}^{JSc}, short-circuit loss term to Voc, as Jsc &lt; JscSQ
+According to equation inline, slightly after Eq 11 in paper Rau PRA 2017
+<a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a>
+- bandgap: unit eV. If not provided, computed from derivative method.
+- jsc: unit mA/cm2. If not provided, computed with default parameters.
+- T: unit K. if not provided, STC value (298.15 K)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.datatypes.curveEQE.bandgap_tauc.html" class="btn btn-neutral float-left" title="grapa.datatypes.curveEQE.bandgap_tauc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.datatypes.curveEQE.FileLoaderOnDemandAM0.html" class="btn btn-neutral float-right" title="grapa.datatypes.curveEQE.FileLoaderOnDemandAM0" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

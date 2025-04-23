@@ -1,0 +1,29 @@
+grapa.gui.widgets\_custom.FrameScrollable
+=========================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autoclass:: FrameScrollable
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FrameScrollable.__init__
+       ~FrameScrollable.on_configure
+       ~FrameScrollable.on_mousewheel
+       ~FrameScrollable.scrolly
+       ~FrameScrollable.update_idletasks
+   
+   
+
+   
+   
+   

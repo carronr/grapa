@@ -1,0 +1,39 @@
+grapa.datatypes.graphJV\_Wavelabs
+=================================
+
+.. automodule:: grapa.datatypes.graphJV_Wavelabs
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      asfloat
+      cleanupdata
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphJV_Wavelabs
+   
+   
+
+   
+   
+   
+
+
+

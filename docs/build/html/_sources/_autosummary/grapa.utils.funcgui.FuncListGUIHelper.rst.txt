@@ -1,0 +1,27 @@
+grapa.utils.funcgui.FuncListGUIHelper
+=====================================
+
+.. currentmodule:: grapa.utils.funcgui
+
+.. autoclass:: FuncListGUIHelper
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FuncListGUIHelper.graph_axislabels
+       ~FuncListGUIHelper.offset_muloffset
+       ~FuncListGUIHelper.typeplot
+   
+   
+
+   
+   
+   

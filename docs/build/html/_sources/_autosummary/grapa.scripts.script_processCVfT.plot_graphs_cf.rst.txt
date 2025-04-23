@@ -1,0 +1,6 @@
+grapa.scripts.script\_processCVfT.plot\_graphs\_cf
+==================================================
+
+.. currentmodule:: grapa.scripts.script_processCVfT
+
+.. autofunction:: plot_graphs_cf

@@ -1,0 +1,35 @@
+grapa.gui.widgets\_custom.FrameTitleContentHide
+===============================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autoclass:: FrameTitleContentHide
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FrameTitleContentHide.__init__
+       ~FrameTitleContentHide.createButton
+       ~FrameTitleContentHide.createWidgets
+       ~FrameTitleContentHide.frameHline
+       ~FrameTitleContentHide.getButton
+       ~FrameTitleContentHide.get_frame_content
+       ~FrameTitleContentHide.get_frame_title
+       ~FrameTitleContentHide.isvisible
+       ~FrameTitleContentHide.setButtonLabels
+       ~FrameTitleContentHide.showHide
+       ~FrameTitleContentHide.sideAnchorFill
+   
+   
+
+   
+   
+   

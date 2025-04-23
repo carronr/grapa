@@ -1,0 +1,37 @@
+grapa.datatypes.graphJV.GraphJV
+===============================
+
+.. currentmodule:: grapa.datatypes.graphJV
+
+.. autoclass:: GraphJV
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphJV.isFileReadable
+       ~GraphJV.readDataFromFile
+       ~GraphJV.readDataFromFileIV_HLS
+       ~GraphJV.readDataFromFileJV
+       ~GraphJV.readDataFromFileTIV
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphJV.FILEIO_GRAPHTYPE
+      ~GraphJV.FILEIO_GRAPHTYPE_IV_HLS
+      ~GraphJV.FILEIO_GRAPHTYPE_TIV
+   
+   

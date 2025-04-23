@@ -1,0 +1,31 @@
+grapa.datatypes.graphPLQY
+=========================
+
+.. automodule:: grapa.datatypes.graphPLQY
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphPLQY
+   
+   
+
+   
+   
+   
+
+
+

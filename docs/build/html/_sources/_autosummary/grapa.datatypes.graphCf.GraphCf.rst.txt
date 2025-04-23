@@ -1,0 +1,34 @@
+grapa.datatypes.graphCf.GraphCf
+===============================
+
+.. currentmodule:: grapa.datatypes.graphCf
+
+.. autoclass:: GraphCf
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphCf.isFileReadable
+       ~GraphCf.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphCf.AXISLABELS
+      ~GraphCf.AXISLABELSNYQUIST
+      ~GraphCf.FILEIO_GRAPHTYPE
+   
+   

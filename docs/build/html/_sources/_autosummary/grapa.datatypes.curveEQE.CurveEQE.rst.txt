@@ -1,0 +1,72 @@
+grapa.datatypes.curveEQE.CurveEQE
+=================================
+
+.. currentmodule:: grapa.datatypes.curveEQE
+
+.. autoclass:: CurveEQE
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveEQE.CurveEQE_absorptionEdge
+       ~CurveEQE.CurveEQE_bandgapLog
+       ~CurveEQE.CurveEQE_bandgapTauc
+       ~CurveEQE.CurveEQE_derivativeanalysis
+       ~CurveEQE.CurveUrbachEnergy
+       ~CurveEQE.ERE
+       ~CurveEQE.ERE_GUI
+       ~CurveEQE.__init__
+       ~CurveEQE.alterListGUI
+       ~CurveEQE.currentCalc
+       ~CurveEQE.deltavocrad_sigma
+       ~CurveEQE.derivative_bandgapmax
+       ~CurveEQE.derivative_bandgappvrau
+       ~CurveEQE.derivative_savgol
+       ~CurveEQE.derivative_sigmabestguess
+       ~CurveEQE.fit_resamplex
+       ~CurveEQE.funcListGUI
+       ~CurveEQE.func_absorptionedge
+       ~CurveEQE.func_bandgapTaucCurve
+       ~CurveEQE.func_bandgapTaucCurveLog
+       ~CurveEQE.func_gaussian_a
+       ~CurveEQE.func_gaussian_a_ev
+       ~CurveEQE.print_popt_func_gaussian_a_ev
+       ~CurveEQE.reference_curve
+       ~CurveEQE.updateFitParam
+       ~CurveEQE.updateFitParamFormatPopt
+       ~CurveEQE.vocloss_shortcircuit
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveEQE.AXISLABELS_X
+      ~CurveEQE.AXISLABELS_Y
+      ~CurveEQE.BB_FG
+      ~CurveEQE.CURVE
+      ~CurveEQE.FORMAT_AUTOLABEL
+      ~CurveEQE.REF_AM0
+      ~CurveEQE.REF_AM0_FILE
+      ~CurveEQE.REF_AM15
+      ~CurveEQE.REF_AM15_FILE
+      ~CurveEQE.REF_SPECTRA
+      ~CurveEQE.REF_SPECTRA_FILE
+      ~CurveEQE.SG_DEGREE
+      ~CurveEQE.SG_WIDTH
+      ~CurveEQE.SHOCKLEYQUEISSER
+      ~CurveEQE.SHOCKLEYQUEISSER_FILE
+      ~CurveEQE.UNIT_LOOKUP_Y
+   
+   

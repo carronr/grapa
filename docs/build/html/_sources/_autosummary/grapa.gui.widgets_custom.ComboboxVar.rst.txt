@@ -1,0 +1,28 @@
+grapa.gui.widgets\_custom.ComboboxVar
+=====================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autoclass:: ComboboxVar
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ComboboxVar.__init__
+       ~ComboboxVar.get
+       ~ComboboxVar.reset_values
+       ~ComboboxVar.set
+   
+   
+
+   
+   
+   

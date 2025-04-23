@@ -1,0 +1,38 @@
+grapa.datatypes.graphXML.GraphXML
+=================================
+
+.. currentmodule:: grapa.datatypes.graphXML
+
+.. autoclass:: GraphXML
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphXML.convert_file
+       ~GraphXML.isFileReadable
+       ~GraphXML.parsexml_to_dict
+       ~GraphXML.readDataFromFile
+       ~GraphXML.split_format_datasets
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphXML.DATAFORMATS
+      ~GraphXML.DATAFORMATS_FILE
+      ~GraphXML.FILEIO_GRAPHTYPE
+      ~GraphXML.PATHXMLFILE
+   
+   

@@ -1,0 +1,35 @@
+grapa.mathModule.MathOperator
+=============================
+
+.. currentmodule:: grapa.mathModule
+
+.. autoclass:: MathOperator
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~MathOperator.operate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MathOperator.ADD
+      ~MathOperator.DIV
+      ~MathOperator.MUL
+      ~MathOperator.POW
+      ~MathOperator.SUB
+   
+   

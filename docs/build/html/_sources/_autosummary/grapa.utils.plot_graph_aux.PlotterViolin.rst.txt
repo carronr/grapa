@@ -1,0 +1,32 @@
+grapa.utils.plot\_graph\_aux.PlotterViolin
+==========================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: PlotterViolin
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~PlotterViolin.__init__
+       ~PlotterViolin.add_curve
+       ~PlotterViolin.plot
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

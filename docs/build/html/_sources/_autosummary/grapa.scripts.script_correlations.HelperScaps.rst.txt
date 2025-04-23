@@ -1,0 +1,26 @@
+grapa.scripts.script\_correlations.HelperScaps
+==============================================
+
+.. currentmodule:: grapa.scripts.script_correlations
+
+.. autoclass:: HelperScaps
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~HelperScaps.as_labels_datatable
+       ~HelperScaps.seriesxy
+   
+   
+
+   
+   
+   

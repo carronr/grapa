@@ -1,0 +1,28 @@
+grapa.gui.interface\_openbis.GrapaOpenbis
+=========================================
+
+.. currentmodule:: grapa.gui.interface_openbis
+
+.. autoclass:: GrapaOpenbis
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GrapaOpenbis.__init__
+       ~GrapaOpenbis.create_widgets
+       ~GrapaOpenbis.merge_files_openbis
+       ~GrapaOpenbis.open_files_openbis
+   
+   
+
+   
+   
+   

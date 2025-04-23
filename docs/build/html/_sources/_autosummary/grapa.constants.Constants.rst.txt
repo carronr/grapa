@@ -1,0 +1,42 @@
+grapa.constants.Constants
+=========================
+
+.. currentmodule:: grapa.constants
+
+.. autoclass:: Constants
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Constants.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Constants.DeltaNu_Cs
+      ~Constants.K_cd
+      ~Constants.N_A
+      ~Constants.STC_T
+      ~Constants.c
+      ~Constants.epsilon0
+      ~Constants.h
+      ~Constants.hbar
+      ~Constants.kb
+      ~Constants.mu0
+      ~Constants.nm_eV
+      ~Constants.q
+   
+   

@@ -1,0 +1,34 @@
+grapa.utils.curve\_subclasses\_utils
+====================================
+
+.. automodule:: grapa.utils.curve_subclasses_utils
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      FileLoaderOnDemand
+      FitHandler
+      FitHandlerBasicFunc
+      FitterFixed
+   
+   
+
+   
+   
+   
+
+
+

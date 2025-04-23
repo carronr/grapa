@@ -1,0 +1,31 @@
+grapa.utils.string\_manipulations.TemplateCustom
+================================================
+
+.. currentmodule:: grapa.utils.string_manipulations
+
+.. autoclass:: TemplateCustom
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TemplateCustom.braceidpattern
+      ~TemplateCustom.pattern
+   
+   

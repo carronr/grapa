@@ -1,0 +1,38 @@
+grapa.datatypes.curveArrhenius.CurveArrheniusJscVocJ00
+======================================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrheniusJscVocJ00
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrheniusJscVocJ00.func_Arrhenius
+       ~CurveArrheniusJscVocJ00.get_help
+       ~CurveArrheniusJscVocJ00.popt
+       ~CurveArrheniusJscVocJ00.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrheniusJscVocJ00.attr
+      ~CurveArrheniusJscVocJ00.dataLabel
+      ~CurveArrheniusJscVocJ00.name
+      ~CurveArrheniusJscVocJ00.poptLabel
+      ~CurveArrheniusJscVocJ00.switchModel
+   
+   

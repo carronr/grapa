@@ -1,0 +1,31 @@
+grapa.datatypes.graphMCA
+========================
+
+.. automodule:: grapa.datatypes.graphMCA
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphMCA
+   
+   
+
+   
+   
+   
+
+
+

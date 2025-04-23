@@ -1,0 +1,41 @@
+grapa.datatypes.graphPLQY.GraphPLQY
+===================================
+
+.. currentmodule:: grapa.datatypes.graphPLQY
+
+.. autoclass:: GraphPLQY
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphPLQY.isFileReadable
+       ~GraphPLQY.readDataFromFile
+       ~GraphPLQY.readDataFromFilePLPowDep
+       ~GraphPLQY.readDataFromFilePLQY
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphPLQY.AXISLABEL_A_X
+      ~GraphPLQY.AXISLABEL_A_Y
+      ~GraphPLQY.AXISLABEL_PLQY
+      ~GraphPLQY.AXISLABEL_TIME
+      ~GraphPLQY.FILEIO_GRAPHTYPE
+      ~GraphPLQY.KEY_AVGAMP
+      ~GraphPLQY.KEY_AVGPHASE
+      ~GraphPLQY.KEY_AVGPLQY
+   
+   

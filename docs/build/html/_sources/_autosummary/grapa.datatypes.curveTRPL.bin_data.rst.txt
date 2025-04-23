@@ -1,0 +1,6 @@
+grapa.datatypes.curveTRPL.bin\_data
+===================================
+
+.. currentmodule:: grapa.datatypes.curveTRPL
+
+.. autofunction:: bin_data

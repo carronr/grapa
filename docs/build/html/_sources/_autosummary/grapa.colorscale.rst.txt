@@ -1,0 +1,41 @@
+grapa.colorscale
+================
+
+.. automodule:: grapa.colorscale
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      colorize_graph
+      colorscales_from_config
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Color
+      Colorscale
+      PhotoImageColorscale
+   
+   
+
+   
+   
+   
+
+
+

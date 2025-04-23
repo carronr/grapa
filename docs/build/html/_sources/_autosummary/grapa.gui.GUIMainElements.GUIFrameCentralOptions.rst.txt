@@ -1,0 +1,38 @@
+grapa.gui.GUIMainElements.GUIFrameCentralOptions
+================================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameCentralOptions
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameCentralOptions.__init__
+       ~GUIFrameCentralOptions.catch_annotations
+       ~GUIFrameCentralOptions.catch_data_editor
+       ~GUIFrameCentralOptions.check_valid_screendpi
+       ~GUIFrameCentralOptions.identify_data_transform
+       ~GUIFrameCentralOptions.open_popup_annotations
+       ~GUIFrameCentralOptions.open_popup_data_editor
+       ~GUIFrameCentralOptions.set_auto_screendpi
+       ~GUIFrameCentralOptions.set_screendpi_bgcolor_from_entry
+       ~GUIFrameCentralOptions.set_screendpi_from_entry
+       ~GUIFrameCentralOptions.update_attributes
+       ~GUIFrameCentralOptions.update_data_transform
+       ~GUIFrameCentralOptions.update_typeplot
+       ~GUIFrameCentralOptions.update_ui
+   
+   
+
+   
+   
+   

@@ -1,0 +1,35 @@
+grapa.utils.funcgui.FuncGUI
+===========================
+
+.. currentmodule:: grapa.utils.funcgui
+
+.. autoclass:: FuncGUI
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FuncGUI.__init__
+       ~FuncGUI.append
+       ~FuncGUI.append_newline
+       ~FuncGUI.appendcbb
+       ~FuncGUI.func_docstring_to_text
+       ~FuncGUI.init_legacy
+       ~FuncGUI.is_similar
+       ~FuncGUI.move_item
+       ~FuncGUI.set_funcdocstring_alt
+       ~FuncGUI.set_hiddenvars
+       ~FuncGUI.set_tooltiptext
+   
+   
+
+   
+   
+   

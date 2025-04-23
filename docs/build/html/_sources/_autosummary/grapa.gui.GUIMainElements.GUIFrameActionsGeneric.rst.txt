@@ -1,0 +1,50 @@
+grapa.gui.GUIMainElements.GUIFrameActionsGeneric
+================================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameActionsGeneric
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameActionsGeneric.__init__
+       ~GUIFrameActionsGeneric.cast_curve
+       ~GUIFrameActionsGeneric.choose_color
+       ~GUIFrameActionsGeneric.copy_curve_to_clipboard
+       ~GUIFrameActionsGeneric.copy_graph_to_clipboard
+       ~GUIFrameActionsGeneric.delete_curve
+       ~GUIFrameActionsGeneric.delete_curves_hidden
+       ~GUIFrameActionsGeneric.duplicate_curve
+       ~GUIFrameActionsGeneric.replace_labels
+       ~GUIFrameActionsGeneric.set_quick_attr
+       ~GUIFrameActionsGeneric.shift_curve
+       ~GUIFrameActionsGeneric.shift_curve_bottom
+       ~GUIFrameActionsGeneric.shift_curve_down
+       ~GUIFrameActionsGeneric.shift_curve_reverse
+       ~GUIFrameActionsGeneric.shift_curve_top
+       ~GUIFrameActionsGeneric.shift_curve_up
+       ~GUIFrameActionsGeneric.show_hide_all
+       ~GUIFrameActionsGeneric.show_hide_curve
+       ~GUIFrameActionsGeneric.show_hide_invert
+       ~GUIFrameActionsGeneric.update_ui
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GUIFrameActionsGeneric.CASTCURVERENAMEGUI
+   
+   

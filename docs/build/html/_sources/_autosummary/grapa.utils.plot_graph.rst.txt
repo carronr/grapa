@@ -1,0 +1,40 @@
+grapa.utils.plot\_graph
+=======================
+
+.. automodule:: grapa.utils.plot_graph
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      convert_svg_to_emf
+      image_to_clipboard
+      plot_graph
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      ScaErrorHandler
+   
+   
+
+   
+   
+   
+
+
+

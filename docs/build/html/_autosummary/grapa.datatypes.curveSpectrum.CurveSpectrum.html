@@ -1,0 +1,432 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.datatypes.curveSpectrum.CurveSpectrum &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance" href="grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance.html" />
+    <link rel="prev" title="grapa.datatypes.curveSpectrum" href="grapa.datatypes.curveSpectrum.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveArrhenius.html">grapa.datatypes.curveArrhenius</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCV.html">grapa.datatypes.curveCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCf.html">grapa.datatypes.curveCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveEQE.html">grapa.datatypes.curveEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJV.html">grapa.datatypes.curveJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJscVoc.html">grapa.datatypes.curveJscVoc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMCA.html">grapa.datatypes.curveMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMath.html">grapa.datatypes.curveMath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSIMS.html">grapa.datatypes.curveSIMS</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.datatypes.curveSpectrum.html">grapa.datatypes.curveSpectrum</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.datatypes.curveSpectrum.CurveSpectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance.html">grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveSpectrum.CurveSpectrumReflectance.html">grapa.datatypes.curveSpectrum.CurveSpectrumReflectance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveSpectrum.CurveSpectrumTransmittance.html">grapa.datatypes.curveSpectrum.CurveSpectrumTransmittance</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveTRPL.html">grapa.datatypes.curveTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveXRD.html">grapa.datatypes.curveXRD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCV.html">grapa.datatypes.graphCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCf.html">grapa.datatypes.graphCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE.html">grapa.datatypes.graphEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html">grapa.datatypes.graphEQE_CSU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV.html">grapa.datatypes.graphJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJVDarkIllum.html">grapa.datatypes.graphJVDarkIllum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Ossila.html">grapa.datatypes.graphJV_Ossila</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Wavelabs.html">grapa.datatypes.graphJV_Wavelabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBE_TinyTusker.html">grapa.datatypes.graphMBE_TinyTusker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBElog.html">grapa.datatypes.graphMBElog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCA.html">grapa.datatypes.graphMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCAfit.html">grapa.datatypes.graphMCAfit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPAIOS.html">grapa.datatypes.graphPAIOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPGZ.html">grapa.datatypes.graphPGZ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPLQY.html">grapa.datatypes.graphPLQY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSIMS.html">grapa.datatypes.graphSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSPE.html">grapa.datatypes.graphSPE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphScaps.html">grapa.datatypes.graphScaps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSpectrum.html">grapa.datatypes.graphSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSquidAdmiral.html">grapa.datatypes.graphSquidAdmiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphTRPL.html">grapa.datatypes.graphTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXLS.html">grapa.datatypes.graphXLS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXML.html">grapa.datatypes.graphXML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.html">grapa.datatypes</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.curveSpectrum.html">grapa.datatypes.curveSpectrum</a></li>
+      <li class="breadcrumb-item active">grapa.datatypes.curveSpectrum.CurveSpectrum</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.datatypes.curveSpectrum.CurveSpectrum.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-datatypes-curvespectrum-curvespectrum">
+<h1>grapa.datatypes.curveSpectrum.CurveSpectrum<a class="headerlink" href="#grapa-datatypes-curvespectrum-curvespectrum" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.datatypes.curveSpectrum.</span></span><span class="sig-name descname"><span class="pre">CurveSpectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">Curve</span></code></a></p>
+<p>Class handling optical spectra, with notably nm to eV conversion and
+background substraction.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.__init__" title="grapa.datatypes.curveSpectrum.CurveSpectrum.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(data, attributes[, silent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.addOffset" title="grapa.datatypes.curveSpectrum.CurveSpectrum.addOffset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addOffset</span></code></a>(value)</p></td>
+<td><p>Add offset: adds a vertical offset to the data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.alterListGUI" title="grapa.datatypes.curveSpectrum.CurveSpectrum.alterListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alterListGUI</span></code></a>()</p></td>
+<td><p>Determines the possible curve visualisations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.computeAbsorptance" title="grapa.datatypes.curveSpectrum.CurveSpectrum.computeAbsorptance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">computeAbsorptance</span></code></a>(auxcurve[, graph])</p></td>
+<td><p>Compute absorptance: computes an absorptance curve, defined as A% = 1 - R% - T%.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.computeAlpha" title="grapa.datatypes.curveSpectrum.CurveSpectrum.computeAlpha"><code class="xref py py-obj docutils literal notranslate"><span class="pre">computeAlpha</span></code></a>(auxcurve, thickness, substrate)</p></td>
+<td><p>Estimate alpha: estimates the optical absorption spectrum of a layer, alpha, or absrptance, alpha uses the formula <code class="docutils literal notranslate"><span class="pre">alpha[cm-1]</span> <span class="pre">=</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">d[cm]</span> <span class="pre">*</span> <span class="pre">ln(T</span> <span class="pre">/</span> <span class="pre">(1-R)</span></code> This formula is a reasonable approximation, assuming a few assumptions detailed in the manual.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.correctInstrumentalResponse" title="grapa.datatypes.curveSpectrum.CurveSpectrum.correctInstrumentalResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correctInstrumentalResponse</span></code></a>(instrresp, ...)</p></td>
+<td><p>Correct for the instrumental response, using an instrumental response provided in file grapa/datatypes/spectrumInstrumentalResponses.txt !! Feel free to adapt the file with curves matching your system !! Parameters: - instrresp: label of the desired instr.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataModifySwapNmEv</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fileInstrResp</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fileSubstrates</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.funcListGUI" title="grapa.datatypes.curveSpectrum.CurveSpectrum.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(**kwargs)</p></td>
+<td><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which elements are instances of <cite>FuncGUI</cite>, or (old style): ::.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.getListSubstrates" title="grapa.datatypes.curveSpectrum.CurveSpectrum.getListSubstrates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getListSubstrates</span></code></a>()</p></td>
+<td><p>returns the substrates that have &lt;substrate&gt;+' R' and &lt;substrate&gt;+' T' in spectrumSubstrates.txt</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOffset</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSubclass</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.integrate" title="grapa.datatypes.curveSpectrum.CurveSpectrum.integrate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrate</span></code></a>([ROI, alter])</p></td>
+<td><p>Integrate: returns the integral of the curve, within ROI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.print_help" title="grapa.datatypes.curveSpectrum.CurveSpectrum.print_help"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_help</span></code></a>()</p></td>
+<td><p>Prints help for the Curve subclass, generated from docstrings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.setSubclass" title="grapa.datatypes.curveSpectrum.CurveSpectrum.setSubclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setSubclass</span></code></a>(newtype, unit)</p></td>
+<td><p>Spectrum type: set the Spectrum spectrum, affecting the GUI actions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.substractBG" title="grapa.datatypes.curveSpectrum.CurveSpectrum.substractBG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">substractBG</span></code></a>(id_dark, interpolate, if_new, ...)</p></td>
+<td><p>Substract dark: substract a curve to the data.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CURVE</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FILE_INSTR_RESP</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FILE_SUBSTRATES</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LIST_SUBSTRATES</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.addOffset">
+<span class="sig-name descname"><span class="pre">addOffset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.addOffset" title="Link to this definition"></a></dt>
+<dd><p>Add offset: adds a vertical offset to the data. The data are modified.
+The cumulated data correction is displayed, such that setting it to 0
+retrieves the original data (with some rounding errors)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.alterListGUI">
+<span class="sig-name descname"><span class="pre">alterListGUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.alterListGUI" title="Link to this definition"></a></dt>
+<dd><p>Determines the possible curve visualisations. One element has the form:
+AlterListItem(‘Label GUI’, [‘alter_x’, ‘alter_y’], ‘semilogx’, “print help doc”)
+By default only neutral (i.e. raw data) is provided</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.computeAbsorptance">
+<span class="sig-name descname"><span class="pre">computeAbsorptance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auxcurve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.computeAbsorptance" title="Link to this definition"></a></dt>
+<dd><p>Compute absorptance: computes an absorptance curve, defined as A% = 1 - R% - T%.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>auxcurve</strong> – index to a transmittance/reflectance curve,</p></li>
+<li><p><strong>graph</strong> – a graph containing the curve refered as auxcurve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Curve, or False if failure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.computeAlpha">
+<span class="sig-name descname"><span class="pre">computeAlpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auxcurve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substrate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.computeAlpha" title="Link to this definition"></a></dt>
+<dd><p>Estimate alpha: estimates the optical absorption spectrum of a layer,
+alpha, or absrptance,
+alpha uses the formula <code class="docutils literal notranslate"><span class="pre">alpha[cm-1]</span> <span class="pre">=</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">d[cm]</span> <span class="pre">*</span> <span class="pre">ln(T</span> <span class="pre">/</span> <span class="pre">(1-R)</span></code>
+This formula is a reasonable approximation, assuming a few assumptions
+detailed in the manual. Notably, the substrate should be transparent,
+and most of the reflections occurs at the air-layer interface.
+A substrate with low refractive index is to be preferred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>auxcurve</strong> – index to a transmittance/reflectance curve,</p></li>
+<li><p><strong>thickness</strong> – thickness of the layer, in [nm],</p></li>
+<li><p><strong>substrate</strong> – a simple model can be used to account for the absorption
+in the substrate. The formula becomes:
+<code class="docutils literal notranslate"><span class="pre">alpha[cm-1]</span> <span class="pre">=</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">*</span> <span class="pre">ln(T</span> <span class="pre">/</span> <span class="pre">(1-R)</span> <span class="pre">*</span> <span class="pre">(1-Rsub)</span> <span class="pre">/</span> <span class="pre">Tsub)</span></code></p></li>
+<li><p><strong>alpha</strong> – if True, computes alpha. If False, compute absorptance</p></li>
+<li><p><strong>graph</strong> – a graph containing the curve refered as auxcurve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a CurveSpectrum</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.correctInstrumentalResponse">
+<span class="sig-name descname"><span class="pre">correctInstrumentalResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instrresp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.correctInstrumentalResponse" title="Link to this definition"></a></dt>
+<dd><p>Correct for the instrumental response, using an instrumental response
+provided in file grapa/datatypes/spectrumInstrumentalResponses.txt
+!! Feel free to adapt the file with curves matching your system !!
+Parameters:
+- instrresp: label of the desired instr. resp. Curve in the file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.funcListGUI">
+<span class="sig-name descname"><span class="pre">funcListGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.funcListGUI" title="Link to this definition"></a></dt>
+<dd><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which
+elements are instances of <cite>FuncGUI</cite>, or (old style):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">func</span><span class="p">,</span>
+ <span class="s1">&#39;Button text&#39;</span><span class="p">,</span>
+ <span class="p">[</span><span class="s1">&#39;label 1&#39;</span><span class="p">,</span> <span class="s1">&#39;label 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">[</span><span class="s1">&#39;value 1&#39;</span><span class="p">,</span> <span class="s1">&#39;value 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">{</span><span class="s1">&#39;hiddenvar1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">},</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+ <span class="p">[</span><span class="n">dictFieldAttributes</span><span class="p">,</span> <span class="p">{},</span> <span class="o">...</span><span class="p">]]</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, returns quick modifs for offset and muloffset (if already set), and
+a help for some plot types (errorbar, scatter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – this function should be called specifying kwargs[‘graph’] the
+graph self is embedded in, and kwargs[‘graph_i’] as position of self in
+graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.getListSubstrates">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getListSubstrates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.getListSubstrates" title="Link to this definition"></a></dt>
+<dd><p>returns the substrates that have &lt;substrate&gt;+’ R’ and &lt;substrate&gt;+’ T’
+in spectrumSubstrates.txt</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ROI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.integrate" title="Link to this definition"></a></dt>
+<dd><p>Integrate: returns the integral of the curve, within ROI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ROI</strong> – example [xmin, xmax]</p></li>
+<li><p><strong>alter</strong> – ‘raw’, or any Graph ‘alter’ value including (mul-)offsets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.print_help">
+<span class="sig-name descname"><span class="pre">print_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.print_help" title="Link to this definition"></a></dt>
+<dd><p>Prints help for the Curve subclass, generated from docstrings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.setSubclass">
+<span class="sig-name descname"><span class="pre">setSubclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.setSubclass" title="Link to this definition"></a></dt>
+<dd><p>Spectrum type: set the Spectrum spectrum, affecting the GUI actions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>newtype</strong> – subclass of CurveSpectrum. Examples:
+‘CurveSpectrumReflectance’, ‘CurveSpectrumTransmittance’, etc.</p></li>
+<li><p><strong>unit</strong> – empty, or ‘%’ if data are in percent units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True for success, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveSpectrum.CurveSpectrum.substractBG">
+<span class="sig-name descname"><span class="pre">substractBG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_dark</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveSpectrum.CurveSpectrum.substractBG" title="Link to this definition"></a></dt>
+<dd><p>Substract dark: substract a curve to the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id_dark</strong> – index of the Curve containing the dark spectrum.</p></li>
+<li><p><strong>interpolate</strong> – <ul>
+<li><p>0: performs element-wise substraction,</p></li>
+<li><p>1: output on x points of both data and dark, interpolate both,</p></li>
+<li><p>2: output on selected Curve x points, interpolate the dark Curve.</p></li>
+</ul>
+</p></li>
+<li><p><strong>if_new</strong> – 1: create a new Curve, 0: modify existing data.</p></li>
+<li><p><strong>offsets</strong> – 0: ignore offset and muloffset information.
+1: substract data after offset and muloffset operation.</p></li>
+<li><p><strong>graph</strong> – Graph object containing the dark Curve referred by idDark</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.datatypes.curveSpectrum.html" class="btn btn-neutral float-left" title="grapa.datatypes.curveSpectrum" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance.html" class="btn btn-neutral float-right" title="grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

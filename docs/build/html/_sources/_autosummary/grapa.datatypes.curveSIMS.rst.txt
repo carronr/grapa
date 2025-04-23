@@ -1,0 +1,39 @@
+grapa.datatypes.curveSIMS
+=========================
+
+.. automodule:: grapa.datatypes.curveSIMS
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      findXAtValuePolynom
+      selectDataEdge
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveSIMS
+   
+   
+
+   
+   
+   
+
+
+

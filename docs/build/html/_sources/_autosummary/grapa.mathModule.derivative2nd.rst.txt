@@ -1,0 +1,6 @@
+grapa.mathModule.derivative2nd
+==============================
+
+.. currentmodule:: grapa.mathModule
+
+.. autofunction:: derivative2nd

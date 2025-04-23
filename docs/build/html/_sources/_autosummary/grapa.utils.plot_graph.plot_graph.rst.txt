@@ -1,0 +1,6 @@
+grapa.utils.plot\_graph.plot\_graph
+===================================
+
+.. currentmodule:: grapa.utils.plot_graph
+
+.. autofunction:: plot_graph

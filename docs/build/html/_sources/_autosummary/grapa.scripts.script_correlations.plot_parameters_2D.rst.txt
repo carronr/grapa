@@ -1,0 +1,6 @@
+grapa.scripts.script\_correlations.plot\_parameters\_2D
+=======================================================
+
+.. currentmodule:: grapa.scripts.script_correlations
+
+.. autofunction:: plot_parameters_2D

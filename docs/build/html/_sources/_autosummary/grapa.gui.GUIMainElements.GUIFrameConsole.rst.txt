@@ -1,0 +1,27 @@
+grapa.gui.GUIMainElements.GUIFrameConsole
+=========================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameConsole
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameConsole.__init__
+       ~GUIFrameConsole.get_console
+       ~GUIFrameConsole.update_ui
+   
+   
+
+   
+   
+   

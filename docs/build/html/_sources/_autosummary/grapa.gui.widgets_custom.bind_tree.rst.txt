@@ -1,0 +1,6 @@
+grapa.gui.widgets\_custom.bind\_tree
+====================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autofunction:: bind_tree

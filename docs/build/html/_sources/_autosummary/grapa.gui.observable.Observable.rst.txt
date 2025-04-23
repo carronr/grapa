@@ -1,0 +1,29 @@
+grapa.gui.observable.Observable
+===============================
+
+.. currentmodule:: grapa.gui.observable
+
+.. autoclass:: Observable
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Observable.__init__
+       ~Observable.register
+       ~Observable.unregister
+       ~Observable.unregister_all
+       ~Observable.update_observers
+   
+   
+
+   
+   
+   

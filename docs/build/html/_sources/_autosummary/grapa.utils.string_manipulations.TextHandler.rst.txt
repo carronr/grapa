@@ -1,0 +1,27 @@
+grapa.utils.string\_manipulations.TextHandler
+=============================================
+
+.. currentmodule:: grapa.utils.string_manipulations
+
+.. autoclass:: TextHandler
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~TextHandler.add
+       ~TextHandler.check_valid
+       ~TextHandler.remove
+   
+   
+
+   
+   
+   

@@ -1,0 +1,33 @@
+grapa.datatypes.graphSquidAdmiral.GraphSquidAdmiral
+===================================================
+
+.. currentmodule:: grapa.datatypes.graphSquidAdmiral
+
+.. autoclass:: GraphSquidAdmiral
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphSquidAdmiral.isFileReadable
+       ~GraphSquidAdmiral.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphSquidAdmiral.AXISLABELS
+      ~GraphSquidAdmiral.FILEIO_GRAPHTYPE
+   
+   

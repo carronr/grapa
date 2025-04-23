@@ -1,0 +1,26 @@
+grapa.gui.widgets\_custom.TextWriteable
+=======================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autoclass:: TextWriteable
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~TextWriteable.flush
+       ~TextWriteable.write
+   
+   
+
+   
+   
+   

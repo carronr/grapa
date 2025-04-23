@@ -1,0 +1,41 @@
+grapa.datatypes.curveCf.CurveCf
+===============================
+
+.. currentmodule:: grapa.datatypes.curveCf
+
+.. autoclass:: CurveCf
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveCf.__init__
+       ~CurveCf.alterListGUI
+       ~CurveCf.funcListGUI
+       ~CurveCf.getArea
+       ~CurveCf.getDataCustomPickerXY
+       ~CurveCf.print_help
+       ~CurveCf.setArea
+       ~CurveCf.y_mdCdlnf
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveCf.AXISLABELS_X
+      ~CurveCf.AXISLABELS_Y
+      ~CurveCf.CURVE
+      ~CurveCf.FORMAT_AUTOLABEL
+   
+   

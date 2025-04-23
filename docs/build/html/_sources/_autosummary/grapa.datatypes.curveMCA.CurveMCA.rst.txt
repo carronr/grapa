@@ -1,0 +1,53 @@
+grapa.datatypes.curveMCA.CurveMCA
+=================================
+
+.. currentmodule:: grapa.datatypes.curveMCA
+
+.. autoclass:: CurveMCA
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveMCA.__init__
+       ~CurveMCA.addElementLabels
+       ~CurveMCA.alterListGUI
+       ~CurveMCA.channel_to_kev
+       ~CurveMCA.fit
+       ~CurveMCA.fit_explicit
+       ~CurveMCA.fit_preset
+       ~CurveMCA.funcListGUI
+       ~CurveMCA.kev_to_channel
+       ~CurveMCA.peaks_data
+       ~CurveMCA.print_help
+       ~CurveMCA.updateFitParam
+       ~CurveMCA.x_kev
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveMCA.AXISLABELS_X
+      ~CurveMCA.AXISLABELS_Y
+      ~CurveMCA.CURVE
+      ~CurveMCA.DEFAULTVALUES
+      ~CurveMCA.DEFAULTVALUES_FILE
+      ~CurveMCA.FITHANDLER
+      ~CurveMCA.FITPARAMETERS_FILE
+      ~CurveMCA.PEAKS_DATA
+      ~CurveMCA.PEAKS_ELEMENTS
+      ~CurveMCA.PEAKS_FILENAME
+      ~CurveMCA.PEAKS_LINES
+   
+   

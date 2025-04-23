@@ -1,0 +1,32 @@
+grapa.datatypes.curveSpectrum.CurveSpectrumReflectance
+======================================================
+
+.. currentmodule:: grapa.datatypes.curveSpectrum
+
+.. autoclass:: CurveSpectrumReflectance
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveSpectrumReflectance.funcListGUISpecific
+       ~CurveSpectrumReflectance.initialize
+       ~CurveSpectrumReflectance.printHelp_
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

@@ -1,0 +1,28 @@
+grapa.utils.plot\_graph\_aux.ParserMisc
+=======================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: ParserMisc
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ParserMisc.alter_lim
+       ~ParserMisc.set_axislabel
+       ~ParserMisc.set_xyticklabels
+       ~ParserMisc.set_xytickstep
+   
+   
+
+   
+   
+   

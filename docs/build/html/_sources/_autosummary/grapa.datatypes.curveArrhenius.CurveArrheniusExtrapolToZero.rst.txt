@@ -1,0 +1,42 @@
+grapa.datatypes.curveArrhenius.CurveArrheniusExtrapolToZero
+===========================================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrheniusExtrapolToZero
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrheniusExtrapolToZero.BUTTONFitLabel
+       ~CurveArrheniusExtrapolToZero.BUTTONFitROI
+       ~CurveArrheniusExtrapolToZero.func_Arrhenius
+       ~CurveArrheniusExtrapolToZero.get_help
+       ~CurveArrheniusExtrapolToZero.popt
+       ~CurveArrheniusExtrapolToZero.x_1000overK
+       ~CurveArrheniusExtrapolToZero.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrheniusExtrapolToZero.attr
+      ~CurveArrheniusExtrapolToZero.dataLabel
+      ~CurveArrheniusExtrapolToZero.dataLabelArrhenius
+      ~CurveArrheniusExtrapolToZero.name
+      ~CurveArrheniusExtrapolToZero.poptLabel
+      ~CurveArrheniusExtrapolToZero.switchModel
+   
+   

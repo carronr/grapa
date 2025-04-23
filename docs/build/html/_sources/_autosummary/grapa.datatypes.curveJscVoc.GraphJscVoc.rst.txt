@@ -1,0 +1,38 @@
+grapa.datatypes.curveJscVoc.GraphJscVoc
+=======================================
+
+.. currentmodule:: grapa.datatypes.curveJscVoc
+
+.. autoclass:: GraphJscVoc
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphJscVoc.CurveJscVoc_fitNJ0
+       ~GraphJscVoc.CurvesJscVocSplitTemperature
+       ~GraphJscVoc.findCurveWithX
+       ~GraphJscVoc.isFileReadable
+       ~GraphJscVoc.readDataFromFile
+       ~GraphJscVoc.split_illumination
+       ~GraphJscVoc.split_temperatures
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphJscVoc.AXISLABELS
+      ~GraphJscVoc.FILEIO_GRAPHTYPE
+   
+   

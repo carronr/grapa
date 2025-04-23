@@ -1,0 +1,44 @@
+grapa.database.Database
+=======================
+
+.. currentmodule:: grapa.database
+
+.. autoclass:: Database
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Database.__init__
+       ~Database.clean
+       ~Database.colIdFromLabel
+       ~Database.colValuesFromId
+       ~Database.deleteRow
+       ~Database.getAttr
+       ~Database.getColLabel
+       ~Database.getRowLabel
+       ~Database.getRowLabelNum
+       ~Database.mask_from_conditions
+       ~Database.merge
+       ~Database.plot
+       ~Database.plot2
+       ~Database.renameColumn
+       ~Database.rowIdFromLabel
+       ~Database.setRowLabel
+       ~Database.setValue
+       ~Database.shape
+       ~Database.update
+       ~Database.value
+   
+   
+
+   
+   
+   

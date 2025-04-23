@@ -1,0 +1,31 @@
+grapa.datatypes.graphXML
+========================
+
+.. automodule:: grapa.datatypes.graphXML
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphXML
+   
+   
+
+   
+   
+   
+
+
+

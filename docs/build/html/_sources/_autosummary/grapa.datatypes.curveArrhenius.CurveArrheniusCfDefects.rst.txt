@@ -1,0 +1,39 @@
+grapa.datatypes.curveArrhenius.CurveArrheniusCfDefects
+======================================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrheniusCfDefects
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrheniusCfDefects.func_Arrhenius
+       ~CurveArrheniusCfDefects.get_help
+       ~CurveArrheniusCfDefects.popt
+       ~CurveArrheniusCfDefects.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrheniusCfDefects.attr
+      ~CurveArrheniusCfDefects.dataLabel
+      ~CurveArrheniusCfDefects.dataLabelArrhenius
+      ~CurveArrheniusCfDefects.name
+      ~CurveArrheniusCfDefects.poptLabel
+      ~CurveArrheniusCfDefects.switchModel
+   
+   

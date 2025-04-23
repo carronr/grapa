@@ -1,0 +1,6 @@
+grapa.curve.math\_on\_curves
+============================
+
+.. currentmodule:: grapa.curve
+
+.. autofunction:: math_on_curves

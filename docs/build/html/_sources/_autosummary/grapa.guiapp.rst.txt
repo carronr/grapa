@@ -1,0 +1,38 @@
+grapa.GUI
+=========
+
+.. automodule:: grapa.GUI
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_ui
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Application
+   
+   
+
+   
+   
+   
+
+
+

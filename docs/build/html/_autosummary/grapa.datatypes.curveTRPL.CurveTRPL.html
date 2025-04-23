@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.datatypes.curveTRPL.CurveTRPL &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.datatypes.curveXRD" href="grapa.datatypes.curveXRD.html" />
+    <link rel="prev" title="grapa.datatypes.curveTRPL.spline" href="grapa.datatypes.curveTRPL.spline.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveArrhenius.html">grapa.datatypes.curveArrhenius</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCV.html">grapa.datatypes.curveCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCf.html">grapa.datatypes.curveCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveEQE.html">grapa.datatypes.curveEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJV.html">grapa.datatypes.curveJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJscVoc.html">grapa.datatypes.curveJscVoc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMCA.html">grapa.datatypes.curveMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMath.html">grapa.datatypes.curveMath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSIMS.html">grapa.datatypes.curveSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSpectrum.html">grapa.datatypes.curveSpectrum</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.datatypes.curveTRPL.html">grapa.datatypes.curveTRPL</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveTRPL.bin_data.html">grapa.datatypes.curveTRPL.bin_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveTRPL.differential_lifetime.html">grapa.datatypes.curveTRPL.differential_lifetime</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveTRPL.find_onset.html">grapa.datatypes.curveTRPL.find_onset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveTRPL.fit_exponentials.html">grapa.datatypes.curveTRPL.fit_exponentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveTRPL.integrate.html">grapa.datatypes.curveTRPL.integrate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.datatypes.curveTRPL.spline.html">grapa.datatypes.curveTRPL.spline</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.datatypes.curveTRPL.CurveTRPL</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveXRD.html">grapa.datatypes.curveXRD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCV.html">grapa.datatypes.graphCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCf.html">grapa.datatypes.graphCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE.html">grapa.datatypes.graphEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html">grapa.datatypes.graphEQE_CSU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV.html">grapa.datatypes.graphJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJVDarkIllum.html">grapa.datatypes.graphJVDarkIllum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Ossila.html">grapa.datatypes.graphJV_Ossila</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Wavelabs.html">grapa.datatypes.graphJV_Wavelabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBE_TinyTusker.html">grapa.datatypes.graphMBE_TinyTusker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBElog.html">grapa.datatypes.graphMBElog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCA.html">grapa.datatypes.graphMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCAfit.html">grapa.datatypes.graphMCAfit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPAIOS.html">grapa.datatypes.graphPAIOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPGZ.html">grapa.datatypes.graphPGZ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPLQY.html">grapa.datatypes.graphPLQY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSIMS.html">grapa.datatypes.graphSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSPE.html">grapa.datatypes.graphSPE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphScaps.html">grapa.datatypes.graphScaps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSpectrum.html">grapa.datatypes.graphSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSquidAdmiral.html">grapa.datatypes.graphSquidAdmiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphTRPL.html">grapa.datatypes.graphTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXLS.html">grapa.datatypes.graphXLS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXML.html">grapa.datatypes.graphXML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.html">grapa.datatypes</a></li>
+          <li class="breadcrumb-item"><a href="grapa.datatypes.curveTRPL.html">grapa.datatypes.curveTRPL</a></li>
+      <li class="breadcrumb-item active">grapa.datatypes.curveTRPL.CurveTRPL</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.datatypes.curveTRPL.CurveTRPL.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-datatypes-curvetrpl-curvetrpl">
+<h1>grapa.datatypes.curveTRPL.CurveTRPL<a class="headerlink" href="#grapa-datatypes-curvetrpl-curvetrpl" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.datatypes.curveTRPL.</span></span><span class="sig-name descname"><span class="pre">CurveTRPL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">Curve</span></code></a></p>
+<p>CurveTRPL offers support to process and fit time-resolved photoluminence
+(TRPL) data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_fitExp" title="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_fitExp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveTRPL_fitExp</span></code></a>([nbExp, ROI, fixed, ...])</p></td>
+<td><p>Fts the data as a constant plus a sum of exponentials.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_sequence_fitexp" title="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_sequence_fitexp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveTRPL_sequence_fitexp</span></code></a>([nb_exp, roi, ...])</p></td>
+<td><p>Fits the data with a sum of exponentials, in a piece-wise manner.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_smoothBin" title="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_smoothBin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveTRPL_smoothBin</span></code></a>([window_len, window, ...])</p></td>
+<td><p>Returns a copy of the Curve after smoothening and data binning.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_spline" title="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_spline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveTRPL_spline</span></code></a>([roi, transform, numknots, ...])</p></td>
+<td><p>Fits the data with a spline and returns a CurveTRPL object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime" title="grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Curve_differential_lifetime</span></code></a>()</p></td>
+<td><p>Returns a CurveTRPL object with differential (instantaneous) lifetime.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime_vs_signal" title="grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime_vs_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Curve_differential_lifetime_vs_signal</span></code></a>()</p></td>
+<td><p>Returns differential lifetime versus signal (log(signal) proportional to QFLS) Differential lifetime: see Curve_differential_lifetime Make sure to remove background before calculating differential lifetime.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.__init__" title="grapa.datatypes.curveTRPL.CurveTRPL.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(data, attributes[, silent])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.addOffset" title="grapa.datatypes.curveTRPL.CurveTRPL.addOffset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addOffset</span></code></a>(value)</p></td>
+<td><p>to adjust the background level.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.addXOffset" title="grapa.datatypes.curveTRPL.CurveTRPL.addXOffset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">addXOffset</span></code></a>(value)</p></td>
+<td><p>Adds a temporal offset, to place the peak onset at t=0.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.alterListGUI" title="grapa.datatypes.curveTRPL.CurveTRPL.alterListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alterListGUI</span></code></a>()</p></td>
+<td><p>Determines the possible curve visualisations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findOnset</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.fit_resampleX" title="grapa.datatypes.curveTRPL.CurveTRPL.fit_resampleX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_resampleX</span></code></a>(spacing)</p></td>
+<td><p>This method modifies self.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitparams_to_clipboard</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.fitparams_weightedaverage" title="grapa.datatypes.curveTRPL.CurveTRPL.fitparams_weightedaverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fitparams_weightedaverage</span></code></a>([silent])</p></td>
+<td><p>Weighted averages of decays: returns tau_effective with tau_i weighted by A_i, and by A_i * tau_i (i.e. integral of exponential).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.funcListGUI" title="grapa.datatypes.curveTRPL.CurveTRPL.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(**kwargs)</p></td>
+<td><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which elements are instances of <cite>FuncGUI</cite>, or (old style): ::.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.func_fitExp" title="grapa.datatypes.curveTRPL.CurveTRPL.func_fitExp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_fitExp</span></code></a>(t, bg, a1, tau1, *args)</p></td>
+<td><p>computes the sum of a cst plus an arbitrary number of exponentials To keep within class, will be called as getattr(CurveTRPL, functionname)()</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFactor</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getOffset</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getXOffset</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.integrate" title="grapa.datatypes.curveTRPL.CurveTRPL.integrate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrate</span></code></a>([ROI, alter])</p></td>
+<td><p>Returns the integral of the curve, within ROI.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.normalize" title="grapa.datatypes.curveTRPL.CurveTRPL.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize</span></code></a>(repetfreq_Hz, duration_s, binwidth_ps)</p></td>
+<td><p>Normalizes intensity of TRPL to account for repetition rate, acquisition duration and binwidth.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalizerevert</span></code>(*_args)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveTRPL.CurveTRPL.setIntensity" title="grapa.datatypes.curveTRPL.CurveTRPL.setIntensity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setIntensity</span></code></a>([offsetnew, factornew])</p></td>
+<td><p>Data stored as (raw + offset) * factor</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS_X</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABELS_Y</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">AXISLABEL_DIFFLIFETIME</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CURVE</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_fitExp">
+<span class="sig-name descname"><span class="pre">CurveTRPL_fitExp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbExp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ROI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showResiduals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showfitonroi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_fitExp" title="Link to this definition"></a></dt>
+<dd><p>Fts the data as a constant plus a sum of exponentials.
+Returns a Curve as the best fit to the TRPL decay.
+Formula: y(t) = BG + A1 exp(-t/tau1) + A2 exp(-t/tau2) + …
+thus y(0) = BG + A1 + A2 + …</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nbExp</strong> – The number of exponentials in the fit</p></li>
+<li><p><strong>ROI</strong> – minimum and maximum on horizontal axis, e.g. [min, max]</p></li>
+<li><p><strong>fixed</strong> – an array of values. When a number is set, the corresponding
+fit parameter is fixed. The order of fit parametersis as follows:
+BG, A1, tau1, A2, tau2, …. e.g. [0,’’,’’]</p></li>
+<li><p><strong>showResiduals</strong> – when 1, also returns a Curve as the fit residuals.</p></li>
+<li><p><strong>showfitonroi</strong> – restrict the xrange of the fitted curve to the ROI</p></li>
+<li><p><strong>silent</strong> – if False, prints additional information</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a CurveTRPL instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_sequence_fitexp">
+<span class="sig-name descname"><span class="pre">CurveTRPL_sequence_fitexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_exp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_sequence_fitexp" title="Link to this definition"></a></dt>
+<dd><p>Fits the data with a sum of exponentials, in a piece-wise manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_exp</strong> – (int, optional) Number of exponentials to fit. Defaults to 3.</p></li>
+<li><p><strong>roi</strong> – (list, optional) Overall data range of interest, specified as
+[xmin, xmax]. Defaults to None.</p></li>
+<li><p><strong>roi0</strong> – (list, optional) Initial data range of interest for the first fit,
+specified as [xmin, xmax]. Defaults to None.</p></li>
+<li><p><strong>multiplier</strong> – (int, optional) Factor to multiply the initial roi0 to get
+the next one. Defaults to 5.</p></li>
+<li><p><strong>maxpoints</strong> – (int, optional) Maximum number of points in the fit, to limit
+data size. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(list) A list of CurveTRPL objects, each representing a piece-wise fit.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_smoothBin">
+<span class="sig-name descname"><span class="pre">CurveTRPL_smoothBin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hanning'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_smoothBin" title="Link to this definition"></a></dt>
+<dd><p>Returns a copy of the Curve after smoothening and data binning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_len</strong> – (width) number of points in the smooth window</p></li>
+<li><p><strong>window</strong> – (convolution widow) the type of window. Possible values:
+‘hanning’, ‘hamming’, ‘bartlett’, ‘blackman’, or ‘flat’ (moving average).</p></li>
+<li><p><strong>binning</strong> – how many points are merged.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_spline">
+<span class="sig-name descname"><span class="pre">CurveTRPL_spline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'semilogx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numknots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minspacingnpts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxspacingrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.CurveTRPL_spline" title="Link to this definition"></a></dt>
+<dd><p>Fits the data with a spline and returns a CurveTRPL object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>roi</strong> – (list, optional): Region of interest for the fit, specified as
+[xmin, xmax]. Defaults to None.</p></li>
+<li><p><strong>transform</strong> – (str, optional): Transformation to apply to the data. Options:
+“semilogx”, “semilogy”, “loglog”, “linlin”, or “”. Defaults “semilogx”.</p></li>
+<li><p><strong>numknots</strong> – (int, optional): Target number of knots for spline
+interpolation. Defaults to 30.</p></li>
+<li><p><strong>minspacingnpts</strong> – (int, optional): Minimum spacing between knots, in number
+of data points. Defaults to 4.</p></li>
+<li><p><strong>maxspacingrange</strong> – (float, optional): Maximum spacing between knots, as a
+fraction of the x range. Defaults to 0.1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A CurveTRPL object with the fitted spline data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime">
+<span class="sig-name descname"><span class="pre">Curve_differential_lifetime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime" title="Link to this definition"></a></dt>
+<dd><p>Returns a CurveTRPL object with differential (instantaneous) lifetime.
+Assuming y = A exp(- t / tau), formula is: tau(t) = - dt / d(ln(y))
+Make sure to remove background before calculating differential lifetime.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime_vs_signal">
+<span class="sig-name descname"><span class="pre">Curve_differential_lifetime_vs_signal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.Curve_differential_lifetime_vs_signal" title="Link to this definition"></a></dt>
+<dd><p>Returns differential lifetime versus signal (log(signal) proportional to QFLS)
+Differential lifetime: see Curve_differential_lifetime
+Make sure to remove background before calculating differential lifetime.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.addOffset">
+<span class="sig-name descname"><span class="pre">addOffset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.addOffset" title="Link to this definition"></a></dt>
+<dd><p>to adjust the background level. Data are modified. The previous adjustment is
+shown. The original data can be re-computed by setting the offset back to 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.addXOffset">
+<span class="sig-name descname"><span class="pre">addXOffset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.addXOffset" title="Link to this definition"></a></dt>
+<dd><p>Adds a temporal offset, to place the peak onset at t=0. The curve data are
+modified. Adding a time offset is relevant as interpretation of fit intensity A
+values assumes the decay starts at t=0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – (float). If value is not a number, the software tries to
+autodetect the leading edge, as the last point below a threshold defined
+as the average of the 25% and 95% percentiles.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.alterListGUI">
+<span class="sig-name descname"><span class="pre">alterListGUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.alterListGUI" title="Link to this definition"></a></dt>
+<dd><p>Determines the possible curve visualisations. One element has the form:
+AlterListItem(‘Label GUI’, [‘alter_x’, ‘alter_y’], ‘semilogx’, “print help doc”)
+By default only neutral (i.e. raw data) is provided</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.fit_resampleX">
+<span class="sig-name descname"><span class="pre">fit_resampleX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.fit_resampleX" title="Link to this definition"></a></dt>
+<dd><p>This method modifies self.
+:param spacing: e.g. 3, or [xmin, xmax, xstep]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.fitparams_weightedaverage">
+<span class="sig-name descname"><span class="pre">fitparams_weightedaverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.fitparams_weightedaverage" title="Link to this definition"></a></dt>
+<dd><p>Weighted averages of decays: returns tau_effective with tau_i weighted by A_i,
+and by A_i * tau_i (i.e. integral of exponential). Formulas:
+(sum A_i * tau_i) / (sum A_i), and
+(sum A_i * tau_i^2) / (sum A_i * tau_i)
+Do not use if any tau values &gt; time range of interest. The fit is weakly
+constrained, and the resulting average values may be artifact.
+Warning is raised if any tau value is larger than the time span.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>silent</strong> – prints suff if False</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sum (A tau) / Sum (A), Sum (A tau**2) / Sum (A tau)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.funcListGUI">
+<span class="sig-name descname"><span class="pre">funcListGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.funcListGUI" title="Link to this definition"></a></dt>
+<dd><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which
+elements are instances of <cite>FuncGUI</cite>, or (old style):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">func</span><span class="p">,</span>
+ <span class="s1">&#39;Button text&#39;</span><span class="p">,</span>
+ <span class="p">[</span><span class="s1">&#39;label 1&#39;</span><span class="p">,</span> <span class="s1">&#39;label 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">[</span><span class="s1">&#39;value 1&#39;</span><span class="p">,</span> <span class="s1">&#39;value 2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+ <span class="p">{</span><span class="s1">&#39;hiddenvar1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">},</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+ <span class="p">[</span><span class="n">dictFieldAttributes</span><span class="p">,</span> <span class="p">{},</span> <span class="o">...</span><span class="p">]]</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, returns quick modifs for offset and muloffset (if already set), and
+a help for some plot types (errorbar, scatter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – this function should be called specifying kwargs[‘graph’] the
+graph self is embedded in, and kwargs[‘graph_i’] as position of self in
+graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.func_fitExp">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">func_fitExp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.func_fitExp" title="Link to this definition"></a></dt>
+<dd><p>computes the sum of a cst plus an arbitrary number of exponentials
+To keep within class, will be called as getattr(CurveTRPL, functionname)()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.integrate">
+<span class="sig-name descname"><span class="pre">integrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ROI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.integrate" title="Link to this definition"></a></dt>
+<dd><p>Returns the integral of the curve, within ROI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ROI</strong> – example [xmin, xmax]</p></li>
+<li><p><strong>alter</strong> – ‘raw’, or any Graph ‘alter’ value including (mul-)offsets.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repetfreq_Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binwidth_ps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.normalize" title="Link to this definition"></a></dt>
+<dd><p>Normalizes intensity of TRPL to account for repetition rate,
+acquisition duration and binwidth. Assumes data is in unit ‘counts’.
+Data: (raw+offset) * (1 / (syncfreq * (measstop-meastime) * binwidth))</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveTRPL.CurveTRPL.setIntensity">
+<span class="sig-name descname"><span class="pre">setIntensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offsetnew</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factornew</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveTRPL.CurveTRPL.setIntensity" title="Link to this definition"></a></dt>
+<dd><p>Data stored as (raw + offset) * factor</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.datatypes.curveTRPL.spline.html" class="btn btn-neutral float-left" title="grapa.datatypes.curveTRPL.spline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.datatypes.curveXRD.html" class="btn btn-neutral float-right" title="grapa.datatypes.curveXRD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

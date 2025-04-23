@@ -1,0 +1,26 @@
+grapa.utils.plot\_graph\_aux.ParserAxlines
+==========================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: ParserAxlines
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ParserAxlines.__init__
+       ~ParserAxlines.plot
+   
+   
+
+   
+   
+   

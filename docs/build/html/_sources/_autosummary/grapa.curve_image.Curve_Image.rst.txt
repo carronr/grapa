@@ -1,0 +1,42 @@
+grapa.curve\_image.Curve\_Image
+===============================
+
+.. currentmodule:: grapa.curve_image
+
+.. autoclass:: Curve_Image
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Curve_Image.__init__
+       ~Curve_Image.aggregate_into_matrix
+       ~Curve_Image.aggregate_into_matrix_i
+       ~Curve_Image.convert_matrix_xyz
+       ~Curve_Image.convert_xyz_matrix
+       ~Curve_Image.funcListGUI
+       ~Curve_Image.get_image_data
+       ~Curve_Image.process_matrix
+       ~Curve_Image.update_extent
+       ~Curve_Image.update_levels
+       ~Curve_Image.x_y_z_to_xyz
+       ~Curve_Image.xyz_to_x_y_z
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Curve_Image.CURVE
+   
+   

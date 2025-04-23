@@ -1,0 +1,53 @@
+grapa.datatypes.graphSIMS.GraphSIMS
+===================================
+
+.. currentmodule:: grapa.datatypes.graphSIMS
+
+.. autoclass:: GraphSIMS
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphSIMS.ROI_GUI2idx
+       ~GraphSIMS.appendReplaceCurveRatio
+       ~GraphSIMS.appendReplaceCurveRatioGUI
+       ~GraphSIMS.appendReplaceCurveRatioGUISmt
+       ~GraphSIMS.check_saturation
+       ~GraphSIMS.getCurve
+       ~GraphSIMS.getLayerBoundaries
+       ~GraphSIMS.getRatio
+       ~GraphSIMS.getRatioGUI
+       ~GraphSIMS.getRatioProcessRatiocurves
+       ~GraphSIMS.isFileReadable
+       ~GraphSIMS.readDataFromFile
+       ~GraphSIMS.setLayerBoundaries
+       ~GraphSIMS.setLayerBoundariesDepthParameters
+       ~GraphSIMS.setLayerBoundariesDepthParametersGUI
+       ~GraphSIMS.setYieldCoefs
+       ~GraphSIMS.targetRatioSetYield
+       ~GraphSIMS.targetRatioSetYieldGUI
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphSIMS.AXISLABELS
+      ~GraphSIMS.FILEIO_GRAPHTYPE
+      ~GraphSIMS.SHORTCUTS
+      ~GraphSIMS.THRESHOLD_SATURATION
+      ~GraphSIMS.TOHIDE
+      ~GraphSIMS.YIELDS
+   
+   

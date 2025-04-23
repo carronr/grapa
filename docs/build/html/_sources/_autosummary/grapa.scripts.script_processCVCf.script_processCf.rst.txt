@@ -1,0 +1,6 @@
+grapa.scripts.script\_processCVCf.script\_processCf
+===================================================
+
+.. currentmodule:: grapa.scripts.script_processCVCf
+
+.. autofunction:: script_processCf

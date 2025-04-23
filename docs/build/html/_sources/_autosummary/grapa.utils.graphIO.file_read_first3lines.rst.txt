@@ -1,0 +1,6 @@
+grapa.utils.graphIO.file\_read\_first3lines
+===========================================
+
+.. currentmodule:: grapa.utils.graphIO
+
+.. autofunction:: file_read_first3lines

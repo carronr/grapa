@@ -1,0 +1,56 @@
+grapa.datatypes.curveTRPL.CurveTRPL
+===================================
+
+.. currentmodule:: grapa.datatypes.curveTRPL
+
+.. autoclass:: CurveTRPL
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveTRPL.CurveTRPL_fitExp
+       ~CurveTRPL.CurveTRPL_sequence_fitexp
+       ~CurveTRPL.CurveTRPL_smoothBin
+       ~CurveTRPL.CurveTRPL_spline
+       ~CurveTRPL.Curve_differential_lifetime
+       ~CurveTRPL.Curve_differential_lifetime_vs_signal
+       ~CurveTRPL.__init__
+       ~CurveTRPL.addOffset
+       ~CurveTRPL.addXOffset
+       ~CurveTRPL.alterListGUI
+       ~CurveTRPL.findOnset
+       ~CurveTRPL.fit_resampleX
+       ~CurveTRPL.fitparams_to_clipboard
+       ~CurveTRPL.fitparams_weightedaverage
+       ~CurveTRPL.funcListGUI
+       ~CurveTRPL.func_fitExp
+       ~CurveTRPL.getFactor
+       ~CurveTRPL.getOffset
+       ~CurveTRPL.getXOffset
+       ~CurveTRPL.integrate
+       ~CurveTRPL.normalize
+       ~CurveTRPL.normalizerevert
+       ~CurveTRPL.setIntensity
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveTRPL.AXISLABELS_X
+      ~CurveTRPL.AXISLABELS_Y
+      ~CurveTRPL.AXISLABEL_DIFFLIFETIME
+      ~CurveTRPL.CURVE
+   
+   

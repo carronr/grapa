@@ -1,0 +1,38 @@
+grapa.utils.plot\_curve
+=======================
+
+.. automodule:: grapa.utils.plot_curve
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      plot_curve
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      DataStruct
+   
+   
+
+   
+   
+   
+
+
+

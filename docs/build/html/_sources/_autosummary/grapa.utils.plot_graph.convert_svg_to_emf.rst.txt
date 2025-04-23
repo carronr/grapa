@@ -1,0 +1,6 @@
+grapa.utils.plot\_graph.convert\_svg\_to\_emf
+=============================================
+
+.. currentmodule:: grapa.utils.plot_graph
+
+.. autofunction:: convert_svg_to_emf

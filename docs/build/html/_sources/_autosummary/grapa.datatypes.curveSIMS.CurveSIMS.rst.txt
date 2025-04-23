@@ -1,0 +1,42 @@
+grapa.datatypes.curveSIMS.CurveSIMS
+===================================
+
+.. currentmodule:: grapa.datatypes.curveSIMS
+
+.. autoclass:: CurveSIMS
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveSIMS.__init__
+       ~CurveSIMS.alterListGUI
+       ~CurveSIMS.cropDataROI
+       ~CurveSIMS.findLayerBorders
+       ~CurveSIMS.funcListGUI
+       ~CurveSIMS.localizeEdge
+       ~CurveSIMS.localizeEdgeFromGUI
+       ~CurveSIMS.print_help
+       ~CurveSIMS.setDepthParameters
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveSIMS.ALTER_SIMS_TIME_DEPTH
+      ~CurveSIMS.AXISLABELS_X
+      ~CurveSIMS.CURVE
+      ~CurveSIMS.FORMAT_AUTOLABEL
+   
+   

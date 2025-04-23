@@ -1,0 +1,32 @@
+grapa.datatypes.graphSpectrum.GraphSpectrumUVVIS
+================================================
+
+.. currentmodule:: grapa.datatypes.graphSpectrum
+
+.. autoclass:: GraphSpectrumUVVIS
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphSpectrumUVVIS.isFileReadable
+       ~GraphSpectrumUVVIS.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphSpectrumUVVIS.AXISLABELS
+   
+   

@@ -1,0 +1,47 @@
+grapa.gui
+=========
+
+.. automodule:: grapa.gui
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      GUIMainElements
+   
+      GUITexts
+   
+      GUIdataEditor
+   
+      interface_openbis
+   
+      observable
+   
+      widgets_custom
+   
+      widgets_graphmanager
+   
+      widgets_tooltip
+

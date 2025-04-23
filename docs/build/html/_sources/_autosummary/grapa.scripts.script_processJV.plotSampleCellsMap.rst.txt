@@ -1,0 +1,6 @@
+grapa.scripts.script\_processJV.plotSampleCellsMap
+==================================================
+
+.. currentmodule:: grapa.scripts.script_processJV
+
+.. autofunction:: plotSampleCellsMap

@@ -1,0 +1,48 @@
+grapa.gui.widgets\_custom
+=========================
+
+.. automodule:: grapa.gui.widgets_custom
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      bind_tree
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      ButtonSmall
+      ButtonVar
+      CheckbuttonVar
+      ComboboxVar
+      EntryVar
+      FrameScrollable
+      FrameTitleContentHide
+      FrameTitleContentHideHorizontal
+      LabelVar
+      OptionMenuVar
+      TextWriteable
+   
+   
+
+   
+   
+   
+
+
+

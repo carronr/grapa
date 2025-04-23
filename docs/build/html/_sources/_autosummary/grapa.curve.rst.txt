@@ -1,0 +1,41 @@
+grapa.curve
+===========
+
+.. automodule:: grapa.curve
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      get_point_closest_to_xy
+      math_on_curves
+      update_curve_values_dictkeys
+      update_graph_values_dictkeys_conditional
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Curve
+   
+   
+
+   
+   
+   
+
+
+

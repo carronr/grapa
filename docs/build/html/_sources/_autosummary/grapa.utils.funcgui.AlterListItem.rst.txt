@@ -1,0 +1,33 @@
+grapa.utils.funcgui.AlterListItem
+=================================
+
+.. currentmodule:: grapa.utils.funcgui
+
+.. autoclass:: AlterListItem
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~AlterListItem.__init__
+       ~AlterListItem.item_neutral
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~AlterListItem.TYPEPLOTS
+      ~AlterListItem.TYPEPLOT_DEF
+   
+   

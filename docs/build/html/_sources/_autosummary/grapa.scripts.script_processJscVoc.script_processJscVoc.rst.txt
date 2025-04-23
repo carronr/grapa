@@ -1,0 +1,6 @@
+grapa.scripts.script\_processJscVoc.script\_processJscVoc
+=========================================================
+
+.. currentmodule:: grapa.scripts.script_processJscVoc
+
+.. autofunction:: script_processJscVoc

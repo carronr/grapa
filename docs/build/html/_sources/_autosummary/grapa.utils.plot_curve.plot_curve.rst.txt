@@ -1,0 +1,6 @@
+grapa.utils.plot\_curve.plot\_curve
+===================================
+
+.. currentmodule:: grapa.utils.plot_curve
+
+.. autofunction:: plot_curve

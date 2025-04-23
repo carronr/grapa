@@ -1,0 +1,6 @@
+grapa.scripts.script\_JVSummaryToBoxPlots.label\_from\_graph
+============================================================
+
+.. currentmodule:: grapa.scripts.script_JVSummaryToBoxPlots
+
+.. autofunction:: label_from_graph

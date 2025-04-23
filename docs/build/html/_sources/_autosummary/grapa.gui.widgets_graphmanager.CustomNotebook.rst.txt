@@ -1,0 +1,27 @@
+grapa.gui.widgets\_graphmanager.CustomNotebook
+==============================================
+
+.. currentmodule:: grapa.gui.widgets_graphmanager
+
+.. autoclass:: CustomNotebook
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CustomNotebook.__init__
+       ~CustomNotebook.on_close_press
+       ~CustomNotebook.on_close_release
+   
+   
+
+   
+   
+   

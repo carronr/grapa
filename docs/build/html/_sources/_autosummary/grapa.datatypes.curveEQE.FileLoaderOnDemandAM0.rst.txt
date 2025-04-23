@@ -1,0 +1,24 @@
+grapa.datatypes.curveEQE.FileLoaderOnDemandAM0
+==============================================
+
+.. currentmodule:: grapa.datatypes.curveEQE
+
+.. autoclass:: FileLoaderOnDemandAM0
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+
+   
+   
+   

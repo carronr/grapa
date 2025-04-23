@@ -1,0 +1,29 @@
+grapa.utils.curve\_subclasses\_utils.FitHandlerBasicFunc
+========================================================
+
+.. currentmodule:: grapa.utils.curve_subclasses_utils
+
+.. autoclass:: FitHandlerBasicFunc
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FitHandlerBasicFunc.funcListGUI_ifnewline
+       ~FitHandlerBasicFunc.func_cst_gaussa
+       ~FitHandlerBasicFunc.func_cst_gaussi
+       ~FitHandlerBasicFunc.func_gaussa
+       ~FitHandlerBasicFunc.func_gaussi
+   
+   
+
+   
+   
+   

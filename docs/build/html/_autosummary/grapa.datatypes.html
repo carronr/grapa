@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.datatypes &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.datatypes.curveArrhenius" href="grapa.datatypes.curveArrhenius.html" />
+    <link rel="prev" title="grapa.database.Database" href="grapa.database.Database.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">grapa.datatypes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveArrhenius.html">grapa.datatypes.curveArrhenius</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCV.html">grapa.datatypes.curveCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveCf.html">grapa.datatypes.curveCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveEQE.html">grapa.datatypes.curveEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJV.html">grapa.datatypes.curveJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveJscVoc.html">grapa.datatypes.curveJscVoc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMCA.html">grapa.datatypes.curveMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveMath.html">grapa.datatypes.curveMath</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSIMS.html">grapa.datatypes.curveSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveSpectrum.html">grapa.datatypes.curveSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveTRPL.html">grapa.datatypes.curveTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveXRD.html">grapa.datatypes.curveXRD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCV.html">grapa.datatypes.graphCV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCf.html">grapa.datatypes.graphCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE.html">grapa.datatypes.graphEQE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html">grapa.datatypes.graphEQE_CSU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV.html">grapa.datatypes.graphJV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJVDarkIllum.html">grapa.datatypes.graphJVDarkIllum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Ossila.html">grapa.datatypes.graphJV_Ossila</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV_Wavelabs.html">grapa.datatypes.graphJV_Wavelabs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBE_TinyTusker.html">grapa.datatypes.graphMBE_TinyTusker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMBElog.html">grapa.datatypes.graphMBElog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCA.html">grapa.datatypes.graphMCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphMCAfit.html">grapa.datatypes.graphMCAfit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPAIOS.html">grapa.datatypes.graphPAIOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPGZ.html">grapa.datatypes.graphPGZ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphPLQY.html">grapa.datatypes.graphPLQY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSIMS.html">grapa.datatypes.graphSIMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSPE.html">grapa.datatypes.graphSPE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphScaps.html">grapa.datatypes.graphScaps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSpectrum.html">grapa.datatypes.graphSpectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphSquidAdmiral.html">grapa.datatypes.graphSquidAdmiral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphTRPL.html">grapa.datatypes.graphTRPL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXLS.html">grapa.datatypes.graphXLS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXML.html">grapa.datatypes.graphXML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+      <li class="breadcrumb-item active">grapa.datatypes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.datatypes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grapa.datatypes">
+<span id="grapa-datatypes"></span><h1>grapa.datatypes<a class="headerlink" href="#module-grapa.datatypes" title="Link to this heading"></a></h1>
+<p class="rubric">Modules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.curveArrhenius.html#module-grapa.datatypes.curveArrhenius" title="grapa.datatypes.curveArrhenius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveArrhenius</span></code></a></p></td>
+<td><p>Curve subclass hndling fits with mathematical expressions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.curveCV.html#module-grapa.datatypes.curveCV" title="grapa.datatypes.curveCV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveCV</span></code></a></p></td>
+<td><p>CurveCV provides functionalities to process C-V capacitance versus voltage measurements of solar cells.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.curveCf.html#module-grapa.datatypes.curveCf" title="grapa.datatypes.curveCf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveCf</span></code></a></p></td>
+<td><p>Created on Thu Feb 23 20:37:38 2017</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.curveEQE.html#module-grapa.datatypes.curveEQE" title="grapa.datatypes.curveEQE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveEQE</span></code></a></p></td>
+<td><p>Curve type to handle External quantum efficiency EQE data of solar cells</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.curveJV.html#module-grapa.datatypes.curveJV" title="grapa.datatypes.curveJV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveJV</span></code></a></p></td>
+<td><p>Created on Fri Jul 15 15:46:13 2016</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.curveJscVoc.html#module-grapa.datatypes.curveJscVoc" title="grapa.datatypes.curveJscVoc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveJscVoc</span></code></a></p></td>
+<td><p>Created on Fri Jul 15 15:46:13 2016</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.curveMCA.html#module-grapa.datatypes.curveMCA" title="grapa.datatypes.curveMCA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveMCA</span></code></a></p></td>
+<td><p>Created on Tue Sep 13 15:44:58 2016</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.curveMath.html#module-grapa.datatypes.curveMath" title="grapa.datatypes.curveMath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveMath</span></code></a></p></td>
+<td><p>Class handling optical spectra, with notably nm to eV conversion and background subtraction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.curveSIMS.html#module-grapa.datatypes.curveSIMS" title="grapa.datatypes.curveSIMS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveSIMS</span></code></a></p></td>
+<td><p>&#64;author: Romain Carron Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.curveSpectrum.html#module-grapa.datatypes.curveSpectrum" title="grapa.datatypes.curveSpectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveSpectrum</span></code></a></p></td>
+<td><p>Curve subclass to provide analysis function for spectra.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.curveTRPL.html#module-grapa.datatypes.curveTRPL" title="grapa.datatypes.curveTRPL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveTRPL</span></code></a></p></td>
+<td><p>&#64;author: Romain Carron Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.curveXRD.html#module-grapa.datatypes.curveXRD" title="grapa.datatypes.curveXRD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curveXRD</span></code></a></p></td>
+<td><p>Fitting fuctions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphCV.html#module-grapa.datatypes.graphCV" title="grapa.datatypes.graphCV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphCV</span></code></a></p></td>
+<td><p>To parse files contaiing capacitance versus voltage C-V data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphCf.html#module-grapa.datatypes.graphCf" title="grapa.datatypes.graphCf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphCf</span></code></a></p></td>
+<td><p>Created on Thu Feb 23 20:37:38 2017</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphEQE.html#module-grapa.datatypes.graphEQE" title="grapa.datatypes.graphEQE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphEQE</span></code></a></p></td>
+<td><p>To parse files containing extrnal quantum efficiency EQE data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html#module-grapa.datatypes.graphEQE_CSU" title="grapa.datatypes.graphEQE_CSU"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphEQE_CSU</span></code></a></p></td>
+<td><p>Created on Sat Oct 28 12:52:52 2017</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphJV.html#module-grapa.datatypes.graphJV" title="grapa.datatypes.graphJV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphJV</span></code></a></p></td>
+<td><p>To parse files containing curent-voltage JV curves</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphJVDarkIllum.html#module-grapa.datatypes.graphJVDarkIllum" title="grapa.datatypes.graphJVDarkIllum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphJVDarkIllum</span></code></a></p></td>
+<td><p>Created on Mon Jul 25 19:47:25 2016</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphJV_Ossila.html#module-grapa.datatypes.graphJV_Ossila" title="grapa.datatypes.graphJV_Ossila"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphJV_Ossila</span></code></a></p></td>
+<td><p>&#64;author: Romain Carron Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphJV_Wavelabs.html#module-grapa.datatypes.graphJV_Wavelabs" title="grapa.datatypes.graphJV_Wavelabs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphJV_Wavelabs</span></code></a></p></td>
+<td><p>Created on Tue May 23 12:53:00 2023</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphMBE_TinyTusker.html#module-grapa.datatypes.graphMBE_TinyTusker" title="grapa.datatypes.graphMBE_TinyTusker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphMBE_TinyTusker</span></code></a></p></td>
+<td><p>Created on Wed  Jan 17 12:53:00 2024</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphMBElog.html#module-grapa.datatypes.graphMBElog" title="grapa.datatypes.graphMBElog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphMBElog</span></code></a></p></td>
+<td><p>Created on Sat Mar  4 10:44:14 2017</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphMCA.html#module-grapa.datatypes.graphMCA" title="grapa.datatypes.graphMCA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphMCA</span></code></a></p></td>
+<td><p>&#64;author: Romain Carron Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphMCAfit.html#module-grapa.datatypes.graphMCAfit" title="grapa.datatypes.graphMCAfit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphMCAfit</span></code></a></p></td>
+<td><p>Created on Sat Mar  4 10:57:14 2017</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphPAIOS.html#module-grapa.datatypes.graphPAIOS" title="grapa.datatypes.graphPAIOS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphPAIOS</span></code></a></p></td>
+<td><p>Created on Tue Nov 12 14:25:49 2021</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphPGZ.html#module-grapa.datatypes.graphPGZ" title="grapa.datatypes.graphPGZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphPGZ</span></code></a></p></td>
+<td><p>Created on Fri Jan 26 13:30:22 2023</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphPLQY.html#module-grapa.datatypes.graphPLQY" title="grapa.datatypes.graphPLQY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphPLQY</span></code></a></p></td>
+<td><p>&#64;author: Romain Carron Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphSIMS.html#module-grapa.datatypes.graphSIMS" title="grapa.datatypes.graphSIMS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphSIMS</span></code></a></p></td>
+<td><p>&#64;author: Romain Carron Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphSPE.html#module-grapa.datatypes.graphSPE" title="grapa.datatypes.graphSPE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphSPE</span></code></a></p></td>
+<td><p>An very primitive data parser for .spe data files containing XRF data of a given manufacturer.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphScaps.html#module-grapa.datatypes.graphScaps" title="grapa.datatypes.graphScaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphScaps</span></code></a></p></td>
+<td><p>Parse the output of SCAPS simulations</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphSpectrum.html#module-grapa.datatypes.graphSpectrum" title="grapa.datatypes.graphSpectrum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphSpectrum</span></code></a></p></td>
+<td><p>Created on Tue Feb  6 19:49:25 2018</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphSquidAdmiral.html#module-grapa.datatypes.graphSquidAdmiral" title="grapa.datatypes.graphSquidAdmiral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphSquidAdmiral</span></code></a></p></td>
+<td><p>Created on Tue Nov 13 14:25:49 2019</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphTRPL.html#module-grapa.datatypes.graphTRPL" title="grapa.datatypes.graphTRPL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphTRPL</span></code></a></p></td>
+<td><p>Parse files containing time-resolved photoluminscence (TRPL) decays</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphXLS.html#module-grapa.datatypes.graphXLS" title="grapa.datatypes.graphXLS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphXLS</span></code></a></p></td>
+<td><p>Created on Sat Mar  4 10:57:14 2017</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.datatypes.graphXML.html#module-grapa.datatypes.graphXML" title="grapa.datatypes.graphXML"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphXML</span></code></a></p></td>
+<td><p>Created on Mon Sep 25 22:22:45 2017</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.datatypes.graphXPS.html#module-grapa.datatypes.graphXPS" title="grapa.datatypes.graphXPS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graphXPS</span></code></a></p></td>
+<td><p>Created on Tue Jan 23 14:25:49 2018</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.database.Database.html" class="btn btn-neutral float-left" title="grapa.database.Database" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.datatypes.curveArrhenius.html" class="btn btn-neutral float-right" title="grapa.datatypes.curveArrhenius" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

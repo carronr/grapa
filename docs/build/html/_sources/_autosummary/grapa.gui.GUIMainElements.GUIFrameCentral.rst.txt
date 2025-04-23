@@ -1,0 +1,29 @@
+grapa.gui.GUIMainElements.GUIFrameCentral
+=========================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameCentral
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameCentral.__init__
+       ~GUIFrameCentral.get_frame_graph
+       ~GUIFrameCentral.get_frame_options
+       ~GUIFrameCentral.get_tabs
+       ~GUIFrameCentral.update_ui
+   
+   
+
+   
+   
+   

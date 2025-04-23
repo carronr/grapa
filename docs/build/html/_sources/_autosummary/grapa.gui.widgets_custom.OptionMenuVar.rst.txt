@@ -1,0 +1,28 @@
+grapa.gui.widgets\_custom.OptionMenuVar
+=======================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autoclass:: OptionMenuVar
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~OptionMenuVar.__init__
+       ~OptionMenuVar.get
+       ~OptionMenuVar.reset_values
+       ~OptionMenuVar.set
+   
+   
+
+   
+   
+   

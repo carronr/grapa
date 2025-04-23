@@ -1,0 +1,35 @@
+grapa.datatypes.graphJV\_Wavelabs.GraphJV\_Wavelabs
+===================================================
+
+.. currentmodule:: grapa.datatypes.graphJV_Wavelabs
+
+.. autoclass:: GraphJV_Wavelabs
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphJV_Wavelabs.interpret_filename
+       ~GraphJV_Wavelabs.isFileReadable
+       ~GraphJV_Wavelabs.parse_iv
+       ~GraphJV_Wavelabs.parse_mpp
+       ~GraphJV_Wavelabs.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphJV_Wavelabs.FILEIO_GRAPHTYPE
+   
+   

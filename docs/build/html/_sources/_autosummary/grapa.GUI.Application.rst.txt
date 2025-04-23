@@ -1,0 +1,64 @@
+grapa.GUI.Application
+=====================
+
+.. currentmodule:: grapa.GUI
+
+.. autoclass:: Application
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Application.__init__
+       ~Application.args_to_str
+       ~Application.blink_widget
+       ~Application.call_curve_method
+       ~Application.call_graph_method
+       ~Application.callback_tab_changed
+       ~Application.disable_canvas_callbacks
+       ~Application.enable_canvas_callbacks
+       ~Application.get_ax
+       ~Application.get_canvas
+       ~Application.get_clipboard
+       ~Application.get_fig
+       ~Application.get_file
+       ~Application.get_folder
+       ~Application.get_frame_graph
+       ~Application.get_frame_options
+       ~Application.get_selected_curves
+       ~Application.get_tab_properties
+       ~Application.get_tabs
+       ~Application.graph
+       ~Application.if_print_commands
+       ~Application.insert_curve_to_graph
+       ~Application.merge_graph
+       ~Application.open_file
+       ~Application.print_last_release
+       ~Application.prompt_file
+       ~Application.prompt_folder
+       ~Application.quit
+       ~Application.save_graph
+       ~Application.set_auto_screendpi
+       ~Application.set_clipboard
+       ~Application.store_selected_curves
+       ~Application.update_ui
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Application.DEFAULT_CANVAS_BACKGROUNDCOLOR
+      ~Application.DEFAULT_SCREENDPI
+   
+   

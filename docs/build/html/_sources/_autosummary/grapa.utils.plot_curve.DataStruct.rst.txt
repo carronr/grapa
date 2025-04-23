@@ -1,0 +1,25 @@
+grapa.utils.plot\_curve.DataStruct
+==================================
+
+.. currentmodule:: grapa.utils.plot_curve
+
+.. autoclass:: DataStruct
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~DataStruct.__init__
+   
+   
+
+   
+   
+   

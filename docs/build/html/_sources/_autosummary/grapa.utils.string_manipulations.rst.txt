@@ -1,0 +1,45 @@
+grapa.utils.string\_manipulations
+=================================
+
+.. automodule:: grapa.utils.string_manipulations
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      format_string_curveattr
+      listToString
+      restructuredtext_to_text
+      strToVar
+      strUnescapeIter
+      stringToVariable
+      varToStr
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      TemplateCustom
+      TextHandler
+   
+   
+
+   
+   
+   
+
+
+

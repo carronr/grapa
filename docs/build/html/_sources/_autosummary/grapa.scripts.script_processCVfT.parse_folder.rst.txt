@@ -1,0 +1,6 @@
+grapa.scripts.script\_processCVfT.parse\_folder
+===============================================
+
+.. currentmodule:: grapa.scripts.script_processCVfT
+
+.. autofunction:: parse_folder

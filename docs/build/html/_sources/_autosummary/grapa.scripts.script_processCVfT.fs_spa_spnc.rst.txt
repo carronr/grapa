@@ -1,0 +1,6 @@
+grapa.scripts.script\_processCVfT.fs\_spa\_spnc
+===============================================
+
+.. currentmodule:: grapa.scripts.script_processCVfT
+
+.. autofunction:: fs_spa_spnc

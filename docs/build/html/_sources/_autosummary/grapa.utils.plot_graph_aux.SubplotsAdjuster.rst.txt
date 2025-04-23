@@ -1,0 +1,26 @@
+grapa.utils.plot\_graph\_aux.SubplotsAdjuster
+=============================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: SubplotsAdjuster
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~SubplotsAdjuster.default
+       ~SubplotsAdjuster.merge
+   
+   
+
+   
+   
+   

@@ -1,0 +1,47 @@
+grapa.mathModule
+================
+
+.. automodule:: grapa.mathModule
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      derivative
+      derivative2nd
+      find_nearest
+      is_number
+      roundSignificant
+      roundSignificantRange
+      roundgraphlim
+      smooth
+      trapz
+      xAtValue
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      MathOperator
+   
+   
+
+   
+   
+   
+
+
+

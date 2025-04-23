@@ -1,0 +1,45 @@
+grapa.datatypes.curveJscVoc.CurveJscVoc
+=======================================
+
+.. currentmodule:: grapa.datatypes.curveJscVoc
+
+.. autoclass:: CurveJscVoc
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveJscVoc.CurvesJscVocSplitIllumination
+       ~CurveJscVoc.T
+       ~CurveJscVoc.__init__
+       ~CurveJscVoc.alterListGUI
+       ~CurveJscVoc.fit_nJ0
+       ~CurveJscVoc.funcListGUI
+       ~CurveJscVoc.func_nJ0
+       ~CurveJscVoc.getArea
+       ~CurveJscVoc.print_help
+       ~CurveJscVoc.setArea
+       ~CurveJscVoc.splitIllumination
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveJscVoc.AXISLABELS_X
+      ~CurveJscVoc.AXISLABELS_Y
+      ~CurveJscVoc.CST_Jsclim0
+      ~CurveJscVoc.CURVE
+      ~CurveJscVoc.Tdefault
+   
+   

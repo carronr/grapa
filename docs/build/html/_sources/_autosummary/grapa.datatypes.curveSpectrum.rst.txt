@@ -1,0 +1,34 @@
+grapa.datatypes.curveSpectrum
+=============================
+
+.. automodule:: grapa.datatypes.curveSpectrum
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveSpectrum
+      CurveSpectrumAbsorptance
+      CurveSpectrumReflectance
+      CurveSpectrumTransmittance
+   
+   
+
+   
+   
+   
+
+
+

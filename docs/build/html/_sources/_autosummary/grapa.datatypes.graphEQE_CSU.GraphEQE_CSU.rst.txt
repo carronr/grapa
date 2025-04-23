@@ -1,0 +1,33 @@
+grapa.datatypes.graphEQE\_CSU.GraphEQE\_CSU
+===========================================
+
+.. currentmodule:: grapa.datatypes.graphEQE_CSU
+
+.. autoclass:: GraphEQE_CSU
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphEQE_CSU.isFileReadable
+       ~GraphEQE_CSU.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphEQE_CSU.AXISLABELS
+      ~GraphEQE_CSU.FILEIO_GRAPHTYPE
+   
+   

@@ -1,0 +1,36 @@
+grapa.curve\_subplot.Curve\_Subplot
+===================================
+
+.. currentmodule:: grapa.curve_subplot
+
+.. autoclass:: Curve_Subplot
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Curve_Subplot.__init__
+       ~Curve_Subplot.funcListGUI
+       ~Curve_Subplot.print_help
+       ~Curve_Subplot.update_spa_figsize_abs
+       ~Curve_Subplot.update_spu
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Curve_Subplot.CURVE
+      ~Curve_Subplot.SPUKEYS
+   
+   

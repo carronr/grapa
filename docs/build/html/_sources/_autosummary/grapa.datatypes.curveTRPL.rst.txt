@@ -1,0 +1,43 @@
+grapa.datatypes.curveTRPL
+=========================
+
+.. automodule:: grapa.datatypes.curveTRPL
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      bin_data
+      differential_lifetime
+      find_onset
+      fit_exponentials
+      integrate
+      spline
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveTRPL
+   
+   
+
+   
+   
+   
+
+
+

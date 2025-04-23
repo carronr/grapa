@@ -1,0 +1,43 @@
+grapa.scripts
+=============
+
+.. automodule:: grapa.scripts
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      script_JVSummaryToBoxPlots
+   
+      script_correlations
+   
+      script_processCVCf
+   
+      script_processCVfT
+   
+      script_processJV
+   
+      script_processJscVoc
+

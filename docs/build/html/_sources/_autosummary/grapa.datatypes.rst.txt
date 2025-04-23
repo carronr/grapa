@@ -1,0 +1,103 @@
+grapa.datatypes
+===============
+
+.. automodule:: grapa.datatypes
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      curveArrhenius
+   
+      curveCV
+   
+      curveCf
+   
+      curveEQE
+   
+      curveJV
+   
+      curveJscVoc
+   
+      curveMCA
+   
+      curveMath
+   
+      curveSIMS
+   
+      curveSpectrum
+   
+      curveTRPL
+   
+      curveXRD
+   
+      graphCV
+   
+      graphCf
+   
+      graphEQE
+   
+      graphEQE_CSU
+   
+      graphJV
+   
+      graphJVDarkIllum
+   
+      graphJV_Ossila
+   
+      graphJV_Wavelabs
+   
+      graphMBE_TinyTusker
+   
+      graphMBElog
+   
+      graphMCA
+   
+      graphMCAfit
+   
+      graphPAIOS
+   
+      graphPGZ
+   
+      graphPLQY
+   
+      graphSIMS
+   
+      graphSPE
+   
+      graphScaps
+   
+      graphSpectrum
+   
+      graphSquidAdmiral
+   
+      graphTRPL
+   
+      graphXLS
+   
+      graphXML
+   
+      graphXPS
+

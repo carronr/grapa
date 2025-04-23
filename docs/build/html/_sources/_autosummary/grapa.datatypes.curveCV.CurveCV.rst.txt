@@ -1,0 +1,53 @@
+grapa.datatypes.curveCV.CurveCV
+===============================
+
+.. currentmodule:: grapa.datatypes.curveCV
+
+.. autoclass:: CurveCV
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveCV.CurveCV_0V
+       ~CurveCV.CurveCV_fitVbiN
+       ~CurveCV.CurveCV_fitVbiN_smart
+       ~CurveCV.__init__
+       ~CurveCV.alterListGUI
+       ~CurveCV.fit_MottSchottky
+       ~CurveCV.funcListGUI
+       ~CurveCV.func_MottSchottky
+       ~CurveCV.getArea
+       ~CurveCV.getEpsR
+       ~CurveCV.setArea
+       ~CurveCV.setEpsR
+       ~CurveCV.smartVlim_MottSchottky
+       ~CurveCV.x_CVdepth_nm
+       ~CurveCV.y_CV_Napparent
+       ~CurveCV.y_ym2
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveCV.AXISLABELS_X
+      ~CurveCV.AXISLABELS_Y
+      ~CurveCV.CST_MottSchottky_Vlim_adaptative
+      ~CurveCV.CST_MottSchottky_Vlim_def
+      ~CurveCV.CST_epsilonR
+      ~CurveCV.CURVE
+      ~CurveCV.FORMAT_AUTOLABEL
+      ~CurveCV.UNIT_LOOKUP_Y
+   
+   

@@ -1,0 +1,6 @@
+grapa.utils.graphIO.export\_xml
+===============================
+
+.. currentmodule:: grapa.utils.graphIO
+
+.. autofunction:: export_xml

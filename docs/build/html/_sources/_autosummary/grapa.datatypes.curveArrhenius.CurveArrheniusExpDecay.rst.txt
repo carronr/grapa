@@ -1,0 +1,43 @@
+grapa.datatypes.curveArrhenius.CurveArrheniusExpDecay
+=====================================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrheniusExpDecay
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrheniusExpDecay.BUTTONFitLabel
+       ~CurveArrheniusExpDecay.BUTTONFitROI
+       ~CurveArrheniusExpDecay.alterListGUIspecific
+       ~CurveArrheniusExpDecay.func_Arrhenius
+       ~CurveArrheniusExpDecay.get_help
+       ~CurveArrheniusExpDecay.popt
+       ~CurveArrheniusExpDecay.x_1000overK
+       ~CurveArrheniusExpDecay.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrheniusExpDecay.attr
+      ~CurveArrheniusExpDecay.dataLabel
+      ~CurveArrheniusExpDecay.dataLabelArrhenius
+      ~CurveArrheniusExpDecay.name
+      ~CurveArrheniusExpDecay.poptLabel
+      ~CurveArrheniusExpDecay.switchModel
+   
+   

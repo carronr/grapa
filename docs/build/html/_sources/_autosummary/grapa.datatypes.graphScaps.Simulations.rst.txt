@@ -1,0 +1,32 @@
+grapa.datatypes.graphScaps.Simulations
+======================================
+
+.. currentmodule:: grapa.datatypes.graphScaps
+
+.. autoclass:: Simulations
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Simulations.__init__
+       ~Simulations.as_graph
+       ~Simulations.current_data_attrs
+       ~Simulations.current_is_empty
+       ~Simulations.new_simulation
+       ~Simulations.parse_data
+       ~Simulations.parse_file
+       ~Simulations.parse_paragraph
+   
+   
+
+   
+   
+   

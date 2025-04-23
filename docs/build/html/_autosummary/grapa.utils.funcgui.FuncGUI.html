@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.utils.funcgui.FuncGUI &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.utils.funcgui.FuncListGUIHelper" href="grapa.utils.funcgui.FuncListGUIHelper.html" />
+    <link rel="prev" title="grapa.utils.funcgui.AlterListItem" href="grapa.utils.funcgui.AlterListItem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.funcgui.AlterListItem.html">grapa.utils.funcgui.AlterListItem</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.utils.funcgui.FuncGUI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.funcgui.FuncListGUIHelper.html">grapa.utils.funcgui.FuncListGUIHelper</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.graphIO.html">grapa.utils.graphIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.metadata.html">grapa.utils.metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph_aux.html">grapa.utils.plot_graph_aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.string_manipulations.html">grapa.utils.string_manipulations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.utils.html">grapa.utils</a></li>
+          <li class="breadcrumb-item"><a href="grapa.utils.funcgui.html">grapa.utils.funcgui</a></li>
+      <li class="breadcrumb-item active">grapa.utils.funcgui.FuncGUI</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.utils.funcgui.FuncGUI.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-utils-funcgui-funcgui">
+<h1>grapa.utils.funcgui.FuncGUI<a class="headerlink" href="#grapa-utils-funcgui-funcgui" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.utils.funcgui.</span></span><span class="sig-name descname"><span class="pre">FuncGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textsave</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hiddenvars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tooltiptext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The GUI request from the displayed Curve a list of FuncGUI objects.
+Each FuncGUI objects contains a possible action the user can perform.
+The class FuncGUI rationalizes the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">currentCalc</span><span class="p">,</span>
+            <span class="s1">&#39;EQE current&#39;</span><span class="p">,</span>
+            <span class="p">[</span><span class="s1">&#39;ROI&#39;</span><span class="p">,</span> <span class="s1">&#39;interpolate&#39;</span><span class="p">,</span> <span class="s1">&#39;spectrum&#39;</span><span class="p">],</span>
+            <span class="p">[[</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">())],</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">fnames</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="p">{},</span>
+            <span class="p">[{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">},</span>
+             <span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="s1">&#39;Combobox&#39;</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;quadratic&#39;</span><span class="p">]},</span>
+             <span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="s1">&#39;Combobox&#39;</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="n">fnames</span><span class="p">}]])</span>
+</pre></div>
+</div>
+<p>Becomes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">line</span> <span class="o">=</span> <span class="n">FuncGUI</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentCalc</span><span class="p">,</span> <span class="s1">&#39;EQE current&#39;</span><span class="p">)</span>
+<span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;ROI&#39;</span><span class="p">,</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">())],</span> <span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">})</span>
+<span class="n">line</span><span class="o">.</span><span class="n">appendcbb</span><span class="p">(</span><span class="s1">&#39;interpolate&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;quadratic&#39;</span><span class="p">],</span> <span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">})</span>
+<span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;Frame&quot;</span><span class="p">)</span>  <span class="c1"># new line</span>
+<span class="n">line</span><span class="o">.</span><span class="n">appendcbb</span><span class="p">(</span><span class="s1">&#39;spectrum&#39;</span><span class="p">,</span> <span class="n">fnames</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fnames</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">})</span>
+<span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">textsave</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hiddenvars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tooltiptext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.__init__" title="Link to this definition"></a></dt>
+<dd><p>In principe, create FuncGUI with func, textsave, hiddenvars,
+then create fields with .append() one after the other
+One may also do FuncGUI(None, None).initLegacy(oldformat)</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.__init__" title="grapa.utils.funcgui.FuncGUI.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(func, textsave[, hiddenvars, ...])</p></td>
+<td><p>In principe, create FuncGUI with func, textsave, hiddenvars, then create fields with .append() one after the other One may also do FuncGUI(None, None).initLegacy(oldformat)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.append" title="grapa.utils.funcgui.FuncGUI.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(label, value[, widgetclass, bind, ...])</p></td>
+<td><p>Examples</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_newline</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.appendcbb" title="grapa.utils.funcgui.FuncGUI.appendcbb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">appendcbb</span></code></a>(label, value, values[, bind, ...])</p></td>
+<td><p>Notation shortcut to .append(), append a Combobox: .appendcbb(&quot;my value&quot;, &quot;a&quot;, [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.func_docstring_to_text" title="grapa.utils.funcgui.FuncGUI.func_docstring_to_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_docstring_to_text</span></code></a>()</p></td>
+<td><p>Returns str lines, with slight reformatting from function docstring</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_legacy</span></code>(line)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.is_similar" title="grapa.utils.funcgui.FuncGUI.is_similar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_similar</span></code></a>(other)</p></td>
+<td><p>Determines if 2 FuncGUI objects are similar Checks for function name, textsave, hidden vars, fields labels Does NOT check for field values - user force same value for all</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.move_item" title="grapa.utils.funcgui.FuncGUI.move_item"><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_item</span></code></a>(old_idx, new_idx)</p></td>
+<td><p>Use-case: a posteriori append a field, want to place it not at last position.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt" title="grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_funcdocstring_alt</span></code></a>(documentation)</p></td>
+<td><p>for use in printHelp</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_hiddenvars</span></code>(hiddenvars)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_tooltiptext</span></code>(tooltiptext)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widgetclass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Entry'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.append" title="Link to this definition"></a></dt>
+<dd><p>Examples</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> – ‘my choice’</p></li>
+<li><p><strong>value</strong> – ‘b’</p></li>
+<li><p><strong>widgetclass</strong> – ‘Entry’, ‘Combobox’… a tk widget (or other library if
+implemented).
+Frame: new line.
+None: to not show in the GUI and not provide a value (e.g. display label)</p></li>
+<li><p><strong>keyword</strong> – for the parameter to be submitted as keyword variable</p></li>
+<li><p><strong>bind</strong> – <p>a (validation) function on the widget value. Examples:</p>
+<ul>
+<li><p>’beforespace’: &lt;&lt;ComboboxSelected&gt;&gt; remove all before first space</p></li>
+<li><p>’previouswidgettogglereadonly’: toggle previous widget readonly state</p></li>
+<li><p>other: &lt;&lt;ComboboxSelected&gt;&gt; call the function provided as ‘bind’</p></li>
+</ul>
+</p></li>
+<li><p><strong>options</strong> – {‘width’: 8, ‘values’: [‘a’, ‘b’, ‘c’]}</p></li>
+<li><p><strong>kwargs</strong> – additional keywords will be added into options</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.appendcbb">
+<span class="sig-name descname"><span class="pre">appendcbb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.appendcbb" title="Link to this definition"></a></dt>
+<dd><p>Notation shortcut to .append(), append a Combobox:
+.appendcbb(“my value”, “a”, [“a”, “b”, “c”])</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.func_docstring_to_text">
+<span class="sig-name descname"><span class="pre">func_docstring_to_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.func_docstring_to_text" title="Link to this definition"></a></dt>
+<dd><p>Returns str lines, with slight reformatting from function docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.is_similar">
+<span class="sig-name descname"><span class="pre">is_similar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.is_similar" title="Link to this definition"></a></dt>
+<dd><p>Determines if 2 FuncGUI objects are similar
+Checks for function name, textsave, hidden vars, fields labels
+Does NOT check for field values - user force same value for all</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.move_item">
+<span class="sig-name descname"><span class="pre">move_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.move_item" title="Link to this definition"></a></dt>
+<dd><p>Use-case: a posteriori append a field, want to place it not at last position.
+For example, CurveMCA fit which line are prepared in base class of FitHandler
+Beware index if moving after old_idx.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt">
+<span class="sig-name descname"><span class="pre">set_funcdocstring_alt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">documentation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt" title="Link to this definition"></a></dt>
+<dd><p>for use in printHelp</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.utils.funcgui.AlterListItem.html" class="btn btn-neutral float-left" title="grapa.utils.funcgui.AlterListItem" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.utils.funcgui.FuncListGUIHelper.html" class="btn btn-neutral float-right" title="grapa.utils.funcgui.FuncListGUIHelper" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

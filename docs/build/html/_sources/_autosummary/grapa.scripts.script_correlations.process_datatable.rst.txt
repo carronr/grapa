@@ -1,0 +1,6 @@
+grapa.scripts.script\_correlations.process\_datatable
+=====================================================
+
+.. currentmodule:: grapa.scripts.script_correlations
+
+.. autofunction:: process_datatable

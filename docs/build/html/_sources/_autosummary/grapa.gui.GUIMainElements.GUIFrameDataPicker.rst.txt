@@ -1,0 +1,32 @@
+grapa.gui.GUIMainElements.GUIFrameDataPicker
+============================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameDataPicker
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameDataPicker.__init__
+       ~GUIFrameDataPicker.create_textbox
+       ~GUIFrameDataPicker.event_mouse_motion
+       ~GUIFrameDataPicker.get_x_y_attrupd
+       ~GUIFrameDataPicker.save_point
+       ~GUIFrameDataPicker.select_curve
+       ~GUIFrameDataPicker.update_crosshair
+       ~GUIFrameDataPicker.update_ui
+   
+   
+
+   
+   
+   

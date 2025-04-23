@@ -1,0 +1,31 @@
+grapa.datatypes.graphSpectrum.GraphSpectrumSpectraSuite
+=======================================================
+
+.. currentmodule:: grapa.datatypes.graphSpectrum
+
+.. autoclass:: GraphSpectrumSpectraSuite
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphSpectrumSpectraSuite.isFileReadable
+       ~GraphSpectrumSpectraSuite.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

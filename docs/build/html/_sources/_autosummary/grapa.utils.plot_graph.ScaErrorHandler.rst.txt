@@ -1,0 +1,25 @@
+grapa.utils.plot\_graph.ScaErrorHandler
+=======================================
+
+.. currentmodule:: grapa.utils.plot_graph
+
+.. autoclass:: ScaErrorHandler
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ScaErrorHandler.attempt
+   
+   
+
+   
+   
+   

@@ -1,0 +1,32 @@
+grapa.datatypes.graphJV\_Ossila.GraphJV\_Ossila
+===============================================
+
+.. currentmodule:: grapa.datatypes.graphJV_Ossila
+
+.. autoclass:: GraphJV_Ossila
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphJV_Ossila.isFileReadable
+       ~GraphJV_Ossila.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphJV_Ossila.FILEIO_GRAPHTYPE
+   
+   

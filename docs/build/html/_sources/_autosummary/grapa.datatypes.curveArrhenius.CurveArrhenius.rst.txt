@@ -1,0 +1,46 @@
+grapa.datatypes.curveArrhenius.CurveArrhenius
+=============================================
+
+.. currentmodule:: grapa.datatypes.curveArrhenius
+
+.. autoclass:: CurveArrhenius
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveArrhenius.BUTTONFitLabel
+       ~CurveArrhenius.BUTTONFitROI
+       ~CurveArrhenius.CurveArrhenius_fit
+       ~CurveArrhenius.__init__
+       ~CurveArrhenius.alterListGUI
+       ~CurveArrhenius.classNameGUI
+       ~CurveArrhenius.fit_Arrhenius
+       ~CurveArrhenius.funcListGUI
+       ~CurveArrhenius.func_Arrhenius
+       ~CurveArrhenius.getVariant
+       ~CurveArrhenius.print_help
+       ~CurveArrhenius.resampleX
+       ~CurveArrhenius.setVariant
+       ~CurveArrhenius.x_1000overK
+       ~CurveArrhenius.y_Arrhenius
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveArrhenius.CURVE
+      ~CurveArrhenius.k_eVoverK
+   
+   

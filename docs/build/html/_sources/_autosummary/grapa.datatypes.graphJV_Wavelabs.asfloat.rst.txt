@@ -1,0 +1,6 @@
+grapa.datatypes.graphJV\_Wavelabs.asfloat
+=========================================
+
+.. currentmodule:: grapa.datatypes.graphJV_Wavelabs
+
+.. autofunction:: asfloat

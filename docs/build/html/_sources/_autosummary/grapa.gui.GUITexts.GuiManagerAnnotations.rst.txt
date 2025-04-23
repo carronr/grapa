@@ -1,0 +1,28 @@
+grapa.gui.GUITexts.GuiManagerAnnotations
+========================================
+
+.. currentmodule:: grapa.gui.GUITexts
+
+.. autoclass:: GuiManagerAnnotations
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GuiManagerAnnotations.__init__
+       ~GuiManagerAnnotations.close_windows
+       ~GuiManagerAnnotations.go
+       ~GuiManagerAnnotations.refresh_ui
+   
+   
+
+   
+   
+   

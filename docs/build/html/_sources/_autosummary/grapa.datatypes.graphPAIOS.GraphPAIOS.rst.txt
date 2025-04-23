@@ -1,0 +1,32 @@
+grapa.datatypes.graphPAIOS.GraphPAIOS
+=====================================
+
+.. currentmodule:: grapa.datatypes.graphPAIOS
+
+.. autoclass:: GraphPAIOS
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphPAIOS.isFileReadable
+       ~GraphPAIOS.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphPAIOS.FILEIO_GRAPHTYPE
+   
+   

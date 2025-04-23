@@ -1,0 +1,43 @@
+grapa.utils.curve\_subclasses\_utils.FitHandler
+===============================================
+
+.. currentmodule:: grapa.utils.curve_subclasses_utils
+
+.. autoclass:: FitHandler
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FitHandler.__init__
+       ~FitHandler.fit
+       ~FitHandler.fit_explicit
+       ~FitHandler.fit_preset
+       ~FitHandler.fit_resamplex
+       ~FitHandler.funcListGUI
+       ~FitHandler.funcListGUI_ifnewline
+       ~FitHandler.funcListGUI_isafit
+       ~FitHandler.funcListGUI_notafit_choicepresets
+       ~FitHandler.funcListGUI_notafit_preset
+       ~FitHandler.funcListGUI_notafit_whichones
+       ~FitHandler.get_fitfunction
+       ~FitHandler.get_preset
+       ~FitHandler.get_presets
+       ~FitHandler.p0_interpret
+       ~FitHandler.set_guishowfitfunc
+       ~FitHandler.set_typecurvefit
+       ~FitHandler.updateFitParam_after
+       ~FitHandler.updateFitParam_before
+   
+   
+
+   
+   
+   

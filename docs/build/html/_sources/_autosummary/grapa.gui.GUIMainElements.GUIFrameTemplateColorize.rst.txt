@@ -1,0 +1,31 @@
+grapa.gui.GUIMainElements.GUIFrameTemplateColorize
+==================================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameTemplateColorize
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameTemplateColorize.__init__
+       ~GUIFrameTemplateColorize.colorize_graph
+       ~GUIFrameTemplateColorize.conditional_format
+       ~GUIFrameTemplateColorize.load_template
+       ~GUIFrameTemplateColorize.save_template
+       ~GUIFrameTemplateColorize.set_bgcolor_from_entry
+       ~GUIFrameTemplateColorize.update_ui
+   
+   
+
+   
+   
+   

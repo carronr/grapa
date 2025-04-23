@@ -1,0 +1,32 @@
+grapa.datatypes.graphXLS.GraphXLS
+=================================
+
+.. currentmodule:: grapa.datatypes.graphXLS
+
+.. autoclass:: GraphXLS
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphXLS.isFileReadable
+       ~GraphXLS.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphXLS.FILEIO_GRAPHTYPE
+   
+   

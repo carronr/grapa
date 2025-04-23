@@ -1,0 +1,31 @@
+grapa.datatypes.graphJV\_Ossila
+===============================
+
+.. automodule:: grapa.datatypes.graphJV_Ossila
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphJV_Ossila
+   
+   
+
+   
+   
+   
+
+
+

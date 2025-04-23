@@ -1,0 +1,29 @@
+grapa.gui.GUIMainElements.GUIFrameTree
+======================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameTree
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameTree.__init__
+       ~GUIFrameTree.forget_selected_curves
+       ~GUIFrameTree.get_tree_active_curve
+       ~GUIFrameTree.store_selected_curves
+       ~GUIFrameTree.update_ui
+   
+   
+
+   
+   
+   

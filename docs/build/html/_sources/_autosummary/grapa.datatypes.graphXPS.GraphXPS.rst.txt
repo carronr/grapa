@@ -1,0 +1,33 @@
+grapa.datatypes.graphXPS.GraphXPS
+=================================
+
+.. currentmodule:: grapa.datatypes.graphXPS
+
+.. autoclass:: GraphXPS
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphXPS.isFileReadable
+       ~GraphXPS.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphXPS.AXISLABELS
+      ~GraphXPS.FILEIO_GRAPHTYPE
+   
+   

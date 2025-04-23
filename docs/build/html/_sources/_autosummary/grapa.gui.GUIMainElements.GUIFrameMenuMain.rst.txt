@@ -1,0 +1,45 @@
+grapa.gui.GUIMainElements.GUIFrameMenuMain
+==========================================
+
+.. currentmodule:: grapa.gui.GUIMainElements
+
+.. autoclass:: GUIFrameMenuMain
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameMenuMain.__init__
+       ~GUIFrameMenuMain.if_print_commands
+       ~GUIFrameMenuMain.insert_curve_empty
+       ~GUIFrameMenuMain.merge_clipboard
+       ~GUIFrameMenuMain.merge_file
+       ~GUIFrameMenuMain.open_clipboard
+       ~GUIFrameMenuMain.open_file
+       ~GUIFrameMenuMain.open_folder
+       ~GUIFrameMenuMain.quit_main
+       ~GUIFrameMenuMain.save_graph
+       ~GUIFrameMenuMain.save_graph_as
+       ~GUIFrameMenuMain.save_image_to_clipboard
+       ~GUIFrameMenuMain.script_cf
+       ~GUIFrameMenuMain.script_correlations
+       ~GUIFrameMenuMain.script_cv
+       ~GUIFrameMenuMain.script_cvft
+       ~GUIFrameMenuMain.script_fit_jv_all
+       ~GUIFrameMenuMain.script_fit_jv_combined
+       ~GUIFrameMenuMain.script_jsc_voc
+       ~GUIFrameMenuMain.script_jv_boxplots
+       ~GUIFrameMenuMain.script_jv_sample_maps
+   
+   
+
+   
+   
+   

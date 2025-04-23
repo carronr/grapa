@@ -1,0 +1,29 @@
+grapa.colorscale.Colorscale
+===========================
+
+.. currentmodule:: grapa.colorscale
+
+.. autoclass:: Colorscale
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Colorscale.__init__
+       ~Colorscale.cmap
+       ~Colorscale.get_colorscale
+       ~Colorscale.inverse_scale
+       ~Colorscale.values_to_color
+   
+   
+
+   
+   
+   

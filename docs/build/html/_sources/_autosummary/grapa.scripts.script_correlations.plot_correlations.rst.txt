@@ -1,0 +1,6 @@
+grapa.scripts.script\_correlations.plot\_correlations
+=====================================================
+
+.. currentmodule:: grapa.scripts.script_correlations
+
+.. autofunction:: plot_correlations

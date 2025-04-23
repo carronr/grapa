@@ -1,0 +1,33 @@
+grapa.datatypes.graphMCA.GraphMCA
+=================================
+
+.. currentmodule:: grapa.datatypes.graphMCA
+
+.. autoclass:: GraphMCA
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphMCA.isFileReadable
+       ~GraphMCA.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphMCA.AXISLABELS
+      ~GraphMCA.FILEIO_GRAPHTYPE
+   
+   

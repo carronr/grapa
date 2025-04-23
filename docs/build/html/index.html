@@ -1,0 +1,206 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa documentation &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=a53e335f"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="grapa" href="_autosummary/grapa.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            grapa
+              <img src="_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "#">Welcome</a></li>
+   </ul>
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="_autosummary/grapa.html">grapa</a></li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">grapa documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-documentation">
+<h1>grapa documentation<a class="headerlink" href="#grapa-documentation" title="Link to this heading"></a></h1>
+</section>
+<section id="grapa">
+<h1>Grapa<a class="headerlink" href="#grapa" title="Link to this heading"></a></h1>
+<p>DOI: 10.5281/zenodo.1164571</p>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Link to this heading"></a></h2>
+<p>Grapa is a python package providing a graphical interface and the
+underlying code dedicated to the visualization, analysis and
+presentation of scientific data, with a focus on photovoltaic research.</p>
+<p>A wide range of data formats can loaded by default. The produced graphs
+are saved both as graphical objects and as text files for later
+modifications.</p>
+<p>The data analysis functions currently focus on photovoltaics and
+semiconductor material science. Advanced analysis or fitting functions
+are notably provided for the following characterization techniques: EQE,
+JV, C-V, C-f, TRPL, SIMS, reflectance, transmittance (not comprehensive
+list).</p>
+<p>The software has extended capabilities for advanced plotting including
+subplots and insets, and can be used for creating high-quality figures
+for scientific publications.</p>
+<p>Last, the user can add to the software and to the graphical interface
+his own specific data loading functions as well new data types and
+analysis functions, with no modification of the existing code.</p>
+<p>Grapa stands for “GRAphing and Photovoltaics Analysis”.</p>
+<p>Cheers!</p>
+</section>
+<section id="features-overview">
+<h2>Features overview<a class="headerlink" href="#features-overview" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Open and merge a wide range of experimental data. Data import
+possible from clipboard.</p></li>
+<li><p>Graphical data presentation and graph customisation.</p></li>
+<li><p>Graph export in various file formats with user-defined dpi.
+Additionally create a .txt file containing the raw data for later
+modifications.</p></li>
+<li><p>The supported image formats are the one supported by the savefig
+function of matplotlib. .emf is also supported, provided a path to an
+inkscape executable is provided in the config.txt file.</p></li>
+<li><p>Drop-down menu to switch between data-relevant views (e.g. log-view
+for JV data, Tauc plot for EQE)</p></li>
+<li><p>Drop-down menu to switch between linear or logarithmic data
+visualisation.</p></li>
+<li><p>A data picker allows selecting and storing chosen data points.</p></li>
+<li><p>Can colorize a graph using color gradients.</p></li>
+<li><p>Some data types can be fitted. The parameters of the fitted curves
+can be modified afterwards.</p></li>
+<li><p>Data can be loaded from other files or from clipboard, then converted
+to the desired data type to benefit from data visualisation and
+processing and fitting options.</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>There are several options to install grapa. The easiest is certainly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">grapa</span>
+</pre></div>
+</div>
+<p>Alternatively, the source can be retrieved from the development page
+on github (<a class="reference external" href="https://github.com/carronr/">https://github.com/carronr/</a><a class="reference internal" href="#grapa">grapa</a>). Download the latest
+release and place its content in a folder named “grapa” somewhere on
+your hard drive, and can be run with your favorite python distribution.</p>
+<p>The software graphical user interface GUI can be started by executing
+the following lines:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">grapa</span>
+<span class="n">grapa</span><span class="o">.</span><span class="n">grapa</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Grapa can also be used in scripts. Just above the console, a
+checkbox “Commands in console” should help you to get started.</p>
+<p>Grapa is developed using python 3.13 and matplotlib 3.10, and should be
+backwards-compatible down to python 3.4 and matplotlib 1.5.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>MIT License</p>
+</section>
+<section id="questions">
+<h2>Questions?<a class="headerlink" href="#questions" title="Link to this heading"></a></h2>
+<p>See manual.pdf in folder /manual</p>
+<p>Author: Romain Carron (Empa, Laboratory for Thin Films and
+Photovoltaics)</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/grapa.html#module-grapa" title="grapa"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grapa</span></code></a></p></td>
+<td><p>Grapa</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="_autosummary/grapa.html" class="btn btn-neutral float-right" title="grapa" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.gui.widgets_graphmanager.GraphsTabManager &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.gui.widgets_tooltip" href="grapa.gui.widgets_tooltip.html" />
+    <link rel="prev" title="grapa.gui.widgets_graphmanager.GraphHandler" href="grapa.gui.widgets_graphmanager.GraphHandler.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.gui.html">grapa.gui</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.GUIMainElements.html">grapa.gui.GUIMainElements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.GUITexts.html">grapa.gui.GUITexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.GUIdataEditor.html">grapa.gui.GUIdataEditor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.interface_openbis.html">grapa.gui.interface_openbis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.observable.html">grapa.gui.observable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_custom.html">grapa.gui.widgets_custom</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.gui.widgets_graphmanager.html">grapa.gui.widgets_graphmanager</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.test_all.html">grapa.gui.widgets_graphmanager.test_all</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.CustomNotebook.html">grapa.gui.widgets_graphmanager.CustomNotebook</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphHandler.html">grapa.gui.widgets_graphmanager.GraphHandler</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.gui.widgets_graphmanager.GraphsTabManager</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_tooltip.html">grapa.gui.widgets_tooltip</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.gui.html">grapa.gui</a></li>
+          <li class="breadcrumb-item"><a href="grapa.gui.widgets_graphmanager.html">grapa.gui.widgets_graphmanager</a></li>
+      <li class="breadcrumb-item active">grapa.gui.widgets_graphmanager.GraphsTabManager</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.gui.widgets_graphmanager.GraphsTabManager.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-gui-widgets-graphmanager-graphstabmanager">
+<h1>grapa.gui.widgets_graphmanager.GraphsTabManager<a class="headerlink" href="#grapa-gui-widgets-graphmanager-graphstabmanager" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.gui.widgets_graphmanager.</span></span><span class="sig-name descname"><span class="pre">GraphsTabManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defdict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Combines a ttk.Notebook with a list of items, 1 item per tab
+Ensures that the content of Notebook and list of items are synchronized
+._item and ._notebook should not be modified separately</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defdict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.__init__" title="Link to this definition"></a></dt>
+<dd><p>Create the GraphsTabHandler the same way you would create a
+ttk.Notebook
+defdict: default values to be provided to ._itemtype.DEFAULT_PROPDICT</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.__init__" title="grapa.gui.widgets_graphmanager.GraphsTabManager.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args[, defdict])</p></td>
+<td><p>Create the GraphsTabHandler the same way you would create a ttk.Notebook defdict: default values to be provided to ._itemtype.DEFAULT_PROPDICT</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.append_new" title="grapa.gui.widgets_graphmanager.GraphsTabManager.append_new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_new</span></code></a>(str_or_graph[, title, child, ...])</p></td>
+<td><p>Append new item into the internal notebook, by creating a GraphHandler item.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_child" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_child</span></code></a>()</p></td>
+<td><p>Returns current selected child (Frame)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_filename" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_filename</span></code></a>()</p></td>
+<td><p>Returns current selected filename</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_folder" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_folder</span></code></a>()</p></td>
+<td><p>Returns current selected folder</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_graph</span></code></a>()</p></td>
+<td><p>Returns current selected Graph</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_properties" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_properties</span></code></a>()</p></td>
+<td><p>Returns current selected propdict dict of properties</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_title" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_title</span></code></a>()</p></td>
+<td><p>Returns current selected title</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid</span></code>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pack</span></code>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.pop" title="grapa.gui.widgets_graphmanager.GraphsTabManager.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a>([idx])</p></td>
+<td><p>Removes an element from both tab and item list.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.register" title="grapa.gui.widgets_graphmanager.GraphsTabManager.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(func)</p></td>
+<td><p>Register callbacks for event &lt;&lt;NotebookTabChanged&gt;&gt;</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.select" title="grapa.gui.widgets_graphmanager.GraphsTabManager.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select</span></code></a>(idx)</p></td>
+<td><p>Select a given tab in the Notebook.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.update_current" title="grapa.gui.widgets_graphmanager.GraphsTabManager.update_current"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_current</span></code></a>([title, filename, folder, dpi])</p></td>
+<td><p>Update selected tab and corresponding information kwargs: etc.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.append_new">
+<span class="sig-name descname"><span class="pre">append_new</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str_or_graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.append_new" title="Link to this definition"></a></dt>
+<dd><p>Append new item into the internal notebook, by creating a GraphHandler item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>str_or_graph</strong> – can be a str or a Graph from which an item can be
+instanciated</p></li>
+<li><p><strong>title</strong> – (str) if title is None, its value will be guessed</p></li>
+<li><p><strong>child</strong> – if child is None, an empty Frame will be automatically created</p></li>
+<li><p><strong>filename</strong> – (str) in case cannot be retrieved from str_or_graph or a
+graph stemming from</p></li>
+<li><p><strong>folder</strong> – (str) same use-case as filename</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_child">
+<span class="sig-name descname"><span class="pre">get_child</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_child" title="Link to this definition"></a></dt>
+<dd><p>Returns current selected child (Frame)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_filename">
+<span class="sig-name descname"><span class="pre">get_filename</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_filename" title="Link to this definition"></a></dt>
+<dd><p>Returns current selected filename</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_folder">
+<span class="sig-name descname"><span class="pre">get_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_folder" title="Link to this definition"></a></dt>
+<dd><p>Returns current selected folder</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph">
+<span class="sig-name descname"><span class="pre">get_graph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph" title="Link to this definition"></a></dt>
+<dd><p>Returns current selected Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_properties">
+<span class="sig-name descname"><span class="pre">get_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_properties" title="Link to this definition"></a></dt>
+<dd><p>Returns current selected propdict dict of properties</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_title">
+<span class="sig-name descname"><span class="pre">get_title</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_title" title="Link to this definition"></a></dt>
+<dd><p>Returns current selected title</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.pop" title="Link to this definition"></a></dt>
+<dd><p>Removes an element from both tab and item list. If None, the selected
+tab is deleted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.register" title="Link to this definition"></a></dt>
+<dd><p>Register callbacks for event &lt;&lt;NotebookTabChanged&gt;&gt;</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.select" title="Link to this definition"></a></dt>
+<dd><p>Select a given tab in the Notebook. idx between 0 and len-1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.update_current">
+<span class="sig-name descname"><span class="pre">update_current</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.update_current" title="Link to this definition"></a></dt>
+<dd><p>Update selected tab and corresponding information
+kwargs: etc.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.gui.widgets_graphmanager.GraphHandler.html" class="btn btn-neutral float-left" title="grapa.gui.widgets_graphmanager.GraphHandler" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.gui.widgets_tooltip.html" class="btn btn-neutral float-right" title="grapa.gui.widgets_tooltip" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

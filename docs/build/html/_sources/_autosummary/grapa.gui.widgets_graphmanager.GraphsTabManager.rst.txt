@@ -1,0 +1,40 @@
+grapa.gui.widgets\_graphmanager.GraphsTabManager
+================================================
+
+.. currentmodule:: grapa.gui.widgets_graphmanager
+
+.. autoclass:: GraphsTabManager
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphsTabManager.__init__
+       ~GraphsTabManager.append_new
+       ~GraphsTabManager.get_child
+       ~GraphsTabManager.get_filename
+       ~GraphsTabManager.get_folder
+       ~GraphsTabManager.get_graph
+       ~GraphsTabManager.get_properties
+       ~GraphsTabManager.get_title
+       ~GraphsTabManager.grid
+       ~GraphsTabManager.index
+       ~GraphsTabManager.item
+       ~GraphsTabManager.pack
+       ~GraphsTabManager.pop
+       ~GraphsTabManager.register
+       ~GraphsTabManager.select
+       ~GraphsTabManager.update_current
+   
+   
+
+   
+   
+   

@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.GUI.Application &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.colorscale" href="grapa.colorscale.html" />
+    <link rel="prev" title="grapa.GUI.build_ui" href="grapa.GUI.build_ui.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.GUI.build_ui.html">grapa.GUI.build_ui</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.GUI.Application</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#grapa.GUI.Application"><code class="docutils literal notranslate"><span class="pre">Application</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.guiapp.html">grapa.GUI</a></li>
+      <li class="breadcrumb-item active">grapa.GUI.Application</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.GUI.Application.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-gui-application">
+<h1>grapa.GUI.Application<a class="headerlink" href="#grapa-gui-application" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.GUI.Application">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.GUI.</span></span><span class="sig-name descname"><span class="pre">Application</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></p>
+<p>Main Frame for the GUI</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.__init__" title="Link to this definition"></a></dt>
+<dd><p>Construct a frame widget with the parent MASTER.</p>
+<p>Valid resource names: background, bd, bg, borderwidth, class,
+colormap, container, cursor, height, highlightbackground,
+highlightcolor, highlightthickness, relief, takefocus, visual, width.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.__init__" title="grapa.GUI.Application.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(master)</p></td>
+<td><p>Construct a frame widget with the parent MASTER.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.args_to_str" title="grapa.GUI.Application.args_to_str"><code class="xref py py-obj docutils literal notranslate"><span class="pre">args_to_str</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Format args and kwargs for printing commands in the console</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.blink_widget" title="grapa.GUI.Application.blink_widget"><code class="xref py py-obj docutils literal notranslate"><span class="pre">blink_widget</span></code></a>(widget, niter[, delay, ...])</p></td>
+<td><p>Make a widget blink a few times (alternating background color)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.call_curve_method" title="grapa.GUI.Application.call_curve_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">call_curve_method</span></code></a>(curve, method, *args, **kwargs)</p></td>
+<td><p>Execute method on active graph[curve], with args and kwargs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.call_graph_method" title="grapa.GUI.Application.call_graph_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">call_graph_method</span></code></a>(method, *args, **kwargs)</p></td>
+<td><p>Execute method on currently active graph, with args and kwargs</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.callback_tab_changed" title="grapa.GUI.Application.callback_tab_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_tab_changed</span></code></a>(*_args, **_kwargs)</p></td>
+<td><p>React to change in tab selection</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.disable_canvas_callbacks" title="grapa.GUI.Application.disable_canvas_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_canvas_callbacks</span></code></a>()</p></td>
+<td><p>Disable the callbacks on the canvas</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.enable_canvas_callbacks" title="grapa.GUI.Application.enable_canvas_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enable_canvas_callbacks</span></code></a>()</p></td>
+<td><p>Enable the callbacks on the canvas</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_ax" title="grapa.GUI.Application.get_ax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ax</span></code></a>()</p></td>
+<td><p>Return active ax</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_canvas" title="grapa.GUI.Application.get_canvas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_canvas</span></code></a>()</p></td>
+<td><p>Return the canvas</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_clipboard" title="grapa.GUI.Application.get_clipboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_clipboard</span></code></a>()</p></td>
+<td><p>returns content of clipboard</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_fig" title="grapa.GUI.Application.get_fig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fig</span></code></a>()</p></td>
+<td><p>Return the Figure</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_file" title="grapa.GUI.Application.get_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_file</span></code></a>([newvalue])</p></td>
+<td><p>Get current active file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_folder" title="grapa.GUI.Application.get_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_folder</span></code></a>([newvalue])</p></td>
+<td><p>Get current active folder</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_frame_graph" title="grapa.GUI.Application.get_frame_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame_graph</span></code></a>()</p></td>
+<td><p>Return the Frame containg the graph</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_frame_options" title="grapa.GUI.Application.get_frame_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame_options</span></code></a>()</p></td>
+<td><p>Return the Frame Options</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_selected_curves" title="grapa.GUI.Application.get_selected_curves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_selected_curves</span></code></a>([multiple])</p></td>
+<td><p>Returns a list of unique, sorted indices [idx0, idx1, ...]</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_tab_properties" title="grapa.GUI.Application.get_tab_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tab_properties</span></code></a>(**kwargs)</p></td>
+<td><p>Get properties of current active tab.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.get_tabs" title="grapa.GUI.Application.get_tabs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tabs</span></code></a>()</p></td>
+<td><p>Returns the tabs widget</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.graph" title="grapa.GUI.Application.graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graph</span></code></a>([newgraph])</p></td>
+<td><p>Get current Graph newgraph: to change current Graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.if_print_commands" title="grapa.GUI.Application.if_print_commands"><code class="xref py py-obj docutils literal notranslate"><span class="pre">if_print_commands</span></code></a>()</p></td>
+<td><p>Returns if the checkbox Print Commands is ticked</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.insert_curve_to_graph" title="grapa.GUI.Application.insert_curve_to_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert_curve_to_graph</span></code></a>(curve[, update_ui])</p></td>
+<td><p>Appends 1 Curve, or a list of Curves to the active graph</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.merge_graph" title="grapa.GUI.Application.merge_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_graph</span></code></a>(graph)</p></td>
+<td><p>graph can be a str (filename), or a Graph</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.open_file" title="grapa.GUI.Application.open_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">open_file</span></code></a>(file)</p></td>
+<td><p>Open a file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.print_last_release" title="grapa.GUI.Application.print_last_release"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_last_release</span></code></a>()</p></td>
+<td><p>Retrieve and prints the content of the last release, if recent enough</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.prompt_file" title="grapa.GUI.Application.prompt_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prompt_file</span></code></a>([initialdir, type_, multiple])</p></td>
+<td><p>Prompts for file open/save</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.prompt_folder" title="grapa.GUI.Application.prompt_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prompt_folder</span></code></a>([initialdir])</p></td>
+<td><p>Prompts for folder open</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.quit" title="grapa.GUI.Application.quit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quit</span></code></a>()</p></td>
+<td><p>Quits application</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.save_graph" title="grapa.GUI.Application.save_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_graph</span></code></a>(filesave[, fileext, ...])</p></td>
+<td><p>Saves Graph into a file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.set_auto_screendpi" title="grapa.GUI.Application.set_auto_screendpi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_auto_screendpi</span></code></a>()</p></td>
+<td><p>Sets the displayed DPI to automatic value</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.set_clipboard" title="grapa.GUI.Application.set_clipboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clipboard</span></code></a>(data)</p></td>
+<td><p>place new data in the clipboard</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.GUI.Application.store_selected_curves" title="grapa.GUI.Application.store_selected_curves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">store_selected_curves</span></code></a>()</p></td>
+<td><p>Keeps in memory the selected curves.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.GUI.Application.update_ui" title="grapa.GUI.Application.update_ui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ui</span></code></a>()</p></td>
+<td><p>Update/refresh the GUI</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_CANVAS_BACKGROUNDCOLOR</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SCREENDPI</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.args_to_str">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">args_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.args_to_str" title="Link to this definition"></a></dt>
+<dd><p>Format args and kwargs for printing commands in the console</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.blink_widget">
+<span class="sig-name descname"><span class="pre">blink_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">niter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'background'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.blink_widget" title="Link to this definition"></a></dt>
+<dd><p>Make a widget blink a few times (alternating background color)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.call_curve_method">
+<span class="sig-name descname"><span class="pre">call_curve_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.call_curve_method" title="Link to this definition"></a></dt>
+<dd><p>Execute method on active graph[curve], with args and kwargs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.call_graph_method">
+<span class="sig-name descname"><span class="pre">call_graph_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.call_graph_method" title="Link to this definition"></a></dt>
+<dd><p>Execute method on currently active graph, with args and kwargs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.callback_tab_changed">
+<span class="sig-name descname"><span class="pre">callback_tab_changed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.callback_tab_changed" title="Link to this definition"></a></dt>
+<dd><p>React to change in tab selection</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.disable_canvas_callbacks">
+<span class="sig-name descname"><span class="pre">disable_canvas_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.disable_canvas_callbacks" title="Link to this definition"></a></dt>
+<dd><p>Disable the callbacks on the canvas</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.enable_canvas_callbacks">
+<span class="sig-name descname"><span class="pre">enable_canvas_callbacks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.enable_canvas_callbacks" title="Link to this definition"></a></dt>
+<dd><p>Enable the callbacks on the canvas</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_ax">
+<span class="sig-name descname"><span class="pre">get_ax</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_ax" title="Link to this definition"></a></dt>
+<dd><p>Return active ax</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_canvas">
+<span class="sig-name descname"><span class="pre">get_canvas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_canvas" title="Link to this definition"></a></dt>
+<dd><p>Return the canvas</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_clipboard">
+<span class="sig-name descname"><span class="pre">get_clipboard</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_clipboard" title="Link to this definition"></a></dt>
+<dd><p>returns content of clipboard</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_fig">
+<span class="sig-name descname"><span class="pre">get_fig</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_fig" title="Link to this definition"></a></dt>
+<dd><p>Return the Figure</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_file">
+<span class="sig-name descname"><span class="pre">get_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_file" title="Link to this definition"></a></dt>
+<dd><p>Get current active file. Also updates folder and title</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newvalue</strong> – set newvalue for the current active file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_folder">
+<span class="sig-name descname"><span class="pre">get_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_folder" title="Link to this definition"></a></dt>
+<dd><p>Get current active folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newvalue</strong> – set newvalue for the current active folder</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_frame_graph">
+<span class="sig-name descname"><span class="pre">get_frame_graph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_frame_graph" title="Link to this definition"></a></dt>
+<dd><p>Return the Frame containg the graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_frame_options">
+<span class="sig-name descname"><span class="pre">get_frame_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_frame_options" title="Link to this definition"></a></dt>
+<dd><p>Return the Frame Options</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_selected_curves">
+<span class="sig-name descname"><span class="pre">get_selected_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_selected_curves" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of unique, sorted indices [idx0, idx1, …]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_tab_properties">
+<span class="sig-name descname"><span class="pre">get_tab_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_tab_properties" title="Link to this definition"></a></dt>
+<dd><p>Get properties of current active tab.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – updates the properties of current active tab</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.get_tabs">
+<span class="sig-name descname"><span class="pre">get_tabs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.get_tabs" title="Link to this definition"></a></dt>
+<dd><p>Returns the tabs widget</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.graph">
+<span class="sig-name descname"><span class="pre">graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newgraph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.graph" title="Link to this definition"></a></dt>
+<dd><p>Get current Graph
+newgraph: to change current Graph. Does NOT refresh interface</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.if_print_commands">
+<span class="sig-name descname"><span class="pre">if_print_commands</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.if_print_commands" title="Link to this definition"></a></dt>
+<dd><p>Returns if the checkbox Print Commands is ticked</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.insert_curve_to_graph">
+<span class="sig-name descname"><span class="pre">insert_curve_to_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_ui</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.insert_curve_to_graph" title="Link to this definition"></a></dt>
+<dd><p>Appends 1 Curve, or a list of Curves to the active graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.merge_graph">
+<span class="sig-name descname"><span class="pre">merge_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.merge_graph" title="Link to this definition"></a></dt>
+<dd><p>graph can be a str (filename), or a Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.open_file">
+<span class="sig-name descname"><span class="pre">open_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.open_file" title="Link to this definition"></a></dt>
+<dd><p>Open a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramfile<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a str, or a list of str to open multiple files, or a Graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.print_last_release">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">print_last_release</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.print_last_release" title="Link to this definition"></a></dt>
+<dd><p>Retrieve and prints the content of the last release, if recent enough</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.prompt_file">
+<span class="sig-name descname"><span class="pre">prompt_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'open'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.prompt_file" title="Link to this definition"></a></dt>
+<dd><p>Prompts for file open/save</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.prompt_folder">
+<span class="sig-name descname"><span class="pre">prompt_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.prompt_folder" title="Link to this definition"></a></dt>
+<dd><p>Prompts for folder open</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.quit">
+<span class="sig-name descname"><span class="pre">quit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.quit" title="Link to this definition"></a></dt>
+<dd><p>Quits application</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.save_graph">
+<span class="sig-name descname"><span class="pre">save_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_altered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.save_graph" title="Link to this definition"></a></dt>
+<dd><p>Saves Graph into a file. Separated plot() and export() calls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filesave</strong> – str, filename to save the graph</p></li>
+<li><p><strong>fileext</strong> – str, image data format (e.g. .png). If ‘’, retrieve preference.</p></li>
+<li><p><strong>save_altered</strong> – as per Graph.export(). Default False.</p></li>
+<li><p><strong>if_compact</strong> – as per Graph.export(). Default True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.set_auto_screendpi">
+<span class="sig-name descname"><span class="pre">set_auto_screendpi</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.set_auto_screendpi" title="Link to this definition"></a></dt>
+<dd><p>Sets the displayed DPI to automatic value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.set_clipboard">
+<span class="sig-name descname"><span class="pre">set_clipboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.set_clipboard" title="Link to this definition"></a></dt>
+<dd><p>place new data in the clipboard</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.store_selected_curves">
+<span class="sig-name descname"><span class="pre">store_selected_curves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.store_selected_curves" title="Link to this definition"></a></dt>
+<dd><p>Keeps in memory the selected curves. To be called in functions that
+will call update_ui(), before any action that may change the curves
+(esp. order, number, new Curves etc. Changes in attributes should be
+safe)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.GUI.Application.update_ui">
+<span class="sig-name descname"><span class="pre">update_ui</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.GUI.Application.update_ui" title="Link to this definition"></a></dt>
+<dd><p>Update/refresh the GUI</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.GUI.build_ui.html" class="btn btn-neutral float-left" title="grapa.GUI.build_ui" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.colorscale.html" class="btn btn-neutral float-right" title="grapa.colorscale" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

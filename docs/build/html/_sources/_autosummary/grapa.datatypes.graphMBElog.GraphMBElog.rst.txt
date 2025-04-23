@@ -1,0 +1,33 @@
+grapa.datatypes.graphMBElog.GraphMBElog
+=======================================
+
+.. currentmodule:: grapa.datatypes.graphMBElog
+
+.. autoclass:: GraphMBElog
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphMBElog.isFileReadable
+       ~GraphMBElog.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphMBElog.AXISLABELS
+      ~GraphMBElog.FILEIO_GRAPHTYPE
+   
+   

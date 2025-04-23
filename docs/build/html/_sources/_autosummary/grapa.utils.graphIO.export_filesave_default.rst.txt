@@ -1,0 +1,6 @@
+grapa.utils.graphIO.export\_filesave\_default
+=============================================
+
+.. currentmodule:: grapa.utils.graphIO
+
+.. autofunction:: export_filesave_default

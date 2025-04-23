@@ -1,0 +1,33 @@
+grapa.curve\_inset.Curve\_Inset
+===============================
+
+.. currentmodule:: grapa.curve_inset
+
+.. autoclass:: Curve_Inset
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Curve_Inset.__init__
+       ~Curve_Inset.funcListGUI
+       ~Curve_Inset.print_help
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Curve_Inset.CURVE
+   
+   

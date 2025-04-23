@@ -1,0 +1,80 @@
+grapa.graph.Graph
+=================
+
+.. currentmodule:: grapa.graph
+
+.. autoclass:: Graph
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Graph.__init__
+       ~Graph.alterListGUI
+       ~Graph.append
+       ~Graph.apply_template
+       ~Graph.attr
+       ~Graph.attr_pop
+       ~Graph.castCurve
+       ~Graph.colorize
+       ~Graph.config
+       ~Graph.config_all
+       ~Graph.curve
+       ~Graph.curve_delete
+       ~Graph.curve_duplicate
+       ~Graph.curve_move_to_index
+       ~Graph.curve_replace
+       ~Graph.curves
+       ~Graph.curves_reverse
+       ~Graph.curves_swap
+       ~Graph.deleteCurve
+       ~Graph.duplicateCurve
+       ~Graph.export
+       ~Graph.filenamewithpath
+       ~Graph.formatAxisLabel
+       ~Graph.getAttribute
+       ~Graph.getAttributes
+       ~Graph.getCurveData
+       ~Graph.get_alter
+       ~Graph.get_attributes
+       ~Graph.get_list_subclasses_parse
+       ~Graph.has_attr
+       ~Graph.iterCurves
+       ~Graph.length
+       ~Graph.merge
+       ~Graph.moveCurveToIndex
+       ~Graph.plot
+       ~Graph.replaceCurve
+       ~Graph.replace_labels
+       ~Graph.reset
+       ~Graph.reverseCurves
+       ~Graph.swapCurves
+       ~Graph.text_add
+       ~Graph.text_check_valid
+       ~Graph.text_remove
+       ~Graph.update
+       ~Graph.updateValuesDictkeys
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Graph.AXISLABELS
+      ~Graph.CONFIG_FILENAME_DEFAULT
+      ~Graph.CONFIG_FILES
+      ~Graph.DEFAULT
+      ~Graph.FIGSIZE_DEFAULT
+      ~Graph.FILEIO_DPI
+   
+   

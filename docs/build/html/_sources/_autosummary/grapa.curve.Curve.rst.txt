@@ -1,0 +1,88 @@
+grapa.curve.Curve
+=================
+
+.. currentmodule:: grapa.curve
+
+.. autoclass:: Curve
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Curve.__init__
+       ~Curve.alterListGUI
+       ~Curve.appendPoints
+       ~Curve.attr
+       ~Curve.attr_pop
+       ~Curve.castCurve
+       ~Curve.castCurveListGUI
+       ~Curve.classNameGUI
+       ~Curve.data_units
+       ~Curve.funcListGUI
+       ~Curve.getAttribute
+       ~Curve.getAttributes
+       ~Curve.getData
+       ~Curve.getDataCustomPickerXY
+       ~Curve.get_attributes
+       ~Curve.get_muloffset
+       ~Curve.has_attr
+       ~Curve.isHidden
+       ~Curve.is_attr_value_default
+       ~Curve.label_auto
+       ~Curve.print_help
+       ~Curve.print_help_func
+       ~Curve.selectData
+       ~Curve.setX
+       ~Curve.setY
+       ~Curve.shape
+       ~Curve.swapShowHide
+       ~Curve.update
+       ~Curve.updateFitParam
+       ~Curve.updateFitParamFormatPopt
+       ~Curve.updateValuesDictkeys
+       ~Curve.updateValuesDictkeysGraph
+       ~Curve.update_plotter_boxplot_addon
+       ~Curve.update_scatter_next_curves
+       ~Curve.visible
+       ~Curve.x
+       ~Curve.x_offsets
+       ~Curve.y
+       ~Curve.y_offsets
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Curve.ALTER_ABS
+      ~Curve.ALTER_ABS0
+      ~Curve.ALTER_LOG10ABS
+      ~Curve.ALTER_MCA_KEV
+      ~Curve.ALTER_NM_CM
+      ~Curve.ALTER_NM_EV
+      ~Curve.ALTER_NORMALIZED
+      ~Curve.ALTER_SIMS_DEPTH
+      ~Curve.ALTER_TAUC
+      ~Curve.ALTER_TAUCLN1MINUSEQE
+      ~Curve.ALTER_X
+      ~Curve.ALTER_Y
+      ~Curve.AXISLABELS_X
+      ~Curve.AXISLABELS_Y
+      ~Curve.CURVE
+      ~Curve.KEY_AXISLABEL_X
+      ~Curve.KEY_AXISLABEL_Y
+      ~Curve.LINESTYLEHIDE
+      ~Curve.OFFSET_0MAX
+      ~Curve.OFFSET_MINMAX
+   
+   

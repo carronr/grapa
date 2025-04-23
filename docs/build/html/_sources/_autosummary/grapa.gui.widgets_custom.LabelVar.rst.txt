@@ -1,0 +1,27 @@
+grapa.gui.widgets\_custom.LabelVar
+==================================
+
+.. currentmodule:: grapa.gui.widgets_custom
+
+.. autoclass:: LabelVar
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~LabelVar.__init__
+       ~LabelVar.get
+       ~LabelVar.set
+   
+   
+
+   
+   
+   

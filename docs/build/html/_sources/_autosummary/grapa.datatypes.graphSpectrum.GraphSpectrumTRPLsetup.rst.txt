@@ -1,0 +1,31 @@
+grapa.datatypes.graphSpectrum.GraphSpectrumTRPLsetup
+====================================================
+
+.. currentmodule:: grapa.datatypes.graphSpectrum
+
+.. autoclass:: GraphSpectrumTRPLsetup
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphSpectrumTRPLsetup.isFileReadable
+       ~GraphSpectrumTRPLsetup.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

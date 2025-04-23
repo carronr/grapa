@@ -1,0 +1,450 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.utils.curve_subclasses_utils.FitHandler &mdash; grapa 0.7.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.utils.curve_subclasses_utils.FitHandlerBasicFunc" href="grapa.utils.curve_subclasses_utils.FitHandlerBasicFunc.html" />
+    <link rel="prev" title="grapa.utils.curve_subclasses_utils.FileLoaderOnDemand" href="grapa.utils.curve_subclasses_utils.FileLoaderOnDemand.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.FileLoaderOnDemand.html">grapa.utils.curve_subclasses_utils.FileLoaderOnDemand</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.utils.curve_subclasses_utils.FitHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.FitHandlerBasicFunc.html">grapa.utils.curve_subclasses_utils.FitHandlerBasicFunc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.FitterFixed.html">grapa.utils.curve_subclasses_utils.FitterFixed</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.graphIO.html">grapa.utils.graphIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.metadata.html">grapa.utils.metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph_aux.html">grapa.utils.plot_graph_aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.string_manipulations.html">grapa.utils.string_manipulations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.utils.html">grapa.utils</a></li>
+          <li class="breadcrumb-item"><a href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+      <li class="breadcrumb-item active">grapa.utils.curve_subclasses_utils.FitHandler</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.utils.curve_subclasses_utils.FitHandler.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-utils-curve-subclasses-utils-fithandler">
+<h1>grapa.utils.curve_subclasses_utils.FitHandler<a class="headerlink" href="#grapa-utils-curve-subclasses-utils-fithandler" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.utils.curve_subclasses_utils.</span></span><span class="sig-name descname"><span class="pre">FitHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class should work as a minimum version, although it has no fit function
+implemented - see below shild class FitHandlerBasicFunc to see how to do that.</p>
+<p>The configuration file is a grapa-style text file, with following attributes (lines
+of parameters). See example grapa/datatypes/XRF_fitparameters.txt. Each column
+is a fit “preset”, intended to be ready to be used. Required attributes:</p>
+<ul class="simple">
+<li><p>label: used for referencing the preset</p></li>
+<li><p>roi: list [valuemin, valuemax], range of interest, in units of the data</p></li>
+<li><p>function: str, name of the fit function, that must be impolemented in a
+child class. Function names must start with <cite>func_</cite></p></li>
+<li><p>p0: a list, default initial guess for fit parameters. Presumably numeric.
+str are also possible. For example ‘1/350’, see function p0_interpret_value; or
+“Background” that will return a interp1d interpolation function over the data
+stored in preset curve with label “Background”.</p></li>
+<li><p>fixed: a list of booleans, True if parameter is fixed by default</p></li>
+<li><p>showingui if the preset is shown in the gui, by default</p></li>
+<li><p>sum_amp_gaussian: not needed, specific to CurveMCA.</p></li>
+</ul>
+<p>Then, create a subclass containing the fit functions:</p>
+<ul class="simple">
+<li><p>fit functions must be named starting with <cite>func_</cite></p></li>
+<li><p>also: overrides needed for additional behaviors (e.g. amplitude in CurveMCA)</p></li>
+<li><p>also: overrides to add e.g. interpretation of text into numerical values</p></li>
+<li><p>other needed behaviors</p></li>
+</ul>
+<p>For implementation into Curve subclass, take care of notably:</p>
+<ul>
+<li><p>class variable - FitHandler, or rather subclass of if containing the fit functions
+of interest</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">FITHANDLER</span> <span class="o">=</span> <span class="n">FitHandler</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_PATHXRD</span><span class="p">,</span> <span class="n">FITPARAMETERS_FILE</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p>__init__:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># in __init__, as class itself not defined at instantiation of class variable</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">FITHANDLER</span><span class="o">.</span><span class="n">set_typecurvefit</span><span class="p">(</span><span class="n">CurveXRD</span><span class="p">)</span>  <span class="c1"># to adapt with own Curve type</span>
+</pre></div>
+</div>
+</li>
+<li><p>funcListGUI</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># fit-related elements</span>
+<span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FITHANDLER</span><span class="o">.</span><span class="n">funcListGUI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>updateFitParam, to provide fit function to Curve.updateFitParam, and
+in case textual keywords are used in fit parameters for e.g. “Background”.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">updateFitParam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">param</span><span class="p">):</span>
+    <span class="c1"># override default behavior, additional things to do</span>
+    <span class="n">param</span><span class="p">,</span> <span class="n">revert</span><span class="p">,</span> <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FITHANDLER</span><span class="o">.</span><span class="n">updateFitParam_before</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">param</span><span class="p">)</span>
+    <span class="c1"># call base function, including parameter func</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">updateFitParam</span><span class="p">(</span><span class="o">*</span><span class="n">param</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">)</span>
+    <span class="c1"># revert callable parameter to its initial string value</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">FITHANDLER</span><span class="o">.</span><span class="n">updateFitParam_after</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">revert</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+</li>
+<li><p>fit_explicit, so curve action can point curve.fit_explicit and not more complex
+dependency, and to host the docstring to report in printHelp()</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fit_explicit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">preset_label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">p0_raw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="c1"># docstring to write here between triple double-quotes</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FITHANDLER</span><span class="o">.</span><span class="n">fit_explicit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="n">funcname</span><span class="p">,</span>
+                           <span class="n">preset_label</span><span class="o">=</span><span class="n">preset_label</span><span class="p">,</span> <span class="n">p0_raw</span><span class="o">=</span><span class="n">p0_raw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>printHelp</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.__init__" title="grapa.utils.curve_subclasses_utils.FitHandler.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filename)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code>(curve, func, roi, p0, fixed)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.fit_explicit" title="grapa.utils.curve_subclasses_utils.FitHandler.fit_explicit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_explicit</span></code></a>(curve, roi, *_args[, funcname, ...])</p></td>
+<td><p>Fit fit_explicit: fit data, for example a peak of a CurveMCA data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.fit_preset" title="grapa.utils.curve_subclasses_utils.FitHandler.fit_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_preset</span></code></a>(curve, preset_label[, roi, p0, fixed])</p></td>
+<td><p>Fit fit_preset: fit a Curve, for example a peak of a CurveMCA data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.fit_resamplex" title="grapa.utils.curve_subclasses_utils.FitHandler.fit_resamplex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_resamplex</span></code></a>(deltax, curve)</p></td>
+<td><p>Change the base of datapoints a fit result is displayed on</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI" title="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(curve, **kwargs)</p></td>
+<td><p>List of options for GUI</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_ifnewline" title="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_ifnewline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI_ifnewline</span></code></a>(counter, _lbl, _func)</p></td>
+<td><p>by dfault, new line every 4 parameters</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_isafit" title="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_isafit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI_isafit</span></code></a>(curve, **_kwargs)</p></td>
+<td><p>If is a fit: updateFitParam, resamplex</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_choicepresets" title="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_choicepresets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI_notafit_choicepresets</span></code></a>(curve, ...)</p></td>
+<td><p>if not a fit, show fit options</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_preset" title="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI_notafit_preset</span></code></a>(curve, preset, ...)</p></td>
+<td><p>Fit using preset settings</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_whichones" title="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_whichones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI_notafit_whichones</span></code></a>(curve, **_kwargs)</p></td>
+<td><p>Chooses which preset to show</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.get_fitfunction" title="grapa.utils.curve_subclasses_utils.FitHandler.get_fitfunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fitfunction</span></code></a>(funcname)</p></td>
+<td><p>fit functions must have names starting with <cite>func_</cite>, and be implemented in a child class</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.get_preset" title="grapa.utils.curve_subclasses_utils.FitHandler.get_preset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_preset</span></code></a>(label)</p></td>
+<td><p>Returns first preset which label matches label</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.get_presets" title="grapa.utils.curve_subclasses_utils.FitHandler.get_presets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_presets</span></code></a>(label[, startswith, fitdefined])</p></td>
+<td><p>tolerant input, useful for GUI Curve Actions Returns a list of (idx, preset Curve)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.p0_interpret" title="grapa.utils.curve_subclasses_utils.FitHandler.p0_interpret"><code class="xref py py-obj docutils literal notranslate"><span class="pre">p0_interpret</span></code></a>(p0[, curve, interp])</p></td>
+<td><p>Returns a list of parameters, after interpreting textual values e.g. contaiing +, * or /, or background curves.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.set_guishowfitfunc" title="grapa.utils.curve_subclasses_utils.FitHandler.set_guishowfitfunc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_guishowfitfunc</span></code></a>(which, fitimmediately[, ...])</p></td>
+<td><p>To make GUI show specific fit functions</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.set_typecurvefit" title="grapa.utils.curve_subclasses_utils.FitHandler.set_typecurvefit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_typecurvefit</span></code></a>(typecurvefit)</p></td>
+<td><p>set the type of Curve to be fitted</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_after" title="grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParam_after</span></code></a>(curve, revert)</p></td>
+<td><p>Small bit of code performed after updateFitParam</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_before" title="grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParam_before</span></code></a>(curve, *popt)</p></td>
+<td><p>Small bit of code performed before updateFitParam</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.fit_explicit">
+<span class="sig-name descname"><span class="pre">fit_explicit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preset_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0_raw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.fit_explicit" title="Link to this definition"></a></dt>
+<dd><p>Fit fit_explicit: fit data, for example a peak of a CurveMCA data.
+Pre-set fit parameters are configured in file indicated at instantiation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curve</strong> – a Curve object containing the data to fit.</p></li>
+<li><p><strong>roi</strong> – range of interest, in unit of channel.</p></li>
+<li><p><strong>funcname</strong> – name of the fit function. Mandatory.</p></li>
+<li><p><strong>preset_label</strong> – label of the fit preset in the configuration file, if
+relevant.</p></li>
+<li><p><strong>p0_raw</strong> – p0 values of the fit preset in configuration file, if relevant.</p></li>
+<li><p><strong>kwargs</strong> – <p>to provide custom initial guess p0. Weird syntax for grapa GUI.</p>
+<p>Syntax 1: keywords “p0” and “fixed” are provided. Instances of list.</p>
+<p>Syntax 2: to meet limitations of grapa GUI. “0p0”: 1.0, “0fi”: True
+(i.e. is fixed fit parameter), “1p0”: 2.1, etc. These are later compiled
+into lists: <cite>p0</cite> and <cite>fixed</cite></p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a CurveMCA fit curve</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.fit_preset">
+<span class="sig-name descname"><span class="pre">fit_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preset_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.fit_preset" title="Link to this definition"></a></dt>
+<dd><p>Fit fit_preset: fit a Curve, for example a peak of a CurveMCA data.
+Pre-set fit parameters are configured in file XRF_fitparameters.txt.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curve</strong> – a Curve object contaiing the data to fit</p></li>
+<li><p><strong>preset_label</strong> – see row “label” in config file. e.g. “Cu Ka1,2”, “Ag Ka1,2”</p></li>
+<li><p><strong>roi</strong> – range of interest, in unit of channel. Overwrite preset.</p></li>
+<li><p><strong>p0</strong> – list, to provide custom initial guess p0. Overwrite preset.</p></li>
+<li><p><strong>fixed</strong> – list of boolean, to provide custom initial guess p0. Overwrite
+reset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a CurveMCA fit curve</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.fit_resamplex">
+<span class="sig-name descname"><span class="pre">fit_resamplex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deltax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.fit_resamplex" title="Link to this definition"></a></dt>
+<dd><p>Change the base of datapoints a fit result is displayed on</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI">
+<span class="sig-name descname"><span class="pre">funcListGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI" title="Link to this definition"></a></dt>
+<dd><p>List of options for GUI</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_ifnewline">
+<span class="sig-name descname"><span class="pre">funcListGUI_ifnewline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_lbl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_ifnewline" title="Link to this definition"></a></dt>
+<dd><p>by dfault, new line every 4 parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_isafit">
+<span class="sig-name descname"><span class="pre">funcListGUI_isafit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_isafit" title="Link to this definition"></a></dt>
+<dd><p>If is a fit: updateFitParam, resamplex</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_choicepresets">
+<span class="sig-name descname"><span class="pre">funcListGUI_notafit_choicepresets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_choicepresets" title="Link to this definition"></a></dt>
+<dd><p>if not a fit, show fit options</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_preset">
+<span class="sig-name descname"><span class="pre">funcListGUI_notafit_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preset</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_preset" title="Link to this definition"></a></dt>
+<dd><p>Fit using preset settings</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_whichones">
+<span class="sig-name descname"><span class="pre">funcListGUI_notafit_whichones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.funcListGUI_notafit_whichones" title="Link to this definition"></a></dt>
+<dd><p>Chooses which preset to show</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.get_fitfunction">
+<span class="sig-name descname"><span class="pre">get_fitfunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">funcname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.get_fitfunction" title="Link to this definition"></a></dt>
+<dd><p>fit functions must have names starting with <cite>func_</cite>, and be implemented in a
+child class</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.get_preset">
+<span class="sig-name descname"><span class="pre">get_preset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.get_preset" title="Link to this definition"></a></dt>
+<dd><p>Returns first preset which label matches label</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.get_presets">
+<span class="sig-name descname"><span class="pre">get_presets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startswith</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitdefined</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.get_presets" title="Link to this definition"></a></dt>
+<dd><p>tolerant input, useful for GUI Curve Actions
+Returns a list of (idx, preset Curve)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.p0_interpret">
+<span class="sig-name descname"><span class="pre">p0_interpret</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.p0_interpret" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of parameters, after interpreting textual values e.g.
+contaiing +, * or /, or background curves</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.set_guishowfitfunc">
+<span class="sig-name descname"><span class="pre">set_guishowfitfunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">which</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitimmediately</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.set_guishowfitfunc" title="Link to this definition"></a></dt>
+<dd><p>To make GUI show specific fit functions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>which</strong> – label of the function to show</p></li>
+<li><p><strong>fitimmediately</strong> – if True, fit immediately</p></li>
+<li><p><strong>curve</strong> – must be provided</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.set_typecurvefit">
+<span class="sig-name descname"><span class="pre">set_typecurvefit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typecurvefit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.set_typecurvefit" title="Link to this definition"></a></dt>
+<dd><p>set the type of Curve to be fitted</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_after">
+<span class="sig-name descname"><span class="pre">updateFitParam_after</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">revert</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_after" title="Link to this definition"></a></dt>
+<dd><p>Small bit of code performed after updateFitParam</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_before">
+<span class="sig-name descname"><span class="pre">updateFitParam_before</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">popt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.curve_subclasses_utils.FitHandler.updateFitParam_before" title="Link to this definition"></a></dt>
+<dd><p>Small bit of code performed before updateFitParam</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.utils.curve_subclasses_utils.FileLoaderOnDemand.html" class="btn btn-neutral float-left" title="grapa.utils.curve_subclasses_utils.FileLoaderOnDemand" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.utils.curve_subclasses_utils.FitHandlerBasicFunc.html" class="btn btn-neutral float-right" title="grapa.utils.curve_subclasses_utils.FitHandlerBasicFunc" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

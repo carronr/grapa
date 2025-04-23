@@ -1,0 +1,31 @@
+grapa.datatypes.curveJV
+=======================
+
+.. automodule:: grapa.datatypes.curveJV
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveJV
+   
+   
+
+   
+   
+   
+
+
+

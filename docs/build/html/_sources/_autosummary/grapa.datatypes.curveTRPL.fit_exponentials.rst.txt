@@ -1,0 +1,6 @@
+grapa.datatypes.curveTRPL.fit\_exponentials
+===========================================
+
+.. currentmodule:: grapa.datatypes.curveTRPL
+
+.. autofunction:: fit_exponentials

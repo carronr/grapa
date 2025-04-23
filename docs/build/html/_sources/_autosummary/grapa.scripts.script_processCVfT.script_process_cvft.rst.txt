@@ -1,0 +1,6 @@
+grapa.scripts.script\_processCVfT.script\_process\_cvft
+=======================================================
+
+.. currentmodule:: grapa.scripts.script_processCVfT
+
+.. autofunction:: script_process_cvft

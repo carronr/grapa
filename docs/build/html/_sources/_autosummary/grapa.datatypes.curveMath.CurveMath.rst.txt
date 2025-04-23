@@ -1,0 +1,39 @@
+grapa.datatypes.curveMath.CurveMath
+===================================
+
+.. currentmodule:: grapa.datatypes.curveMath
+
+.. autoclass:: CurveMath
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveMath.__init__
+       ~CurveMath.add
+       ~CurveMath.assemble_curve_xy
+       ~CurveMath.classNameGUI
+       ~CurveMath.funcListGUI
+       ~CurveMath.inv
+       ~CurveMath.neg
+       ~CurveMath.print_help
+       ~CurveMath.swap_xy
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveMath.CURVE
+   
+   

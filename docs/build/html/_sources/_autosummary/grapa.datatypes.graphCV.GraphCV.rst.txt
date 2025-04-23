@@ -1,0 +1,33 @@
+grapa.datatypes.graphCV.GraphCV
+===============================
+
+.. currentmodule:: grapa.datatypes.graphCV
+
+.. autoclass:: GraphCV
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphCV.isFileReadable
+       ~GraphCV.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphCV.AXISLABELS
+      ~GraphCV.FILEIO_GRAPHTYPE
+   
+   

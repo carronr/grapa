@@ -1,0 +1,87 @@
+grapa.datatypes.curveJV.CurveJV
+===============================
+
+.. currentmodule:: grapa.datatypes.curveJV
+
+.. autoclass:: CurveJV
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveJV.CurveJVFromFit
+       ~CurveJV.CurveJVFromFit_print
+       ~CurveJV.J
+       ~CurveJV.JlSuchAsJ0VJsc
+       ~CurveJV.V
+       ~CurveJV.__init__
+       ~CurveJV.alterListGUI
+       ~CurveJV.area
+       ~CurveJV.calcJsc
+       ~CurveJV.calcResiduals
+       ~CurveJV.calcRp
+       ~CurveJV.calcVocJscFFEffMPP
+       ~CurveJV.calcVocJscFFEffMPP_print
+       ~CurveJV.cell
+       ~CurveJV.cleanDataVJ
+       ~CurveJV.darkOrIllum
+       ~CurveJV.diodeFit
+       ~CurveJV.diodeFitCheckQuality
+       ~CurveJV.diodeFit_BestGuess
+       ~CurveJV.extractJscVoc
+       ~CurveJV.fit_func_diodeResistors_AbsLog
+       ~CurveJV.fit_resampleX
+       ~CurveJV.funcListGUI
+       ~CurveJV.func_diodeIdeal
+       ~CurveJV.func_diodeIdealAbsLog
+       ~CurveJV.func_diodeIdealAbsLog10
+       ~CurveJV.func_diodeResistors
+       ~CurveJV.func_diodeResistorsAbsLog
+       ~CurveJV.func_diodeResistorsAbsLog10
+       ~CurveJV.func_diodeResistorsAbsLog10_modParam
+       ~CurveJV.func_diodeResistorsAbsLog10_modParam_red
+       ~CurveJV.func_diodeResistors_Jsc
+       ~CurveJV.fwd_bwd
+       ~CurveJV.idxFitHighSensitivityNJ0
+       ~CurveJV.idxRange
+       ~CurveJV.illumspectrum
+       ~CurveJV.interpJ
+       ~CurveJV.measId
+       ~CurveJV.parse_filename
+       ~CurveJV.printShort
+       ~CurveJV.sample
+       ~CurveJV.selectJVdataForFit
+       ~CurveJV.setArea
+       ~CurveJV.simpleLabel
+       ~CurveJV.update
+       ~CurveJV.xinversejminusjsc
+       ~CurveJV.yDifferentialR
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveJV.AXISLABELS_X
+      ~CurveJV.AXISLABELS_Y
+      ~CurveJV.CURVE
+      ~CurveJV.DARK
+      ~CurveJV.DARK_ILLUM
+      ~CurveJV.DARK_ILLUM_VALUESLIST
+      ~CurveJV.FILENAMEPARSE_EXPR
+      ~CurveJV.FILENAMEPARSE_KEYS
+      ~CurveJV.FORMAT_AUTOLABEL
+      ~CurveJV.ILLUM
+      ~CurveJV.defaultIllumPower
+   
+   

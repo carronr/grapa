@@ -1,0 +1,32 @@
+grapa.graph.ConditionalPropertyApplier
+======================================
+
+.. currentmodule:: grapa.graph
+
+.. autoclass:: ConditionalPropertyApplier
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ConditionalPropertyApplier.apply
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConditionalPropertyApplier.MODES_BYINPUTTYPE
+      ~ConditionalPropertyApplier.MODES_VALUES
+   
+   

@@ -1,0 +1,27 @@
+grapa.utils.plot\_graph\_aux.GroupedPlotters
+============================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: GroupedPlotters
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GroupedPlotters.__init__
+       ~GroupedPlotters.add_curve
+       ~GroupedPlotters.plot
+   
+   
+
+   
+   
+   

@@ -1,0 +1,30 @@
+grapa.datatypes.curveSpectrum.CurveSpectrumAbsorptance
+======================================================
+
+.. currentmodule:: grapa.datatypes.curveSpectrum
+
+.. autoclass:: CurveSpectrumAbsorptance
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveSpectrumAbsorptance.initialize
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

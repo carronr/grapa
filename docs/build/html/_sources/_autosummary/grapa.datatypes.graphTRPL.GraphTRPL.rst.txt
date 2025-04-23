@@ -1,0 +1,33 @@
+grapa.datatypes.graphTRPL.GraphTRPL
+===================================
+
+.. currentmodule:: grapa.datatypes.graphTRPL
+
+.. autoclass:: GraphTRPL
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphTRPL.isFileReadable
+       ~GraphTRPL.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphTRPL.AXISLABELS
+      ~GraphTRPL.FILEIO_GRAPHTYPE
+   
+   

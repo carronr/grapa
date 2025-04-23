@@ -1,0 +1,6 @@
+grapa.datatypes.curveSIMS.selectDataEdge
+========================================
+
+.. currentmodule:: grapa.datatypes.curveSIMS
+
+.. autofunction:: selectDataEdge

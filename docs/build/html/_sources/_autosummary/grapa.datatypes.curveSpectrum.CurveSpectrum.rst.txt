@@ -1,0 +1,50 @@
+grapa.datatypes.curveSpectrum.CurveSpectrum
+===========================================
+
+.. currentmodule:: grapa.datatypes.curveSpectrum
+
+.. autoclass:: CurveSpectrum
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveSpectrum.__init__
+       ~CurveSpectrum.addOffset
+       ~CurveSpectrum.alterListGUI
+       ~CurveSpectrum.computeAbsorptance
+       ~CurveSpectrum.computeAlpha
+       ~CurveSpectrum.correctInstrumentalResponse
+       ~CurveSpectrum.dataModifySwapNmEv
+       ~CurveSpectrum.fileInstrResp
+       ~CurveSpectrum.fileSubstrates
+       ~CurveSpectrum.funcListGUI
+       ~CurveSpectrum.getListSubstrates
+       ~CurveSpectrum.getOffset
+       ~CurveSpectrum.getSubclass
+       ~CurveSpectrum.integrate
+       ~CurveSpectrum.print_help
+       ~CurveSpectrum.setSubclass
+       ~CurveSpectrum.substractBG
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveSpectrum.CURVE
+      ~CurveSpectrum.FILE_INSTR_RESP
+      ~CurveSpectrum.FILE_SUBSTRATES
+      ~CurveSpectrum.LIST_SUBSTRATES
+   
+   

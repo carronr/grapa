@@ -1,0 +1,31 @@
+grapa.gui.observable
+====================
+
+.. automodule:: grapa.gui.observable
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Observable
+   
+   
+
+   
+   
+   
+
+
+

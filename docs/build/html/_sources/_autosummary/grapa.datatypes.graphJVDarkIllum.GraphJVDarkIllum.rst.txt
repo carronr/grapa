@@ -1,0 +1,36 @@
+grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum
+=================================================
+
+.. currentmodule:: grapa.datatypes.graphJVDarkIllum
+
+.. autoclass:: GraphJVDarkIllum
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphJVDarkIllum.__init__
+       ~GraphJVDarkIllum.plot
+       ~GraphJVDarkIllum.plotDiff
+       ~GraphJVDarkIllum.plotLogAbs
+       ~GraphJVDarkIllum.plotStd
+       ~GraphJVDarkIllum.printShort
+       ~GraphJVDarkIllum.returnDataCurves
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

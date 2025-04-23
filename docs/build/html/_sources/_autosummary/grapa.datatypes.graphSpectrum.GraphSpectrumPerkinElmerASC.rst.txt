@@ -1,0 +1,32 @@
+grapa.datatypes.graphSpectrum.GraphSpectrumPerkinElmerASC
+=========================================================
+
+.. currentmodule:: grapa.datatypes.graphSpectrum
+
+.. autoclass:: GraphSpectrumPerkinElmerASC
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphSpectrumPerkinElmerASC.isFileReadable
+       ~GraphSpectrumPerkinElmerASC.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphSpectrumPerkinElmerASC.AXISLABELS
+   
+   

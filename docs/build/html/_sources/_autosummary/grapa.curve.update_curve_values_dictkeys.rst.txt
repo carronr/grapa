@@ -1,0 +1,6 @@
+grapa.curve.update\_curve\_values\_dictkeys
+===========================================
+
+.. currentmodule:: grapa.curve
+
+.. autofunction:: update_curve_values_dictkeys

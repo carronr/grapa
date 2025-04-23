@@ -1,0 +1,31 @@
+grapa.datatypes.graphSquidAdmiral
+=================================
+
+.. automodule:: grapa.datatypes.graphSquidAdmiral
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphSquidAdmiral
+   
+   
+
+   
+   
+   
+
+
+

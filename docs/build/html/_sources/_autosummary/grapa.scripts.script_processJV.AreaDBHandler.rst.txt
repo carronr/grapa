@@ -1,0 +1,26 @@
+grapa.scripts.script\_processJV.AreaDBHandler
+=============================================
+
+.. currentmodule:: grapa.scripts.script_processJV
+
+.. autoclass:: AreaDBHandler
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~AreaDBHandler.__init__
+       ~AreaDBHandler.get
+   
+   
+
+   
+   
+   

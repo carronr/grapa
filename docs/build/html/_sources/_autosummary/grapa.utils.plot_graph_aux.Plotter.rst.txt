@@ -1,0 +1,38 @@
+grapa.utils.plot\_graph\_aux.Plotter
+====================================
+
+.. currentmodule:: grapa.utils.plot_graph_aux
+
+.. autoclass:: Plotter
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Plotter.__init__
+       ~Plotter.funcListGUI
+       ~Plotter.plot_addon_scatter
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Plotter.IMPORTERROR
+      ~Plotter.SCATTER
+      ~Plotter.SCATTER_JITTER_DEFAULT
+      ~Plotter.SEABORN_STRIPPLOT
+      ~Plotter.SEABORN_SWARMPLOT
+      ~Plotter.position
+   
+   

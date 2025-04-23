@@ -1,0 +1,39 @@
+grapa.utils.plot\_graph\_aux
+============================
+
+.. automodule:: grapa.utils.plot_graph_aux
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GroupedPlotters
+      ParserAxhline
+      ParserAxlines
+      ParserAxvline
+      ParserMisc
+      Plotter
+      PlotterBoxplot
+      PlotterViolin
+      SubplotsAdjuster
+   
+   
+
+   
+   
+   
+
+
+

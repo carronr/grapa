@@ -1,0 +1,39 @@
+grapa.datatypes.curveEQE
+========================
+
+.. automodule:: grapa.datatypes.curveEQE
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      bandgap_tauc
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveEQE
+      FileLoaderOnDemandAM0
+   
+   
+
+   
+   
+   
+
+
+
