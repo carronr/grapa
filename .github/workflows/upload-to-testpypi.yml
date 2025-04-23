@@ -1,0 +1,41 @@
+name: Build and Upload to TestPyPI
+
+on:
+  push:
+    branches:
+      - main      # Trigger this workflow on push to the 'main' branch
+  # You can also trigger the workflow manually using `workflow_dispatch`
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest   # Runs on the latest Ubuntu environment
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Choose the Python version you want to use
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine build
+
+    - name: Build the package
+      run: |
+        python -m build  # This creates the .tar.gz and .whl files in the dist directory
+
+    - name: Check the package (optional)
+      run: |
+        twine check dist/*   # Check if the built package is valid before uploading
+
+    - name: Upload to TestPyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}   # GitHub Secret for TestPyPI Username
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}   # GitHub Secret for TestPyPI Password
+      run: |
+        twine upload --repository-url https://test.pypi.org/legacy/ dist/*  # Upload the package
