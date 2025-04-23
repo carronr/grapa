@@ -1,0 +1,30 @@
+label	default	xrdml	xrdmltest
+# for identification			
+extension	xml	xrdml	xrdmltest
+line1		<xrdMeasurements xmlns="http://www.xrdml.com/XRDMeasurement/2.1"	<xrdMeasurements xmlns="http://www.xrdml.com/XRDMeasurement/2.1"
+line2			
+line3			
+_meastype	Undetermined Graph type	XRD data	XRD data
+cast		Curve XRD	Curve XRD
+# for parsing			
+roottag_strip	{}	{}	
+roottag_strip_comment	# special value: "{}": identify '{url}' in root.tag, and remove it from every single element tag. Can also provide a str.		
+key_replace	[]	[["xrdMeasurement", "xrd", "replace"], ["xrds_xrd_", "xrd_", "replace"], ["xrds_xrd", "xrd", "equal"]]	[["xrdMeasurement", "xrd", "replace"], ["xrds_xrd_", "xrd_", "replace"], ["xrds_xrd", "xrd", "equal"]]
+key_replace_comment	# format metadata key to shorten metadata keys. Order matters. e.g. [["xrdMeasurement", "xrd", "replace"], ["xrds_xrd_", "xrd_", "replace"], ["xrds_xrd", "xrd", "equal"]]		
+attribs_append_to_tag	[]	[["axis", "-axis", "delete"], ["unit", "()", "delete"]]	[["id", "-id", "delete"], ["axis", "-axis", "delete"], ["unit", "()", "delete"]]
+attribs_append_to_tag_comment	# Examples: [["unit", "()", "delete"]]: parses <length unit="m">123</length> --> {"length(m)": 123};     [["axis", "-", "delete"]]: parses <position axis="AXIS_1">123</position> --> {"position-AXIS_1": 123};       Special value[2]: "delete" will delete the attrib[key] after append		
+attribs_as_metadata	[]	[["id", "delete"], ["name", "delete"]]	
+attribs_as_metadata_comment	#To extract attrb as if it were a subelement. with [["id", "delete"]]: <item id="abc"><sub>content</sub></item> -> "item_id": "abc", "item_sub": "content"		
+separator	_	_	_
+separator_comment	separator could be "_" or "/"		
+# for formatting			
+_xlabel	Parameter	['2$\\Theta$ angle', '', 'deg']	['2$\\Theta$ angle', '', 'deg']
+_ylabel	Value	['Counts', '', '-']	['Counts', '', '-']
+keyend_valuesx	valuesx		
+keyend_valuesx_start		2Theta(deg)_startPosition	2Theta(deg)_startPosition
+keyend_valuesx_end		2Theta(deg)_endPosition	2Theta(deg)_endPosition
+keyend_valuesy	valuesy	_dataPoints_counts(counts)	_dataPoints_counts(counts)
+datasetsplit		scan#	scan#
+datasetsplit_comment		# last character assumed to be a separator, see appendNumber in tag_append_attrib	# last character assumed to be a separator, see appendNumber in tag_append_attrib
+filename_to_label_replace	[["- ", "_"], [" ", ""], [";", "_"], ["_", " "]]	[["- ", "_"], [" ", ""], [";", "_"], ["_", " "]]	[["- ", "_"], [" ", ""], [";", "_"], ["_", " "]]
+0	0	0	0

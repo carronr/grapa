@@ -1,0 +1,8 @@
+comment			
+label	PSK 12.6deg PbI	PSK 14.1deg	PSK 28.4deg
+roi	[12.2, 13.0]	[13.6, 14.6]	[27.7, 29.0]
+function	func_cst_gaussa	func_cst_gaussa	func_cst_gaussa
+p0	[0, 10, 12.6, 0.1]	[0, 10, 14.1, 0.1]	[0, 10, 28.4, 0.1]
+fixed	[False, False, False, False]	[False, False, False, False]	[False, False, False, False]
+showingui	1	1	1
+0	0	0	0
