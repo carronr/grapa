@@ -1,9 +1,10 @@
 name: Build and Upload to TestPyPI
 
 on:
-  push:
-    branches:
-      - main      # Trigger this workflow on push to the 'main' branch
+  # push:
+  #   branches:
+  #     - main      # Trigger this workflow on push to the 'main' branch
+  
   # You can also trigger the workflow manually using `workflow_dispatch`
   workflow_dispatch: 
 
