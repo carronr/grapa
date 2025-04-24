@@ -1,0 +1,50 @@
+04/24/2025 02:55:50 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0, 100], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:55:54 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:00 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:19 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:26 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:35 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:40 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:46 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:49 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:53 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:56:56 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [0.0, 200.0], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:57:56 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [inf, inf], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:58:02 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [-21.105096236129782, 168.18359858827756], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 02:58:07 PM - grapa.utils.plot_graph_aux - WARNING - ParserMisc alter_lim: cannot transform limit, keep initial input. lim [-21.105096236129782, 168.18359858827756], xory y, alter ['nmeV', 'tauc'], curvedummy.
+04/24/2025 03:02:08 PM - grapa.gui.GUIMainElements - ERROR - While executing function <bound method CurveEQE.CurveEQE_derivativeanalysis of <grapa.datatypes.curveEQE.CurveEQE object at 0x000001CDF0E0F490>> with args [1.0, 2.0, [530.0, 1020.0]] kwargs {'silent': False}.
+Traceback (most recent call last):
+  File "C:\_python\_python_packages\grapa\grapa\gui\GUIMainElements.py", line 2724, in execute_func
+    res = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveEQE.py", line 748, in CurveEQE_derivativeanalysis
+    poptm, xr = self.derivative_bandgapmax(**kwsg)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveEQE.py", line 604, in derivative_bandgapmax
+    order = True if x_[1] > x_[0] else False
+                    ~~^^^
+TypeError: 'NoneType' object is not subscriptable
+04/24/2025 03:02:13 PM - grapa.gui.GUIMainElements - ERROR - While executing function <bound method CurveEQE.CurveEQE_derivativeanalysis of <grapa.datatypes.curveEQE.CurveEQE object at 0x000001CDF0E0F490>> with args [2.0, 2.0, [530.0, 1020.0]] kwargs {'silent': False}.
+Traceback (most recent call last):
+  File "C:\_python\_python_packages\grapa\grapa\gui\GUIMainElements.py", line 2724, in execute_func
+    res = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveEQE.py", line 748, in CurveEQE_derivativeanalysis
+    poptm, xr = self.derivative_bandgapmax(**kwsg)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveEQE.py", line 604, in derivative_bandgapmax
+    order = True if x_[1] > x_[0] else False
+                    ~~^^^
+TypeError: 'NoneType' object is not subscriptable
+04/24/2025 03:02:19 PM - grapa.gui.GUIMainElements - ERROR - While executing function <bound method CurveEQE.CurveEQE_derivativeanalysis of <grapa.datatypes.curveEQE.CurveEQE object at 0x000001CDF0E0F490>> with args [1.0, 1.0, [530.0, 1020.0]] kwargs {'silent': False}.
+Traceback (most recent call last):
+  File "C:\_python\_python_packages\grapa\grapa\gui\GUIMainElements.py", line 2724, in execute_func
+    res = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveEQE.py", line 748, in CurveEQE_derivativeanalysis
+    poptm, xr = self.derivative_bandgapmax(**kwsg)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveEQE.py", line 604, in derivative_bandgapmax
+    order = True if x_[1] > x_[0] else False
+                    ~~^^^
+TypeError: 'NoneType' object is not subscriptable

@@ -24,6 +24,7 @@ setup(
         "grapa": [
             "*.txt",
             "*.rst",
+            "*.log",
             "manual/*.py",
             "manual/*.txt",
             "manual/*.pdf",
