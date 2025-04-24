@@ -13,3 +13,5 @@
 /grapa.egg-info/requires.txt
 /grapa.egg-info/SOURCES.txt
 /grapa.egg-info/top_level.txt
+/docs/source/_autosummary/
+/docs/build/doctrees/

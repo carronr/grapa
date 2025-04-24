@@ -14,10 +14,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4  # v2
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5  # v2
       with:
         python-version: '3.x'  # Choose the Python version you want to use
 
@@ -28,8 +28,8 @@ jobs:
 
     - name: Build the package
       run: |
-        # python -m build  # This creates the .tar.gz and .whl files in the dist directory
-        python setup.py sdist
+        python -m build  # This creates the .tar.gz and .whl files in the dist directory
+        # python setup.py sdist
 
     - name: Check the package (optional)
       run: |
