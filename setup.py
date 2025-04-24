@@ -17,8 +17,8 @@ setup(
         "grapa.datatypes",
         "grapa.gui",
         "grapa.scripts",
-        "grapa.tests",
         "grapa.utils",
+        "tests",
     ],
     package_data={
         "grapa": [
