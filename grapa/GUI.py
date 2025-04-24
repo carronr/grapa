@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 # TODO
 # - LONGTERM check import .graph instead of grapa. Look at standard python packages. Check from GUI, with spyder various versions, and when calling script from external python script (Note: gui Change curve type was failing in early test, when importing in different manner)
 # - progressively remove all uses of pyplot, does not mix well with tkagg and stuff
-# - Stackplot: transparency Alpha ?
+# - Stackplot: transparency Alpha?
 # - scatter, add text values for each point. [clear all annotations] [text formatting "{.2g}". Remove only] [kwargs: centered both]
 
 

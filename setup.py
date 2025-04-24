@@ -17,12 +17,13 @@ setup(
         "grapa.datatypes",
         "grapa.gui",
         "grapa.scripts",
-        "grapa.tests",
         "grapa.utils",
+        "tests",
     ],
     package_data={
         "grapa": [
             "*.txt",
+            "*.rst",
             "manual/*.py",
             "manual/*.txt",
             "manual/*.pdf",
@@ -53,4 +54,5 @@ setup(
                      "the underlying code dedicated to the visualization, analysis "
                      "and presentation of scientific data, with a focus on "
                      "photovoltaic research.",
+    long_description_content_type="text/plain",  # "text/markdown",  # ADD THIS LINE
 )
