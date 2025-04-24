@@ -18,7 +18,7 @@ setup(
         "grapa.gui",
         "grapa.scripts",
         "grapa.utils",
-        "tests",
+        # "tests",
     ],
     package_data={
         "grapa": [
