@@ -1,4 +1,4 @@
-name: Build and Upload to TestPyPI
+bose name: Build and Upload to TestPyPI
 
 on:
   push:
@@ -38,4 +38,4 @@ jobs:
         TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}   # GitHub Secret for TestPyPI Username
         TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}   # GitHub Secret for TestPyPI Password
       run: |
-        twine upload --repository-url https://test.pypi.org/legacy/ dist/*  # Upload the package
+        twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*  # Upload the package
