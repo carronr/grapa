@@ -1,4 +1,4 @@
-bose name: Build and Upload to TestPyPI
+name: Build and Upload to TestPyPI
 
 on:
   push:
