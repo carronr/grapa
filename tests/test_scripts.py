@@ -36,9 +36,9 @@ def test_script_boxplot(grapa_folder, script_boxplot_folder_prefix):
 
 @pytest.fixture
 def script_correlations_setup_base():
-    from grapa.scripts.script_correlations import AUTO
+    from grapa.scripts.script_correlations import CONF
 
-    datakeys = AUTO
+    datakeys = CONF.AUTO
     filters = []
     seriesx = None
     seriesy = None
@@ -87,25 +87,25 @@ def script_boxplot_assert(out):
 
 
 def test_script_correlations_1(grapa_folder, script_correlations_setup_1):
-    from grapa.scripts.script_correlations import HIGHER, process_file
+    from grapa.scripts.script_correlations import CONF, process_file
 
     fname, other = script_correlations_setup_1
     dkeys, filt, xs, ys = other
     # dkeys = AS_DATATABLE  # not necessarily needed, autodetection should work
-    filt = [["Jsc_mApcm2", HIGHER, 33.7]]
+    filt = [["Jsc_mApcm2", CONF.HIGHER, 33.7]]
     xs = range(11)
     with HiddenPrints():
-        out = process_file(fname, datakeys=dkeys, filters=filt, seriesx=xs, seriesy=ys)
+        out = process_file(fname, datakeys=dkeys, filters=filt, idx_pattern=xs, idx_labels=ys)
     script_boxplot_assert(out)
 
 
 def test_script_correlations_2(grapa_folder, script_correlations_setup_2):
-    from grapa.scripts.script_correlations import HIGHER
+    from grapa.scripts.script_correlations import CONF
 
     fname, other = script_correlations_setup_2
     dkeys, filt, xs, ys = other
     dkeys = ["Voc", "Jsc", "FF", "area"]  # , 'Eff', 'Rp', 'acquis soft rs']
-    filt = [["Jsc", HIGHER, 10]]
+    filt = [["Jsc", CONF.HIGHER, 10]]
     # with HiddenPrints():
     #     out = process_file(fname, datakeys=dkeys, filters=filt, seriesx=xs, seriesy=ys)
     # print("OUT", out)

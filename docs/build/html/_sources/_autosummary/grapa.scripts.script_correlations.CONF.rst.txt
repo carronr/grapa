@@ -1,0 +1,35 @@
+grapa.scripts.script\_correlations.CONF
+=======================================
+
+.. currentmodule:: grapa.scripts.script_correlations
+
+.. autoclass:: CONF
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CONF.AS_DATATABLE
+      ~CONF.AS_SCAPS
+      ~CONF.AUTO
+      ~CONF.HIGHER
+      ~CONF.LOWER
+      ~CONF.pltclose
+   
+   

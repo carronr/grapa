@@ -3,6 +3,7 @@
 from . import grapa_folder, HiddenPrints, open_files_in_subfolder
 
 from grapa.curve import Curve
+from grapa.graph import Graph
 from grapa.curve_image import Curve_Image
 
 from grapa.utils.string_manipulations import strToVar
@@ -17,6 +18,7 @@ from grapa.datatypes.curveSIMS import CurveSIMS
 from grapa.datatypes.curveSpectrum import CurveSpectrum
 from grapa.datatypes.curveTRPL import CurveTRPL
 from grapa.datatypes.curveMCA import CurveMCA
+from grapa.datatypes.curveMath import CurveMath
 
 
 def check_graphlist(graphs, curvesubclass, lengraph=1, testtypeonlyfirst=False):
@@ -113,8 +115,13 @@ def check_funclistgui(curve, graph, graphi):
 
 
 def test_open_files_subplotsinsets(grapa_folder):
-    out = open_files_in_subfolder(grapa_folder, "examples/_subplots_insets", "*.*")
-    assert len(out) == 6
+    graphs = open_files_in_subfolder(grapa_folder, "examples/_subplots_insets", "*.*")
+    assert len(graphs) == 6
+
+
+def test_open_files_math(grapa_folder):
+    graphs = [Graph(grapa_folder + "/examples/_subplots_insets/scatter.txt")]
+    check_graphlist(graphs, CurveMath, lengraph=2, testtypeonlyfirst=True)
 
 
 def test_open_files_boxplot(grapa_folder):
@@ -247,7 +254,7 @@ def test_open_files_examples(grapa_folder):
         gr for gr in graphs if gr[0].attr("filename").endswith("_imshow_picture.txt")
     ]
     assert len(graphstest) == 1
-    check_graphlist(graphstest, Curve_Image, testtypeonlyfirst=True, lengraph=2)
+    check_graphlist(graphstest, Curve_Image, testtypeonlyfirst=True, lengraph=3)
 
     graphstest = [
         gr for gr in graphs if gr[0].attr("filename").endswith("imshow_datafile.txt")

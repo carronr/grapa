@@ -13,6 +13,8 @@ import logging
 import numpy as np
 import matplotlib as mpl
 
+from grapa.mathModule import is_number
+
 logger = logging.getLogger(__name__)
 
 
@@ -203,8 +205,13 @@ class ParserMisc:
     @classmethod
     def alter_lim(cls, ax, lim, xory, alter, curvedummy):
         limAuto = ax.get_xlim() if xory == "x" else ax.get_ylim()
-        limInput = [li if not isinstance(li, str) else np.inf for li in lim]
+        if not isinstance(lim, list):
+            lim = list(lim)
+        # limInput = [li if not isinstance(li, str) else np.inf for li in lim]
+        limInput = [li if is_number(li) else np.inf for li in lim]
         lim = list(limInput)
+        while len(lim) < 2:
+            lim.append(np.inf)
         if xory == "x":
             fun = ax.set_xlim
         elif xory == "y":

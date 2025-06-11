@@ -11,6 +11,32 @@ Empa TFPV data reading software
 
 
 
+** Version 0.7.0.1
+
+ONGOING
+
+* Additions *
+
+- Graph DLCP: parse DLCP files generated in Abt207. Not final, to test further.
+- Example subplots_examples.txt: added a Curve adding a color gradient, fading into white.
+- GUI: can zoom in and out the axis limits using the mouse wheel. Only affects current axis, may fail with figures containing several axes. Tip: "Save zoom an/subplots" after mouse wheel action.
+
+* Modification *
+
+- GraphJV: Modified parsing of files following update of acquisition software.
+- Script Correlations, added cross-correlations plots.
+
+* BUGS *
+
+- Solved a bug affecting curves types fill_between and fill_betweenx
+- Solved a bug, rcParams['keymap.save'] conflicting with .bind("<Control-s>", ...)
+- Solved a bug with CurveMath, prevented to use the Assemble new Curve.
+- Solved a number of small bugs and adjusted behavior. The logger proves useful.
+
+
+
+
+
 
 **Version 0.7.0.0
 

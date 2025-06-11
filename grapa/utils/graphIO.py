@@ -874,23 +874,29 @@ def export(
     if not graph.attr("savesilent", True):
         print("Graph data saved as", filename.replace("/", "\\"))
     graph.fileexport = os.path.normpath(filename)
-    with open(filename, "w", encoding="utf-8") as f:
-        try:
-            f.write(out)
-        except UnicodeEncodeError as e:
-            # give some details to the user, otherwise can become quite
-            # difficult to identify where the problem originates from
-            logger.error("export: could not save the file!", exc_info=True)
-            ident = "in position "
-            errmsg = str(e)
-            if ident in errmsg:
-                idx = errmsg.find(ident) + len(ident)
-                chari = refindall("[0-9]+", errmsg[idx:])
-                if len(chari) > 0:
-                    chari = int(chari[0])
-                    outmsg = out[max(0, chari - 20) : min(len(out), chari + 15)]
-                    msg = "--> surrounding characters:" + outmsg.replace("\n", "\\n")
-                    logger.error(msg)
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            try:
+                f.write(out)
+            except UnicodeEncodeError as e:
+                # give some details to the user, otherwise can become quite
+                # difficult to identify where the problem originates from
+                logger.error("export: could not save the file!", exc_info=True)
+                ident = "in position "
+                errmsg = str(e)
+                if ident in errmsg:
+                    idx = errmsg.find(ident) + len(ident)
+                    chari = refindall("[0-9]+", errmsg[idx:])
+                    if len(chari) > 0:
+                        chari = int(chari[0])
+                        outmsg = out[max(0, chari - 20) : min(len(out), chari + 15)]
+                        msg = "--> surrounding characters:" + outmsg.replace(
+                            "\n", "\\n"
+                        )
+                        logger.error(msg)
+    except PermissionError:
+        msg = "PermissionError in graphIO.export, filename {}."
+        logger.error(msg.format(filename))  # maybe just print?
     return filename
 
 

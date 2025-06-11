@@ -30,6 +30,7 @@ grapa.datatypes.graphJV.GraphJV
 
    .. autosummary::
    
+      ~GraphJV.AXISLABELS
       ~GraphJV.FILEIO_GRAPHTYPE
       ~GraphJV.FILEIO_GRAPHTYPE_IV_HLS
       ~GraphJV.FILEIO_GRAPHTYPE_TIV

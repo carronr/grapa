@@ -241,7 +241,12 @@ def _fractionstr_to_float(frac_str):
     try:
         return float(frac_str)
     except ValueError:
-        num, denom = frac_str.split("/")
+        try:
+            num, denom = frac_str.split("/")
+        except ValueError:
+            msg = "_fractionstr_to_float: cannot make sense of input, return nan: {}."
+            logger.warning(msg.format(frac_str))  # maybe just or logger.warning ?
+            return np.nan
         return float(num) / float(denom)
 
 

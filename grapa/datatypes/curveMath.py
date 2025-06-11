@@ -204,15 +204,15 @@ class CurveMath(Curve):
         out.update({"math": math + "; " + txt if math != "" else txt})
         return out
 
-    @staticmethod
     def assemble_curve_xy(
-        idx_x: int, xory_x: str, idx_y: int, xory_y: str, graph: Graph
+        self, idx_x: int, xory_x: str, idx_y: int, xory_y: str, graph: Graph
     ) -> Curve:
         """
         Assemble new Curve from data series of same length available in a Graph object.
+
         :param idx_x: index of Curve in Graph, from which to pick the x data series
         :param xory_x: is the x or y data series picked
-        :param idx_y:index of Curve in Graph, from which to pick the y data series
+        :param idx_y: index of Curve in Graph, from which to pick the y data series
         :param xory_y: is the x or y data series picked
         :param graph: Graph object to work on
         :return: a Curve with x and y data according to wishes

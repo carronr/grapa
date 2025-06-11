@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.scripts.script_correlations.plot_parameters_2D &mdash; grapa 0.7.0.0 documentation</title>
+  <title>grapa.scripts.script_correlations.plot_parameters_2d &mdash; grapa 0.7.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/documentation_options.js?v=0146b746"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="grapa.scripts.script_correlations.plot_pearson" href="grapa.scripts.script_correlations.plot_pearson.html" />
-    <link rel="prev" title="grapa.scripts.script_correlations.plot_parameters_1D" href="grapa.scripts.script_correlations.plot_parameters_1D.html" /> 
+    <link rel="prev" title="grapa.scripts.script_correlations.plot_parameters_1d" href="grapa.scripts.script_correlations.plot_parameters_1d.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -66,16 +66,19 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_JVSummaryToBoxPlots.html">grapa.scripts.script_JVSummaryToBoxPlots</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.scripts.script_correlations.html">grapa.scripts.script_correlations</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.colorize_graph.html">grapa.scripts.script_correlations.colorize_graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_plot.html">grapa.scripts.script_correlations.crosscorrelations_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_stats.html">grapa.scripts.script_correlations.crosscorrelations_stats</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.filter_pvals.html">grapa.scripts.script_correlations.filter_pvals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.guess_is_logarithm_quantity.html">grapa.scripts.script_correlations.guess_is_logarithm_quantity</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_correlations.html">grapa.scripts.script_correlations.plot_correlations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_1D.html">grapa.scripts.script_correlations.plot_parameters_1D</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.scripts.script_correlations.plot_parameters_2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_1d.html">grapa.scripts.script_correlations.plot_parameters_1d</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.scripts.script_correlations.plot_parameters_2d</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_pearson.html">grapa.scripts.script_correlations.plot_pearson</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.process_datatable.html">grapa.scripts.script_correlations.process_datatable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.process_file.html">grapa.scripts.script_correlations.process_file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.run_standalone.html">grapa.scripts.script_correlations.run_standalone</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.values_to_lim.html">grapa.scripts.script_correlations.values_to_lim</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.writefile_datatable.html">grapa.scripts.script_correlations.writefile_datatable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.CONF.html">grapa.scripts.script_correlations.CONF</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.Helper.html">grapa.scripts.script_correlations.Helper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.HelperDatatable.html">grapa.scripts.script_correlations.HelperDatatable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.HelperScaps.html">grapa.scripts.script_correlations.HelperScaps</a></li>
@@ -115,9 +118,9 @@
           <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
           <li class="breadcrumb-item"><a href="grapa.scripts.html">grapa.scripts</a></li>
           <li class="breadcrumb-item"><a href="grapa.scripts.script_correlations.html">grapa.scripts.script_correlations</a></li>
-      <li class="breadcrumb-item active">grapa.scripts.script_correlations.plot_parameters_2D</li>
+      <li class="breadcrumb-item active">grapa.scripts.script_correlations.plot_parameters_2d</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/grapa.scripts.script_correlations.plot_parameters_2D.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/grapa.scripts.script_correlations.plot_parameters_2d.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -126,10 +129,10 @@
            <div itemprop="articleBody">
              
   <section id="grapa-scripts-script-correlations-plot-parameters-2d">
-<h1>grapa.scripts.script_correlations.plot_parameters_2D<a class="headerlink" href="#grapa-scripts-script-correlations-plot-parameters-2d" title="Link to this heading"></a></h1>
+<h1>grapa.scripts.script_correlations.plot_parameters_2d<a class="headerlink" href="#grapa-scripts-script-correlations-plot-parameters-2d" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="grapa.scripts.script_correlations.plot_parameters_2D">
-<span class="sig-prename descclassname"><span class="pre">grapa.scripts.script_correlations.</span></span><span class="sig-name descname"><span class="pre">plot_parameters_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkeys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seriesx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seriesy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newGraphKwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.scripts.script_correlations.plot_parameters_2D" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="grapa.scripts.script_correlations.plot_parameters_2d">
+<span class="sig-prename descclassname"><span class="pre">grapa.scripts.script_correlations.</span></span><span class="sig-name descname"><span class="pre">plot_parameters_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkeys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_graph_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.scripts.script_correlations.plot_parameters_2d" title="Link to this definition"></a></dt>
 <dd><p>array of scatter plots</p>
 </dd></dl>
 
@@ -139,7 +142,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="grapa.scripts.script_correlations.plot_parameters_1D.html" class="btn btn-neutral float-left" title="grapa.scripts.script_correlations.plot_parameters_1D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.scripts.script_correlations.plot_parameters_1d.html" class="btn btn-neutral float-left" title="grapa.scripts.script_correlations.plot_parameters_1d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="grapa.scripts.script_correlations.plot_pearson.html" class="btn btn-neutral float-right" title="grapa.scripts.script_correlations.plot_pearson" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

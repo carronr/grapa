@@ -15,6 +15,7 @@ from tkinter.colorchooser import askcolor
 from _tkinter import TclError
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import hex2color, rgb2hex
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -87,9 +88,10 @@ class GUIFrameCanvasGraph:
         self.callback_notifycanvas_registered = []
         self.tabs = None  # will be created later, here to reserve the name
         self.fig, self.ax = None, None
-        self.canvas = None
+        self.canvas: FigureCanvasTkAgg = None
         self._create_widgets(self.frame)
         self.app.master.bind("<Control-w>", lambda e: self.close_tab())
+        self.canvas.get_tk_widget().bind("<MouseWheel>", self.on_mousewheel)
 
     def update_ui(self):
         """Update plot on canvas"""
@@ -233,6 +235,56 @@ class GUIFrameCanvasGraph:
         """Closes current tab"""
         self.tabs.pop()
 
+    def on_mousewheel(self, event) -> None:
+        """
+        Handles the event on_mousewheel on the canvas.
+        Zoom in/out, the location pointed by mouse stays at the same position.
+        Only affects current active ax - can be problematic if several axes
+        """
+        x, y = event.x, event.y
+        # Get axes position in figure coordinates
+        fig = self.app.get_fig()
+        ax = self.app.get_ax()
+        bbox = ax.get_position()
+        # Convert to pixel coordinates
+        fig_width_px, fig_height_px = fig.get_size_inches() * fig.dpi
+        x0 = bbox.x0 * fig_width_px
+        y0 = (1 - bbox.y1) * fig_height_px  # invert Y because GUI origin is top-left
+        x1 = bbox.x1 * fig_width_px
+        y1 = (1 - bbox.y0) * fig_height_px
+        xrel = (x - x0) / (x1 - x0)  # relative to the axis coordinates
+        yrel = 1 - (y - y0) / (y1 - y0)  # opposite y direction for kinter vs matplotlib
+        if not 0 <= xrel <= 1 or not 0 <= yrel <= 1:
+            # print("on_mouse_scroll nope, ignore", xrel, yrel)
+            return  # not within axis limits
+
+        # scroll direction and magnitude of change
+        scroll = 1
+        if event.num == 4 or event.delta > 0:
+            scroll = 3 / 4
+        elif event.num == 5 or event.delta < 0:
+            scroll = 4 / 3
+
+        # new axis limits - location pointed by the mouse stays same position
+        def adaptlim(lim, scale, reverse=False):
+            if scale in ["log"]:
+                return np.log(lim) if not reverse else np.exp(lim)
+            return lim
+
+        xscale = ax.get_xscale()
+        yscale = ax.get_yscale()
+        xlim = adaptlim(ax.get_xlim(), xscale)
+        ylim = adaptlim(ax.get_ylim(), yscale)
+        xspan = xlim[1] - xlim[0]
+        yspan = ylim[1] - ylim[0]
+        xcenter = xlim[0] + xspan * xrel
+        ycenter = ylim[0] + yspan * yrel
+        xlim = [xcenter - xrel * xspan * scroll, xcenter + (1 - xrel) * xspan * scroll]
+        ylim = [ycenter - yrel * yspan * scroll, ycenter + (1 - yrel) * yspan * scroll]
+        ax.set_xlim(adaptlim(xlim, xscale, reverse=True))
+        ax.set_ylim(adaptlim(ylim, yscale, reverse=True))
+        self.canvas.draw()
+
 
 class GUIFrameCentralOptions:
     """
@@ -266,8 +318,13 @@ class GUIFrameCentralOptions:
         # labels, limits
         xlim = graph.attr("xlim", ["", ""])
         ylim = graph.attr("ylim", ["", ""])
-        xlim = [(x if not isinstance(x, str) and not np.isnan(x) else "") for x in xlim]
-        ylim = [(y if not isinstance(y, str) and not np.isnan(y) else "") for y in ylim]
+        # xlim = [(x if not isinstance(x, str) and not np.isnan(x) else "") for x in xlim]
+        # ylim = [(y if not isinstance(y, str) and not np.isnan(y) else "") for y in ylim]
+        xlim = [(x if is_number(x) else "") for x in xlim]
+        ylim = [(y if is_number(y) else "") for y in ylim]
+        for item in [xlim, ylim]:
+            while len(item) < 2:
+                item.append("")
         self._widgets["xlabel"].set(varToStr(graph.attr("xlabel")))
         self._widgets["ylabel"].set(varToStr(graph.attr("ylabel")))
         self._widgets["xlim0"].set(varToStr(xlim[0]))
@@ -929,10 +986,14 @@ class GUIFrameMenuMain:
         """Bind keystrokes to the behavior of the main application"""
         frame = self.app.master
         frame.bind("<Control-s>", lambda e: self.save_graph())
+        # otherwise 2 callbacks associated with ctrl+s, do not want the matplotlib one
+        if "ctrl+s" in matplotlib.rcParams["keymap.save"]:
+            matplotlib.rcParams["keymap.save"].remove("ctrl+s")  # ['s', 'ctrl+s']
+
         frame.bind("<Control-Shift-S>", lambda e: self.save_graph_as())
         frame.bind("<Control-o>", lambda e: self.open_file())
         frame.bind("<Control-Shift-O>", lambda e: self.merge_file())
-        # too larges chances to mess up with that one
+        # too large chances to mess up with that one
         # self.master.bind('<Control-v>', lambda e: self.openClipboard())
         frame.bind("<Control-Shift-V>", lambda e: self.merge_clipboard())
         frame.bind("<Control-Shift-N>", lambda e: self.insert_curve_empty())
@@ -1259,15 +1320,16 @@ class GUIFrameMenuMain:
         if filesave is None or filesave == "":
             # asksaveasfile return `None` if dialog closed with "cancel".
             return
+
         # retrieve info from GUI
         save_altered = self._widgets["saveScreen"].get()
         if_compact = not self._widgets["saveSepara"].get()
         # some checks to avoid erasing something important
         filesave, fileext = os.path.splitext(filesave)
         fileext = fileext.lower()
-        forbidden_ext = ["py", "txt", ".py", ".txt"]
-        for ext in forbidden_ext:
-            fileext = fileext.replace(ext, "")
+        forbidden_ext = {".py": "", ".txt": "", "py": "", "txt": ""}
+        if fileext in forbidden_ext:
+            fileext = forbidden_ext[fileext]
         if fileext == defext:
             fileext = ""
         self.app.save_graph(

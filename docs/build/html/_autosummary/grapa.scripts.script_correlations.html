@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.scripts.script_correlations &mdash; grapa 0.7.0.0 documentation</title>
+  <title>grapa.scripts.script_correlations &mdash; grapa 0.7.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/documentation_options.js?v=0146b746"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -66,16 +66,19 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_JVSummaryToBoxPlots.html">grapa.scripts.script_JVSummaryToBoxPlots</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.scripts.script_correlations</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.colorize_graph.html">grapa.scripts.script_correlations.colorize_graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_plot.html">grapa.scripts.script_correlations.crosscorrelations_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_stats.html">grapa.scripts.script_correlations.crosscorrelations_stats</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.filter_pvals.html">grapa.scripts.script_correlations.filter_pvals</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.guess_is_logarithm_quantity.html">grapa.scripts.script_correlations.guess_is_logarithm_quantity</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_correlations.html">grapa.scripts.script_correlations.plot_correlations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_1D.html">grapa.scripts.script_correlations.plot_parameters_1D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_2D.html">grapa.scripts.script_correlations.plot_parameters_2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_1d.html">grapa.scripts.script_correlations.plot_parameters_1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_2d.html">grapa.scripts.script_correlations.plot_parameters_2d</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.plot_pearson.html">grapa.scripts.script_correlations.plot_pearson</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.process_datatable.html">grapa.scripts.script_correlations.process_datatable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.process_file.html">grapa.scripts.script_correlations.process_file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.run_standalone.html">grapa.scripts.script_correlations.run_standalone</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.values_to_lim.html">grapa.scripts.script_correlations.values_to_lim</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.writefile_datatable.html">grapa.scripts.script_correlations.writefile_datatable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.CONF.html">grapa.scripts.script_correlations.CONF</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.Helper.html">grapa.scripts.script_correlations.Helper</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.HelperDatatable.html">grapa.scripts.script_correlations.HelperDatatable</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_correlations.HelperScaps.html">grapa.scripts.script_correlations.HelperScaps</a></li>
@@ -131,8 +134,14 @@ possibly, SCAPS 2-D parameter sweeps</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.colorize_graph.html#grapa.scripts.script_correlations.colorize_graph" title="grapa.scripts.script_correlations.colorize_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorize_graph</span></code></a>(graph, seriesx, pvals)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.colorize_graph.html#grapa.scripts.script_correlations.colorize_graph" title="grapa.scripts.script_correlations.colorize_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorize_graph</span></code></a>(graph, idx_pattern, pvals)</p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_plot.html#grapa.scripts.script_correlations.crosscorrelations_plot" title="grapa.scripts.script_correlations.crosscorrelations_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosscorrelations_plot</span></code></a>(stats, pkeys, pvals, ...)</p></td>
+<td><p>Plots cross-correlations between parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_stats.html#grapa.scripts.script_correlations.crosscorrelations_stats" title="grapa.scripts.script_correlations.crosscorrelations_stats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosscorrelations_stats</span></code></a>(pvals, pattern_idx, ...)</p></td>
+<td><p>Computes cross-correlation statistics for given parameter indices.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.filter_pvals.html#grapa.scripts.script_correlations.filter_pvals" title="grapa.scripts.script_correlations.filter_pvals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_pvals</span></code></a>(pkeys, pvals[, filters])</p></td>
 <td><p></p></td>
@@ -140,42 +149,45 @@ possibly, SCAPS 2-D parameter sweeps</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.guess_is_logarithm_quantity.html#grapa.scripts.script_correlations.guess_is_logarithm_quantity" title="grapa.scripts.script_correlations.guess_is_logarithm_quantity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">guess_is_logarithm_quantity</span></code></a>(series)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_correlations.html#grapa.scripts.script_correlations.plot_correlations" title="grapa.scripts.script_correlations.plot_correlations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correlations</span></code></a>(pkeys, pvals[, seriesx, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_correlations.html#grapa.scripts.script_correlations.plot_correlations" title="grapa.scripts.script_correlations.plot_correlations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correlations</span></code></a>(pkeys, pvals[, ...])</p></td>
 <td><p>seriesX, seriesy: tuple of column to consider groupbyparam: if True, organize data as series where possible</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_1D.html#grapa.scripts.script_correlations.plot_parameters_1D" title="grapa.scripts.script_correlations.plot_parameters_1D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_parameters_1D</span></code></a>(pkeys, pvals[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_1d.html#grapa.scripts.script_correlations.plot_parameters_1d" title="grapa.scripts.script_correlations.plot_parameters_1d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_parameters_1d</span></code></a>(pkeys, pvals[, ...])</p></td>
 <td><p>array of normal plots</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_2D.html#grapa.scripts.script_correlations.plot_parameters_2D" title="grapa.scripts.script_correlations.plot_parameters_2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_parameters_2D</span></code></a>(pkeys, pvals[, seriesx, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_parameters_2d.html#grapa.scripts.script_correlations.plot_parameters_2d" title="grapa.scripts.script_correlations.plot_parameters_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_parameters_2d</span></code></a>(pkeys, pvals[, ...])</p></td>
 <td><p>array of scatter plots</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.plot_pearson.html#grapa.scripts.script_correlations.plot_pearson" title="grapa.scripts.script_correlations.plot_pearson"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pearson</span></code></a>(pearson, keysx, keysy[, ...])</p></td>
-<td><p>plot Pearson correlation graph pearson: pearson correlation matrix</p></td>
+<td><p>Plots a Pearson correlation heatmap.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.process_datatable.html#grapa.scripts.script_correlations.process_datatable" title="grapa.scripts.script_correlations.process_datatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_datatable</span></code></a>(filenamebase, pkeys, pvals)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.process_datatable.html#grapa.scripts.script_correlations.process_datatable" title="grapa.scripts.script_correlations.process_datatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_datatable</span></code></a>(pkeys, pvals[, ...])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.process_file.html#grapa.scripts.script_correlations.process_file" title="grapa.scripts.script_correlations.process_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_file</span></code></a>(filename[, datakeys, filters, ...])</p></td>
 <td><p>Process a file contaiing correleation data.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.values_to_lim.html#grapa.scripts.script_correlations.values_to_lim" title="grapa.scripts.script_correlations.values_to_lim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values_to_lim</span></code></a>(values)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.run_standalone.html#grapa.scripts.script_correlations.run_standalone" title="grapa.scripts.script_correlations.run_standalone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_standalone</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.writefile_datatable.html#grapa.scripts.script_correlations.writefile_datatable" title="grapa.scripts.script_correlations.writefile_datatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writefile_datatable</span></code></a>(filename, pkeys, pvals)</p></td>
-<td><p>Write the content of the data matix into a text file</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.values_to_lim.html#grapa.scripts.script_correlations.values_to_lim" title="grapa.scripts.script_correlations.values_to_lim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values_to_lim</span></code></a>(values[, is_log])</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.Helper.html#grapa.scripts.script_correlations.Helper" title="grapa.scripts.script_correlations.Helper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Helper</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.CONF.html#grapa.scripts.script_correlations.CONF" title="grapa.scripts.script_correlations.CONF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONF</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.HelperDatatable.html#grapa.scripts.script_correlations.HelperDatatable" title="grapa.scripts.script_correlations.HelperDatatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelperDatatable</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.Helper.html#grapa.scripts.script_correlations.Helper" title="grapa.scripts.script_correlations.Helper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Helper</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.HelperScaps.html#grapa.scripts.script_correlations.HelperScaps" title="grapa.scripts.script_correlations.HelperScaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelperScaps</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.HelperDatatable.html#grapa.scripts.script_correlations.HelperDatatable" title="grapa.scripts.script_correlations.HelperDatatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelperDatatable</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.HelperScaps.html#grapa.scripts.script_correlations.HelperScaps" title="grapa.scripts.script_correlations.HelperScaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelperScaps</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>

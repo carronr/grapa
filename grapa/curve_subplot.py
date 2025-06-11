@@ -4,6 +4,8 @@
 @author: Romain Carron
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
+import logging
+
 import numpy as np
 
 from grapa.graph import Graph
@@ -11,6 +13,8 @@ from grapa.curve import Curve
 from grapa.mathModule import roundSignificant
 from grapa.utils.plot_graph_aux import SubplotsAdjuster
 from grapa.utils.funcgui import FuncGUI
+
+logger = logging.getLogger(__name__)
 
 
 class Curve_Subplot(Curve):
@@ -33,7 +37,12 @@ class Curve_Subplot(Curve):
             if val == "":
                 self.update({key: default})
             elif not isinstance(val, typ_):
-                self.update({key: typ_(val)})
+                try:
+                    new = typ_(val)
+                    self.update({key: new})
+                except ValueError:
+                    msg = "check_attr when casting value: {}."
+                    logger.error(msg.format(val), exc_info=True)
 
         check_attr("subplotfile", " ", str)
         check_attr("subplotrowspan", 1, int)

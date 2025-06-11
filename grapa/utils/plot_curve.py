@@ -127,6 +127,7 @@ def _choose_plot_method(struct, attr, groupedplotters, linespec, ignore_next):
     (ax, x, y, fmt) = struct.ax_x_y_fmt
     (_, _, curve) = struct.graph_i_curve
     alter, plot_method = struct.alter, struct.plot_method
+    handle = None
 
     # "simple" plotting methods, with prototype similar to plot()
     if plot_method in [
@@ -158,7 +159,7 @@ def _choose_plot_method(struct, attr, groupedplotters, linespec, ignore_next):
     elif plot_method in ["bar", "barh"]:
         handle = _plot_bar_barh(struct)
     elif plot_method in ["fill_between", "fill_betweenx"]:
-        handle, ignore_next = _plot_fillbetweenetc(alter, ignore_next)
+        handle, ignore_next = _plot_fillbetweenetc(struct, ignore_next)
     #  plotting of single vector data
     elif plot_method in [
         "acorr",
@@ -189,7 +190,11 @@ def _choose_plot_method(struct, attr, groupedplotters, linespec, ignore_next):
     else:
         # default is plot (lin-lin) # also valid if no information is
         # stored, aka returned ''
-        handle = ax.plot(x, y, linespec, **fmt)
+        try:
+            handle = ax.plot(x, y, linespec, **fmt)
+        except (ValueError, AttributeError) as e:
+            msg = "_choose_plot_method ax.plot. linespec: {}, fmt: {}. {}: {}."
+            logger.error(msg.format(linespec, fmt, type(e), e))
     return handle, ignore_next, attr_ignore
 
 

@@ -17,7 +17,7 @@ grapa.scripts.script\_correlations.HelperScaps
    .. autosummary::
    
        ~HelperScaps.as_labels_datatable
-       ~HelperScaps.seriesxy
+       ~HelperScaps.idx_pattern_labels
    
    
 

@@ -6,12 +6,14 @@
 .idea/modules.xml
 .idea/vcs.xml
 .idea/workspace.xml
-/dist/*.*
-/_publication_howto/*.*
 /grapa.egg-info/dependency_links.txt
 /grapa.egg-info/PKG-INFO
 /grapa.egg-info/requires.txt
 /grapa.egg-info/SOURCES.txt
 /grapa.egg-info/top_level.txt
+/_publication_howto/
+/dist/*.*
 /docs/source/_autosummary/
 /docs/build/doctrees/
+/grapa/.hypothesis/
+/tests/.hypothesis/

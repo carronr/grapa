@@ -6,9 +6,12 @@ import os
 import sys
 import copy
 import fnmatch
+import itertools
+import logging
 
 import numpy as np
 from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -21,16 +24,21 @@ from grapa.curve import Curve
 from grapa.datatypes.graphScaps import GraphScaps
 from grapa.colorscale import Color
 
-
-AS_DATATABLE = "AS_DATATABLE"
-AS_SCAPS = "AS_SCAPS"
-AUTO = "AUTO"
-
-HIGHER = ">"
-LOWER = "<"
+logger = logging.getLogger(__name__)
 
 
-def writefile_datatable(filename, pkeys, pvals):
+class CONF:
+    AS_DATATABLE = "AS_DATATABLE"
+    AS_SCAPS = "AS_SCAPS"
+    AUTO = "AUTO"
+
+    HIGHER = ">"
+    LOWER = "<"
+
+    pltclose = True
+
+
+def _writefile_datatable(filename, pkeys, pvals):
     """Write the content of the data matix into a text file"""
     with open(filename, "w") as file:
         file.write("\t".join(pkeys) + "\n")
@@ -39,14 +47,14 @@ def writefile_datatable(filename, pkeys, pvals):
             file.write("\t".join([str(li) for li in line]) + "\n")
 
 
-def plot_parameters_1D(pkeys, pvals, newGraphKwargs={}):
+def plot_parameters_1d(pkeys, pvals, new_graph_kwargs={}):
     """array of normal plots"""
     xlim = values_to_lim(pvals[0])
-    graphaux = Graph(**newGraphKwargs)
+    graphaux = Graph(**new_graph_kwargs)
     graphaux.append(Curve([[0], [0]], {}))
     graphaux.castCurve("subplot", 0, silentSuccess=True)
     graphaux[0].update({"subplotupdate": {"xlabel": pkeys[0], "xlim": xlim}})
-    graphshow = Graph(**newGraphKwargs)
+    graphshow = Graph(**new_graph_kwargs)
     for i in range(1, pvals.shape[0]):
         graphshow.append(copy.deepcopy(graphaux[0]))
         spu = graphshow[-1].attr("subplotupdate")
@@ -59,31 +67,27 @@ def plot_parameters_1D(pkeys, pvals, newGraphKwargs={}):
     return graphshow
 
 
-def plot_parameters_2D(pkeys, pvals, seriesx=None, seriesy=None, newGraphKwargs={}):
+def plot_parameters_2d(
+    pkeys, pvals, idx_pattern=None, idx_labels=None, new_graph_kwargs={}
+):
     """array of scatter plots"""
-    if seriesx is None:
-        seriesx = [0, 1]
-    if seriesy is None:
-        seriesy = range(2, len(pkeys))
+    if idx_pattern is None:
+        idx_pattern = [0, 1]
+    if idx_labels is None:
+        idx_labels = range(2, len(pkeys))
 
     # preparatory works
-    islog = [guess_is_logarithm_quantity(pvals[i, :]) for i in seriesx]
-    typeplot = ""
-    if islog[0] and islog[1]:
-        typeplot = "loglog"
-    elif islog[0] and not islog[1]:
-        typeplot = "semilogx"
-    elif not islog[0] and islog[1]:
-        typeplot = "semilogy"
+    islog = [guess_is_logarithm_quantity(pvals[i, :]) for i in idx_pattern]
+    TYPEPLOTS = {0: "", 1: "semilogy", 10: "semilogx", 11: "loglog"}
+    typeplot = TYPEPLOTS[islog[0] * 10 + islog[1]]
 
     s_a = [0.1, 0.1, 0.9, 0.9, 0.5, 0.5]
     figsize = [8, 8]
     spanx = figsize[0] * (s_a[2] - s_a[0]) / (2 * 1 + 1 * s_a[4]) * 72  # in points
     npntsx = np.sqrt(pvals.shape[1]) * 1.5  # *2 safety margin, symbols not too large
     markersize = (spanx / npntsx) ** 2
-    # print('markersize', markersize)
 
-    graphaux = Graph(**newGraphKwargs)
+    graphaux = Graph(**new_graph_kwargs)
     dataaux = [[1], [1]]
     graphaux.append(Curve(dataaux, {}))
     attr0 = {
@@ -92,14 +96,14 @@ def plot_parameters_2D(pkeys, pvals, seriesx=None, seriesy=None, newGraphKwargs=
         "markersize": markersize,
         "colorbar": {"adjust": [1.00, 0, 0.05, 1, "ax"]},
     }
-    x0, x1 = pvals[seriesx[0], :], pvals[seriesx[1], :]
+    x0, x1 = pvals[idx_pattern[0], :], pvals[idx_pattern[1], :]
     graphaux.append(Curve([x0, x1], attr0))
     graphaux.castCurve("subplot", 0, silentSuccess=True)
-    xlim = list(np.exp(values_to_lim(np.log(x0)))) if islog[0] else values_to_lim(x0)
-    ylim = list(np.exp(values_to_lim(np.log(x1)))) if islog[1] else values_to_lim(x1)
+    xlim = values_to_lim(x0, islog[0])
+    ylim = values_to_lim(x1, islog[1])
     su = {
-        "xlabel": pkeys[seriesx[0]],
-        "ylabel": pkeys[seriesx[1]],
+        "xlabel": pkeys[idx_pattern[0]],
+        "ylabel": pkeys[idx_pattern[1]],
         "xlim": xlim,
         "ylim": ylim,
     }
@@ -107,14 +111,14 @@ def plot_parameters_2D(pkeys, pvals, seriesx=None, seriesy=None, newGraphKwargs=
         su.update({"typeplot": typeplot})
     graphaux[0].update({"subplotupdate": su})
 
-    graphshow = Graph(**newGraphKwargs)
-    flagonlynan = True
-    for i in seriesy:
+    graph = Graph(**new_graph_kwargs)
+    flag_onlynan = True
+    for i in idx_labels:
         values, key = pvals[i, :], pkeys[i]
         if pkeys[i] in ["FF", "eta"]:
             values = np.array(values) * 100
             key = key + " (%)"
-        graphshow.append(copy.deepcopy(graphaux[0]))
+        graph.append(copy.deepcopy(graphaux[0]))
         # text annotations
         text, textxy, textargs = [], [], []
         colorthres = (np.min(values) + np.max(values)) / 2
@@ -132,43 +136,48 @@ def plot_parameters_2D(pkeys, pvals, seriesx=None, seriesy=None, newGraphKwargs=
                     "color": color,
                 }
             )  # , 'zorder':0
-        spu = graphshow[-1].attr("subplotupdate")
+        spu = graph[-1].attr("subplotupdate")
         spu.update({"title": key, "text": text, "textxy": textxy, "textargs": textargs})
-        graphshow[-1].update({"subplotupdate": spu})
-        graphshow.append(graphaux[1])
+        graph[-1].update({"subplotupdate": spu})
+        graph.append(graphaux[1])
         # add data
-        graphshow.append(Curve([x0, values], {"type": "scatter_c", "label": key}))
+        graph.append(Curve([x0, values], {"type": "scatter_c", "label": key}))
         if not np.isnan(values).all():
-            flagonlynan = False
-    graphshow.update({"subplots_adjust": s_a, "figsize": figsize})
-    if flagonlynan:
+            flag_onlynan = False
+    graph.update({"subplots_adjust": s_a, "figsize": figsize})
+    if flag_onlynan:
         return None
-    return graphshow
+    return graph
 
 
 def plot_correlations(
-    pkeys, pvals, seriesx=None, seriesy=None, groupbyparam=True, newGraphKwargs={}
+    pkeys,
+    pvals,
+    idx_pattern=None,
+    idx_labels=None,
+    groupbyparam=True,
+    new_graph_kwargs={},
 ):
     """
     seriesX, seriesy: tuple of column to consider
     groupbyparam: if True, organize data as series where possible
     """
-    if seriesx is None:
-        seriesx = range(pvals.shape[0])
-    if seriesy is None:
-        seriesy = range(pvals.shape[1])
+    if idx_pattern is None:
+        idx_pattern = range(pvals.shape[0])
+    if idx_labels is None:
+        idx_labels = range(pvals.shape[1])
 
     # preparatory works
-    islogx = [guess_is_logarithm_quantity(pvals[i, :]) for i in seriesx]
-    islogy = [guess_is_logarithm_quantity(pvals[j, :]) for j in seriesy]
+    islogx = [guess_is_logarithm_quantity(pvals[i, :]) for i in idx_pattern]
+    islogy = [guess_is_logarithm_quantity(pvals[j, :]) for j in idx_labels]
     xlim = []
-    for k in range(len(seriesx)):
-        d = pvals[seriesx[k], :]
+    for k in range(len(idx_pattern)):
+        d = pvals[idx_pattern[k], :]
         lim = list(np.exp(values_to_lim(np.log(d)))) if islogx[k] else values_to_lim(d)
         xlim.append(lim)
     ylim = []
-    for k in range(len(seriesy)):
-        d = pvals[seriesy[k], :]
+    for k in range(len(idx_labels)):
+        d = pvals[idx_labels[k], :]
         lim = list(np.exp(values_to_lim(np.log(d)))) if islogy[k] else values_to_lim(d)
         ylim.append(lim)
     # axis label & ticks removval. arbitraryfunc.: matplotlib bug with minor tick labels
@@ -183,21 +192,21 @@ def plot_correlations(
         "arbitraryfunctions": [["yaxis.set_minor_formatter", ["NullFormatter()"], {}]],
     }
 
-    lenx, leny = len(seriesx), len(seriesy)
-    graph = Graph(**newGraphKwargs)
+    lenx, leny = len(idx_pattern), len(idx_labels)
+    graph = Graph(**new_graph_kwargs)
     plts = [3 * (lenx + (lenx - 1) * 0.0), 3 * (leny + (leny - 1) * 0.0)]
     fs = [plts[0] + 1 + 0.5, plts[1] + 1 + 0.5]
     sa = [1 / fs[0], 1 / fs[0], 1 - 0.5 / fs[0], 1 - 0.5 / fs[1], 0, 0]
     graph.update({"subplotsncols": lenx, "figsize": fs, "subplots_adjust": sa})
     pearson = np.zeros((lenx, leny, 2))
     pearson.fill(np.nan)
-    for j_ in range(len(seriesy)):
-        j = seriesy[j_]
+    for j_ in range(len(idx_labels)):
+        j = idx_labels[j_]
         pvalsj = pvals[j, :]
         if np.isnan(pvalsj).all():
             continue  # no point to proceed if only nan in data
-        for i_ in range(len(seriesx)):
-            i = seriesx[i_]
+        for i_ in range(len(idx_pattern)):
+            i = idx_pattern[i_]
             pvalsi = np.array(pvals[i, :])
             # Curve subplot
             attri = {
@@ -212,9 +221,9 @@ def plot_correlations(
             sbu.update({"xlim": xlim[i_], "ylim": ylim[j_]})
             # remove axis labels, except for end graph.
             # NB: grapa not yet compatible with sharex and sharey axes
-            if i != seriesx[0]:
+            if i != idx_pattern[0]:
                 sbu.update(sburemovery)
-            if j != seriesy[-1]:
+            if j != idx_labels[-1]:
                 sbu.update(sburemoverx)
             if islogx[i_] and islogy[j_]:
                 sbu.update({"typeplot": "loglog"})
@@ -230,7 +239,7 @@ def plot_correlations(
                 signatures = []
                 for m in range(len(pvalsi)):
                     signatures.append(
-                        ";".join([str(pvals[k, m]) for k in seriesx if k != i])
+                        ";".join([str(pvals[k, m]) for k in idx_pattern if k != i])
                     )
                 signatures = np.array(signatures)
                 signunique = np.unique(signatures)
@@ -249,19 +258,156 @@ def plot_correlations(
                 pass  # maybe not >= 2 numbers to compute correlation
 
     if np.isnan(pearson).all():
-        print("Only Nan in Pearson matrix. Stop here.")
+        logger.warning("plot_correlations: only Nan in Pearson matrix. Stop here.")
         return None, None
     return graph, pearson
 
 
-def plot_pearson(pearson, keysx, keysy, newGraphKwargs={}):
+def crosscorrelations_stats(pvals, pattern_idx, label_idx, also_transpose=True):
     """
-    plot Pearson correlation graph
-    pearson: pearson correlation matrix
+    Computes cross-correlation statistics for given parameter indices.
+
+    :param pvals: 2D array of parameter values.
+    :param pattern_idx: List of indices for parameters to analyze.
+    :param label_idx: Index of the label parameter.
+    :param also_transpose: Whether to include transposed pairs in the output.
+    :return: Dictionary of statistics for parameter pairs.
+    """
+    if not pattern_idx or label_idx >= pvals.shape[0]:
+        raise ValueError("Invalid indices provided for pattern_idx or label_idx.")
+
+    stats = {}
+    for col1, col2 in itertools.combinations(pattern_idx, 2):
+        unique_col1 = np.unique(pvals[col1, :])
+        unique_col2 = np.unique(pvals[col2, :])
+        if len(unique_col1) == 0 or len(unique_col2) == 0:
+            continue  # Skip if no unique values
+
+        pair_stats = {}
+        for val1 in unique_col1:
+            mask_col1 = pvals[col1, :] == val1
+            for val2 in unique_col2:
+                mask = mask_col1 & (pvals[col2, :] == val2)
+                if np.any(mask):
+                    avg = np.nanmean(pvals[label_idx, mask])
+                    std = np.nanstd(pvals[label_idx, mask])
+                    pair_stats[(val1, val2)] = {"avg": avg, "std": std}
+        stats[(col1, col2)] = pair_stats
+
+    if also_transpose:
+        transposed = {}
+        for (col1, col2), data in stats.items():
+            transposed[(col2, col1)] = {
+                tuple(reversed(key)): value for key, value in data.items()
+            }
+        stats.update(transposed)
+    return stats
+
+
+def crosscorrelations_plot(
+    stats, pkeys, pvals, pattern_idx, label_idx, new_graph_kwargs={}
+):
+    """
+    Plots cross-correlations between parameters.
+
+    :param stats: Dictionary containing statistics for parameter pairs.
+    :param pkeys: List of parameter names.
+    :param pvals: Array of parameter values.
+    :param pattern_idx: Indices of parameters to analyze.
+    :param label_idx: Index of the label parameter.
+    :param new_graph_kwargs: Additional arguments for the Graph object.
+    :return: Graph object with cross-correlation plots.
+    """
+    # constants - maybe could be modified later on
+    SUBPLOTDIM = [2.5, 2.5]
+    MARGIN = [1, 1, 1, 1, 1.5, 1]
+
+    # for log plots
+    TYPEPLOTS = {0: "", 1: "semilogy", 10: "semilogx", 11: "loglog"}
+    islog = {i: guess_is_logarithm_quantity(pvals[i, :]) for i in pattern_idx}
+
+    # Calculate z-axis limits
+    avgmin, avgmax = np.inf, -np.inf
+    for _, data in stats.items():
+        for _, values in data.items():
+            avgmin = min(avgmin, values["avg"])
+            avgmax = max(avgmax, values["avg"])
+    zlim = [avgmin, avgmax]
+    zstd = np.nanstd(pvals[label_idx])
+
+    # initialize graph
+    graph = Graph(**new_graph_kwargs)
+    empty_spu = {"arbitraryfunctions": [["set_axis_off", [], {}]]}
+
+    # generate plot for each pair, also empty diagonal
+    pairs = []
+    for cy in pattern_idx:
+        for cx in pattern_idx:
+            pairs.append((cx, cy))
+    for pair in pairs:
+        if pair not in stats:
+            # along the diagonal
+            graph.append(Curve([[0], [0]], {}))
+            graph.castCurve("subplot", -1, silentSuccess=True)
+            graph[-1].update({"subplotupdate": empty_spu, "label": str(pair)})
+        else:
+            data = stats[pair]
+            x, y, avg, std = [], [], [], []
+            for (valx, valy), values in data.items():
+                x.append(valx)
+                y.append(valy)
+                avg.append(values["avg"])
+                std.append(values["std"])
+            conf = np.clip(1 / (np.array(std) / max(zstd, 1e-300)), 0, 10)
+            # create subplot
+            typeplot = TYPEPLOTS[islog[pair[0]] * 10 + islog[pair[1]]]
+            spu = {
+                "xlim": values_to_lim(x, is_log=islog[pair[0]]),
+                "ylim": values_to_lim(y, is_log=islog[pair[1]]),
+                "xlabel": pkeys[pair[0]],
+                "ylabel": pkeys[pair[1]],
+                "typeplot": typeplot,
+            }
+            graph.append(Curve([[0], [0]], {}))
+            graph.castCurve("subplot", -1, silentSuccess=True)
+            graph[-1].update({"subplotupdate": spu, "label": pair})
+            # create scatter plot
+            attrs = {
+                "type": "scatter",
+                "vminmax": zlim,
+                "colorbar": {
+                    "label": pkeys[label_idx],
+                    "adjust": [1.0, 0, 0.05, 1, "ax"],
+                },
+            }
+            graph.append(Curve([x, y], attrs))
+            graph.append(Curve([x, avg], {"type": "scatter_c"}))
+            graph.append(Curve([x, conf * 50], {"type": "scatter_s"}))
+
+    # cosmetics
+    kw_spa = {"graph": graph, "ncols": len(pattern_idx), "nrows": len(pattern_idx)}
+    graph[0].update_spa_figsize_abs(SUBPLOTDIM, MARGIN, **kw_spa)
+    return graph
+
+
+def plot_pearson(pearson, keysx, keysy, new_graph_kwargs={}):
+    """
+    Plots a Pearson correlation heatmap.
+
+    :param pearson: A 3D NumPy array containing Pearson correlation coefficients.
+                    The first two dimensions represent the correlation matrix,
+                    and the third dimension contains the coefficient and p-value.
+    :param keysx: List of labels for the x-axis, corresponding to the columns of the
+                  correlation matrix.
+    :param keysy: List of labels for the y-axis, corresponding to the rows of the
+                  correlation matrix.
+    :param new_graph_kwargs: Dictionary of additional keyword arguments to customize the
+                             Graph object.
+    :return: A Graph object representing the Pearson correlation heatmap.
     """
     lenx, leny = pearson.shape[0], pearson.shape[1]
     # plot Pearson correlation coefficient
-    graph = Graph(**newGraphKwargs)
+    graph = Graph(**new_graph_kwargs)
     for c in range(1, pearson.shape[1]):
         graph.append(Curve([pearson[:, 0, 0], pearson[:, c, 0]], {}))
     graph.castCurve("image", 0, silentSuccess=True)
@@ -307,13 +453,15 @@ def guess_is_logarithm_quantity(series):
         ratios = sunique[1:] / sunique[:-1]
         ratiosda = np.abs(ratios - ratios[0])
         # print("ratiosda", ratios, ratiosda)
-        if np.max(ratiosda) < 1e-3:  # 1e-15
+        if np.max(ratiosda) < 1e-4:  # 1e-15
             # print("logarithm TRUE")
             return True
     return False
 
 
-def values_to_lim(values):
+def values_to_lim(values, is_log=False):
+    if is_log:
+        return list(np.exp(values_to_lim(np.log(values))))
     mi, ma = np.nanmin(values), np.nanmax(values)
     s = ma - mi
     lim = [mi - s / 10, ma + s / 10]
@@ -343,9 +491,9 @@ def filter_pvals(pkeys, pvals, filters: list = None):
                     for i in range(len(pkeys)):
                         if fnmatch.fnmatch(pkeys[i], fil[0]):
                             break  # True
-            if fil[1] == HIGHER and not pvals[i, j] > fil[2]:
+            if fil[1] == CONF.HIGHER and not pvals[i, j] > fil[2]:
                 flag = False
-            elif fil[1] == LOWER and not pvals[i, j] < fil[2]:
+            elif fil[1] == CONF.LOWER and not pvals[i, j] < fil[2]:
                 flag = False
         if not flag:
             flagged.append(j)
@@ -364,51 +512,48 @@ def filter_pvals(pkeys, pvals, filters: list = None):
     return pvals
 
 
-def process_datatable(
-    filenamebase, pkeys, pvals, seriesx=None, seriesy=None, **ngkwargs
-):
-    if len(seriesx) == 1:
-        graphshow = plot_parameters_1D(pkeys, pvals, **ngkwargs)
-        graphshow.plot(filenamebase + "_summary")
-    if len(seriesx) == 2:
-        graphshow = plot_parameters_2D(pkeys, pvals, seriesx, seriesy, **ngkwargs)
-        if graphshow is not None:
-            graphshow.plot(filenamebase + "_summary")
+def process_datatable(pkeys, pvals, idx_pattern=None, idx_labels=None, **ngkwargs):
+    graphshow = None
+    if len(idx_pattern) == 1:
+        graphshow = plot_parameters_1d(pkeys, pvals, **ngkwargs)
+    if len(idx_pattern) == 2:
+        graphshow = plot_parameters_2d(
+            pkeys, pvals, idx_pattern, idx_labels, **ngkwargs
+        )
 
     # correlation graph
     graphtable, pearson = plot_correlations(
-        pkeys, pvals, seriesx=seriesx, seriesy=seriesy, **ngkwargs
+        pkeys, pvals, idx_pattern=idx_pattern, idx_labels=idx_labels, **ngkwargs
     )
+
     # Pearson summary
     graphpearson = None
     if graphtable is not None:
         # pearson graph
         graphpearson = plot_pearson(
             pearson,
-            [pkeys[p] for p in seriesx],
-            [pkeys[p] for p in seriesy],
+            [pkeys[p] for p in idx_pattern],
+            [pkeys[p] for p in idx_labels],
             **ngkwargs
         )
-        graphtable.plot(filenamebase + "_correlation_data")
-        graphpearson.plot(filenamebase + "_correlation_pearson")
-    return graphtable, graphpearson, pearson
+    return graphtable, graphpearson, pearson, graphshow
 
 
-def colorize_graph(graph, seriesx, pvals):
+def colorize_graph(graph, idx_pattern, pvals):
     # Modifies object graph
     # for 2D parameter sweeps: colorize in sweeps in hls colorspace, with
     # - hue between 0 and 1 according to the first parameter, starting with red,
     #   with additional small increment according to 2nd parameter,
     # - luminance from 0.25 to 0.75 according to the second parameter
-    if seriesx is None:
+    if idx_pattern is None:
         return
 
-    if len(seriesx) == 1:
+    if len(idx_pattern) == 1:
         graph.colorize("viridis")
         return
 
-    if len(seriesx) == 2:
-        x0, x1 = pvals[seriesx[0], :], pvals[seriesx[1], :]
+    if len(idx_pattern) == 2:
+        x0, x1 = pvals[idx_pattern[0], :], pvals[idx_pattern[1], :]
         lookup = [[x0[i], x1[i]] for i in range(len(x0))]
         p0 = list(np.unique(x0))
         p1 = list(np.unique(x1))
@@ -429,10 +574,10 @@ def colorize_graph(graph, seriesx, pvals):
 
 class Helper:
     @classmethod
-    def seriesxy(cls, pkeys):
-        seriesx = range(len(pkeys))
-        seriesy = range(len(pkeys))
-        return seriesx, seriesy
+    def idx_pattern_labels(cls, pkeys):
+        idx_pattern = range(len(pkeys))
+        idx_labels = range(len(pkeys))
+        return idx_pattern, idx_labels
 
     @classmethod
     def as_labels_datatable(cls, graph, keys):
@@ -447,13 +592,13 @@ class Helper:
 
 class HelperScaps(Helper):
     @classmethod
-    def seriesxy(cls, pkeys):
+    def idx_pattern_labels(cls, pkeys):
         nresults = 6
         nparams = len(pkeys) - nresults
         nresults = 4  # hack, ignore last 2 results
-        seriesx = range(nparams)
-        seriesy = range(nparams, nparams + nresults)
-        return seriesx, seriesy
+        idx_pattern = range(nparams)
+        idx_labels = range(nparams, nparams + nresults)
+        return idx_pattern, idx_labels
 
     @classmethod
     def as_labels_datatable(cls, graph, *args):
@@ -518,14 +663,14 @@ class HelperDatatable(Helper):
                 pkeys = None
         else:  # let's try something else
             pkeys = None
+
         if pkeys is None:
             pkeys = graph.attr("collabels")
             if len(pkeys) == len(graph):  # missing first columns
                 pkeys.insert(0, graph.attr("xlabel"))
             if len(pkeys) < len(graph) + 1:
-                print(
-                    "HelperDatatable.as_labels_datatable: Alternative guess for pkeys"
-                )
+                msg = "HelperDatatable.as_labels_datatable: Alternative guess for pkeys"
+                print(msg)
                 pkeys = [graph.attr("xlabel")]
                 for curve in graph:
                     pkeys.append(curve.attr("label"))
@@ -547,21 +692,44 @@ class HelperDatatable(Helper):
         for curve in graph:
             pvals.append(curve.y())
         if len(pkeys) != len(pvals):
-            print(
-                "ERROR HelperDatatable.as_labels_datatable size issue",
-                len(pkeys),
-                len(pvals),
+            msg = (
+                "ERROR HelperDatatable.as_labels_datatable size issue. len pkeys {"
+                "}, len pvals {}."
             )
+            logger.error(msg.format(len(pkeys), len(pvals)))
             print(pkeys)
         return pkeys, np.array(pvals), len(pkeys)
 
 
+def _choice_helper_datakeys(datakeys, graph):
+    helper = Helper
+    helper_dict = {CONF.AS_SCAPS: HelperScaps, CONF.AS_DATATABLE: HelperDatatable}
+    if isinstance(datakeys, str) and datakeys in helper_dict:
+        helper = helper_dict[datakeys]
+        print("Interpret input data {}.".format(datakeys.lower().replace("_", " ")))
+
+    # identification of data type
+    if datakeys == CONF.AUTO:
+        meastype = graph.attr("meastype")
+        if meastype == GraphScaps.FILEIO_GRAPHTYPE:
+            print("Datatype AUTO, detected Scaps.")
+            datakeys = CONF.AS_SCAPS
+            helper = HelperScaps
+
+        meastype_possible = ["Undetermined data type", "Database"]
+        if len(str(graph.attr("collabels", ""))) > 0 and meastype in meastype_possible:
+            print("Datatype AUTO, detected data table.")
+            datakeys = CONF.AS_DATATABLE
+            helper = HelperDatatable
+    return helper, datakeys
+
+
 def process_file(
-    filename,
-    datakeys=AUTO,
+    filename: str,
+    datakeys=CONF.AUTO,
     filters: list = None,
-    seriesx=None,
-    seriesy=None,
+    idx_pattern=None,
+    idx_labels=None,
     newGraphKwargs={},
 ) -> Graph:
     """Process a file contaiing correleation data. e.g. a SCAPS output file of a
@@ -571,58 +739,39 @@ def process_file(
     :param filename: file to process
     :param datakeys: how to interpret the file content.
 
-           - AS_DATATABLE: open the file as a datatable
+           - CONF.AS_DATATABLE: open the file as a datatable
 
-           - AS_SCAPS: assumes this is the output of Scaps simulations. also preselect
-             series of interest
+           - CONF.AS_SCAPS: assumes this is the output of Scaps simulations. also
+             preselect series of interest
 
-           - AUTO: first open the graph, then auto detect
+           - CONF.AUTO: first open the graph, then auto detect
 
            -  [key1, key2, ...]: to retrieve from graph Graph, each Curve is one
               "experiment"
 
     :param filters: list of conditions to exclude specific "experiments" (e.g. rows in
            a table) should be excluded. e.g. [["Jsc_mApcm2", HIGHER, 10]]
-    :param seriesx: list/range of data to consider for the correlation plots
+    :param idx_pattern: list/range of data to consider for the correlation plots
            By default, whow all columns
-    :param seriesy: list/range of data to consider for the correlation plots
+    :param idx_labels: list/range of data to consider for the correlation plots
            By default, whow all columns
     :param newGraphKwargs: specific to Grapa, to e.g. have consistent config file
     :return: a Graph object
     """
     print("Processing file", filename)
-    ngkwargs = {"newGraphKwargs": newGraphKwargs}
-    helper = Helper
-    helper_dict = {AS_SCAPS: HelperScaps, AS_DATATABLE: HelperDatatable}
-    if isinstance(datakeys, str) and datakeys in helper_dict:
-        helper = helper_dict[datakeys]
-        print("Interpret input data {}.".format(datakeys.lower().replace("_", " ")))
+    ngkwargs = {"new_graph_kwargs": newGraphKwargs}
 
     # open input data
     graph = Graph(filename, **newGraphKwargs)
-    # some checks
     if len(graph) == 0:
-        print("Could not find data in the file. Script end.")
+        logger.error("Could not find data in file {}. Script end.".format(filename))
         return False
-    # cosmetics
-    if len(graph) > 10:
-        graph.update({"legendproperties": {"fontsize": 6}})
 
-    # identification of data type
+    helper, datakeys = _choice_helper_datakeys(datakeys, graph)
     fnamebase = os.path.splitext(filename)[0]
     dataext = graph[0].attr("curve").replace("Curve ", "")
-    if datakeys == AUTO:
-        if graph.attr("meastype") == GraphScaps.FILEIO_GRAPHTYPE:
-            print("Datatype AUTO, detected Scaps.")
-            datakeys = AS_SCAPS
-            helper = HelperScaps
-        if len(str(graph.attr("collabels", ""))) > 0 and graph.attr("meastype") in [
-            "Undetermined data type",
-            "Database",
-        ]:
-            print("Datatype AUTO, detected data table.")
-            datakeys = AS_DATATABLE
-            helper = HelperDatatable
+    if len(graph) > 10:
+        graph.update({"legendproperties": {"fontsize": 6}})
 
     print("Running script assuming data", datakeys)
 
@@ -632,41 +781,71 @@ def process_file(
     pkeys, pvals, nparams = helper.as_labels_datatable(graph, datakeys)
 
     # filter data
-    pvalshape = list(pvals.shape)
     pvals = filter_pvals(pkeys, pvals, filters=filters)
-    # if np.sum(pvalshape) != np.sum(pvals.shape):
-    #    print(pvalshape, pvals.shape)
-    #    fnamebase += "_filter"
-
     if np.isnan(pvals).all():
         graph.plot(fnamebase + "_parseddata" + dataext)  # before coloring
-        print("Data table of parameters contains only NaN, script stops here.")
-        print(pkeys)
-        print(pvals.shape)
+        if CONF.pltclose:
+            plt.close()
+        msg = "Data table of parameters contains only NaN, script stops here."
+        msg += "\npkeys: {}\npvals.shape: {}"
+        logger.error(msg.format(pkeys, pvals.shape))
         return graph
 
     # export and plot results
-    writefile_datatable(fnamebase + "_correlation_table.txt", pkeys, pvals)
+    _writefile_datatable(fnamebase + "_correlation_table.txt", pkeys, pvals)
 
-    # by default,  full correlation matrix
-    # helper handles generic or Scaps variant
-    serx, sery = seriesx, seriesy
-    seriesx_, seriesy_ = helper.seriesxy(pkeys)
-    if serx is None:
-        serx = seriesx_
-        print("Automatic choice of seriesx: {}.".format(serx))
-    if sery is None:
-        sery = seriesy_
-        print("Automatic choice of seriesy: {}.".format(sery))
+    # by default, full correlation matrix
+    idx_pattern_, idx_labels_ = helper.idx_pattern_labels(pkeys)
+    if idx_pattern is None:
+        idx_pattern = idx_pattern_
+        print("Automatic choice of seriesx: {}.".format(idx_pattern))
+    if idx_labels is None:
+        idx_labels = idx_labels_
+        print("Automatic choice of seriesy: {}.".format(idx_labels))
 
-    # if datakeys != AS_DATATABLE:
-    colorize_graph(graph, serx, pvals)
+    # if datakeys != CONF.AS_DATATABLE:
+    colorize_graph(graph, idx_pattern, pvals)
     graph.plot(fnamebase + "_parseddata" + dataext)
+    if CONF.pltclose:
+        plt.close()
+
+    # cross-correlations
+    if len(idx_pattern) > 1:
+        for idx_l in idx_labels:
+            if idx_l in idx_pattern:
+                msg = "Cross-correlation: skip {} {} because part of the pattern."
+                print(msg.format(idx_l, pkeys[idx_l]))
+                continue
+            if len(np.unique(pvals[idx_l])) < 2:
+                msg = "Cross-correlation: skip {} {} because has less than 2 values."
+                print(msg.format(idx_l, pkeys[idx_l]))
+                continue
+
+            averages = crosscorrelations_stats(pvals, idx_pattern, idx_l)
+            graphcc = crosscorrelations_plot(
+                averages, pkeys, pvals, idx_pattern, idx_l, **ngkwargs
+            )
+            graphcc.update({"dpi": 100})
+            graphcc.plot(fnamebase + "_corrcross" + str(idx_l))
+            if CONF.pltclose:
+                plt.close()
 
     # process datatable
-    graphtable, graphpearson, pearson = process_datatable(
-        fnamebase, pkeys, pvals, seriesx=serx, seriesy=sery, **ngkwargs
+    graphtable, graphpearson, pearson, graphshow = process_datatable(
+        pkeys, pvals, idx_pattern=idx_pattern, idx_labels=idx_labels, **ngkwargs
     )
+    if isinstance(graphtable, Graph):
+        graphtable.plot(fnamebase + "_correlation_data")
+        if CONF.pltclose:
+            plt.close()
+    if isinstance(graphpearson, Graph):
+        graphpearson.plot(fnamebase + "_correlation_pearson")
+        if CONF.pltclose:
+            plt.close()
+    if isinstance(graphshow, Graph):
+        graphshow.plot(fnamebase + "_summary")
+        if CONF.pltclose:
+            plt.close()
 
     print("Script ended successfully")
     if graphtable is not None:
@@ -674,39 +853,40 @@ def process_file(
     return graph
 
 
-if __name__ == "__main__":
-    datakeys_ = AUTO
-    filters_ = []
-    seriesx_ = None
-    seriesy_ = None
-
-    r"""
-    # Example
-    filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
-    # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CIGStau_CIGSp.iv'
-    datakeys_ = ['batch parameters 0 value', 'batch parameters 1 value','temperature [k]']
-    filters_ = [["i_ZnO*affinit*", HIGHER, 4.45], [1, '>', 220]]
-    """
+def run_standalone():
+    datakeys = CONF.AUTO
+    idx_pattern = None
+    idx_labels = None
+    filters = []
 
     # Example
+    # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
+    # # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CIGStau_CIGSp.iv'
+    # datakeys = ['batch parameters 0 value', 'batch parameters 1 value','temperature [k]']
+    # filters = [["i_ZnO*affinit*", CONF.HIGHER, 4.45], [1, '>', 220]]
+
+    # # Example
     filename = r"..\examples\JV\SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_Param.txt"
-    # datakeys_ = AS_DATATABLE  # not necessarily needed, autodetection should work
-    filters_ = [["Jsc_mApcm2", HIGHER, 10]]
-    seriesx_ = range(11)
+    # datakeys_ = CONF.AS_DATATABLE  # not necessarily needed, autodetection should work
+    filters = [["Jsc_mApcm2", CONF.HIGHER, 10]]
+    idx_pattern = range(11)
 
-    r"""
     # Example
-    filename = (
-        r"..\examples\JV\SAMPLE_B_3layerMo\export_SAMPLE_B_3LayerMo_summary_allJV.txt"
-    )
-    datakeys_ = ["Voc", "Jsc", "FF", "area"]  # , 'Eff', 'Rp', 'acquis soft rs']
-    filters_ = [["Jsc", HIGHER, 10]]
-    """
+    # filename = r"..\examples\JV\SAMPLE_B_3layerMo\export_SAMPLE_B_3LayerMo_summary_allJV.txt"
+    # datakeys = ["Voc", "Jsc", "FF", "area"]  # , 'Eff', 'Rp', 'acquis soft rs']
+    # filters = [["Jsc", CONF.HIGHER, 10]]
 
     process_file(
         filename,
-        datakeys=datakeys_,
-        filters=filters_,
-        seriesx=seriesx_,
-        seriesy=seriesy_,
+        datakeys=datakeys,
+        filters=filters,
+        idx_pattern=idx_pattern,
+        idx_labels=idx_labels,
     )
+
+
+if __name__ == "__main__":
+    CONF.pltclose = False
+    run_standalone()
+    if not CONF.pltclose:
+        plt.show()

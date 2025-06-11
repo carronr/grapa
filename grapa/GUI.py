@@ -189,7 +189,7 @@ class Application(tk.Frame):
                 section[0].update_ui()
             except Exception:
                 msg = "Exception during update of {}."
-                logger.critical(msg.format(section[1]), exc_info=True)
+                logger.error(msg.format(section[1]), exc_info=True)
             # t1 = time.perf_counter()
             # print('update_ui elapsed time:', t1-t0, section[1])
 
@@ -202,10 +202,10 @@ class Application(tk.Frame):
         """Return the Frame Options"""
         return self.frame_central.get_frame_options()
 
-    def graph(self, newgraph=None, **kwargs):
-        """
-        Get current Graph
-        newgraph: to change current Graph. Does NOT refresh interface
+    def graph(self, newgraph=None, **kwargs) -> Graph:
+        """Get current Graph
+
+        newgraph: to change current Graph. Does NOT refresh interface.
         """
         tabs = self.get_tabs()
         if newgraph is not None:
@@ -350,6 +350,7 @@ class Application(tk.Frame):
             initialdir = self.get_folder()
         if type_ == "save":
             return tk.filedialog.asksaveasfilename(initialdir=initialdir, **kwargs)
+
         if multiple:
             out = list(tk.filedialog.askopenfilenames(initialdir=initialdir, **kwargs))
             if len(out) == 0:
@@ -433,6 +434,7 @@ class Application(tk.Frame):
             fig, ax = graph.plot(
                 filesave=filesave,
                 img_format=fileext,
+                if_save=True,
                 if_export=False,
                 fig_ax=[self.get_fig(), None],
             )

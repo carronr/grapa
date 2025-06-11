@@ -15,16 +15,18 @@ grapa.scripts.script\_correlations
       :toctree:
    
       colorize_graph
+      crosscorrelations_plot
+      crosscorrelations_stats
       filter_pvals
       guess_is_logarithm_quantity
       plot_correlations
-      plot_parameters_1D
-      plot_parameters_2D
+      plot_parameters_1d
+      plot_parameters_2d
       plot_pearson
       process_datatable
       process_file
+      run_standalone
       values_to_lim
-      writefile_datatable
    
    
 
@@ -36,6 +38,7 @@ grapa.scripts.script\_correlations
       :toctree:
       :template: custom-class-template.rst
    
+      CONF
       Helper
       HelperDatatable
       HelperScaps

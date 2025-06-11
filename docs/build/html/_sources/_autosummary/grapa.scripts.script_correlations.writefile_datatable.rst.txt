@@ -1,6 +1,0 @@
-grapa.scripts.script\_correlations.writefile\_datatable
-=======================================================
-
-.. currentmodule:: grapa.scripts.script_correlations
-
-.. autofunction:: writefile_datatable

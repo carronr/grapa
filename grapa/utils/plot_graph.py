@@ -479,7 +479,12 @@ def _plot_add_legend(graph, ax, handles):
         else:
             labels.append(label)
     # labels is reversed by construction
-    leg = ax.legend([h["handle"] for h in handles], labels[::-1], **leg_prop)
+    try:
+        leg = ax.legend([h["handle"] for h in handles], labels[::-1], **leg_prop)
+    except ValueError as e:
+        logger.error("_plot_add_legend: ValueError {}".format(e))
+        return None
+
     # color of legend
     if leg_label_color is not None:
         if leg_label_color == "curve":
@@ -980,9 +985,16 @@ def _plot_loop_over_curves(graph, container, ax, handles):
             if "labelsize" in kwargs:
                 pass  # TODO
             colorbar_ax.append({"ax": fig.add_axes(adjust), "adjusted": False})
-            colorbar_ax[-1]["cbar"] = fig.colorbar(
-                handle, cax=colorbar_ax[-1]["ax"], **kwargs
-            )
+            try:
+                colorbar_ax[-1]["cbar"] = fig.colorbar(
+                    handle, cax=colorbar_ax[-1]["ax"], **kwargs
+                )
+            except AttributeError as e:
+                msg = "_plot_loop_over_curves in fig.colorbar. {}, cax={}, kwargs {}). {}: {}."
+                logger.error(
+                    msg.format(handle, colorbar_ax[-1]["ax"], kwargs, type(e), e)
+                )
+
             try:
                 colorbar_ax[-1]["cbar"].solids.set_rasterized(True)
                 colorbar_ax[-1]["cbar"].solids.set_edgecolor("face")
@@ -1011,8 +1023,9 @@ def _plot_savefig(graph, fig, filename, img_format):
     Uses matplotlib fig.savefig"""
     save_dpi = 300 if "dpi" not in graph.graphinfo else graph.graphinfo["dpi"]
 
-    if len(img_format) == 0:
+    if len(img_format) == 0:  # default file format
         img_format = graph.config("save_imgformat", ".png")
+
     if not isinstance(img_format, list):
         img_format = [img_format]
     for img_forma_ in img_format:
@@ -1025,9 +1038,15 @@ def _plot_savefig(graph, fig, filename, img_format):
         filename_ = filename + img_forma_
         if not graph.attr("saveSilent"):
             print("Graph saved as " + filename_.replace("/", "\\"))
-        fig.savefig(filename_, transparent=True, dpi=save_dpi)
-        graph.filename = filename_
 
+        try:
+            fig.savefig(filename_, transparent=True, dpi=save_dpi)
+        except PermissionError:
+            msg = "PermissionError in _plot_savefig, filename_ {}."
+            logger.error(msg.format(filename_))  # maybe just print?
+            return
+
+        graph.filename = filename_
         if img_format_target == ".emf":
             convert_svg_to_emf(graph, filename_, img_format, img_format_target)
 
@@ -1089,7 +1108,7 @@ def image_to_clipboard(graph, folder=""):
     except ImportError:
         msg = (
             "Module win32clipboard not found, cannot copy to clipboard. Image was "
-            "created: {}."
+            "created: {}. Try the following:\npip install pywin32"
         )
         logger.error(msg.format(file_clipboard), exc_info=True)
         return False

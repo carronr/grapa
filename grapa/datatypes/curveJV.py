@@ -50,8 +50,8 @@ class CurveJV(Curve):
     # to retrieve info from filename: sample name, cell, measurement id
     # FINDALLSTR = "^(I-V_)*(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt"
     FILENAMEPARSE_EXPR = [
-        "^I-V_(.*)_([a-zA-Z#]+[0-9]+)_([bfwdBFWD]+)[_]*([-.a-zA-Z0-9]*)_([0-9]+).txt",
-        "^I-V_(.*)_([a-zA-Z]+[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt",
+        "^I-V_(.*)_([a-zA-Z#]?[0-9]+)_(fwd|bwd)?[_]*([-.a-zA-Z0-9]*)_([0-9]+).txt",
+        "^I-V_(.*)_([a-zA-Z]?[0-9]+)_([0-9]+)([_a-zA-Z0-9]*).txt",
     ]
     FILENAMEPARSE_KEYS = [
         ["sample", "cell", "fwd_bwd", "illumspectrum", "measId"],

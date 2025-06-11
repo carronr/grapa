@@ -1,0 +1,38 @@
+grapa.datatypes.graphDLCP
+=========================
+
+.. automodule:: grapa.datatypes.graphDLCP
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      curvecv_to_doping_vs_depth
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GraphDLCP
+   
+   
+
+   
+   
+   
+
+
+

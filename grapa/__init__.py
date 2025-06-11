@@ -7,7 +7,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 
-__version__ = "0.7.0.0"
+__version__ = "0.7.0.1"
 __author__ = "Romain Carron"
 
 import os

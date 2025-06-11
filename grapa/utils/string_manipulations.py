@@ -127,7 +127,7 @@ def strUnescapeIter(var):
         try:
             var = codecs.getdecoder("unicode_escape")(var)[0]
         except Exception:
-            msg = "strUnescapeIter: Exception, input ({})."
+            msg = "strUnescapeIter: Exception in codecs.getdecoder, input ({})."
             logger.error(msg.format(var))
         try:
             # handling of special characters transformed into mojibake

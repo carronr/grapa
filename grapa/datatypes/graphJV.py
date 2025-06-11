@@ -21,6 +21,8 @@ class GraphJV(Graph):
     FILEIO_GRAPHTYPE_TIV = "TIV curve"
     FILEIO_GRAPHTYPE_IV_HLS = "I-V curve (H-L soaking)"
 
+    AXISLABELS = [["Bias voltage", "V", "V"], ["Current density", "J", "mA cm$^{-2}$"]]
+
     @classmethod
     def isFileReadable(
         cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
@@ -64,44 +66,49 @@ class GraphJV(Graph):
 
     def readDataFromFileJV(self, attributes):
         _filename, _fileext = os.path.splitext(self.filename)  # , fileExt
-        # extract data analysis from acquisition software - requires a priori
-        # knowledge of file structure
-        # especially want to know cell area before creation of the CurveJV
-        # object
-        JVsoft = np.genfromtxt(
-            self.filename,
-            skip_header=1,
-            delimiter="\t",
-            usecols=[3],
-            invalid_raise=False,
-            dtype=str,
-        )
-        key = [
-            "Acquis soft Voc",
-            "Acquis soft Jsc",
-            "Acquis soft FF",
-            "Acquis soft Eff",
-            "Acquis soft Cell area",
-            "Acquis soft Vmpp",
-            "Acquis soft Jmpp",
-            "Acquis soft Pmpp",
-            "Acquis soft Rp",
-            "Acquis soft Rs",
-            "Acquis soft datetime",
-            "Acquis soft Temperature",
-            "Acquis soft Illumination factor",
-            "Acquis soft (Cell Comment)",
-            "Acquis soft (Global Comment)",
-            "Acquis soft Lightsource",
-        ]
-        for i in range(len(key)):
-            val = JVsoft[i]
-            if len(val) > 0:  # is a str by construction
+        # extract data analysis from acquisition software
+        # - requires a priori knowledge of file structure
+        # especially want to know cell area before creation of the CurveJV object
+        kw = {"skip_header": 1, "delimiter": "\t", "invalid_raise": False, "dtype": str}
+        jvsoft = np.genfromtxt(self.filename, usecols=[3, 4], **kw)
+        test_fileformat = "".join([line[0] for line in jvsoft])
+        if len(test_fileformat) == 0:
+            jvsoft = np.genfromtxt(self.filename, usecols=[2, 4], **kw)
+
+        key_replace = {
+            "approx. cell temperature": "temperature",
+            "measurement date and time": "datetime",
+        }
+        for value, key_ in jvsoft:
+            if len(value) > 0:  # is a str by construction
+                key = key_.lower().strip()
+                if " (" in key:
+                    key = key[: key.find(" (")]
+                if key in key_replace:
+                    key = key_replace[key]
+                key = "acquis soft " + key
                 try:
-                    val = float(val)
+                    value = float(value)
                 except ValueError:
                     pass  # keep as str
-                attributes.update({key[i]: val})
+                attributes.update({key: value})
+        # until 08.05.2025 - update of IV acquisition software
+        # key = ["Acquis soft Voc", "Acquis soft Jsc", "Acquis soft FF",
+        #        "Acquis soft Eff", "Acquis soft Cell area", "Acquis soft Vmpp",
+        #        "Acquis soft Jmpp", "Acquis soft Pmpp", "Acquis soft Rp",
+        #        "Acquis soft Rs", "Acquis soft datetime", "Acquis soft Temperature",
+        #        "Acquis soft Illumination factor", "Acquis soft (Cell Comment)",
+        #        "Acquis soft (Global Comment)", "Acquis soft Lightsource",
+        #       ]
+        # for i in range(len(key)):
+        #     val = JVsoft[i]
+        #     if len(val) > 0:  # is a str by construction
+        #         try:
+        #             val = float(val)
+        #         except ValueError:
+        #             pass  # keep as str
+        #         attributes.update({key[i]: val})
+
         if "label" in attributes:
             attributes["label"] = (
                 attributes["label"].replace("I-V ", "").replace("_", " ")
@@ -114,27 +121,22 @@ class GraphJV(Graph):
             usecols=[0, 1],
             invalid_raise=False,
         )
-        self.append(
-            CurveJV(
-                np.transpose(data),
-                attributes,
-                units=["V", "mAcm-2"],
-                ifCalc=True,
-                silent=self.silent,
-            )
+        curve = CurveJV(
+            np.transpose(data),
+            attributes,
+            units=["V", "mAcm-2"],
+            ifCalc=True,
+            silent=self.silent,
         )
-        self.update({"collabels": ["Voltage [V]", "Current density [mA cm-2]"]})
+        self.append(curve)
         self.update(
             {
-                "xlabel": self.formatAxisLabel(["Bias voltage", "V", "V"]),
-                "ylabel": self.formatAxisLabel(
-                    ["Current density", "J", "mA cm$^{-2}$"]
-                ),
+                "collabels": ["Voltage [V]", "Current density [mA cm-2]"],
+                "xlabel": self.formatAxisLabel(GraphJV.AXISLABELS[0]),
+                "ylabel": self.formatAxisLabel(GraphJV.AXISLABELS[1]),
+                "axhline": [0, {"linewidth": 0.5}],
+                "axvline": [0, {"linewidth": 0.5}],
             }
-        )
-        # some cosmetic information
-        self.update(
-            {"axhline": [0, {"linewidth": 0.5}], "axvline": [0, {"linewidth": 0.5}]}
         )
 
     def readDataFromFileTIV(self, attributes):
@@ -148,10 +150,8 @@ class GraphJV(Graph):
         self.update(
             {
                 "collabels": "",
-                "xlabel": self.formatAxisLabel(["Bias voltage", "V", "V"]),
-                "ylabel": self.formatAxisLabel(
-                    ["Current density", "J", "mA cm$^{-2}$"]
-                ),
+                "xlabel": self.formatAxisLabel(GraphJV.AXISLABELS[0]),
+                "ylabel": self.formatAxisLabel(GraphJV.AXISLABELS[1]),
             }
         )
         # delete columns of temperature in newer versions

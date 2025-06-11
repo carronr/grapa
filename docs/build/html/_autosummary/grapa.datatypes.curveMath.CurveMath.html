@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.datatypes.curveMath.CurveMath &mdash; grapa 0.7.0.0 documentation</title>
+  <title>grapa.datatypes.curveMath.CurveMath &mdash; grapa 0.7.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/documentation_options.js?v=0146b746"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -76,6 +76,7 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.curveXRD.html">grapa.datatypes.curveXRD</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCV.html">grapa.datatypes.graphCV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphCf.html">grapa.datatypes.graphCf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphDLCP.html">grapa.datatypes.graphDLCP</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE.html">grapa.datatypes.graphEQE</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphEQE_CSU.html">grapa.datatypes.graphEQE_CSU</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphJV.html">grapa.datatypes.graphJV</a></li>
@@ -197,14 +198,22 @@ subtraction.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.assemble_curve_xy">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">assemble_curve_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="Link to this definition"></a></dt>
-<dd><p>Assemble new Curve from data series of same length available in a Graph object.
-:param idx_x: index of Curve in Graph, from which to pick the x data series
-:param xory_x: is the x or y data series picked
-:param idx_y:index of Curve in Graph, from which to pick the y data series
-:param xory_y: is the x or y data series picked
-:param graph: Graph object to work on
-:return: a Curve with x and y data according to wishes</p>
+<span class="sig-name descname"><span class="pre">assemble_curve_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="Link to this definition"></a></dt>
+<dd><p>Assemble new Curve from data series of same length available in a Graph object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx_x</strong> – index of Curve in Graph, from which to pick the x data series</p></li>
+<li><p><strong>xory_x</strong> – is the x or y data series picked</p></li>
+<li><p><strong>idx_y</strong> – index of Curve in Graph, from which to pick the y data series</p></li>
+<li><p><strong>xory_y</strong> – is the x or y data series picked</p></li>
+<li><p><strong>graph</strong> – Graph object to work on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Curve with x and y data according to wishes</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

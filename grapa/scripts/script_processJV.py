@@ -114,6 +114,9 @@ class AreaDB(Database):
                     return self.data[cell]
             return np.nan
         out = self.value(self.colIdx, cell)
+        if isinstance(out, list):
+            print("Warning: please check that cell (picel) exists in database!", cell)
+            return np.nan
         if np.isnan(out):
             out = self.value(self.colIdx, self.sample + " " + cell)
         if np.isnan(out):
@@ -712,7 +715,7 @@ def plotSampleCellsMap(
     x, y, val = [], [], []
     split = [research(r"([a-zA-Z#])([0-9]*)", c).groups() for c in cells]
     for i in range(len(split)):
-        if len(split[i]) == 2:
+        if len(split[i]) == 2 and len(split[i][1]) > 0:
             # max(1, ...): to convert "#" into "a"
             x.append(max(1, float(ord(split[i][0].lower()) - 96)))
             y.append(float(split[i][1]))
@@ -720,6 +723,12 @@ def plotSampleCellsMap(
             val.append(values[i])
             if split[i][0] == "#":
                 ticklabeldash = True
+        else:
+            print("plotSampleCellsMap: cell name not legal:", split)
+    if len(x) == 0:
+        print("plotSampleCellsMap: empty list of cells.")
+        return
+
     x, y, val = np.array(x), np.array(y), np.array(val)
     transpose = False
     if max(y) > 2 and max(x) == 1 and ticklabeldash:
@@ -855,8 +864,8 @@ def plotSampleCellsMap(
 if __name__ == "__main__":
     # go through files, store files content in order to later select pairs
     folder = "./../examples/JV/SAMPLE_A/"
-    # processJVfolder(folder, fitDiodeWeight=5, pltClose=True,  groupCell=True)
-    processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
+    processJVfolder(folder, fitDiodeWeight=5, pltClose=True, groupCell=True)
+    # processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
 
     # file = r'./../examples/JV\SAMPLE_B_3layerMo\export_sample_b_3layermo_summary_illum.txt'
     # processSampleCellsMap(file, pltClose=True)

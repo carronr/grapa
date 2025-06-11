@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.GUIMainElements.GUIFrameCanvasGraph &mdash; grapa 0.7.0.0 documentation</title>
+  <title>grapa.gui.GUIMainElements.GUIFrameCanvasGraph &mdash; grapa 0.7.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a53e335f"></script>
+      <script src="../_static/documentation_options.js?v=0146b746"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -159,16 +159,19 @@ Some methods will call methods of application</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.get_tabs" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.get_tabs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tabs</span></code></a>()</p></td>
 <td><p>Returns the tabs element</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.registercallback_notifycanvas" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.registercallback_notifycanvas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registercallback_notifycanvas</span></code></a>(func)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.on_mousewheel" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.on_mousewheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_mousewheel</span></code></a>(event)</p></td>
+<td><p>Handles the event on_mousewheel on the canvas.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.registercallback_notifycanvas" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.registercallback_notifycanvas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registercallback_notifycanvas</span></code></a>(func)</p></td>
 <td><p>Register functions to callback when the canvas gets notified of an event</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.set_canvas_background" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.set_canvas_background"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_canvas_background</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.set_canvas_background" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.set_canvas_background"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_canvas_background</span></code></a>()</p></td>
 <td><p>Change background color of the canvas</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_ui" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_ui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ui</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_ui" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_ui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ui</span></code></a>()</p></td>
 <td><p>Update plot on canvas</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_upon_resize_window" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_upon_resize_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_upon_resize_window</span></code></a>(*_args)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_upon_resize_window" title="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.update_upon_resize_window"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_upon_resize_window</span></code></a>(*_args)</p></td>
 <td><p>Updates the frame including the canvas, but only when main app is ready</p></td>
 </tr>
 </tbody>
@@ -201,6 +204,14 @@ Some methods will call methods of application</p>
 <dt class="sig sig-object py" id="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.get_tabs">
 <span class="sig-name descname"><span class="pre">get_tabs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.get_tabs" title="Link to this definition"></a></dt>
 <dd><p>Returns the tabs element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.GUIMainElements.GUIFrameCanvasGraph.on_mousewheel">
+<span class="sig-name descname"><span class="pre">on_mousewheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#grapa.gui.GUIMainElements.GUIFrameCanvasGraph.on_mousewheel" title="Link to this definition"></a></dt>
+<dd><p>Handles the event on_mousewheel on the canvas.
+Zoom in/out, the location pointed by mouse stays at the same position.
+Only affects current active ax - can be problematic if several axes</p>
 </dd></dl>
 
 <dl class="py method">

@@ -22,6 +22,7 @@ grapa.gui.GUIMainElements.GUIFrameCanvasGraph
        ~GUIFrameCanvasGraph.enable_canvas_callbacks
        ~GUIFrameCanvasGraph.get_canvas
        ~GUIFrameCanvasGraph.get_tabs
+       ~GUIFrameCanvasGraph.on_mousewheel
        ~GUIFrameCanvasGraph.registercallback_notifycanvas
        ~GUIFrameCanvasGraph.set_canvas_background
        ~GUIFrameCanvasGraph.update_ui

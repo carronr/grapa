@@ -1,16 +1,18 @@
 subplots_adjust	[0.15, 0.15, 0.85, 0.9]
-ylabel	Cell EQE [%]
 fontsize	12.0
+ylabel	Cell EQE [%]
 ylim	[0, 100]
 xlabel	Wavelength [nm]
 xlim	[300.0, 1200]
-meastype	EQE curve
+meastype	Graph
 amplificationamp.factor	0.0	0.0
 bandgap	1.14706535254	1.14706535254
 bandgapslope	7.92804143885	7.92804143885
+bandgaptauc	1.1473818336854298	1.1473818336854298
+bandgaptauc_slope	7.930228825663265	7.930228825663265
 cmap	[[0.91, 0.25, 1], [1.09, 0.75, 1], 'hls']
 colorbar	{'adjust': [1.05, 0, 0.05, 1, 'ax']}
-curve	Curve EQE	Curve EQE
+curve	Curve Math	Curve EQE
 filename	examples/_subplots_insets/SAMPLE_A_d1_1.sr	examples/_subplots_insets/SAMPLE_A_d1_1.sr
 label	SAMPLE A d1	SAMPLE A d1
 lockinfrequency	258.081	258.081

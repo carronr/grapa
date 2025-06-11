@@ -1,0 +1,36 @@
+grapa.datatypes.graphDLCP.GraphDLCP
+===================================
+
+.. currentmodule:: grapa.datatypes.graphDLCP
+
+.. autoclass:: GraphDLCP
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GraphDLCP.isFileReadable
+       ~GraphDLCP.readDataFromFile
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GraphDLCP.AXISLABELS
+      ~GraphDLCP.AXISLABEL_X_DEPTH
+      ~GraphDLCP.AXISLABEL_Y_NDLCP
+      ~GraphDLCP.FILEIO_GRAPHTYPE
+      ~GraphDLCP.KEY_VAC
+   
+   

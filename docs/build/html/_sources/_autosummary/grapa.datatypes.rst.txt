@@ -57,6 +57,8 @@ grapa.datatypes
    
       graphCf
    
+      graphDLCP
+   
       graphEQE
    
       graphEQE_CSU
