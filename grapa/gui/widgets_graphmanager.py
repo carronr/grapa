@@ -4,10 +4,10 @@ Created on Sun Jan 24 13:30:42 2021
 
 @author: car
 """
-
+from enum import Enum
 import os
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 # path = os.path.normpath(
 #     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -18,6 +18,22 @@ from grapa.graph import Graph
 from grapa.gui.observable import Observable
 
 
+class RecorderSpecialKeys(str, Enum):
+    SAVE = "save"
+    OPEN = "open"
+
+
+def userconfirm_close_notsaved(graph: Graph) -> bool:
+    if graph.recorder.is_log_active():
+        last = graph.recorder.last_command()
+        # print( "userconfirm", last, last.is_null(), last.tag_special)
+        if last.tag_special not in [RecorderSpecialKeys.SAVE, RecorderSpecialKeys.OPEN]:
+            title = "Close tab"
+            msg = "Graph not saved. Close tab anyway?"
+            return messagebox.askyesno(title, msg)
+    return True
+
+
 class CustomNotebook(ttk.Notebook):
     """
     A ttk Notebook with close buttons on each tab
@@ -26,7 +42,8 @@ class CustomNotebook(ttk.Notebook):
 
     __initialized = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, graphstabmanager: "GraphsTabManager" = None, **kwargs):
+        self.graphstabmanager = graphstabmanager
         if not self.__initialized:
             self.__initialize_custom_style()
             CustomNotebook.__initialized = True
@@ -53,9 +70,16 @@ class CustomNotebook(ttk.Notebook):
             index = self.index("@%d,%d" % (event.x, event.y))
         except Exception:  # mouse was released outside of the Notebook area
             index = None
+
         if "close" in element and self._active == index:
-            self.forget(index)
-            self.event_generate("<<NotebookTabClosed>>")
+            confirm = True
+            if self.graphstabmanager is not None:
+                graph = self.graphstabmanager.get_graph(idx=index)
+                confirm = userconfirm_close_notsaved(graph)
+
+            if confirm:
+                self.forget(index)
+                self.event_generate("<<NotebookTabClosed>>")
         self.state(["!pressed"])
         self._active = None
 
@@ -204,7 +228,7 @@ class GraphsTabManager:
         """
         self.observableTabChanged = Observable()
         # hidden properties
-        self._notebook = CustomNotebook(*args, **kwargs)
+        self._notebook = CustomNotebook(*args, **kwargs, graphstabmanager=self)
         self._items = []
         self._itemtype = GraphHandler
         # configure default parameters
@@ -236,7 +260,9 @@ class GraphsTabManager:
     def index(self):
         return self._notebook.index(self._notebook.select())
 
-    def item(self):
+    def item(self, idx: int = None):
+        if idx is not None:
+            return self._items[idx]
         return self._items[self.index()]
 
     # creation or removal of tabs
@@ -325,17 +351,23 @@ class GraphsTabManager:
         if isinstance(str_or_graph, Graph):
             kw["graph"] = str_or_graph
         elif str_or_graph is not None:
-            kw["graph"] = Graph(str_or_graph)
+            kw["graph"] = Graph(str_or_graph, log_active=True)
             kw["filename"] = str_or_graph
         elif "graph" in kwargs:
             kw["graph"] = kwargs["graph"]
         # else graph will not be in kw
+        if "graph" in kw:
+            kw["graph"].recorder.is_log_active(True)
+
         # filename
         if filename is not None:
             kw["filename"] = filename
         elif "filename" not in kw:
             if "graph" in kw:
-                if hasattr(kw["graph"], "fileexport"):
+                if (
+                    hasattr(kw["graph"], "fileexport")
+                    and str_or_graph.fileexport is not None
+                ):
                     kw["filename"] = str_or_graph.fileexport
                 elif hasattr(kw["graph"], "filename"):
                     kw["filename"] = str_or_graph.filename
@@ -424,8 +456,10 @@ class GraphsTabManager:
         """Returns current selected child (Frame)"""
         return self.item().child()
 
-    def get_graph(self):
+    def get_graph(self, idx: int = None):
         """Returns current selected Graph"""
+        if idx is not None:
+            return self.item(idx=idx).property("graph")
         return self.item().property("graph")
 
     def get_filename(self):

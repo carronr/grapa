@@ -16,6 +16,7 @@ import numpy as np
 from grapa.curve import Curve
 from grapa.graph import Graph
 from grapa.utils.funcgui import FuncGUI
+from grapa.utils.error_management import issue_warning
 from grapa.mathModule import is_number, roundSignificant
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class FileLoaderOnDemand:
         call_index: call on object instance will return Object[call_index]
         """
         self.filename = filename
-        self.content = None
+        self.content: Graph = None
         self.call_index = call_index
 
     def _load_if_not_already(self):
@@ -62,12 +63,13 @@ class FileLoaderOnDemand:
         self._load_if_not_already()
         if len(self.content) == 1:  # let's be helpful, return if only 1 Curve available
             return self.content[0]
+
         msg = (
             "FileLoaderOnDemand: cannot call Object, because call_index was not"
-            "defined at instantiation and more than one possibility. (file {})."
+            "defined at instantiation and more than one possibility. (file %s)."
         )
-        logger.error(msg.format(self.filename))
-        raise RuntimeError(msg.format(self.filename))
+        logger.error(msg, self.filename)
+        raise RuntimeError(msg % self.filename)
 
     def get(self, value, key="label"):
         """Returns the first Curve with key==value"""
@@ -75,8 +77,9 @@ class FileLoaderOnDemand:
         for curve in self.content:
             if curve.attr(key) == value:
                 return curve
+
         msg = "FileLoaderOnDemand: cannot find curve in file {} with {} = {}."
-        logger.error(msg.format(self.filename, key, value))
+        issue_warning(logger, msg.format(self.filename, key, value))
         return None
 
     def labels(self, key="label"):
@@ -221,7 +224,7 @@ class FitHandler:
         self.typecurvefit = Curve
 
     # some getters and setters
-    def set_guishowfitfunc(self, which, fitimmediately, curve=None):
+    def set_guishowfitfunc(self, which, fitimmediately, curve: Curve = None):
         """To make GUI show specific fit functions
 
         :param which: label of the function to show
@@ -260,26 +263,24 @@ class FitHandler:
                 print(msg.format(self.typecurvefit, typecurvefit))
             self.typecurvefit = typecurvefit
         else:
-            msg = (
-                "FitHandler.set_typecurvefit: typecurvefit must be a subclass of "
-                "Curve. Ignored."
-            )
-            logger.warning(msg)
+            msg = "FitHandler.set_typecurvefit: typecurvefit must be a subclass of Curve. Ignored."
+            issue_warning(logger, msg)
 
     def get_fitfunction(self, funcname):
         """fit functions must have names starting with `func_`, and be implemented in a
         child class"""
         if funcname.startswith("func_") and hasattr(self, funcname):
             return getattr(self, funcname)
-        msg = "Fit function ({}) does not seem implemented. Abort."
-        logger.error(msg.format(funcname))
-        raise RuntimeError(msg.format(funcname))
+
+        msg = "Fit function (%s) does not seem implemented. Abort."
+        logger.error(msg, funcname)
+        raise NotImplementedError(msg % funcname)
 
     def get_preset(self, label):
         """Returns first preset which label matches label"""
         if label not in self.database.labels():
             msg = "No fit parameters defined with label: {} (possibilities: {})"
-            logger.warning(msg.format(label, self.database.labels()))
+            issue_warning(logger, msg.format(label, self.database.labels()))
             return False
 
         preset = self.database.get(label)
@@ -456,7 +457,7 @@ class FitHandler:
         if len(new) > 0 or new != "":
             # recreate data container, with new x values both in x and y
             # positions. next step it to compute new y values
-            curve.data = np.array([new, new])
+            curve.set_data(np.array([new, new]))
             curve.updateFitParam(*curve.attr("_popt"))
             return 1
         return "Invalid input."
@@ -497,9 +498,10 @@ class FitHandler:
                 return interp1d(bgcurve.x(), bgcurve.y())
 
         if interp:
-            msg = "FitHandler._p0_interpret_value Cannot find data for input '{}' {}"
-            logger.error(msg.format(value, interp))
-            raise NotImplementedError(msg.format(value, interp))
+            msg = "FitHandler._p0_interpret_value Cannot find data for input '%s' %s"
+            msa = (value, interp)
+            logger.error(msg, *msa)
+            raise NotImplementedError(msg % msa)
         return value
 
     def p0_interpret(self, p0, curve=None, interp=True):
@@ -521,7 +523,7 @@ class FitHandler:
             if isinstance(p0, list) and isinstance(fixed, list):
                 return kwargs["p0"], kwargs["fixed"]
 
-            logger.warning("fit retrieve inputs: p0 or fixed not lists. Ignore.")
+            issue_warning(logger, "fit retrieve inputs: p0 or fixed not lists. Ignore.")
         i = 0
         p0_raw, fixed = [], []
         while True:
@@ -541,12 +543,12 @@ class FitHandler:
         datax = x[mask]
         datay = y[mask]
         try:
-            popt, poptintern, pcov = FitterFixed.curve_fit_fixed(
+            popt, _poptintern, _pcov = FitterFixed.curve_fit_fixed(
                 func, datax, datay, p0=p0, fixed=fixed
             )
         except RuntimeError:
             msg = "Exception RuntimeError fit, curve {}"
-            logger.error(msg.format(curve.attr("label")), exc_info=True)
+            issue_warning(None, msg.format(curve.attr("label")), exc_info=True)
             curvefit = self.typecurvefit([[0], [0]], {})
             for key in self.fitcurve_attr_to_copy:
                 curvefit.update({key: curve.attr(key)})

@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.utils.plot_graph_aux.ParserMisc &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.utils.plot_graph_aux.ParserMisc &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -64,10 +64,16 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.command_recorder.html">grapa.utils.command_recorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_curves.html">grapa.utils.container_curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_metadata.html">grapa.utils.container_metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.error_management.html">grapa.utils.error_management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.export.html">grapa.utils.export</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.graphIO.html">grapa.utils.graphIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.metadata.html">grapa.utils.metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_database.html">grapa.utils.parser_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_dispatcher.html">grapa.utils.parser_dispatcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_generic.html">grapa.utils.parser_generic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.plot_graph_aux.html">grapa.utils.plot_graph_aux</a><ul class="current">
@@ -128,6 +134,7 @@
 <dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.ParserMisc">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.utils.plot_graph_aux.</span></span><span class="sig-name descname"><span class="pre">ParserMisc</span></span><a class="headerlink" href="#grapa.utils.plot_graph_aux.ParserMisc" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to handle miscellaneous plot properties</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.ParserMisc.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.ParserMisc.__init__" title="Link to this definition"></a></dt>
@@ -136,25 +143,43 @@
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">alter_lim</span></code>(ax, lim, xory, alter, curvedummy)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.ParserMisc.alter_lim" title="grapa.utils.plot_graph_aux.ParserMisc.alter_lim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alter_lim</span></code></a>(ax, lim, xory, alter, curvedummy)</p></td>
+<td><p>Alters the limits of the specified axis.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axislabel</span></code>(method, label, graph)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.ParserMisc.set_axislabel" title="grapa.utils.plot_graph_aux.ParserMisc.set_axislabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_axislabel</span></code></a>(method, label, graph)</p></td>
+<td><p>Sets the axis label with the given method and label.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.ParserMisc.set_xyticklabels" title="grapa.utils.plot_graph_aux.ParserMisc.set_xyticklabels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_xyticklabels</span></code></a>(value, xyaxis)</p></td>
 <td><p>Set ticks according to user wishes xyaxis: e.g. ax.xaxis.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_xytickstep</span></code>(val, xyaxis, axlim)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.ParserMisc.set_xytickstep" title="grapa.utils.plot_graph_aux.ParserMisc.set_xytickstep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_xytickstep</span></code></a>(val, xyaxis, axlim)</p></td>
+<td><p>Set ticks according to user wishes</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.ParserMisc.alter_lim">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alter_lim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curvedummy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.ParserMisc.alter_lim" title="Link to this definition"></a></dt>
+<dd><p>Alters the limits of the specified axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.ParserMisc.set_axislabel">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_axislabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.ParserMisc.set_axislabel" title="Link to this definition"></a></dt>
+<dd><p>Sets the axis label with the given method and label.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.ParserMisc.set_xyticklabels">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_xyticklabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyaxis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.ParserMisc.set_xyticklabels" title="Link to this definition"></a></dt>
 <dd><p>Set ticks according to user wishes
 xyaxis: e.g. ax.xaxis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.ParserMisc.set_xytickstep">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_xytickstep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xyaxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axlim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.ParserMisc.set_xytickstep" title="Link to this definition"></a></dt>
+<dd><p>Set ticks according to user wishes</p>
 </dd></dl>
 
 </dd></dl>

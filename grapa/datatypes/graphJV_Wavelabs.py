@@ -166,6 +166,7 @@ class GraphJV_Wavelabs(Graph):
             if curve.darkOrIllum():  # dark: revise label
                 label = curve.attr("label") + " " + curve.darkOrIllum(ifText=True)
                 curve.update({"label": label})
+            curve.update({"_collabels": ["Voltage [V]", "Current density [mA cm-2]"]})
             self.append(curve)
 
             # RS curve
@@ -191,13 +192,13 @@ class GraphJV_Wavelabs(Graph):
             data = cleanupdata(data, i)
             # create Curve object
             curve = CurveJV(np.transpose(data_rs[:, 0:2]), attributes_rs, **kwargscurve)
+            curve.update({"_collabels": ["Voltage [V]", ""]})
             curve.visible(False)
             self.append(curve)
 
         # end of parse data - graph cosmetics - JV
         self.update(
             {
-                "collabels": ["Voltage [V]", "Current density [mA cm-2]"],
                 "xlabel": ["Bias voltage", "V", "V"],
                 "ylabel": ["Current density", "J", "mA cm$^{-2}$"],
                 "axhline": [0, {"linewidth": 0.5}],
@@ -235,8 +236,8 @@ class GraphJV_Wavelabs(Graph):
         self.append(Curve(np.transpose(data[:, [0, 2]]), attributes))
         self[-1].update({"label": label + " " + header[2]})
         self[-1].visible(False)
+        self[-1].update({"_collabels": header})  # not sure this is correct anymore
         # graph cosmetics
-        self.update({"collabels": header})  # not sure it's needed
         self.update({"xlabel": header[0], "ylabel": header[3]})
 
     @staticmethod

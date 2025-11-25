@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.widgets_custom.FrameTitleContentHideHorizontal &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.gui.widgets_custom.FrameTitleContentHideHorizontal &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -131,6 +131,7 @@
 <dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHideHorizontal">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.gui.widgets_custom.</span></span><span class="sig-name descname"><span class="pre">FrameTitleContentHideHorizontal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcFillTitle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcFillContent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contentkwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'show'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showHideTitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">createButtons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizLineFrame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHideHorizontal" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="grapa.gui.widgets_custom.FrameTitleContentHide.html#grapa.gui.widgets_custom.FrameTitleContentHide" title="grapa.gui.widgets_custom.FrameTitleContentHide"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTitleContentHide</span></code></a></p>
+<p>Frame with title and content area that can be shown/hidden horizontally.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHideHorizontal.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcFillTitle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funcFillContent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contentkwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'show'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showHideTitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">createButtons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizLineFrame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHideHorizontal.__init__" title="Link to this definition"></a></dt>
@@ -143,14 +144,28 @@ highlightcolor, highlightthickness, relief, takefocus, visual, width.</p>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">createWidgets</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHideHorizontal.create_widgets" title="grapa.gui.widgets_custom.FrameTitleContentHideHorizontal.create_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_widgets</span></code></a>()</p></td>
+<td><p>Create the internal widgets.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BUTTON_LABEL_IN</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setButtonLabels</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BUTTON_LABEL_OUT</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHideHorizontal.create_widgets">
+<span class="sig-name descname"><span class="pre">create_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHideHorizontal.create_widgets" title="Link to this definition"></a></dt>
+<dd><p>Create the internal widgets.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

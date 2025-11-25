@@ -22,4 +22,15 @@ grapa.utils.plot\_curve.DataStruct
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataStruct.ax_x_y_fmt
+      ~DataStruct.alter
+      ~DataStruct.plot_method
+      ~DataStruct.graph
+      ~DataStruct.graph_i
+      ~DataStruct.curve
+   
    

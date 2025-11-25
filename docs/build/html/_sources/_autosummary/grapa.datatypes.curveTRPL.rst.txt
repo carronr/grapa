@@ -32,6 +32,7 @@ grapa.datatypes.curveTRPL
       :template: custom-class-template.rst
    
       CurveTRPL
+      GuiFunclistTrpl
    
    
 

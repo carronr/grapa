@@ -143,7 +143,7 @@ def test_open_files_cv(grapa_folder):
 
 def test_open_files_eqe(grapa_folder):
     graphs = open_files_in_subfolder(grapa_folder, "examples/EQE", "*.*")
-    assert len(graphs) == 4
+    assert len(graphs) == 3
     check_graphlist(graphs, CurveEQE)
 
 

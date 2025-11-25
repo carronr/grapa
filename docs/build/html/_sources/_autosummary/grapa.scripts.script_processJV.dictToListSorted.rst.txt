@@ -1,6 +1,0 @@
-grapa.scripts.script\_processJV.dictToListSorted
-================================================
-
-.. currentmodule:: grapa.scripts.script_processJV
-
-.. autofunction:: dictToListSorted

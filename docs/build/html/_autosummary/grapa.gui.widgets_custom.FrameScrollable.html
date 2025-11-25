@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.widgets_custom.FrameScrollable &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.gui.widgets_custom.FrameScrollable &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -150,23 +150,42 @@ highlightcolor, highlightthickness, relief, takefocus, visual, width.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameScrollable.__init__" title="grapa.gui.widgets_custom.FrameScrollable.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(parent, **kwargs)</p></td>
 <td><p>Construct a frame widget with the parent MASTER.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_configure</span></code>(_event)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameScrollable.on_configure" title="grapa.gui.widgets_custom.FrameScrollable.on_configure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_configure</span></code></a>(_event)</p></td>
+<td><p>Called when the child frame is configured.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_mousewheel</span></code>(event)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameScrollable.on_mousewheel" title="grapa.gui.widgets_custom.FrameScrollable.on_mousewheel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_mousewheel</span></code></a>(event)</p></td>
+<td><p>Scroll vertically the canvas with the mouse wheel.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">scrolly</span></code>(*args)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameScrollable.scrolly" title="grapa.gui.widgets_custom.FrameScrollable.scrolly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scrolly</span></code></a>(*args)</p></td>
+<td><p>Scroll vertically the canvas.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameScrollable.update_idletasks" title="grapa.gui.widgets_custom.FrameScrollable.update_idletasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_idletasks</span></code></a>([event])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameScrollable.update_idletasks" title="grapa.gui.widgets_custom.FrameScrollable.update_idletasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_idletasks</span></code></a>([_event])</p></td>
 <td><p>Updates the child Frame and resizes the canvas accordingly.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameScrollable.on_configure">
+<span class="sig-name descname"><span class="pre">on_configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameScrollable.on_configure" title="Link to this definition"></a></dt>
+<dd><p>Called when the child frame is configured.
+Updates the scrollregion of the canvas.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameScrollable.on_mousewheel">
+<span class="sig-name descname"><span class="pre">on_mousewheel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameScrollable.on_mousewheel" title="Link to this definition"></a></dt>
+<dd><p>Scroll vertically the canvas with the mouse wheel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameScrollable.scrolly">
+<span class="sig-name descname"><span class="pre">scrolly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameScrollable.scrolly" title="Link to this definition"></a></dt>
+<dd><p>Scroll vertically the canvas.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameScrollable.update_idletasks">
-<span class="sig-name descname"><span class="pre">update_idletasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameScrollable.update_idletasks" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_idletasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameScrollable.update_idletasks" title="Link to this definition"></a></dt>
 <dd><p>Updates the child Frame and resizes the canvas accordingly.
 Normally handled by event self.child &lt;Configure&gt;</p>
 </dd></dl>

@@ -206,12 +206,15 @@ class CurveSIMS(Curve):
                 [{}, {"field": "Combobox", "values": ratios}],
             ]
         )
+        whichratio = "GGI"
+        if "^71Ga+" not in labels and "^113In+" not in labels:
+            whichratio = "CuSn"
         out.append(
             [
                 GraphSIMS.appendReplaceCurveRatioGUISmt,
                 "Create curve ratio",
                 ["Ratio", "Curve name", "Smooth S-G w", "d"],
-                ["GGI", "GGI", 1, 1],
+                [whichratio, whichratio, 1, 1],
                 msmtidDict,
                 [{"field": "Combobox", "values": ratios, "width": 6}, {}, {}, {}],
             ]

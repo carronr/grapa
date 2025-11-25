@@ -29,7 +29,9 @@ grapa.curve
       :toctree:
       :template: custom-class-template.rst
    
+      CommandRecorderCurve
       Curve
+      CurveGraphsReferrer
    
    
 

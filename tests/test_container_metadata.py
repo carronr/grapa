@@ -4,13 +4,15 @@ Tests for the content of module metadata.py
 import pytest
 
 from tests import HiddenPrints  # grapa_folder
-from grapa.utils.metadata import MetadataContainer
+from grapa import Curve
+from grapa.utils.container_metadata import MetadataContainer
 
 
 @pytest.fixture
 def container():
     """Returns a container"""
-    out = MetadataContainer()
+    curve = Curve([[1,2] ,[3,4]], {})
+    out = MetadataContainer(curve)
     out.update({"a": 1, "b": 2})
     yield out
     # after yield: code for teardown

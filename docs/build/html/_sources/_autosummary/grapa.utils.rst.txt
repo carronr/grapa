@@ -29,13 +29,25 @@ grapa.utils
    :recursive:
 
    
+      command_recorder
+   
+      container_curves
+   
+      container_metadata
+   
       curve_subclasses_utils
+   
+      error_management
+   
+      export
    
       funcgui
    
-      graphIO
+      parser_database
    
-      metadata
+      parser_dispatcher
+   
+      parser_generic
    
       plot_curve
    

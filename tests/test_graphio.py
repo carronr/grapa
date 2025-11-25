@@ -1,7 +1,7 @@
 import pytest
 
+from grapa.utils.parser_dispatcher import _identify_delimiter
 from . import HiddenPrints
-from grapa.utils.graphIO import _identify_delimiter
 
 
 def test_identify_delimiter():

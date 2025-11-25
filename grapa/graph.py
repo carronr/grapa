@@ -10,18 +10,25 @@ from copy import deepcopy
 from re import findall as refindall
 import importlib
 import logging
+from typing import List, Tuple, Any, Literal, Optional, Union
 
 import numpy as np
 import matplotlib as mpl
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 from grapa import KEYWORDS_GRAPH, KEYWORDS_CURVE, KEYWORDS_HEADERS
 from grapa.mathModule import is_number
 from grapa.colorscale import colorize_graph
 from grapa.curve import Curve
+from grapa.utils.export import export
 from grapa.utils.string_manipulations import strToVar, TextHandler
 from grapa.utils.funcgui import AlterListItem
-from grapa.utils.metadata import MetadataContainer
-from grapa.utils.graphIO import GraphIO, export
+from grapa.utils.container_metadata import MetadataContainer
+from grapa.utils.container_curves import CurveContainer
+from grapa.utils.command_recorder import CommandRecorderGraph
+from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.utils.error_management import issue_warning
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +50,9 @@ class Graph:
 
     :param silent: to get more details on what is going on. Default True
     :param config: configuration datafile. Default 'config.txt'
+    :param log_active: if True, sets a CommandRecorder that logs the actions performed
+           on the graph object (low level instructions, not API-level). Purpose is to
+           offer do/undo functionalities.
     """
 
     # Class constants
@@ -64,29 +74,39 @@ class Graph:
     # constructor
     def __init__(
         self,
-        filename="",  # str, list[str], or list[xseries, yseries]
-        complement: dict = "",  # OR EBTTER A DICT???
+        filename: Union[str, List[str], List, np.ndarray] = "",
+        # str, list[str], or list[x, y]
+        complement: Union[dict, Literal[""], List[Union[dict, Literal[""]]]] = "",
+        # complement: not clean implementation.
         silent: bool = True,
-        config: str = CONFIG_FILENAME_DEFAULT,  # or None
+        config: Optional[str] = CONFIG_FILENAME_DEFAULT,  # or None
+        log_active: bool = False,
     ):
         """default constructor. Calls method reset."""
-        self.filename = None
-        self.silent = None
-        self.data = []
-        self.headers = MetadataContainer()
-        self.graphinfo = MetadataContainer()
+        self.filename: str
+        self.fileexport: Optional[str] = None
+        self.silent = True
+        self._curves = CurveContainer(self)
+        self.headers = MetadataContainer(self)
+        self.graphinfo = MetadataContainer(self)
+        self.recorder = CommandRecorderGraph(self, log_active=log_active)
         self._config = None
         self._init_config(config)
         # actually load the file
         self.reset(filename, complement=complement, silent=silent)
 
-    def reset(self, filename, complement: dict = "", silent: bool = True):
+    def reset(
+        self,
+        filename: Union[str, List[str], Any],
+        complement: Union[dict, Literal[""], List[Union[dict, Literal[""]]]] = "",
+        silent: bool = True,
+    ):
         """Reset a Graph: empty its list of Curves, and metadata."""
         # complement: special keywords: 'readas', 'isfilecontent'
         # default values
-        self.filename = filename
+        self.filename = filename if isinstance(filename, str) else ""
         self.silent = silent
-        self.data = []
+        self._curves.clear()
         self.headers.clear()
         self.graphinfo.clear()
         # try to identify and parse the datafile
@@ -98,7 +118,7 @@ class Graph:
         if isinstance(filename, str):
             # if single file was provided - a string, or if filename is the
             # content if the file - complement['isfilecontent'] must be true
-            GraphIO.readDataFile(self, complement=complement)
+            FileParserDispatcher.read(self, complement=complement)
         elif (
             len(filename) == 2
             and len(filename[0]) == len(filename[1])
@@ -108,48 +128,54 @@ class Graph:
             if not self.silent:
                 print('Class Graph: interpret "filename" as data content')
             self.filename = ""
-            GraphIO.append_curve_from_datainput(self, filename, attributes=complement)
+            FileParserDispatcher.append_curve_from_datainput(
+                self, filename, attributes=complement
+            )
         else:
             # if a list was provided - open first file, then merge the
             # others one by one
-            if not isinstance(complement, list):
+            if isinstance(complement, list):
+                cpl: list = list(complement)  # to make pylance happy
+            else:
                 if complement != "":
                     msg = (
                         "Graph: complement must be a list if filename is a list."
                         " Filename {} elements, complement: {}."
                     )
-                    logger.warning(msg.format(len(filename), complement))
-                complement = [complement] * len(filename)
+                    issue_warning(logger, msg.format(len(filename), complement))
+                cpl = [complement] * len(filename)
             self.filename = filename[0]
-            GraphIO.readDataFile(self, complement[0])
+            FileParserDispatcher.read(self, cpl[0])
             if len(filename) > 1:
                 for i in range(1, len(filename)):
                     if len(complement) > 1:
-                        self.merge(Graph(filename[i], complement=complement[i]))
+                        self.merge(Graph(filename[i], complement=cpl[i]))
                     else:
                         self.merge(Graph(filename[i]))
         # last: want to have abspath and not relative
-        if hasattr(self, "filename"):
+        if isinstance(self.filename, str):
             self.filename = os.path.abspath(self.filename)
 
-    def _init_config(self, config: str) -> None:
+    def _init_config(self, config: Optional[str]) -> None:
         """Initialize the configuration file. Tries to recycle if possible"""
-        if config is not None:
-            if config == self.CONFIG_FILENAME_DEFAULT:
-                folder = os.path.dirname(os.path.realpath(__file__))
-                config = os.path.join(folder, config)
-            if config not in Graph.CONFIG_FILES:
-                graph = Graph(config, complement={"readas": "database"}, config=None)
-                if len(graph) > 0:
-                    Graph.CONFIG_FILES[config] = graph
-                else:
-                    msg = (
-                        "Graph.init_config not found, or not properly"
-                        "formatted (2-columns key-values). Cannot use it."
-                    )
-                    logger.warning(msg)
-            if config in Graph.CONFIG_FILES:
-                self._config = Graph.CONFIG_FILES[config]
+        if config is None:
+            return
+
+        if config == self.CONFIG_FILENAME_DEFAULT:
+            folder = os.path.dirname(os.path.realpath(__file__))
+            config = os.path.join(folder, config)
+        if config not in Graph.CONFIG_FILES:
+            graph = Graph(config, complement={"readas": "database"}, config=None)
+            if len(graph) > 0:
+                Graph.CONFIG_FILES.update({config: graph})
+            else:
+                msg = (
+                    "Graph.init_config not found, or not properly"
+                    "formatted (2-columns key-values). Cannot use it."
+                )
+                issue_warning(logger, msg)
+        if config in Graph.CONFIG_FILES:
+            self._config = Graph.CONFIG_FILES[config]
 
     # RELATED TO GUI
     def alterListGUI(self) -> list:
@@ -175,44 +201,47 @@ class Graph:
         return out
 
     # interactions with other Graph objects
-    def merge(self, graph):
-        """Add in a Graph object the content of another Graph object"""
+    def merge(self, other_graph: "Graph"):
+        """Add in a Graph object the content of another Graph object
+        Append Curves, graph metadata copy content only for keys which did not already
+        existed"""
         # keep previous self.filename
         # copy data
-        for x in graph.data:
-            self.data.append(x)
-        # copy headers, unless already exists (is so, info is lost)
-        for key, value in graph.headers.items():
-            if key not in self.headers:
-                self.headers.update({key: value})
-        # copy graphInfo, unless already exists (is so, info is lost)
-        for key, value in graph.graphinfo.items():
-            if key not in self.graphinfo:
-                self.graphinfo.update({key: value})
+        for curve in other_graph:
+            self._curves.append(curve)
+        # copy headers and graphinfo, unless already exists (is so, info is lost)
+        for key, value in other_graph.get_attributes().items():
+            if not self.has_attr(key):
+                self.update({key: value})
 
     # methods handling the bunch of curves
     def __len__(self):
         """Returns the number of Curves."""
-        return len(self.data)
+        return len(self._curves)
 
-    def __getitem__(self, key) -> Curve:
+    def __getitem__(self, i: int) -> Curve:
         """Returns a Curve object at index key."""
-        return self.data[key]
+        return self._curves[i]
+
+    def __setitem__(self, i: int, new_curve: Curve):
+        """Replace the Curve at index key"""
+        return self._curves.__setitem__(i, new_curve)
 
     def __iter__(self):
-        return self.data.__iter__()
+        return self._curves.__iter__()
 
     def __delitem__(self, key):
         """Deletes the Curve at index key."""
         self.curve_delete(key)
 
-    def curve(self, index):
-        """Returns the Curve object at index i in the list. Can also use graph[index]"""
-        if index >= len(self) or len(self) == 0:
-            msg = "Graph.curve: cannot find Curve (index {}, len(self) {})."
-            logger.error(msg.format(index, len(self)))  # raise ?
+    def curve(self, idx: int) -> Optional[Curve]:
+        """Returns the Curve object at index i in the list.
+        Deprecated. Should use graph[idx] instead"""
+        if idx >= len(self) or len(self) == 0:
+            msg = "Graph.curve: cannot find Curve (index %s, len(self) %s)."
+            logger.error(msg, idx, len(self))  # raise ?
             return None
-        return self.data[index]
+        return self._curves[idx]
 
     def curves(
         self, key: str, value, str_lower: bool = False, str_startswith: bool = False
@@ -243,88 +272,52 @@ class Graph:
                     out.append(curve)
         return out
 
-    def append(self, curve, idx=None):
+    def append(self, curve: Union[Curve, "Graph", tuple, list], idx=None):
         """
         Add into the object list a Curve, a list or Curves, or every Curve in a
         Graph object.
+        id idx is provided, acts as an insert() function.
         """
-        insert = False if idx is None else True
-        if isinstance(curve, Graph):
-            for curv_ in curve:  # "curve" is a Graph, can iterate
-                if insert:
-                    self.data.insert(idx, curv_)
-                    idx += 1
-                else:
-                    self.data.append(curv_)  # curv_ is a Curve, we can directly append
-        elif isinstance(curve, list):
-            for curv_ in curve:
-                if insert:
-                    self.append(curv_, idx)
-                    idx += 1
-                else:
-                    self.append(curv_)  # call itself, to ensure curv_ is a Curve
-        elif isinstance(curve, Curve):
-            if insert:
-                self.data.insert(idx, curve)
-            else:
-                self.data.append(curve)
-        else:
-            logger.error("Graph.append: failed (type: {})".format(type(curve)))
+        if idx is None:
+            return self._curves.append(curve)
+        return self._curves.insert(idx, curve)
 
-    def curve_delete(self, i):
+    def curve_delete(self, idx: Union[int, List[int], Tuple[int]]):
         """Delete a Curve at index i from the Graph object."""
-        if isinstance(i, (list, tuple)):
-            i = list(np.sort(i)[::-1])
-            for k in i:
+        if isinstance(idx, (list, tuple)):
+            idx = list(np.sort(idx)[::-1])
+            for k in idx:
                 self.curve_delete(k)
-        else:
-            le0 = len(self.data)
-            if is_number(i) and i < le0:
-                # delete data
-                del self.data[i]
-                # delete in headers
-                if "collabels" in self.headers and i < len(self.headers["collabels"]):
-                    if len(self.headers["collabels"]) == 0:
-                        del self.headers["collabels"]
-                    else:
-                        del self.headers["collabels"][i]
-                if "collabelsdetail" in self.headers:
-                    # certainly only useful for "databases"
-                    for j in range(len(self.headers["collabelsdetail"])):
-                        if i < len(self.headers["collabelsdetail"][j]):
-                            del self.headers["collabelsdetail"][j][i]
-                # nothing to delete in graphInfo
+            return
 
-    def curve_replace(self, new_curve, idx):
-        """Replaces a Curve with another."""
-        if isinstance(new_curve, Curve):
-            try:
-                self.data[idx] = new_curve
-                return True
-            except Exception:
-                msg = "Graph.curve_replace: cannot add Curve at index {}."
-                logger.warning(msg.format(idx))  # , exc_info=True
-        else:
-            msg = "Graph.curve_replace: new_curve is not a Curve (type {})"
-            logger.warning(msg.format(type(new_curve)))
+        if is_number(idx) and idx < len(self):
+            del self._curves[idx]
+
+    def curve_replace(self, new_curve: Curve, idx: int):
+        """Update a Curve with a new one."""
+        try:
+            self[idx] = new_curve
+            return True
+        except Exception as e:
+            msg = "Graph.curve_replace: cannot add Curve at index %s. %s: %s."
+            logger.error(msg, idx, type(e), e)  # , exc_info=True
         return False
 
-    def curve_move_to_index(self, idxsource, idxtarget):
+    def curve_move_to_index(self, idx_source, idx_target):
         """Change the position of a Curve in the list"""
-        tmp = self.data.pop(idxsource)
-        self.data.insert(idxtarget, tmp)
+        tmp = self._curves.pop(idx_source)
+        self._curves.insert(idx_target, tmp)
         return True
 
-    def curve_duplicate(self, idx1):
+    def curve_duplicate(self, idx):
         """
         Duplicate (clone) an existing curve and append it in the curves list.
         """
-        if idx1 < -len(self) or idx1 >= len(self):
-            msg = "Graph.curve_duplicate: idx1 not valid ({})."
-            logger.error(msg.format(idx1))
+        if idx < -len(self) or idx >= len(self):
+            logger.error("Graph.curve_duplicate: idx1 not valid (%s).", idx)
             return False
-        curve = deepcopy(self[idx1])
-        self.data.insert(idx1 + 1, curve)
+        curve = deepcopy(self[idx])
+        self._curves.insert(idx + 1, curve)
         return True
 
     def curves_swap(self, idx1, idx2, relative=False):
@@ -333,29 +326,29 @@ class Graph:
         For example useful to modify the plot order (and order in the legend)
         """
         if idx1 < -len(self) or idx1 >= len(self):
-            msg = "Graph.curves_swap: idx1 not valid ({})."
-            logger.error(msg.format(idx1))
+            logger.error("Graph.curves_swap: idx1 not valid (%s).", idx1)
             return False
+
         if relative:
             idx2 = idx1 + idx2
         if idx2 == idx1:  # swap with itself
             return True
+
         if idx2 < -len(self) or idx2 >= len(self):
-            msg = "Graph.curves_swap: idx2 not valid ({})."
-            logger.error(msg.format(idx2))
+            logger.error("Graph.curves_swap: idx2 not valid (%s).", idx2)
             return False
-        swap = deepcopy(self[idx1])
-        self.data[idx1] = self[idx2]
-        self.data[idx2] = swap
+
+        self[idx2], self[idx1] = self._curves[idx1], self._curves[idx2]
         return True
 
     def curves_reverse(self):
         """Reverse the order of the Curves."""
-        self.data.reverse()
+        self._curves.reverse()
         return True
 
     # methods handling content of curves
     def getCurveData(self, idx, ifAltered=True):
+        """Returns the x and y data of Curve at index idx, as a 2D numpy array."""
         if ifAltered:
             alter = self.get_alter()
             x = self[idx].x_offsets(alter=alter[0])
@@ -365,7 +358,7 @@ class Graph:
             y = self[idx].y(alter="")
         return np.array([x, y])
 
-    def attr(self, key, default=MetadataContainer.VALUE_DEFAULT):
+    def attr(self, key, default: Any = MetadataContainer.VALUE_DEFAULT) -> Any:
         """Retrieve an attribute value in header, graphInfo or in curve[0]"""
         if key in self.headers:
             return self.headers[key]
@@ -375,9 +368,8 @@ class Graph:
             return self[0].attr(key, default=default)
         return default
 
-    def get_attributes(self, keys_list: list = None) -> dict:
+    def get_attributes(self, keys_list: Optional[list] = None) -> dict:
         """Returns a dict containing the content of both headers and graphInfo"""
-        # TODO: test Graph.get_attributes
         out = {}
         # need to merge several dicts. Can erase meaningless values, we should not erase
         # meaningful ones. The data input methods should prevent risk of duplicated keys
@@ -422,7 +414,7 @@ class Graph:
                     self[-1].update({k: value})
                 else:
                     msg = "Graph.update: cannot process ({}, {})."
-                    logger.error(msg.format(key, value))
+                    issue_warning(logger, msg.format(key, value))
 
     def updateValuesDictkeys(self, *args, **kwargs):
         """Update the graph using a specific data input, for GUI purposes.
@@ -437,14 +429,14 @@ class Graph:
                 "Graph.updateValuesDictkeys: 'keys' key must be provided, must be a "
                 "list of keys corresponding to the values provided in *args."
             )
-            logger.error(msg)
+            issue_warning(logger, msg)
             return False
         if len(kwargs["keys"]) != len(args):
             msg = (
                 "WARNING Graph updateValuesDictkeys: len of list 'keys' argument "
                 "must match the number of provided values ({} args provided, {} keys)"
             )
-            logger.error(msg.format(len(args), len(kwargs["keys"])))
+            issue_warning(logger, msg.format(len(args), len(kwargs["keys"])))
         lenmax = min(len(kwargs["keys"]), len(args))
         for i in range(lenmax):
             self.update({kwargs["keys"][i]: args[i]})
@@ -461,7 +453,7 @@ class Graph:
         return out
 
     @classmethod
-    def _get_alter_to_format(cls, alter):
+    def _get_alter_to_format(cls, alter) -> List[str]:
         """Return a formatted alter instruction"""
         if alter == "":
             alter = ["", ""]
@@ -473,24 +465,24 @@ class Graph:
         """returns the formatted alter instruction of self"""
         return self._get_alter_to_format(self.attr("alter"))
 
-    def castCurve(self, newtype, idx, silentSuccess=False):
+    def castCurve(self, newtype: str, idx: int, silentSuccess=False):
         """
         Replace a Curve with another type of Curve with identical data and properties.
         """
         if -len(self) <= idx < len(self):
-            newCurve = self[idx].castCurve(newtype)
-            if isinstance(newCurve, Curve):
-                flag = self.curve_replace(newCurve, idx)
+            new_curve = self[idx].castCurve(newtype)
+            if isinstance(new_curve, Curve):
+                flag = self.curve_replace(new_curve, idx)
                 if flag:
                     if not silentSuccess:
                         msg = "Graph.castCurve: new Curve type: {} {}."
                         print(msg.format(self[idx].classNameGUI(), type(self[idx])))
                 else:
-                    print("Graph.castCurve")
+                    print("Graph.castCurve", newtype)
                 return flag
         else:
             msg = "Graph.castCurve: idx not in suitable range ({}, max {})."
-            logger.error(msg.format(idx, len(self)))
+            issue_warning(logger, msg.format(idx, len(self)))
         return False
 
     def colorize(
@@ -507,7 +499,7 @@ class Graph:
             curvesselection=curvesselection,
         )
 
-    def apply_template(self, graph, also_curves=True):
+    def apply_template(self, graph: "Graph", also_curves=True):
         """
         Apply a template to the Graph object. The template is a Graph object which
         contains:
@@ -520,21 +512,21 @@ class Graph:
                properties
         """
         # strip default attributes
-        for key in Graph.DEFAULT:
-            if graph.attr(key) == Graph.DEFAULT[key]:
+        for key, value in Graph.DEFAULT.items():
+            if graph.attr(key) == value:
                 graph.update({key: ""})
         for key in KEYWORDS_GRAPH["keys"]:
             val = graph.attr(key)
             if not MetadataContainer.is_attr_value_default(val):
                 self.update({key: val})
         if also_curves:
-            for c in range(len(self)):
+            for c, curve in enumerate(self):
                 if c >= len(graph):
                     break
                 for key in KEYWORDS_CURVE["keys"]:
                     val = graph[c].attr(key)
                     if not MetadataContainer.is_attr_value_default(val):
-                        self[c].update({key: val})
+                        curve.update({key: val})
 
     def replace_labels(self, old, new):
         """
@@ -567,7 +559,7 @@ class Graph:
         """
         return TextHandler.remove(self, by_id=by_id)
 
-    def formatAxisLabel(self, label):
+    def formatAxisLabel(self, label: Union[str, List[str]]) -> str:
         """
         Returns a string for label according to user preference.
         'Some quantity [unit]' may become 'Some quantify (unit)'
@@ -575,7 +567,7 @@ class Graph:
         """
         # retrieve user preference
         symbol = bool(self.config("graph_labels_symbols", False))
-        units = self.config("graph_labels_units", default="[]", astype=str)
+        units = str(self.config("graph_labels_units", default="[]", astype="str"))
         units = units.replace("unit", "").replace(" ", "")
         # format input
         if isinstance(label, str):
@@ -605,7 +597,9 @@ class Graph:
         return label
 
     # Configuration file
-    def config(self, key: str, default=MetadataContainer.VALUE_DEFAULT, astype="auto"):
+    def config(
+        self, key: str, default: Any = MetadataContainer.VALUE_DEFAULT, astype="auto"
+    ):
         """
         Returns the value corresponding to key in the configuration file.
         If 'key' is not defined in config file, returns default.
@@ -618,7 +612,7 @@ class Graph:
                 return strToVar(out)
         return default
 
-    def config_all(self) -> (dict, str):
+    def config_all(self) -> dict:
         """Returns all key-value pairs in config file, and filename"""
         if self._config is not None and len(self._config) > 0:
             return {
@@ -628,6 +622,8 @@ class Graph:
         return {"attributes": {}, "filename": None}
 
     def filenamewithpath(self, filename):
+        """Returns the absolute path of the file, joining it with the path of the Graph
+        object if necessary."""
         # if filename is relative, join the path of the file with
         if os.path.isabs(filename):
             return filename
@@ -640,7 +636,7 @@ class Graph:
             path = os.path.dirname(os.path.abspath(self.filename))
         return os.path.join(path, filename)
 
-    # For convenience, a shortcut to graphIO export
+    # For convenience, a shortcut to export
     def export(
         self,
         filesave="",
@@ -667,11 +663,11 @@ class Graph:
         filesave="",
         img_format="",
         figsize=(0, 0),
-        if_save="auto",
-        if_export="auto",
-        fig_ax=None,
-        if_subplot="auto",
-    ):
+        if_save: Union[bool, Literal["auto"]] = "auto",
+        if_export: Union[bool, Literal["auto"]] = "auto",
+        fig_ax: Optional[list] = None,
+        if_subplot: Union[bool, Literal["auto"]] = "auto",
+    ) -> Tuple[Figure, List[Axes]]:
         """
         Plot the content of the Graph object.
 
@@ -709,16 +705,18 @@ class Graph:
                 and fig_ax[1] is not None
             ):
                 if_subplot = True
-        return plot_graph(
+        fig_ax_tuple = None if fig_ax is None else tuple(fig_ax)
+        fig, ax = plot_graph(
             self,
             filesave=filesave,
             img_format=img_format,
             figsize=figsize,
             if_save=if_save,
             if_export=if_export,
-            fig_ax=fig_ax,
+            fig_ax=fig_ax_tuple,
             if_subplot=if_subplot,
         )
+        return (fig, ax)
 
     @classmethod
     def get_list_subclasses_parse(cls):
@@ -767,9 +765,9 @@ class Graph:
 
         :meta private:
         """
-        return len(self.data)
+        return len(self._curves)
 
-    def iterCurves(self):
+    def iterCurves(self):  # @pylint: disable=C0103
         """. Deprecated. Returns an iterator over the different Curves.
         Not great, deprecateds. Rather use: for curve in graph:
 
@@ -778,54 +776,56 @@ class Graph:
         for curve in self:
             yield curve
 
-    def getAttribute(self, key: str, default=MetadataContainer.VALUE_DEFAULT) -> dict:
+    def getAttribute(
+        self, key: str, default=MetadataContainer.VALUE_DEFAULT
+    ):  # @pylint: disable=C0103
         """. Deprecated. alias to attr.
 
         :meta private:"""
         return self.attr(key, default=default)
 
-    def getAttributes(self, keys_list: list = None) -> dict:
+    def getAttributes(self, keys_list=None) -> dict:  # @pylint: disable=C0103
         """. Deprecated. Use get_attributes
 
         :meta private:"""
         return self.get_attributes(keys_list=keys_list)
 
-    def deleteCurve(self, i):
+    def deleteCurve(self, i):  # @pylint: disable=C0103
         """. Deprecated. Use curve_delete instead.
 
         :meta private:
         """
         return self.curve_delete(i)
 
-    def replaceCurve(self, new_curve, idx):
+    def replaceCurve(self, new_curve, idx):  # @pylint: disable=C0103
         """. Deprecated. Use curve_replace instead
 
         :meta private:
         """
         return self.curve_replace(new_curve, idx)
 
-    def moveCurveToIndex(self, idxsource, idxtarget):
+    def moveCurveToIndex(self, idxsource, idxtarget):  # @pylint: disable=C0103
         """. Deprecated. Use curve_move_to_index instread.
 
         :meta private:
         """
         return self.curve_move_to_index(idxsource, idxtarget)
 
-    def duplicateCurve(self, idx1):
+    def duplicateCurve(self, idx1):  # @pylint: disable=C0103
         """. Deprecated. Use curve_duplicate instead
 
         :meta private:
         """
         return self.curve_duplicate(idx1)
 
-    def swapCurves(self, idx1, idx2, relative=False):
+    def swapCurves(self, idx1, idx2, relative=False):  # @pylint: disable=C0103
         """. Deprecated. Use curves_swap instead
 
         :meta private:
         """
         return self.curves_swap(idx1, idx2, relative=relative)
 
-    def reverseCurves(self):
+    def reverseCurves(self):  # @pylint: disable=C0103
         """. Deprecated. Use curves_reverse instead
 
         :meta private:
@@ -889,7 +889,7 @@ class ConditionalPropertyApplier:
             "GraphConditionalPropertyApplier._evaluate_values: unsupported mode "
             "{}, return False. Input values {}, {}."
         )
-        logger.warning(msg.format(mode, valref, valtest))
+        issue_warning(logger, msg.format(mode, valref, valtest))
         return False
 
     @classmethod
@@ -901,7 +901,7 @@ class ConditionalPropertyApplier:
             "GraphConditionalProperty: unsupported mode, changed '{}' for '{}'. "
             "Possible values: {}."
         )
-        logger.warning(msg.format(mode, new, cls.MODES_VALUES))
+        issue_warning(logger, msg.format(mode, new, cls.MODES_VALUES))
         return new
 
     @classmethod
@@ -925,7 +925,7 @@ class ConditionalPropertyApplier:
                 "GraphConditionalProperty.apply: Error during evaluation: {}. "
                 "Comparison: {} ({}), {}, {}."
             )
-            logger.warning(msg.format(e, val, test_prop, mode, test_value))
+            issue_warning(logger, msg.format(e, val, test_prop, mode, test_value))
         else:
             if test:
                 graphorcurve.update({apply_prop: apply_value})

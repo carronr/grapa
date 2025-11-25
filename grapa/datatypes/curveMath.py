@@ -7,12 +7,17 @@ subtraction.
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
+import logging
+
 import numpy as np
 
 from grapa.curve import Curve
 from grapa.graph import Graph
 from grapa.mathModule import is_number
 from grapa.utils.funcgui import FuncGUI
+from grapa.utils.error_management import issue_warning
+
+logger = logging.getLogger(__name__)
 
 
 class CurveMath(Curve):
@@ -32,30 +37,30 @@ class CurveMath(Curve):
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
         le = len(self.x())
-        listCurves = [""]
-        listCurves_samelen = []
+        list_curves = [""]
+        list_curves_samelen = []
         default_samelen = ""
         graph = kwargs["graph"] if "graph" in kwargs else None
         if graph is not None:
-            for i in range(len(graph)):
-                lbl_nice = str(i) + " " + str(graph[i].attr("label"))[0:12]
-                listCurves.append(lbl_nice)
-                if len(graph[i].x()) == le:
-                    listCurves_samelen.append(lbl_nice)
-                if self == graph[i]:
-                    default_samelen = str(i)
+            for c, curve in enumerate(graph):
+                lbl_nice = str(c) + " " + str(curve.attr("label"))[0:12]
+                list_curves.append(lbl_nice)
+                if len(curve.x()) == le:
+                    list_curves_samelen.append(lbl_nice)
+                if self == curve:
+                    default_samelen = str(c)
 
         fieldprops = {
             "field": "Combobox",
             "width": 12,
-            "values": listCurves,
+            "values": list_curves,
             "bind": "beforespace",
         }
         default = ""
         fieldprops_samelen = {
             "field": "Combobox",
             "width": 12,
-            "values": listCurves_samelen,
+            "values": list_curves_samelen,
             "bind": "beforespace",
         }
         xory = {"field": "Combobox", "width": 2, "values": ["x", "y"]}
@@ -122,7 +127,15 @@ class CurveMath(Curve):
     def classNameGUI(cls):
         return cls.CURVE.replace("Curve ", "") + " operations"
 
+    @classmethod
+    def _append_to_math(cls, curve, txt):
+        """Append a text to the 'math' attribute of a curve."""
+        math = curve.attr("math")
+        curve.update({"math": math + "; " + txt if math != "" else txt})
+
     def add(self, cst, curves, graph=None, operator="add"):
+        """Add a constant or a (list of) curves to this curve."""
+
         def op(x, y, operator):
             if operator == "sub":
                 return x - y
@@ -133,10 +146,8 @@ class CurveMath(Curve):
             if operator == "pow":
                 return x**y
             if operator != "add":
-                print(
-                    "WARNING CureMath.add: unexpected operator argument",
-                    "(" + operator + ").",
-                )
+                msg = "CurveMath add: unexpected operator argument ({})."
+                issue_warning(logger, msg.format(operator))
             return x + y
 
         strjoin_ = {
@@ -151,8 +162,8 @@ class CurveMath(Curve):
         out = self + 0
         lbl = self.attr("label")
         idx = np.nan
-        for c in range(len(graph)):
-            if graph[c] == self:
+        for c, curve in enumerate(graph):
+            if curve == self:
                 idx = c
                 break
         lst = ["{Curve " + str(int(idx)) + (": " + lbl if lbl != "" else "") + "}"]
@@ -168,8 +179,8 @@ class CurveMath(Curve):
                 curves = [curves]
             for c in curves:
                 if is_number(c):
-                    out = op(out, graph.curve(int(c)), operator)
-                    lbl = graph.curve(int(c)).attr("label")
+                    out = op(out, graph[int(c)], operator)
+                    lbl = graph[int(c)].attr("label")
                     lst.append("{Curve " + str(int(c)))
                     if lbl != "":
                         lst[-1] = lst[-1] + ": " + str(lbl)
@@ -180,28 +191,28 @@ class CurveMath(Curve):
         return out
 
     def neg(self):
+        """Return the negative of this curve, i.e. 0 - Curve."""
         out = 0 - self
         lbl = self.attr("label")
         txt = " - {Curve" + (": " + lbl if lbl != "" else "") + "}"
-        math = self.attr("math")
-        out.update({"math": math + "; " + txt if math != "" else txt})
+        self._append_to_math(out, txt)
         return out
 
     def inv(self):
+        """Return the inverse of this curve, i.e. 1 / Curve."""
         out = 1 / self
         lbl = self.attr("label")
         txt = "1 / {Curve" + (": " + lbl if lbl != "" else "") + "}"
-        math = self.attr("math")
-        out.update({"math": math + "; " + txt if math != "" else txt})
+        self._append_to_math(out, txt)
         return out
 
     def swap_xy(self):
+        """Return a copy of this curve with x and y data swapped."""
         out = 0 + self  # work on copy
         out.setX(self.y())
         out.setY(self.x())
         txt = "swap x<->y"
-        math = self.attr("math")
-        out.update({"math": math + "; " + txt if math != "" else txt})
+        self._append_to_math(out, txt)
         return out
 
     def assemble_curve_xy(
@@ -236,7 +247,6 @@ class CurveMath(Curve):
             curve_y.attr("label"), xory_y, curve_x.attr("label"), xory_x
         )
         curve.update({"label": label})
-        math = curve.attr("math")
         txt = "assembled x,y from curves {} {} {}, {} {} {}".format(
             int(idx_x),
             curve_x.attr("label"),
@@ -245,7 +255,7 @@ class CurveMath(Curve):
             curve_y.attr("label"),
             xory_y,
         )
-        curve.update({"math": math + "; " + txt if math != "" else txt})
+        self._append_to_math(curve, txt)
         curve_type = curve.attr("curve", "")
         if curve_type != "":
             curve = curve.castCurve(curve_type)

@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.utils.plot_graph_aux.Plotter &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.utils.plot_graph_aux.Plotter &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -64,10 +64,16 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.command_recorder.html">grapa.utils.command_recorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_curves.html">grapa.utils.container_curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_metadata.html">grapa.utils.container_metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.error_management.html">grapa.utils.error_management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.export.html">grapa.utils.export</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.graphIO.html">grapa.utils.graphIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.metadata.html">grapa.utils.metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_database.html">grapa.utils.parser_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_dispatcher.html">grapa.utils.parser_dispatcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_generic.html">grapa.utils.parser_generic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.plot_graph_aux.html">grapa.utils.plot_graph_aux</a><ul class="current">
@@ -127,7 +133,8 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.Plotter">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.utils.plot_graph_aux.</span></span><span class="sig-name descname"><span class="pre">Plotter</span></span><a class="headerlink" href="#grapa.utils.plot_graph_aux.Plotter" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for handling grouped plots like boxplots and violin plots.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.Plotter.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.Plotter.__init__" title="Link to this definition"></a></dt>
@@ -139,11 +146,17 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.Plotter.__init__" title="grapa.utils.plot_graph_aux.Plotter.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code>(curve)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.Plotter.add_curve" title="grapa.utils.plot_graph_aux.Plotter.add_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_curve</span></code></a>(curve, y, fmt, ax)</p></td>
+<td><p>Add a curve to the boxplot or violin plot.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_addon_scatter</span></code>(curve, y, position, ax)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.Plotter.funcListGUI" title="grapa.utils.plot_graph_aux.Plotter.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(curve)</p></td>
+<td><p>Generates a GUI function list for configuring boxplot addons.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.Plotter.plot" title="grapa.utils.plot_graph_aux.Plotter.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>(ax, ax_or_one_of_its_twins)</p></td>
+<td><p>Plots the boxplot or violinplot on the given axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.plot_graph_aux.Plotter.plot_addon_scatter" title="grapa.utils.plot_graph_aux.Plotter.plot_addon_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_addon_scatter</span></code></a>(curve, y, position, ax)</p></td>
+<td><p>Handles possible scatter addons to boxplot or violin plot</p></td>
 </tr>
 </tbody>
 </table>
@@ -170,6 +183,30 @@
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.Plotter.add_curve">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.Plotter.add_curve" title="Link to this definition"></a></dt>
+<dd><p>Add a curve to the boxplot or violin plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.Plotter.funcListGUI">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">funcListGUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.Plotter.funcListGUI" title="Link to this definition"></a></dt>
+<dd><p>Generates a GUI function list for configuring boxplot addons.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.Plotter.plot">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_or_one_of_its_twins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.Plotter.plot" title="Link to this definition"></a></dt>
+<dd><p>Plots the boxplot or violinplot on the given axes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.plot_graph_aux.Plotter.plot_addon_scatter">
+<span class="sig-name descname"><span class="pre">plot_addon_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph_aux.Plotter.plot_addon_scatter" title="Link to this definition"></a></dt>
+<dd><p>Handles possible scatter addons to boxplot or violin plot</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

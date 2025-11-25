@@ -6,18 +6,20 @@ A popup window ti edit graph text legends, titles and text annotations.
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
+import sys
+import os
 import tkinter as tk
 from tkinter import ttk, font as tkfont
 from copy import deepcopy
+import logging
 
-import sys
-import os
 
 path = os.path.abspath(os.path.join(".", "..", ".."))
 if path not in sys.path:
     sys.path.append(path)
 
 from grapa.utils.string_manipulations import strToVar, strUnescapeIter, varToStr
+from grapa.utils.error_management import issue_warning
 from grapa.gui.widgets_tooltip import CreateToolTip
 from grapa.gui.widgets_custom import (
     EntryVar,
@@ -26,6 +28,8 @@ from grapa.gui.widgets_custom import (
     ComboboxVar,
     FrameScrollable,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class GuiManagerAnnotations(tk.Frame):
@@ -545,22 +549,20 @@ class GuiManagerAnnotations(tk.Frame):
                 out["text"].append(strUnescapeIter(ann[1].get()))  # as str
                 args = strToVar(ann[-1].get())
                 if not isinstance(args, dict):
-                    print(
-                        "GuiManagerAnnotations invalid input:", args, "should be a dict"
-                    )
+                    msg = "GuiManagerAnnotations invalid input: {} should be a dict."
+                    issue_warning(logger, msg.format(args))
                     args = {}
                 for j in range(len(self.text_fields) - 1):
                     if self.text_fields[j]["fromkwargs"] != "":
                         val = strToVar(ann[j].get())
                         if self.text_fields[j]["label"] == "xytext":
                             if not isinstance(val, (list, tuple)):
-                                print(
-                                    "GuiManagerAnnotations invalid input:",
-                                    "(xytext)",
-                                    val,
-                                    "should be a tuple or",
-                                    "dict with 2 elements (coordinates)",
+                                msg = (
+                                    "GuiManagerAnnotations invalid input: (xytext) {}"
+                                    "should be a tuple or dict with 2 elements"
+                                    "(coordinates)."
                                 )
+                                issue_warning(logger, msg.format(val))
                         if self.text_fields[j]["label"] == "visible?" and val:
                             val = ""
                         if val != "":
@@ -574,11 +576,11 @@ class GuiManagerAnnotations(tk.Frame):
             tit = strUnescapeIter(self.legtit_vars[1][j].get())  # as str
             kw = strToVar(self.legtit_vars[-1][j].get())
             if not isinstance(kw, dict):
-                print(
-                    "GuiManagerAnnotations invalid input:",
-                    kw,
-                    "should be a dict (legendtitle)",
+                msg = (
+                    "GuiManagerAnnotations invalid input: {} should be a dict"
+                    "(legendtitle)."
                 )
+                issue_warning(logger, msg.format(kw))
                 kw = {}
             for i in range(len(self.legtit_fields)):
                 if "fromkwargs" in self.legtit_fields[i]:
@@ -595,9 +597,8 @@ class GuiManagerAnnotations(tk.Frame):
         # legend properties
         kw = strToVar(self.legend_vars[-1][0].get())
         if not isinstance(kw, dict):
-            print(
-                "GuiManagerAnnotations invalid input:", kw, "should be a dict (legend)"
-            )
+            msg = "GuiManagerAnnotations invalid input: {} should be a dict (legend)."
+            issue_warning(logger, msg.format(kw))
             kw = {}
         for i in range(len(self.legend_fields)):
             if "fromkwargs" in self.legend_fields[i]:

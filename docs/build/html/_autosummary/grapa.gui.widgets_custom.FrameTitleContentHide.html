@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.widgets_custom.FrameTitleContentHide &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.gui.widgets_custom.FrameTitleContentHide &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -152,42 +152,100 @@ highlightcolor, highlightthickness, relief, takefocus, visual, width.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.__init__" title="grapa.gui.widgets_custom.FrameTitleContentHide.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(master, funcFillTitle, funcFillContent)</p></td>
 <td><p>Construct a frame widget with the parent MASTER.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.createButton" title="grapa.gui.widgets_custom.FrameTitleContentHide.createButton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">createButton</span></code></a>(frame[, symbol, size])</p></td>
-<td><p>size: None: return Button.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.create_widgets" title="grapa.gui.widgets_custom.FrameTitleContentHide.create_widgets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_widgets</span></code></a>()</p></td>
+<td><p>Create the internal widgets.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">createWidgets</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_only" title="grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_only"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cw_button_only</span></code></a>(frame, symbol)</p></td>
+<td><p>Create only the button.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_sized" title="grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_sized"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cw_button_sized</span></code></a>(frame[, symbol, size])</p></td>
+<td><p>size: None: auto: [20, 20].</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.frame_hline" title="grapa.gui.widgets_custom.FrameTitleContentHide.frame_hline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frame_hline</span></code></a>(frame)</p></td>
+<td><p>Create a horizontal line frame</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.get_button" title="grapa.gui.widgets_custom.FrameTitleContentHide.get_button"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_button</span></code></a>()</p></td>
+<td><p>Returns the show/hide button.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_content" title="grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame_content</span></code></a>()</p></td>
+<td><p>Returns the content frame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_title" title="grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame_title</span></code></a>()</p></td>
+<td><p>Returns the title frame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.is_visible" title="grapa.gui.widgets_custom.FrameTitleContentHide.is_visible"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_visible</span></code></a>()</p></td>
+<td><p>Returns True if the content is visible, False otherwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_custom.FrameTitleContentHide.show_hide" title="grapa.gui.widgets_custom.FrameTitleContentHide.show_hide"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_hide</span></code></a>(*_args)</p></td>
+<td><p>Show or hide the content frame.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BUTTON_LABEL_IN</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">frameHline</span></code>(frame)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getButton</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame_content</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame_title</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">isvisible</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setButtonLabels</span></code>()</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">showHide</span></code>(*_args)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sideAnchorFill</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BUTTON_LABEL_OUT</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.createButton">
-<span class="sig-name descname"><span class="pre">createButton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.createButton" title="Link to this definition"></a></dt>
-<dd><p>size: None: return Button. ‘auto’: [20, 20]. Or size [x, y]</p>
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.create_widgets">
+<span class="sig-name descname"><span class="pre">create_widgets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.create_widgets" title="Link to this definition"></a></dt>
+<dd><p>Create the internal widgets.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_only">
+<span class="sig-name descname"><span class="pre">cw_button_only</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_only" title="Link to this definition"></a></dt>
+<dd><p>Create only the button.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_sized">
+<span class="sig-name descname"><span class="pre">cw_button_sized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.cw_button_sized" title="Link to this definition"></a></dt>
+<dd><p>size: None:
+auto: [20, 20]. Or size [x, y]
+return Button.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.frame_hline">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_hline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.frame_hline" title="Link to this definition"></a></dt>
+<dd><p>Create a horizontal line frame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.get_button">
+<span class="sig-name descname"><span class="pre">get_button</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.get_button" title="Link to this definition"></a></dt>
+<dd><p>Returns the show/hide button.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_content">
+<span class="sig-name descname"><span class="pre">get_frame_content</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_content" title="Link to this definition"></a></dt>
+<dd><p>Returns the content frame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_title">
+<span class="sig-name descname"><span class="pre">get_frame_title</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.get_frame_title" title="Link to this definition"></a></dt>
+<dd><p>Returns the title frame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.is_visible">
+<span class="sig-name descname"><span class="pre">is_visible</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.is_visible" title="Link to this definition"></a></dt>
+<dd><p>Returns True if the content is visible, False otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.gui.widgets_custom.FrameTitleContentHide.show_hide">
+<span class="sig-name descname"><span class="pre">show_hide</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_custom.FrameTitleContentHide.show_hide" title="Link to this definition"></a></dt>
+<dd><p>Show or hide the content frame.</p>
 </dd></dl>
 
 </dd></dl>

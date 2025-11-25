@@ -83,11 +83,11 @@ class GraphMCA(Graph):
         if self[-1].attr("sample") == "":
             self[-1].update({"sample": self[-1].attr("label")})
         self[-1].data_units(unit_y="counts")
+        self[-1].update({"_collabels": ["Channel [ ]", "Counts [ ]"]})
         # graph cosmetics
         ylabel = list(GraphMCA.AXISLABELS[1])
         if self[-1].get_muloffset()[1] != 1:
             ylabel[2] = ylabel[2] + " s$^{-1}$"
-        self.update({"collabels": ["Channel [ ]", "Counts [ ]"]})
         self.update(
             {
                 "xlabel": self.formatAxisLabel(GraphMCA.AXISLABELS[0]),

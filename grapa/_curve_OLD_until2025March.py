@@ -14,9 +14,6 @@ import importlib
 
 from string import Template
 
-from grapa.constants import CST
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI
-
 
 class TemplateCustom(Template):
     # braceidpattern = "(?a:[_a-z][_a-z0-9 \[\]]*)"  # added: whitespace, [, ]

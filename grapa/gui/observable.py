@@ -7,6 +7,11 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 # from abc import ABCMeta, abstractmethod
+import logging
+
+from grapa.utils.error_management import issue_warning
+
+logger = logging.getLogger(__name__)
 
 
 class Observable(object):
@@ -32,11 +37,5 @@ class Observable(object):
             elif callable(observer):
                 observer(*args, **kwargs)
             else:
-                print(
-                    "WARNING Observable.update_observers, dont know what to",
-                    "do",
-                    observer,
-                    "args:",
-                    *args,
-                    **kwargs
-                )
+                msg = "Observable.update_observers, shat should I do? {}, args: {}, {}."
+                issue_warning(logger, msg.format(observer, args, kwargs))

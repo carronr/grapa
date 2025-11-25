@@ -7,15 +7,17 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 import os
-import numpy as np
 from re import findall as refindall
 
+import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
 
 
 class GraphMCAfit(Graph):
+    """to open html output of pymca XRF software"""
+
     FILEIO_GRAPHTYPE = "XRF fit areas"
 
     AXISLABELS = [["Data", "", None], ["Value", "", None]]
@@ -27,11 +29,11 @@ class GraphMCAfit(Graph):
         return False
 
     def readDataFromFile(self, attributes, **_kwargs):
-        filenam_, fileext = os.path.splitext(self.filename)
+        filename = str(self.filename)
+        filenam_, _ = os.path.splitext(filename)
         sample = filenam_.split("/")[-1].split(".mca")[0]
-        f = open(self.filename, "r")
-        content = f.read()
-        f.close()
+        with open(filename, "r") as f:
+            content = f.read()
         tmp = np.array([])
         content = (
             content.replace(' align="left"', "")
@@ -47,70 +49,73 @@ class GraphMCAfit(Graph):
             .replace("<table", "\n<table")
             .replace("\n\n", "\n")
         )
-        split = refindall(
-            r"<tr><td>Cu</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>",
-            content,
-        )
+        # Cu
+        expr = r"<tr><td>Cu</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>"
+        split = refindall(expr, content)
         try:
             tmp = np.append(tmp, float(split[0][0]))
         except IndexError:
             tmp = np.append(tmp, np.nan)
-        split = refindall(
-            r"<tr><td>In</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>",
-            content,
-        )
+        # In
+        expr = r"<tr><td>In</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>"
+        split = refindall(expr, content)
         try:
             tmp = np.append(tmp, float(split[0][0]))
         except IndexError:
             tmp = np.append(tmp, np.nan)
-        split = refindall(
-            r"<tr><td>Ga</td><td>Ka</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>",
-            content,
-        )
+        # Ga
+        expr = r"<tr><td>Ga</td><td>Ka</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>"
+        split = refindall(expr, content)
         try:
             tmp = np.append(tmp, float(split[0][0]))
         except IndexError:
             tmp = np.append(tmp, np.nan)
-        split = refindall(
-            r"<tr><td>Se</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>",
-            content,
-        )
+        # Se
+        expr = r"<tr><td>Se</td><td>K</td><td>([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)</td><td>"
+        split = refindall(expr, content)
         try:
             tmp = np.append(tmp, float(split[0][0]))
         except IndexError:
             tmp = np.append(tmp, np.nan)
-        tmp = np.append(tmp, 180)  # time - assumed here, no value reading
+        # time - assumed here, no value reading
+        tmp = np.append(tmp, 180)
+
         ##  XRF calibration: MIGHT WANT TO UPDATE THAT!!!
-        val_Cu = tmp[0] / 43434 * 22.56
-        val_In = tmp[1] / 10992 * 13.66
-        val_Ga = tmp[2] / 29578 * 11.41
-        val_Se = tmp[3] / 195460 * 52.40
+        val_cu = tmp[0] / 43434 * 22.56
+        val_in = tmp[1] / 10992 * 13.66
+        val_ga = tmp[2] / 29578 * 11.41
+        val_se = tmp[3] / 195460 * 52.40
         ##  END OF XRF calibration: MIGHT WANT TO UPDATE THAT!!!
-        val_sum = val_Cu + val_In + val_Ga + val_Se
-        val_Cu /= val_sum
-        val_In /= val_sum
-        val_Ga /= val_sum
-        val_Se /= val_sum
-        tmp = np.append(tmp, val_Ga / (val_Ga + val_In))  # x calculation
-        tmp = np.append(tmp, val_Cu / (val_Ga + val_In))  # y calculation
+
+        val_sum = val_cu + val_in + val_ga + val_se
+        val_cu /= val_sum
+        val_in /= val_sum
+        val_ga /= val_sum
+        val_se /= val_sum
+        tmp = np.append(tmp, val_ga / (val_ga + val_in))  # x calculation
+        tmp = np.append(tmp, val_cu / (val_ga + val_in))  # y calculation
         tmp = np.append(tmp, tmp[0] * 450 / 10000000)  # D calculation
-        self.data.append(
-            Curve(np.append(np.arange(tmp.size), tmp).reshape((2, tmp.size)), {})
-        )
-        c = self.curve(-1)
-        c.update(attributes)
-        c.update({"XRF fit Cu [fitarea/s]": float(tmp[0]) / float(tmp[4])})
-        c.update({"XRF fit In [fitarea/s]": float(tmp[1]) / float(tmp[4])})
-        c.update({"XRF fit Ga [fitarea/s]": float(tmp[2]) / float(tmp[4])})
-        c.update({"XRF fit Se [fitarea/s]": float(tmp[3]) / float(tmp[4])})
-        c.update({"XRF fit time [s]": float(tmp[4])})
-        c.update({"XRF fit x [ ]": float(tmp[5])})
-        c.update({"XRF fit y [ ]": float(tmp[6])})
-        c.update({"XRF fit D [um]": float(tmp[7])})
-        # other info
-        self.headers.update(
-            {"sample": sample, "collabels": ["Element [ ]", "Fit area / value [a.u.]"]}
-        )
+
+        curve = Curve(np.append(np.arange(tmp.size), tmp).reshape((2, tmp.size)), {})
+        curve.update(attributes)
+        attr = {
+            "XRF fit Cu [fitarea/s]": float(tmp[0]) / float(tmp[4]),
+            "XRF fit In [fitarea/s]": float(tmp[1]) / float(tmp[4]),
+            "XRF fit Ga [fitarea/s]": float(tmp[2]) / float(tmp[4]),
+            "XRF fit Se [fitarea/s]": float(tmp[3]) / float(tmp[4]),
+            "XRF fit time [s]": float(tmp[4]),
+            "XRF fit x [ ]": float(tmp[5]),
+            "XRF fit y [ ]": float(tmp[6]),
+            "XRF fit D [um]": float(tmp[7]),
+            "sample": sample,
+            "label": curve.attr("label").split(".")[0],
+            "linespec": "d",
+            "_collabels": ["Element [ ]", "Fit area / value [a.u.]"],
+        }
+        curve.update(attr)
+        self.append(curve)
+
+        # graph cosmetics
         self.update(
             {
                 "xlabel": self.formatAxisLabel(GraphMCAfit.AXISLABELS[0]),
@@ -121,31 +126,21 @@ class GraphMCAfit(Graph):
                 ],
             }
         )
-        c.update({"linespec": "d"})
-        c.update({"label": c.attr("label").split(".")[0]})
-        print(
-            "   XRF composition: GGI",
-            "{:1.3f}".format(tmp[5]),
-            ", CGI",
-            "{:1.3f}".format(tmp[6]),
-            ", D",
-            "{:1.3f}".format(tmp[7]),
-            "(calibration x=0.3).",
-        )
-        GaSe = 1.63 * tmp[2] / tmp[3]
-        CuSe = 2.0661 * tmp[0] / tmp[3]
-        GGI_ = 2 * GaSe / (1 + 1 / 3 * (1 - 2 * CuSe))
-        CGI_ = 2 * CuSe / (1 + 1 / 3 * (1 - 2 * CuSe))
-        D_ = 9.50e-06 * tmp[3]
-        c.update({"XRF fit x (Se ratios) [ ]": float(GGI_)})
-        c.update({"XRF fit y (Se ratios) [ ]": float(CGI_)})
-        c.update({"XRF fit D (Se ratios) [um]": float(D_)})
-        print(
-            "   XRF Se ratios composition: GGI",
-            "{:1.3f}".format(GGI_),
-            ", CGI",
-            "{:1.3f}".format(CGI_),
-            "D",
-            "{:1.3f}".format(D_),
-            "(calibration Ga/Se, Cu/Se)",
-        )
+
+        # Print composition calibration "x=0.3"
+        msg = "  XRF composition: GGI {:1.3f}, CGI {:1.3f}, D {:1.3f} (calibration x=0.3)."
+        print(msg.format(tmp[5], tmp[6], tmp[7]))
+        # Print composition alternative calibration Se ratios
+        gase = 1.63 * tmp[2] / tmp[3]
+        cuse = 2.0661 * tmp[0] / tmp[3]
+        ggi_ = 2 * gase / (1 + 1 / 3 * (1 - 2 * cuse))
+        cgi_ = 2 * cuse / (1 + 1 / 3 * (1 - 2 * cuse))
+        d_ = 9.50e-06 * tmp[3]
+        attr2 = {
+            "XRF fit x (Se ratios) [ ]": float(ggi_),
+            "XRF fit y (Se ratios) [ ]": float(cgi_),
+            "XRF fit D (Se ratios) [um]": float(d_),
+        }
+        curve.update(attr2)
+        msg = "  XRF composition: GGI {:1.3f}, CGI {:1.3f}, D {:1.3f} (calibration Ga/Se, Cu/Se)."
+        print(msg.format(ggi_, cgi_, d_))

@@ -12,6 +12,7 @@ from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.mathModule import roundSignificant
 from grapa.utils.plot_graph_aux import SubplotsAdjuster
+from grapa.utils.error_management import issue_warning
 from grapa.utils.funcgui import FuncGUI
 
 logger = logging.getLogger(__name__)
@@ -40,9 +41,9 @@ class Curve_Subplot(Curve):
                 try:
                     new = typ_(val)
                     self.update({key: new})
-                except ValueError:
-                    msg = "check_attr when casting value: {}."
-                    logger.error(msg.format(val), exc_info=True)
+                except ValueError as e:
+                    msg = "Curve_Subplot init check_attr: {}. ValueError {}."
+                    issue_warning(logger, msg.format(val, e), exc_info=True)
 
         check_attr("subplotfile", " ", str)
         check_attr("subplotrowspan", 1, int)
@@ -213,7 +214,7 @@ class Curve_Subplot(Curve):
         return out
 
     def update_spa_figsize_abs(
-        self, panelsize, margin, ncols=2, nrows=2, graph=None, **_kwargs
+        self, panelsize, margin, ncols=2, nrows=2, graph: Graph = None, **_kwargs
     ):
         """
         Updates the subplots_adjustupdate and figsize, based on margins and panelsize
@@ -264,8 +265,8 @@ class Curve_Subplot(Curve):
         spu = self.attr("subplotupdate")
         if not isinstance(spu, dict):
             spu = {}
-        for i in range(len(self.SPUKEYS)):
-            spu.update({self.SPUKEYS[i]: args[i]})
+        for i, key in enumerate(self.SPUKEYS):
+            spu.update({key: args[i]})
         self.update({"subplotupdate": spu})
         return True
 
@@ -287,7 +288,7 @@ class Curve_Subplot(Curve):
             + "Graph. Provides basic support for run-time customization of"
             + "the inset graph."
         )
-        print(string),
+        print(string)
         print("Examples: {'fontsize': 8}, or {'xlabel': 'An updated label'}")
         print()
         return True

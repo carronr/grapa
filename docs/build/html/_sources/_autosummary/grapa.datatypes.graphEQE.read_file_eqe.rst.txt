@@ -1,0 +1,6 @@
+grapa.datatypes.graphEQE.read\_file\_eqe
+========================================
+
+.. currentmodule:: grapa.datatypes.graphEQE
+
+.. autofunction:: read_file_eqe

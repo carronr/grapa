@@ -1,0 +1,41 @@
+grapa.utils.error\_management
+=============================
+
+.. automodule:: grapa.utils.error_management
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      issue_warning
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      FileNotCreatedError
+      FileNotReadError
+      GrapaError
+      GrapaWarning
+      IncorrectInputError
+   
+   
+
+
+

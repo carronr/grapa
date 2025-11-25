@@ -1,0 +1,39 @@
+grapa.utils.plot\_graph.Container
+=================================
+
+.. currentmodule:: grapa.utils.plot_graph
+
+.. autoclass:: Container
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Container.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Container.fig
+      ~Container.gs
+      ~Container.matrix
+      ~Container.subplotsid
+      ~Container.fontsize
+      ~Container.ax_twinx
+      ~Container.ax_twiny
+      ~Container.ax_twinxy
+      ~Container.groupedplotters
+   
+   

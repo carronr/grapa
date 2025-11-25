@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.curve.update_graph_values_dictkeys_conditional &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.curve.update_graph_values_dictkeys_conditional &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grapa.curve.Curve" href="grapa.curve.Curve.html" />
+    <link rel="next" title="grapa.curve.CommandRecorderCurve" href="grapa.curve.CommandRecorderCurve.html" />
     <link rel="prev" title="grapa.curve.update_curve_values_dictkeys" href="grapa.curve.update_curve_values_dictkeys.html" /> 
 </head>
 
@@ -61,7 +61,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#grapa.curve.update_graph_values_dictkeys_conditional"><code class="docutils literal notranslate"><span class="pre">update_graph_values_dictkeys_conditional()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.curve.CommandRecorderCurve.html">grapa.curve.CommandRecorderCurve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.Curve.html">grapa.curve.Curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.curve.CurveGraphsReferrer.html">grapa.curve.CurveGraphsReferrer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
@@ -114,7 +116,7 @@
 <h1>grapa.curve.update_graph_values_dictkeys_conditional<a class="headerlink" href="#grapa-curve-update-graph-values-dictkeys-conditional" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="grapa.curve.update_graph_values_dictkeys_conditional">
-<span class="sig-prename descclassname"><span class="pre">grapa.curve.</span></span><span class="sig-name descname"><span class="pre">update_graph_values_dictkeys_conditional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_vals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grapa.curve.update_graph_values_dictkeys_conditional" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">grapa.curve.</span></span><span class="sig-name descname"><span class="pre">update_graph_values_dictkeys_conditional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_vals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#grapa.curve.update_graph_values_dictkeys_conditional" title="Link to this definition"></a></dt>
 <dd><p>Similar as updateValuesDictkeys, for all curves inside a provided graph.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -137,7 +139,7 @@ modifications if curve.attr(also_attr[i]) == also_vals[i], for all i in range</p
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="grapa.curve.update_curve_values_dictkeys.html" class="btn btn-neutral float-left" title="grapa.curve.update_curve_values_dictkeys" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grapa.curve.Curve.html" class="btn btn-neutral float-right" title="grapa.curve.Curve" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grapa.curve.CommandRecorderCurve.html" class="btn btn-neutral float-right" title="grapa.curve.CommandRecorderCurve" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

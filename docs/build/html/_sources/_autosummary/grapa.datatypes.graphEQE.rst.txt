@@ -9,6 +9,13 @@ grapa.datatypes.graphEQE
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      read_file_eqe
+   
    
 
    

@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.utils.plot_graph.plot_graph &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.utils.plot_graph.plot_graph &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grapa.utils.plot_graph.ScaErrorHandler" href="grapa.utils.plot_graph.ScaErrorHandler.html" />
+    <link rel="next" title="grapa.utils.plot_graph.Container" href="grapa.utils.plot_graph.Container.html" />
     <link rel="prev" title="grapa.utils.plot_graph.image_to_clipboard" href="grapa.utils.plot_graph.image_to_clipboard.html" /> 
 </head>
 
@@ -64,15 +64,22 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.command_recorder.html">grapa.utils.command_recorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_curves.html">grapa.utils.container_curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_metadata.html">grapa.utils.container_metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.error_management.html">grapa.utils.error_management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.export.html">grapa.utils.export</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.graphIO.html">grapa.utils.graphIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.metadata.html">grapa.utils.metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_database.html">grapa.utils.parser_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_dispatcher.html">grapa.utils.parser_dispatcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_generic.html">grapa.utils.parser_generic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="grapa.utils.plot_graph.convert_svg_to_emf.html">grapa.utils.plot_graph.convert_svg_to_emf</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.utils.plot_graph.image_to_clipboard.html">grapa.utils.plot_graph.image_to_clipboard</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.utils.plot_graph.plot_graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.plot_graph.Container.html">grapa.utils.plot_graph.Container</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.utils.plot_graph.ScaErrorHandler.html">grapa.utils.plot_graph.ScaErrorHandler</a></li>
 </ul>
 </li>
@@ -121,7 +128,7 @@
 <h1>grapa.utils.plot_graph.plot_graph<a class="headerlink" href="#grapa-utils-plot-graph-plot-graph" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="grapa.utils.plot_graph.plot_graph">
-<span class="sig-prename descclassname"><span class="pre">grapa.utils.plot_graph.</span></span><span class="sig-name descname"><span class="pre">plot_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph.plot_graph" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">grapa.utils.plot_graph.</span></span><span class="sig-name descname"><span class="pre">plot_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Axes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.plot_graph.plot_graph" title="Link to this definition"></a></dt>
 <dd><p>Plot the content of the object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -149,7 +156,7 @@ GUI, but might be useful in scripts. Prevents deletion of existing axes.</p></li
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="grapa.utils.plot_graph.image_to_clipboard.html" class="btn btn-neutral float-left" title="grapa.utils.plot_graph.image_to_clipboard" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grapa.utils.plot_graph.ScaErrorHandler.html" class="btn btn-neutral float-right" title="grapa.utils.plot_graph.ScaErrorHandler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grapa.utils.plot_graph.Container.html" class="btn btn-neutral float-right" title="grapa.utils.plot_graph.Container" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

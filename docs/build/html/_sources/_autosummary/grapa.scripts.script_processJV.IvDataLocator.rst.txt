@@ -1,0 +1,25 @@
+grapa.scripts.script\_processJV.IvDataLocator
+=============================================
+
+.. currentmodule:: grapa.scripts.script_processJV
+
+.. autoclass:: IvDataLocator
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~IvDataLocator.parse_folder_or_file
+   
+   
+
+   
+   
+   

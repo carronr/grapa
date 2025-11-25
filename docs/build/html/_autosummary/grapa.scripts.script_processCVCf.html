@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.scripts.script_processCVCf &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.scripts.script_processCVCf &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -67,10 +67,11 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_correlations.html">grapa.scripts.script_correlations</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.scripts.script_processCVCf</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.execute_standalone.html">grapa.scripts.script_processCVCf.execute_standalone</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.maskUndesiredLegends.html">grapa.scripts.script_processCVCf.maskUndesiredLegends</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.mask_undesired_legends.html">grapa.scripts.script_processCVCf.mask_undesired_legends</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.script_processCV.html">grapa.scripts.script_processCVCf.script_processCV</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.script_processCf.html">grapa.scripts.script_processCVCf.script_processCf</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.setXlim.html">grapa.scripts.script_processCVCf.setXlim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.LegendChoice.html">grapa.scripts.script_processCVCf.LegendChoice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processCVCf.UtilsCv.html">grapa.scripts.script_processCVCf.UtilsCv</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processCVfT.html">grapa.scripts.script_processCVfT</a></li>
@@ -124,19 +125,27 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.execute_standalone.html#grapa.scripts.script_processCVCf.execute_standalone" title="grapa.scripts.script_processCVCf.execute_standalone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute_standalone</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>For test purposes</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.maskUndesiredLegends.html#grapa.scripts.script_processCVCf.maskUndesiredLegends" title="grapa.scripts.script_processCVCf.maskUndesiredLegends"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maskUndesiredLegends</span></code></a>(graph, legend)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.mask_undesired_legends.html#grapa.scripts.script_processCVCf.mask_undesired_legends" title="grapa.scripts.script_processCVCf.mask_undesired_legends"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_undesired_legends</span></code></a>(graph, legend)</p></td>
 <td><p>mask undesired legends in Graph object legend: possible values: 'no', 'minmax', 'all'</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.script_processCV.html#grapa.scripts.script_processCVCf.script_processCV" title="grapa.scripts.script_processCVCf.script_processCV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">script_processCV</span></code></a>(folder[, legend, ROIfit, ...])</p></td>
-<td><p></p></td>
+<td><p>Script process CV files in folder</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.script_processCf.html#grapa.scripts.script_processCVCf.script_processCf" title="grapa.scripts.script_processCVCf.script_processCf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">script_processCf</span></code></a>(folder[, legend, pltClose, ...])</p></td>
-<td><p>legend: possible values: 'no', 'minmax', 'all'</p></td>
+<td><p>legend: possible values: 'none', 'minmax', 'all'</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.setXlim.html#grapa.scripts.script_processCVCf.setXlim" title="grapa.scripts.script_processCVCf.setXlim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setXlim</span></code></a>(graph[, keyword])</p></td>
-<td><p></p></td>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.LegendChoice.html#grapa.scripts.script_processCVCf.LegendChoice" title="grapa.scripts.script_processCVCf.LegendChoice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LegendChoice</span></code></a>(value)</p></td>
+<td><p>Possibilities for show/hide legends</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processCVCf.UtilsCv.html#grapa.scripts.script_processCVCf.UtilsCv" title="grapa.scripts.script_processCVCf.UtilsCv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UtilsCv</span></code></a>()</p></td>
+<td><p>Utility functions related to script CV</p></td>
 </tr>
 </tbody>
 </table>

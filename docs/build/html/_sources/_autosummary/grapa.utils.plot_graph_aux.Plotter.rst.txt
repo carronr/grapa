@@ -17,7 +17,9 @@ grapa.utils.plot\_graph\_aux.Plotter
    .. autosummary::
    
        ~Plotter.__init__
+       ~Plotter.add_curve
        ~Plotter.funcListGUI
+       ~Plotter.plot
        ~Plotter.plot_addon_scatter
    
    

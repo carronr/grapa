@@ -18,7 +18,7 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import file_read_first3lines
+from grapa.utils.parser_dispatcher import file_read_first3lines
 from grapa.curve import Curve
 from grapa.curve_image import Curve_Image
 from grapa.curve_subplot import Curve_Subplot
@@ -127,12 +127,14 @@ def is_file_suitable(folder, file):
     """
     Is a file suitable to be considered as input for the script
     """
-    fileName, fileExt = os.path.splitext(file)
-    fileExt = fileExt.lower()
-    if fileExt in [".png", ".py"]:
+    fileName, file_ext = os.path.splitext(file)
+    file_ext = file_ext.lower()
+    if file_ext in [".png", ".py"]:
         return False  # to speed up by avoid actually opening the files
     line1, line2, line3 = file_read_first3lines(os.path.join(folder, file))
-    if GraphCf.isFileReadable(fileName, fileExt, line1=line1, line2=line2, line3=line3):
+    if GraphCf.isFileReadable(
+        fileName, file_ext, line1=line1, line2=line2, line3=line3
+    ):
         return True
     return False
 
@@ -197,8 +199,9 @@ def parse_folder(folder, errorsmsg, tolerance_temperature="default"):
                     if is_file_suitable(sub, file):
                         files.append(os.path.join(sub, file))
     if len(files) == 0:
-        errorsmsg.append("Found no suitable file in folder {}.".format(folder))
-        return
+        msg = "Found no suitable file (GraphCf) in folder {}."
+        errorsmsg.append(msg.format(folder))
+        return dataset, temperatures, volts, sample, area
 
     # gather Curve objects, according to temperature and voltage
     for file in files:
@@ -602,6 +605,9 @@ def script_process_cvft(
     dataset, temperatures, volts, sample, area = parse_folder(
         folder, errorsmsg, **kwtol
     )
+    if len(dataset) == 0:
+        print("Found no suitable found, stop script.")
+        return
 
     # construct graphs for individual temperatures
     graphds, graphcs, graphfs = generate_graphs(

@@ -17,6 +17,8 @@ grapa.gui.GUIMainElements.GUIFrameMenuMain
    .. autosummary::
    
        ~GUIFrameMenuMain.__init__
+       ~GUIFrameMenuMain.graph_redo
+       ~GUIFrameMenuMain.graph_undo
        ~GUIFrameMenuMain.if_print_commands
        ~GUIFrameMenuMain.insert_curve_empty
        ~GUIFrameMenuMain.merge_clipboard
@@ -37,6 +39,7 @@ grapa.gui.GUIMainElements.GUIFrameMenuMain
        ~GUIFrameMenuMain.script_jsc_voc
        ~GUIFrameMenuMain.script_jv_boxplots
        ~GUIFrameMenuMain.script_jv_sample_maps
+       ~GUIFrameMenuMain.update_ui
    
    
 

@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.graph.Graph &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.graph.Graph &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -111,7 +111,7 @@
 <h1>grapa.graph.Graph<a class="headerlink" href="#grapa-graph-graph" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="grapa.graph.Graph">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.graph.</span></span><span class="sig-name descname"><span class="pre">Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'config.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.graph.</span></span><span class="sig-name descname"><span class="pre">Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'config.txt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A Graph can be though as containing a list of Curves, and is a convenient way to
 read, store and manipulate data, as well as export plot as images and text files.</p>
@@ -131,19 +131,22 @@ consider using pandas instead</p></li>
 </p></li>
 <li><p><strong>silent</strong> – to get more details on what is going on. Default True</p></li>
 <li><p><strong>config</strong> – configuration datafile. Default ‘config.txt’</p></li>
+<li><p><strong>log_active</strong> – if True, sets a CommandRecorder that logs the actions performed
+on the graph object (low level instructions, not API-level). Purpose is to
+offer do/undo functionalities.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'config.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'config.txt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.__init__" title="Link to this definition"></a></dt>
 <dd><p>default constructor. Calls method reset.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.__init__" title="grapa.graph.Graph.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([filename, complement, silent, config])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.__init__" title="grapa.graph.Graph.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([filename, complement, silent, ...])</p></td>
 <td><p>default constructor.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.alterListGUI" title="grapa.graph.Graph.alterListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">alterListGUI</span></code></a>()</p></td>
@@ -173,20 +176,20 @@ consider using pandas instead</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.config_all" title="grapa.graph.Graph.config_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config_all</span></code></a>()</p></td>
 <td><p>Returns all key-value pairs in config file, and filename</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve" title="grapa.graph.Graph.curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve</span></code></a>(index)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve" title="grapa.graph.Graph.curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve</span></code></a>(idx)</p></td>
 <td><p>Returns the Curve object at index i in the list.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_delete" title="grapa.graph.Graph.curve_delete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_delete</span></code></a>(i)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_delete" title="grapa.graph.Graph.curve_delete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_delete</span></code></a>(idx)</p></td>
 <td><p>Delete a Curve at index i from the Graph object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_duplicate" title="grapa.graph.Graph.curve_duplicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_duplicate</span></code></a>(idx1)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_duplicate" title="grapa.graph.Graph.curve_duplicate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_duplicate</span></code></a>(idx)</p></td>
 <td><p>Duplicate (clone) an existing curve and append it in the curves list.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_move_to_index" title="grapa.graph.Graph.curve_move_to_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_move_to_index</span></code></a>(idxsource, idxtarget)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_move_to_index" title="grapa.graph.Graph.curve_move_to_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_move_to_index</span></code></a>(idx_source, idx_target)</p></td>
 <td><p>Change the position of a Curve in the list</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.curve_replace" title="grapa.graph.Graph.curve_replace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curve_replace</span></code></a>(new_curve, idx)</p></td>
-<td><p>Replaces a Curve with another.</p></td>
+<td><p>Update a Curve with a new one.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.curves" title="grapa.graph.Graph.curves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">curves</span></code></a>(key, value[, str_lower, str_startswith])</p></td>
 <td><p>Returns a list of Curves for which curve.attr(key) value (type and value equality)</p></td>
@@ -206,8 +209,8 @@ consider using pandas instead</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.export" title="grapa.graph.Graph.export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code></a>([filesave, save_altered, ...])</p></td>
 <td><p>Exports content of Grah object into a human- and machine-readable format.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filenamewithpath</span></code>(filename)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.filenamewithpath" title="grapa.graph.Graph.filenamewithpath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filenamewithpath</span></code></a>(filename)</p></td>
+<td><p>Returns the absolute path of the file, joining it with the path of the Graph object if necessary.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.formatAxisLabel" title="grapa.graph.Graph.formatAxisLabel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">formatAxisLabel</span></code></a>(label)</p></td>
 <td><p>Returns a string for label according to user preference.</p></td>
@@ -218,8 +221,8 @@ consider using pandas instead</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getAttributes</span></code>([keys_list])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCurveData</span></code>(idx[, ifAltered])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.getCurveData" title="grapa.graph.Graph.getCurveData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCurveData</span></code></a>(idx[, ifAltered])</p></td>
+<td><p>Returns the x and y data of Curve at index idx, as a 2D numpy array.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.get_alter" title="grapa.graph.Graph.get_alter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_alter</span></code></a>()</p></td>
 <td><p>returns the formatted alter instruction of self</p></td>
@@ -239,8 +242,8 @@ consider using pandas instead</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">length</span></code>()</p></td>
 <td><p>Returns the number of Curve objects in the list.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.merge" title="grapa.graph.Graph.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(graph)</p></td>
-<td><p>Add in a Graph object the content of another Graph object</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.merge" title="grapa.graph.Graph.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(other_graph)</p></td>
+<td><p>Add in a Graph object the content of another Graph object Append Curves, graph metadata copy content only for keys which did not already existed</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">moveCurveToIndex</span></code>(idxsource, idxtarget)</p></td>
 <td><p></p></td>
@@ -311,14 +314,15 @@ consider using pandas instead</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.append" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.append" title="Link to this definition"></a></dt>
 <dd><p>Add into the object list a Curve, a list or Curves, or every Curve in a
-Graph object.</p>
+Graph object.
+id idx is provided, acts as an insert() function.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.apply_template">
-<span class="sig-name descname"><span class="pre">apply_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_curves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.apply_template" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">apply_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_curves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.apply_template" title="Link to this definition"></a></dt>
 <dd><p>Apply a template to the Graph object. The template is a Graph object which
 contains:</p>
 <ul class="simple">
@@ -335,7 +339,7 @@ properties</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.attr">
-<span class="sig-name descname"><span class="pre">attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.attr" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#grapa.graph.Graph.attr" title="Link to this definition"></a></dt>
 <dd><p>Retrieve an attribute value in header, graphInfo or in curve[0]</p>
 </dd></dl>
 
@@ -348,7 +352,7 @@ Return the deleted attribute as a dict</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.castCurve">
-<span class="sig-name descname"><span class="pre">castCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silentSuccess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.castCurve" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">castCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silentSuccess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.castCurve" title="Link to this definition"></a></dt>
 <dd><p>Replace a Curve with another type of Curve with identical data and properties.</p>
 </dd></dl>
 
@@ -360,45 +364,46 @@ Return the deleted attribute as a dict</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.config">
-<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">astype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">astype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.config" title="Link to this definition"></a></dt>
 <dd><p>Returns the value corresponding to key in the configuration file.
 If ‘key’ is not defined in config file, returns default.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.config_all">
-<span class="sig-name descname"><span class="pre">config_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'dict'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.config_all" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">config_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.graph.Graph.config_all" title="Link to this definition"></a></dt>
 <dd><p>Returns all key-value pairs in config file, and filename</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.curve">
-<span class="sig-name descname"><span class="pre">curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve" title="Link to this definition"></a></dt>
-<dd><p>Returns the Curve object at index i in the list. Can also use graph[index]</p>
+<span class="sig-name descname"><span class="pre">curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#grapa.graph.Graph.curve" title="Link to this definition"></a></dt>
+<dd><p>Returns the Curve object at index i in the list.
+Deprecated. Should use graph[idx] instead</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.curve_delete">
-<span class="sig-name descname"><span class="pre">curve_delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_delete" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">curve_delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_delete" title="Link to this definition"></a></dt>
 <dd><p>Delete a Curve at index i from the Graph object.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.curve_duplicate">
-<span class="sig-name descname"><span class="pre">curve_duplicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_duplicate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">curve_duplicate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_duplicate" title="Link to this definition"></a></dt>
 <dd><p>Duplicate (clone) an existing curve and append it in the curves list.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.curve_move_to_index">
-<span class="sig-name descname"><span class="pre">curve_move_to_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idxsource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idxtarget</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_move_to_index" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">curve_move_to_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_move_to_index" title="Link to this definition"></a></dt>
 <dd><p>Change the position of a Curve in the list</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.curve_replace">
-<span class="sig-name descname"><span class="pre">curve_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_curve</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_replace" title="Link to this definition"></a></dt>
-<dd><p>Replaces a Curve with another.</p>
+<span class="sig-name descname"><span class="pre">curve_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.curve_replace" title="Link to this definition"></a></dt>
+<dd><p>Update a Curve with a new one.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -443,11 +448,24 @@ For example useful to modify the plot order (and order in the legend)</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.filenamewithpath">
+<span class="sig-name descname"><span class="pre">filenamewithpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.filenamewithpath" title="Link to this definition"></a></dt>
+<dd><p>Returns the absolute path of the file, joining it with the path of the Graph
+object if necessary.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.formatAxisLabel">
-<span class="sig-name descname"><span class="pre">formatAxisLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.formatAxisLabel" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">formatAxisLabel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#grapa.graph.Graph.formatAxisLabel" title="Link to this definition"></a></dt>
 <dd><p>Returns a string for label according to user preference.
 ‘Some quantity [unit]’ may become ‘Some quantify (unit)’
 Other possible input is [‘This is a Quantity’, ‘Q’, ‘unit’]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.graph.Graph.getCurveData">
+<span class="sig-name descname"><span class="pre">getCurveData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ifAltered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.getCurveData" title="Link to this definition"></a></dt>
+<dd><p>Returns the x and y data of Curve at index idx, as a 2D numpy array.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -458,7 +476,7 @@ Other possible input is [‘This is a Quantity’, ‘Q’, ‘unit’]</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.get_attributes">
-<span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.graph.Graph.get_attributes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.graph.Graph.get_attributes" title="Link to this definition"></a></dt>
 <dd><p>Returns a dict containing the content of both headers and graphInfo</p>
 </dd></dl>
 
@@ -481,13 +499,15 @@ methods, and returns a list of Graph child class.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.merge">
-<span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.merge" title="Link to this definition"></a></dt>
-<dd><p>Add in a Graph object the content of another Graph object</p>
+<span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.merge" title="Link to this definition"></a></dt>
+<dd><p>Add in a Graph object the content of another Graph object
+Append Curves, graph metadata copy content only for keys which did not already
+existed</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_subplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.plot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_subplot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Figure</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Axes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#grapa.graph.Graph.plot" title="Link to this definition"></a></dt>
 <dd><p>Plot the content of the Graph object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -522,7 +542,7 @@ By default, keeps axes if axes are provided in figAx.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.reset" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">''</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset a Graph: empty its list of Curves, and metadata.</p>
 </dd></dl>
 

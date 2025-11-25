@@ -1,0 +1,6 @@
+grapa.scripts.script\_processJV.standalone
+==========================================
+
+.. currentmodule:: grapa.scripts.script_processJV
+
+.. autofunction:: standalone

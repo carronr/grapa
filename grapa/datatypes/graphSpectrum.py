@@ -9,7 +9,7 @@ from os import path as ospath
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveSpectrum import CurveSpectrum
 
 
@@ -56,16 +56,17 @@ class GraphSpectrumSpectraSuite(GraphSpectrum):
     """Reads a HR2000 file (optical fiber spectrophotometer)."""
 
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", **kwargs):
         if fileext == ".txt" and line1 == "SpectraSuite Datei":
             return True
 
     def readDataFromFile(self, attributes, **kwargs):
-        filenam_, fileext = ospath.splitext(self.filename)  # , fileExt
+        filename = str(self.filename)
+        filenam_, _ = ospath.splitext(filename)  # , fileExt
         # TODO:  improve header parsing
         data = np.transpose(
             np.genfromtxt(
-                self.filename,
+                filename,
                 skip_header=17,
                 delimiter="\t",
                 invalid_raise=False,
@@ -73,10 +74,10 @@ class GraphSpectrumSpectraSuite(GraphSpectrum):
         )
         self.append(CurveSpectrum(data, attributes))
         # BG = 1140 # seems not generally valid
-        BG = 0
-        self[-1].setY(self[-1].y() - BG)
+        bg = 0
+        self[-1].setY(self[-1].y() - bg)
         self[-1].update({"label": filenam_.split("/")[-1]})
-        self.headers.update({"collabels": ["Wavelength [nm]", "Intensity [counts]"]})
+        self[-1].update({"_collabels": ["Wavelength [nm]", "Intensity [counts]"]})
         self.update(
             {
                 "xlabel": self.formatAxisLabel(GraphSpectrum.AXISLABELS[0]),
@@ -92,7 +93,7 @@ class GraphSpectrumUVVIS(GraphSpectrum):
     AXISLABELS = [["Wavelength", "", "nm"], GraphSpectrum.AXISLABELS[1]]
 
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", line2="", **kwargs):
         if (
             fileext == ".txt"
             and line1.startswith('"')
@@ -103,7 +104,7 @@ class GraphSpectrumUVVIS(GraphSpectrum):
             return True
 
     def readDataFromFile(self, attributes, **kwargs):
-        GraphIO.readDataFromFileGeneric(self, attributes)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes)
         sub = self[-1].attr('"Wavelength nm."')
         lbl = self[-1].attr("label")
         ylabel = GraphSpectrumUVVIS.AXISLABELS[1]
@@ -135,14 +136,14 @@ class GraphSpectrumTRPLsetup(GraphSpectrum):
     """TRPL setup PL spectrum"""
 
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", **kwargs):
         if fileext == ".dat" and line1[:29] == "Excitation Wavelength[nm]	crv":
             return True
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
         len0 = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes)
         self.castCurve("Curve Spectrum", len0, silentSuccess=True)
         self[len0].update(
             {"label": self[len0].attr("label").replace(" crv[0] [Cnts.]", "")}
@@ -167,16 +168,17 @@ class GraphSpectrumPerkinElmerASC(GraphSpectrum):
     AXISLABELS = [GraphSpectrum.AXISLABELS[0], ["Intensity", "", "%"]]
 
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(cls, _filename, fileext, line3="", **kwargs):
         if fileext == ".asc" and line3.endswith(".asc"):
             return True
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
         # reads header and count headers lines
+        filename = str(self.filename)
         nlines = 0
         headers = []
-        with open(self.filename) as fp:
+        with open(filename) as fp:
             for line in fp:
                 line = line.strip()
                 nlines += 1
@@ -203,22 +205,16 @@ class GraphSpectrumPerkinElmerASC(GraphSpectrum):
                     )
                 if line == "#DATA":
                     break
-        data = np.transpose(
-            np.genfromtxt(
-                self.filename, skip_header=nlines, delimiter="\t", invalid_raise=False
-            )
+        data = np.genfromtxt(
+            filename, skip_header=nlines, delimiter="\t", invalid_raise=False
         )
-        self.append(CurveSpectrum(data, attributes))
-        for h in range(len(headers)):
-            self[-1].update({"headers" + str(h): headers[h]})
-        self.update(
-            {
-                "xlabel": self.formatAxisLabel(
-                    GraphSpectrumPerkinElmerASC.AXISLABELS[0]
-                ),
-                "ylabel": self.formatAxisLabel(
-                    GraphSpectrumPerkinElmerASC.AXISLABELS[1]
-                ),
-            }
-        )
+        self.append(CurveSpectrum(np.transpose(data), attributes))
+        for h, header in enumerate(headers):
+            self[-1].update({"headers" + str(h): header})
+        attrs = {
+            "xlabel": self.formatAxisLabel(GraphSpectrumPerkinElmerASC.AXISLABELS[0]),
+            "ylabel": self.formatAxisLabel(GraphSpectrumPerkinElmerASC.AXISLABELS[1]),
+        }
+
+        self.update(attrs)
         return True

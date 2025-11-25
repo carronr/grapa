@@ -1,0 +1,28 @@
+grapa.curve.CommandRecorderCurve
+================================
+
+.. currentmodule:: grapa.curve
+
+.. autoclass:: CommandRecorderCurve
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CommandRecorderCurve.__init__
+       ~CommandRecorderCurve.is_log_active
+       ~CommandRecorderCurve.log
+       ~CommandRecorderCurve.log_special
+   
+   
+
+   
+   
+   

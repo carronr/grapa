@@ -17,19 +17,25 @@ grapa.gui.widgets\_custom.FrameTitleContentHide
    .. autosummary::
    
        ~FrameTitleContentHide.__init__
-       ~FrameTitleContentHide.createButton
-       ~FrameTitleContentHide.createWidgets
-       ~FrameTitleContentHide.frameHline
-       ~FrameTitleContentHide.getButton
+       ~FrameTitleContentHide.create_widgets
+       ~FrameTitleContentHide.cw_button_only
+       ~FrameTitleContentHide.cw_button_sized
+       ~FrameTitleContentHide.frame_hline
+       ~FrameTitleContentHide.get_button
        ~FrameTitleContentHide.get_frame_content
        ~FrameTitleContentHide.get_frame_title
-       ~FrameTitleContentHide.isvisible
-       ~FrameTitleContentHide.setButtonLabels
-       ~FrameTitleContentHide.showHide
-       ~FrameTitleContentHide.sideAnchorFill
+       ~FrameTitleContentHide.is_visible
+       ~FrameTitleContentHide.show_hide
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FrameTitleContentHide.BUTTON_LABEL_IN
+      ~FrameTitleContentHide.BUTTON_LABEL_OUT
    
    

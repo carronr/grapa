@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.widgets_graphmanager.GraphsTabManager &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.gui.widgets_graphmanager.GraphsTabManager &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grapa.gui.widgets_tooltip" href="grapa.gui.widgets_tooltip.html" />
+    <link rel="next" title="grapa.gui.widgets_graphmanager.RecorderSpecialKeys" href="grapa.gui.widgets_graphmanager.RecorderSpecialKeys.html" />
     <link rel="prev" title="grapa.gui.widgets_graphmanager.GraphHandler" href="grapa.gui.widgets_graphmanager.GraphHandler.html" /> 
 </head>
 
@@ -69,9 +69,11 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_custom.html">grapa.gui.widgets_custom</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.gui.widgets_graphmanager.html">grapa.gui.widgets_graphmanager</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.test_all.html">grapa.gui.widgets_graphmanager.test_all</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved.html">grapa.gui.widgets_graphmanager.userconfirm_close_notsaved</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.CustomNotebook.html">grapa.gui.widgets_graphmanager.CustomNotebook</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphHandler.html">grapa.gui.widgets_graphmanager.GraphHandler</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.gui.widgets_graphmanager.GraphsTabManager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.RecorderSpecialKeys.html">grapa.gui.widgets_graphmanager.RecorderSpecialKeys</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_tooltip.html">grapa.gui.widgets_tooltip</a></li>
@@ -152,7 +154,7 @@ defdict: default values to be provided to ._itemtype.DEFAULT_PROPDICT</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_folder" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_folder</span></code></a>()</p></td>
 <td><p>Returns current selected folder</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_graph</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_graph</span></code></a>([idx])</p></td>
 <td><p>Returns current selected Graph</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_properties" title="grapa.gui.widgets_graphmanager.GraphsTabManager.get_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_properties</span></code></a>()</p></td>
@@ -167,7 +169,7 @@ defdict: default values to be provided to ._itemtype.DEFAULT_PROPDICT</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>([idx])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pack</span></code>(*args, **kwargs)</p></td>
@@ -226,7 +228,7 @@ graph stemming from</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph">
-<span class="sig-name descname"><span class="pre">get_graph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.GraphsTabManager.get_graph" title="Link to this definition"></a></dt>
 <dd><p>Returns current selected Graph</p>
 </dd></dl>
 
@@ -277,7 +279,7 @@ kwargs: etc.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="grapa.gui.widgets_graphmanager.GraphHandler.html" class="btn btn-neutral float-left" title="grapa.gui.widgets_graphmanager.GraphHandler" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grapa.gui.widgets_tooltip.html" class="btn btn-neutral float-right" title="grapa.gui.widgets_tooltip" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grapa.gui.widgets_graphmanager.RecorderSpecialKeys.html" class="btn btn-neutral float-right" title="grapa.gui.widgets_graphmanager.RecorderSpecialKeys" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.datatypes.curveMath.CurveMath &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.datatypes.curveMath.CurveMath &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -162,8 +162,8 @@ subtraction.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.__init__" title="grapa.datatypes.curveMath.CurveMath.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(data, attributes[, silent])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code>(cst, curves[, graph, operator])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.add" title="grapa.datatypes.curveMath.CurveMath.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code></a>(cst, curves[, graph, operator])</p></td>
+<td><p>Add a constant or a (list of) curves to this curve.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="grapa.datatypes.curveMath.CurveMath.assemble_curve_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assemble_curve_xy</span></code></a>(idx_x, xory_x, idx_y, ...)</p></td>
 <td><p>Assemble new Curve from data series of same length available in a Graph object.</p></td>
@@ -174,17 +174,17 @@ subtraction.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.funcListGUI" title="grapa.datatypes.curveMath.CurveMath.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(**kwargs)</p></td>
 <td><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which elements are instances of <cite>FuncGUI</cite>, or (old style): ::.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.inv" title="grapa.datatypes.curveMath.CurveMath.inv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inv</span></code></a>()</p></td>
+<td><p>Return the inverse of this curve, i.e. 1 / Curve.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">neg</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.neg" title="grapa.datatypes.curveMath.CurveMath.neg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">neg</span></code></a>()</p></td>
+<td><p>Return the negative of this curve, i.e. 0 - Curve.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.print_help" title="grapa.datatypes.curveMath.CurveMath.print_help"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_help</span></code></a>()</p></td>
 <td><p>Prints help for the Curve subclass, generated from docstrings.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.swap_xy" title="grapa.datatypes.curveMath.CurveMath.swap_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">swap_xy</span></code></a>()</p></td>
+<td><p>Return a copy of this curve with x and y data swapped.</p></td>
 </tr>
 </tbody>
 </table>
@@ -196,6 +196,12 @@ subtraction.</p>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.add" title="Link to this definition"></a></dt>
+<dd><p>Add a constant or a (list of) curves to this curve.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.assemble_curve_xy">
 <span class="sig-name descname"><span class="pre">assemble_curve_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="Link to this definition"></a></dt>
@@ -241,9 +247,27 @@ graph.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.inv">
+<span class="sig-name descname"><span class="pre">inv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.inv" title="Link to this definition"></a></dt>
+<dd><p>Return the inverse of this curve, i.e. 1 / Curve.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.neg">
+<span class="sig-name descname"><span class="pre">neg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.neg" title="Link to this definition"></a></dt>
+<dd><p>Return the negative of this curve, i.e. 0 - Curve.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.print_help">
 <span class="sig-name descname"><span class="pre">print_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.print_help" title="Link to this definition"></a></dt>
 <dd><p>Prints help for the Curve subclass, generated from docstrings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.swap_xy">
+<span class="sig-name descname"><span class="pre">swap_xy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.swap_xy" title="Link to this definition"></a></dt>
+<dd><p>Return a copy of this curve with x and y data swapped.</p>
 </dd></dl>
 
 </dd></dl>

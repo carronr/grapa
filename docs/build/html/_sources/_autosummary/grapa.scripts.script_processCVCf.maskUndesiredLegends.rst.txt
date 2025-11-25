@@ -1,6 +1,0 @@
-grapa.scripts.script\_processCVCf.maskUndesiredLegends
-======================================================
-
-.. currentmodule:: grapa.scripts.script_processCVCf
-
-.. autofunction:: maskUndesiredLegends

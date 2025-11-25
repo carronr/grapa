@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.scripts.script_processJV.AreaDBHandler &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.scripts.script_processJV.AreaDBHandler &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grapa.scripts.script_processJscVoc" href="grapa.scripts.script_processJscVoc.html" />
+    <link rel="next" title="grapa.scripts.script_processJV.IvDataLocator" href="grapa.scripts.script_processJV.IvDataLocator.html" />
     <link rel="prev" title="grapa.scripts.script_processJV.AreaDB" href="grapa.scripts.script_processJV.AreaDB.html" /> 
 </head>
 
@@ -68,14 +68,16 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processCVCf.html">grapa.scripts.script_processCVCf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processCVfT.html">grapa.scripts.script_processCVfT</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.scripts.script_processJV.html">grapa.scripts.script_processJV</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.dictToListSorted.html">grapa.scripts.script_processJV.dictToListSorted</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.dict_to_list_sorted.html">grapa.scripts.script_processJV.dict_to_list_sorted</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.plotSampleCellsMap.html">grapa.scripts.script_processJV.plotSampleCellsMap</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.processJVfolder.html">grapa.scripts.script_processJV.processJVfolder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.processSampleCellsMap.html">grapa.scripts.script_processJV.processSampleCellsMap</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.promptForFolder.html">grapa.scripts.script_processJV.promptForFolder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.prompt_for_folder.html">grapa.scripts.script_processJV.prompt_for_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.standalone.html">grapa.scripts.script_processJV.standalone</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.writeFileAvgMax.html">grapa.scripts.script_processJV.writeFileAvgMax</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.AreaDB.html">grapa.scripts.script_processJV.AreaDB</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.scripts.script_processJV.AreaDBHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.IvDataLocator.html">grapa.scripts.script_processJV.IvDataLocator</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processJscVoc.html">grapa.scripts.script_processJscVoc</a></li>
@@ -125,6 +127,9 @@
 <dt class="sig sig-object py" id="grapa.scripts.script_processJV.AreaDBHandler">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.scripts.script_processJV.</span></span><span class="sig-name descname"><span class="pre">AreaDBHandler</span></span><a class="headerlink" href="#grapa.scripts.script_processJV.AreaDBHandler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Handler for area databases, to avoid opening the same database multiple times
+.get(folder, sample) returns an AreaDB object</p>
+<p>Retrospectvely: class seems useless, could be bypassed</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.scripts.script_processJV.AreaDBHandler.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.scripts.script_processJV.AreaDBHandler.__init__" title="Link to this definition"></a></dt>
@@ -136,11 +141,17 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.scripts.script_processJV.AreaDBHandler.__init__" title="grapa.scripts.script_processJV.AreaDBHandler.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code>(p1, p2)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.scripts.script_processJV.AreaDBHandler.get" title="grapa.scripts.script_processJV.AreaDBHandler.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(folder, sample)</p></td>
+<td><p>.get(folder, sample) returns an AreaDB object</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.scripts.script_processJV.AreaDBHandler.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.scripts.script_processJV.AreaDBHandler.get" title="Link to this definition"></a></dt>
+<dd><p>.get(folder, sample) returns an AreaDB object</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -150,7 +161,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="grapa.scripts.script_processJV.AreaDB.html" class="btn btn-neutral float-left" title="grapa.scripts.script_processJV.AreaDB" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grapa.scripts.script_processJscVoc.html" class="btn btn-neutral float-right" title="grapa.scripts.script_processJscVoc" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grapa.scripts.script_processJV.IvDataLocator.html" class="btn btn-neutral float-right" title="grapa.scripts.script_processJV.IvDataLocator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

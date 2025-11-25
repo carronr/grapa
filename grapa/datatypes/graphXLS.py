@@ -8,7 +8,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.mathModule import is_number
 
 
@@ -38,10 +38,10 @@ class GraphXLS(Graph):
         if not isinstance(sheet_id, str) and not is_number(sheet_id):
             sheet_id = attributes["sheetid"] if "sheetid" in attributes else 0
         try:  # first try by name, then try by index, try first sheet by defaul
-            sheet = wb.sheet_by_name(sheet_id)
+            sheet = wb.sheet_by_name(str(sheet_id))
         except Exception:
             try:
-                sheet = wb.sheet_by_index(sheet_id)
+                sheet = wb.sheet_by_index(int(sheet_id))
             except Exception:
                 sheet = wb.sheet_by_index(0)
                 print(
@@ -68,5 +68,5 @@ class GraphXLS(Graph):
                     values.append(value)
             items.append(values)
         # identify correct way to process data - is it database, or file generic ?
-        func = GraphIO._funcReadDataFile(items, attributes)
+        func = FileParserDispatcher._funcReadDataFile(items, attributes)
         func(self, attributes, fileContent=items)

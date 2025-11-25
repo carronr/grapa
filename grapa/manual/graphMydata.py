@@ -57,7 +57,7 @@ class GraphMydata(Graph):
             self.append(CurveMycurve(data, attributes))
         except ImportError:
             self.append(Curve(data, attributes))
-        self.curve(-1).update(attrs)  # file content may override default attributes
+        self[-1].update(attrs)  # file content may override default attributes
 
         # cosmetics
         # some default settings

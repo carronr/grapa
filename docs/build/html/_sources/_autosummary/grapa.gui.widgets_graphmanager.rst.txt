@@ -15,6 +15,7 @@ grapa.gui.widgets\_graphmanager
       :toctree:
    
       test_all
+      userconfirm_close_notsaved
    
    
 
@@ -29,6 +30,7 @@ grapa.gui.widgets\_graphmanager
       CustomNotebook
       GraphHandler
       GraphsTabManager
+      RecorderSpecialKeys
    
    
 

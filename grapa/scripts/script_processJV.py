@@ -4,23 +4,24 @@
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-import numpy as np
 import os
 import sys
-
-import glob
 from copy import deepcopy
 from re import search as research
+import glob
+from typing import Tuple, List
+
+import numpy as np
 import matplotlib.pyplot as plt
 
-path = os.path.normpath(
+path_ = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 )
-if path not in sys.path:
-    sys.path.append(path)
+if path_ not in sys.path:
+    sys.path.append(path_)
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import file_read_first3lines
+from grapa.utils.parser_dispatcher import file_read_first3lines
 from grapa.database import Database
 from grapa.mathModule import is_number, roundSignificant
 from grapa.utils.string_manipulations import strToVar
@@ -34,7 +35,8 @@ from grapa.datatypes.graphJVDarkIllum import GraphJVDarkIllum
 
 
 # prompt for folder
-def promptForFolder():
+def prompt_for_folder():
+    """Prompt user for a folder, return path as string."""
     # Start->Execute, cmd, type "pip install tkinter"
     from tkinter.filedialog import askdirectory
 
@@ -43,7 +45,8 @@ def promptForFolder():
 
 
 # auxiliary function
-def dictToListSorted(d):
+def dict_to_list_sorted(d):
+    """Convert dictionary keys to a sorted list"""
     lst = []
     for key in d:
         lst.append(key)
@@ -52,22 +55,30 @@ def dictToListSorted(d):
 
 
 class AreaDBHandler:
+    """Handler for area databases, to avoid opening the same database multiple times
+    .get(folder, sample) returns an AreaDB object
+
+    Retrospectvely: class seems useless, could be bypassed"""
+
     def __init__(self):
         self._dict = {}
 
-    def get(self, p1, p2):
-        print("areaDBHandler", p1, p2)
-        if p1 not in self._dict:
-            self._dict.update({p1: {}})
-        if p2 not in self._dict[p1]:
-            self._dict[p1].update({p2: AreaDB(p1, p2)})
-        return self._dict[p1][p2]
+    def get(self, folder, sample):
+        """.get(folder, sample) returns an AreaDB object"""
+        print("areaDBHandler", folder, sample)
+        if folder not in self._dict:
+            self._dict.update({folder: {}})
+        if sample not in self._dict[folder]:
+            self._dict[folder].update({sample: AreaDB(folder, sample)})
+        return self._dict[folder][sample]
 
 
 #  auxiliary class - add some useful tools to the database class
 class AreaDB(Database):
+    """Class to handle area database files"""
+
     def __init__(self, folder, sample):
-        self.colIdx = 0
+        self.col_idx = 0
         self.folder = folder
         self.sample = sample
         # different possible names for area databases
@@ -81,7 +92,7 @@ class AreaDB(Database):
             [os.path.join(folder, "areas.xlsx"), sample],
         ]
         self.flag = False
-        self.flagCheat = False
+        self.flag_cheat = False
         for t in test:
             print("Area database: look for file ", t[0])
             if not os.path.exists(t[0]):  # file not found
@@ -97,7 +108,7 @@ class AreaDB(Database):
                     # identify suitable column
                     for col in self.colLabels:
                         if col.find("area") > -1:
-                            self.colIdx = col
+                            self.col_idx = col
                     self.flag = True
                     print("Database of cell area parsed and area identified.")
                 except Exception:
@@ -108,17 +119,18 @@ class AreaDB(Database):
             print("areaDB: cannot find area database file.")
 
     def get_area(self, cell):
+        """get area for a given cell, return np.nan if not found"""
         if not self.flag:  # if database could not be opened
-            if self.flagCheat:
+            if self.flag_cheat:
                 if cell in self.data:
                     return self.data[cell]
             return np.nan
-        out = self.value(self.colIdx, cell)
+        out = self.value(self.col_idx, cell)
         if isinstance(out, list):
             print("Warning: please check that cell (picel) exists in database!", cell)
             return np.nan
         if np.isnan(out):
-            out = self.value(self.colIdx, self.sample + " " + cell)
+            out = self.value(self.col_idx, self.sample + " " + cell)
         if np.isnan(out):
             msg = "AreaDB get_area: row {} not found ({})"
             print(msg.format(cell, self.rowLabels))
@@ -126,302 +138,324 @@ class AreaDB(Database):
         return out
 
     def set_area(self, cell, value):
+        """set area for a given cell"""
         if self.flag:
-            self.setValue(self.colIdx, cell, value, silent=True)
+            self.setValue(self.col_idx, cell, value, silent=True)
         else:
-            self.flagCheat = True
+            self.flag_cheat = True
             if not hasattr(self, "data"):
                 self.data = {}
             self.data.update({cell: value})
 
 
-# main function
-def processJVfolder(
-    folder,
-    ylim=[-50, 150],
-    sampleName="",
-    fitDiodeWeight=0,
-    groupCell=True,
-    figAx=None,
-    pltClose=True,
-    newGraphKwargs={},
-):
-    msg = "Script processJV folder initiated. Data processing can last a few seconds."
-    print(msg)
-    newGraphKwargs = deepcopy(newGraphKwargs)
-    newGraphKwargs.update({"silent": True})
-    if figAx is not None:
-        pltClose = False
-    path = os.path.join(folder, "*.txt")
+class IvDataLocator:
 
-    cellDict = {}
-    sampleAreaDict = {}
-    outFlag = True
-    out0 = ""
-
-    for file in glob.glob(path):
-        fileName, fileExt = os.path.splitext(file)
-        fileExt = fileExt.lower()
-        line1, line2, line3 = file_read_first3lines(filename=file)
-        if GraphJV.isFileReadable(
-            fileName, fileExt, line1=line1, line2=line2, line3=line3
-        ):
-            try:
-                graphTmp = Graph(file, **newGraphKwargs)
-            except IndexError:
-                continue  # next file
-        else:
-            continue
-        try:
-            sample = graphTmp[-1].sample()
-            cell = graphTmp[-1].cell()
-            dark = graphTmp[-1].darkOrIllum(ifText=True)
-            measId = graphTmp[-1].measId()
-        except Exception:
-            continue  # go to next file
-
-        print("File", os.path.basename(file))
-        if sample == "" or cell == "":
-            print(
-                "WARNING: cannot identify sample (", sample, ") or cell (", cell, ")."
+    @classmethod
+    def parse_folder_or_file(
+        cls, folder_or_file: str, newgraphkwargs: dict
+    ) -> Tuple[dict, dict, str]:
+        if os.path.isfile(folder_or_file):
+            return cls._parse_file_unique(folder_or_file, newgraphkwargs)
+        # is folder
+        sampledict, areadict, header = cls._parse_folder_files_raw(
+            folder_or_file, newgraphkwargs
+        )
+        if len(sampledict) == 0:
+            sampledict, areadict, header = cls._parse_folder_files_consolidated(
+                folder_or_file, newgraphkwargs
             )
+        return sampledict, areadict, header
+
+    @staticmethod
+    def _add_to_sampledict(sampledict, areadict, curve: CurveJV, folder, file=None):
+        try:
+            sample = curve.sample()
+            cell = curve.cell()
+            dark = curve.darkOrIllum(ifText=True)
+            measid = int(curve.measId())
+        except Exception:
+            print("failed step retrieve identifiers")
+            return False
+
+        if sample == "" or cell == "":
+            msg = "WARNING: cannot identify sample ({}) or cell ({})."
+            print(msg.format(sample, cell))
+            return False
 
         if sample != "" and cell != "":
-            if sample not in cellDict:
-                cellDict.update({sample: {}})
-            if cell not in cellDict[sample]:
-                cellDict[sample].update({cell: {}})
-            if dark not in cellDict[sample][cell]:
-                cellDict[sample][cell].update({dark: {}})
-            if sample not in sampleAreaDict:
-                areaHandler = AreaDBHandler()
-                sampleAreaDict.update({sample: areaHandler.get(folder, sample)})
-            # open JV file again to correct for cell area
-            area = sampleAreaDict[sample].get_area(cell)
-            if (
-                np.isnan(area)
-                and is_number(graphTmp[0].attr("Acquis soft Cell area"))
-                and not np.isnan(graphTmp[0].attr("Acquis soft Cell area"))
+            if sample not in sampledict:
+                sampledict.update({sample: {}})
+            if cell not in sampledict[sample]:
+                sampledict[sample].update({cell: {}})
+            if dark not in sampledict[sample][cell]:
+                sampledict[sample][cell].update({dark: {}})
+            to_insert = file if file is not None else curve
+            sampledict[sample][cell][dark].update({measid: to_insert})
+
+            # retrieve area inormation from dedicated file, if possible
+            if sample not in areadict:
+                area_handler = AreaDBHandler()
+                areadict.update({sample: area_handler.get(folder, sample)})
+
+            areadb = areadict[sample].get_area(cell)
+            areaattr = curve.area()
+            areainit = curve.attr("Acquis soft Cell area")
+            if np.isnan(areadb) and is_number(areaattr) and not np.isnan(areaattr):
+                areadict[sample].set_area(cell, areaattr)
+                areadb = areadict[sample].get_area(cell)
+
+            msgsub = []
+            if is_number(areadb) and is_number(areaattr) and areadb != areaattr:
+                msgsub.append("parsed as {}".format(areaattr))
+            if is_number(areaattr) and is_number(areainit) and areainit != areaattr:
+                msgsub.append("initial acquisition {}".format(areainit))
+            msg = "  {}, cell {}: area {} cm2 ({})"
+            print(msg.format(sample, cell, areadb, ", ".join(msgsub)))
+
+    @classmethod
+    def _parse_folder_files_raw(cls, folder: str, newgraphkwargs: dict):
+        sampledict = {}
+        areadict = {}
+        header = ""
+        header_done = False
+
+        path = os.path.join(folder, "*.txt")
+        for file in glob.glob(path):
+            filename, ext = os.path.splitext(file)
+            ext = ext.lower()
+            line1, line2, line3 = file_read_first3lines(filename=file)
+            if GraphJV.isFileReadable(
+                filename, ext, line1=line1, line2=line2, line3=line3
             ):
-                sampleAreaDict[sample].set_area(
-                    cell, graphTmp[0].attr("Acquis soft Cell area")
-                )
-                area = sampleAreaDict[sample].get_area(cell)
-            cellDict[sample][cell][dark].update({measId: file})
-
-            areaformer = graphTmp[0].attr("Acquis soft Cell area")
-            msg = "  Sample {}, cell {}, area {} cm2 (acquired as {})"
-            print(msg.format(sample, cell, area, areaformer))
-
-        if outFlag:
-            out0 = out0 + graphTmp[-1].printShort(header=True)
-            outFlag = False
-
-    # sweep through files, identify pairs
-    listSample = dictToListSorted(cellDict)
-    graphAllJV = Graph("", **newGraphKwargs)  # in case listSample is empty
-    for s in listSample:
-        graphAllJV = Graph("", **newGraphKwargs)
-
-        s_str = "Sample " + str(s) if is_number(s) else str(s)
-        out = (
-            "Sample\t"
-            + s_str
-            + "\n"
-            + "label\t"
-            + s_str.replace("_", "\\n")
-            + "\n"
-            + deepcopy(out0)
-        )
-        outIllum = (
-            "Sample\t"
-            + s_str
-            + "\n"
-            + "label\t"
-            + s_str.replace("_", "\\n")
-            + "\n"
-            + deepcopy(out0)
-        )
-        outDark = (
-            "Sample\t"
-            + s_str
-            + "\n"
-            + "label\t"
-            + s_str.replace("_", "\\n")
-            + "\n"
-            + deepcopy(out0)
-        )
-        listCell = dictToListSorted(cellDict[s])
-        for c in listCell:
-            listDarkIllum = dictToListSorted(cellDict[s][c])
-            # if want to process each emasureemnt independently
-            if not groupCell:
-                for d in listDarkIllum:
-                    listGraph = dictToListSorted(cellDict[s][c][d])
-                    for m in listGraph:
-                        filesave = (
-                            "export_"
-                            + s
-                            + "_"
-                            + c
-                            + "_"
-                            + m
-                            + ("_" + d).replace("_" + CurveJV.ILLUM, "")
-                        )
-                        print("Graph saved as", filesave)
-                        graph = GraphJVDarkIllum(
-                            cellDict[s][c][d][m],
-                            "",
-                            area=sampleAreaDict[s].get_area(c),
-                            complement={
-                                "ylim": ylim,
-                                "saveSilent": True,
-                                "_fitDiodeWeight": fitDiodeWeight,
-                            },
-                            **newGraphKwargs
-                        )
-                        out = out + graph.printShort()
-                        filesave = os.path.join(folder, filesave)
-                        graph.plot(filesave, fig_ax=figAx, pltClose=pltClose)
-                        graphAllJV.append(graph.returnDataCurves())
+                try:
+                    graph = Graph(file, **newgraphkwargs)
+                except IndexError:
+                    continue  # next file
             else:
-                # if want to restrict 1 msmt dark + 1 illum per cell
-                if len(listDarkIllum) > 2:
-                    print("test WARNING sorting JV files.")
-                # only dark on only illum measurement
-                if len(listDarkIllum) == 1:
-                    d = listDarkIllum[0]
-                    listGraph = dictToListSorted(cellDict[s][c][d])
-                    m = listGraph[0]
-                    filesave = (
-                        "export_"
-                        + s
-                        + "_"
-                        + c
-                        + "_"
-                        + m
-                        + ("_" + d)
-                        .replace("_" + CurveJV.ILLUM, "")
-                        .replace("_" + CurveJV.DARK, "")
-                    )
-                    print("Graph saved as", filesave)
-                    fileDark = (
-                        cellDict[s][c][d][m] if listDarkIllum[0] == CurveJV.DARK else ""
-                    )
-                    fileIllum = (
-                        cellDict[s][c][d][m]
-                        if listDarkIllum[0] == CurveJV.ILLUM
-                        else ""
-                    )
-                    # create Graph file
-                    graph = GraphJVDarkIllum(
-                        fileDark,
-                        fileIllum,
-                        area=sampleAreaDict[s].get_area(c),
-                        complement={
-                            "ylim": ylim,
-                            "saveSilent": True,
-                            "_fitDiodeWeight": fitDiodeWeight,
-                        },
-                        **newGraphKwargs
-                    )
-                    filesave = os.path.join(folder, filesave)
-                    graph.plot(filesave=filesave, fig_ax=figAx, pltClose=pltClose)
-                    # prepare output summary files
-                    out = out + graph.printShort()
-                    if listDarkIllum[0] == CurveJV.DARK:
-                        outDark = outDark + graph.printShort()
-                    else:
-                        outIllum = outIllum + graph.printShort()
-                    # if len(listGraph) > 1 :
-                    #    msg = '.'.join([cellDict[s][c][d][m2] for m2 in cellDict[s][c][d]][1:])
-                    #    print ('test WARNING: other files ignored (,',msg,')')
-                    graphAllJV.append(graph.returnDataCurves())
+                continue
+            print("File:", os.path.basename(file))
 
-                # can identify pair of dark-illum files
-                if len(listDarkIllum) == 2:
-                    listGraph = dictToListSorted(cellDict[s][c][listDarkIllum[0]])
-                    filesave = "export_" + s + "_" + c + "_" + listGraph[0]
-                    fileDark = cellDict[s][c][listDarkIllum[0]][listGraph[0]]
+            curve = graph[-1]
+            cls._add_to_sampledict(sampledict, areadict, curve, folder, file=file)
 
-                    listGraph = dictToListSorted(cellDict[s][c][listDarkIllum[1]])
-                    filesave = filesave + "-" + listGraph[0]
-                    fileIllum = cellDict[s][c][listDarkIllum[1]][listGraph[0]]
+            if not header_done:
+                header += curve.printShort(header=True)
+                header_done = True
+        return sampledict, areadict, header
 
-                    print("Graph saved as", filesave)
-                    # create Graph file
-                    graph = GraphJVDarkIllum(
-                        fileDark,
-                        fileIllum,
-                        area=sampleAreaDict[s].get_area(c),
-                        complement={
-                            "ylim": ylim,
-                            "saveSilent": True,
-                            "_fitDiodeWeight": fitDiodeWeight,
-                        },
-                        **newGraphKwargs
-                    )
-                    filesave = os.path.join(folder, filesave)
-                    graph.plot(filesave=filesave, fig_ax=figAx, pltClose=pltClose)
-                    # prepare output summary files
-                    out = out + graph.printShort()
-                    outIllum = outIllum + graph.printShort(onlyIllum=True)
-                    outDark = outDark + graph.printShort(onlyDark=True)
-                    graphAllJV.append(graph.returnDataCurves())
+    @classmethod
+    def _parse_folder_files_consolidated(cls, folder: str, newgraphkwargs: dict):
+        sampledict = {}
+        areadict = {}
+        header = ""
+        header_done = False
 
-        # graph with all JV curves area-corrected
-        for c in graphAllJV:
-            c.update({"color": ""})
-        if len(cellDict[s].keys()) > 0:  # retrieve consistent xlabel, ylabel
-            cds = cellDict[s]
-            try:
-                cdsc = cds[list(cds.keys())[0]]
-                cdscd = cdsc[list(cdsc.keys())[0]]
-                randomfile = cdscd[list(cdscd.keys())[0]]
-                graphtmp = Graph(randomfile)
-                graphAllJV.update(
-                    {
-                        "xlabel": graphtmp.attr("xlabel"),
-                        "ylabel": graphtmp.attr("ylabel"),
-                    }
+        path = os.path.join(folder, "*.txt")
+        for file in glob.glob(path):
+            if os.path.basename(file).startswith("export"):
+                continue
+            graph = Graph(file, **newgraphkwargs)
+            if len(graph) < 2:
+                continue
+            onlyjv = True
+            for curve in graph:
+                if not isinstance(curve, CurveJV):
+                    onlyjv = False
+                    break
+            if not onlyjv:
+                continue
+
+            msg = "Found file containing only CurveJV Curves, at least 2 of them: {}"
+            print(msg.format(file))
+            print("Do not consider other files, execution may last too long.")
+            for curve in graph:
+                cls._add_to_sampledict(sampledict, areadict, curve, folder)
+                if not header_done:
+                    header += curve.printShort(header=True)
+                    header_done = True
+        return sampledict, areadict, header
+
+    @classmethod
+    def _parse_file_unique(cls, file: str, newgraphkwargs: dict):
+        sampledict = {}
+        areadict = {}
+        header = ""
+        header_done = False
+
+        folder = os.path.dirname(file)
+        graph = Graph(file, **newgraphkwargs)
+        for curve in graph:
+            cls._add_to_sampledict(sampledict, areadict, curve, folder)
+            if not header_done:
+                header += curve.printShort(header=True)
+                header_done = True
+        return sampledict, areadict, header
+
+
+def _plot_jvall(graph: Graph, s: str, folder: str, fig_ax: list, pltclose: bool):
+    fsave = "export_{}_summary_allJV".format(s)
+    for c in graph:
+        c.update({"color": ""})
+    graph.update({"xlabel": GraphJV.AXISLABELS[0], "ylabel": GraphJV.AXISLABELS[1]})
+    graph.plot(os.path.join(folder, fsave), fig_ax=fig_ax)
+    if pltclose and fig_ax is None:
+        plt.close()
+
+
+def _process_sample(s, celldict, areadict, header0, struct):
+    encoding = "utf-8"
+    folder, fig_ax, pltClose, group_cell, fitDiodeWeight, ylim, newgraphkwargs = struct
+    kwargs_plot = {"fig_ax": fig_ax, "pltClose": pltClose}
+    complement = {"ylim": ylim, "saveSilent": True, "_fitDiodeWeight": fitDiodeWeight}
+
+    s_str = "Sample " + str(s) if is_number(s) else str(s)
+    out_base = "Sample\t{}\nlabel\t{}\n{}"
+    outall = out_base.format(s_str, s_str.replace("_", "\\n"), header0)
+    outillum = out_base.format(s_str, s_str.replace("_", "\\n"), header0)
+    outdark = out_base.format(s_str, s_str.replace("_", "\\n"), header0)
+
+    graph_alljv = Graph("", **newgraphkwargs)
+    cell_list = dict_to_list_sorted(celldict)
+    for c in cell_list:
+        area = areadict[s].get_area(c)
+        kwargs_more = {"area": area, "complement": complement}
+        kwargs_more.update(newgraphkwargs)
+        darkillum_list = dict_to_list_sorted(celldict[c])
+        # if want to process each emasureemnt independently
+        if not group_cell:
+            for d in darkillum_list:
+                files_list = dict_to_list_sorted(celldict[c][d])
+                for m in files_list:
+                    graph = GraphJVDarkIllum(celldict[c][d][m], "", **kwargs_more)
+                    graph_alljv.append(graph.get_datacurves())
+                    outall += graph.printShort()
+                    fsave_tmp = ("_" + d).replace("_" + CurveJV.ILLUM, "")
+                    fsave = "export_{}_{}_{}{}".format(s, c, m, fsave_tmp)
+                    graph.plot(os.path.join(folder, fsave), **kwargs_plot)
+                    print("Graph saved as", fsave)
+        else:
+            # if want to restrict 1 msmt dark + 1 illum per cell
+            if len(darkillum_list) > 2:
+                print("test WARNING sorting JV files.")
+            # only dark on only illum measurement
+            if len(darkillum_list) == 1:
+                d = darkillum_list[0]
+                files_list = dict_to_list_sorted(celldict[c][d])
+                m = files_list[0]
+                file_dark = (
+                    celldict[c][d][m] if darkillum_list[0] == CurveJV.DARK else ""
                 )
-            except IndexError:
-                pass
-        filesave = os.path.join(folder, "export_" + s + "_summary_allJV")
-        graphAllJV.plot(filesave, fig_ax=figAx)
-        if pltClose and figAx is None:
-            plt.close()
+                file_illum = (
+                    celldict[c][d][m] if darkillum_list[0] == CurveJV.ILLUM else ""
+                )
+                # create Graph file
+                graph = GraphJVDarkIllum(file_dark, file_illum, **kwargs_more)
+                fsave_tmp = (
+                    ("_" + d)
+                    .replace("_" + CurveJV.ILLUM, "")
+                    .replace("_" + CurveJV.DARK, "")
+                )
+                fsave = "export_{}_{}_{}{}".format(s, c, m, fsave_tmp)
+                graph.plot(filesave=os.path.join(folder, fsave), **kwargs_plot)
+                print("Graph saved as", fsave)
+                graph_alljv.append(graph.get_datacurves())
+                # prepare output summary files
+                outall = outall + graph.printShort()
+                if darkillum_list[0] == CurveJV.DARK:
+                    outdark += graph.printShort()
+                else:
+                    outillum += graph.printShort()
+                # if len(listGraph) > 1 :
+                #    msg = '.'.join([cellDict[s][c][d][m2] for m2 in cellDict[s][c][d]][1:])
+                #    print ('test WARNING: other files ignored (,',msg,')')
 
-        # print sample summary
-        filesave = "export_" + s + "_summary" + ".txt"
-        filesave = os.path.join(folder, filesave)
-        # print('End of JV curves processing, showing summary file...')
-        # print(out)
-        print("Summary saved in file", filesave, ".")
-        with open(filesave, "w") as f:
-            f.write(out)
-        if groupCell:
-            filesave = "export_" + s + "_summary_dark" + ".txt"
-            filesave = os.path.join(folder, filesave)
-            with open(filesave, "w") as f:
-                f.write(outDark)
-            processSampleCellsMap(filesave, figAx=figAx, pltClose=pltClose)
-            filesave = "export_" + s + "_summary_illum" + ".txt"
-            filesave = os.path.join(folder, filesave)
-            with open(filesave, "w") as f:
-                f.write(outIllum)
-            processSampleCellsMap(filesave, figAx=figAx, pltClose=pltClose)
-            writeFileAvgMax(filesave, filesave=True, ifPrint=True)
+            # can identify pair of dark-illum files
+            if len(darkillum_list) == 2:
+                list_files0 = dict_to_list_sorted(celldict[c][darkillum_list[0]])
+                file_dark = celldict[c][darkillum_list[0]][list_files0[0]]
+                list_files1 = dict_to_list_sorted(celldict[c][darkillum_list[1]])
+                file_illum = celldict[c][darkillum_list[1]][list_files1[0]]
+                # create Graph file
+                graph = GraphJVDarkIllum(file_dark, file_illum, **kwargs_more)
+                fsave_tmp = "export_{}_{}_{}-{}"
+                fsave = fsave_tmp.format(s, c, list_files0[0], list_files1[0])
+                print("Graph saved as", fsave)
+                graph.plot(filesave=os.path.join(folder, fsave), **kwargs_plot)
+                graph_alljv.append(graph.get_datacurves())
+                # prepare output summary files
+                outall += graph.printShort()
+                outillum += graph.printShort(onlyIllum=True)
+                outdark += graph.printShort(onlyDark=True)
+
+    # graph with all JV curves area-corrected
+    _plot_jvall(graph_alljv, s, folder, fig_ax, pltClose)
+
+    # print sample summary
+    fsave = "export_{}_summary.txt".format(s)
+    fsave = os.path.join(folder, fsave)
+    print("Summary saved in file {}.".format(fsave))
+    with open(fsave, "w", encoding=encoding) as f:
+        f.write(outall)
+
+    if group_cell:  # summaries dark and illum
+        fsave = "export_{}_summary_dark.txt".format(s)
+        fsave = os.path.join(folder, fsave)
+        with open(fsave, "w", encoding=encoding) as f:
+            f.write(outdark)
+        processSampleCellsMap(fsave, figAx=fig_ax, pltClose=pltClose)
+
+        fsave = "export_{}_summary_illum.txt".format(s)
+        fsave = os.path.join(folder, fsave)
+        with open(fsave, "w", encoding=encoding) as f:
+            f.write(outillum)
+        processSampleCellsMap(fsave, figAx=fig_ax, pltClose=pltClose)
+        writeFileAvgMax(fsave, filesave=True, ifPrint=True)
+    return graph_alljv
+
+
+# main function
+def processJVfolder(
+    folder: str,
+    ylim: list = [-50, 150],
+    fitDiodeWeight: float = 0,
+    groupCell: bool = True,
+    figAx: list = None,
+    pltClose: bool = True,
+    newGraphKwargs: dict = {},
+):
+    """Process a folder containing JV files, identify pairs of dark-illum files,"""
+    msg = "Script processJV folder initiated. Data processing can last a few seconds."
+    print(msg)
+    newgraphkwargs = deepcopy(newGraphKwargs)
+    newgraphkwargs.update({"silent": True})
+    if figAx is not None:
+        pltClose = False
+
+    # parse sample, cell, dark/illum, msmtid from files
+    print("Parsing file or folder {}...".format(folder))
+    sampledict, areadict, header = IvDataLocator.parse_folder_or_file(
+        folder, newgraphkwargs
+    )
+
+    if len(sampledict) == 0:
+        print("Unfortunately, no suitable file found...")
+        return Graph("", **newgraphkwargs)
+
+    # process each sample found
+    struct = (folder, figAx, pltClose, groupCell, fitDiodeWeight, ylim, newgraphkwargs)
+    for s, celldict in sampledict.items():
+        graph_alljv = _process_sample(s, celldict, areadict, header, struct)
     print("Script processJV folder done.")
-    # print('return graph', type(graph), graph)
-    # Graph.plot(graph, os.path.join(folder, 'export_test'))
-    return graphAllJV
+    return graph_alljv
 
 
 def writeFileAvgMax(
     fileOrContent, filesave=False, withHeader=True, colSample=True, ifPrint=True
 ):
-    colOfInterest = ["Voc", "Jsc", "FF", "Eff"]
+    """Process a file or Graph containing summary of solar cell parameters for different
+    cells."""
+    encoding = "utf-8"
+    cols_of_interest = ["Voc", "Jsc", "FF", "Eff"]
     if isinstance(fileOrContent, Graph):
         content = fileOrContent
         filename = content.attr("sample").replace("\n", "")
@@ -432,16 +466,35 @@ def writeFileAvgMax(
         filename = fileOrContent
     #    print(content)
     # identify columns of interest
-    colLbl = content.attr("collabels")
-    cols = []
-    idxs = []
-    for c in colOfInterest:
-        cols.append([np.nan])
-        idxs.append(np.nan)
-        for i in range(len(colLbl)):
-            if c in colLbl[i]:
-                cols[-1] = content[i].y()
-                idxs[-1] = i
+
+    curves_of_interest = {}
+    for key in cols_of_interest:
+        curves_of_interest[key] = {
+            "y": [],
+            "average": "",
+            "median": "",
+            "argmax": None,
+            "collabely": key,
+        }
+        found = False
+        for curve in content:
+            collabels = curve.attr("_collabels")
+            if not isinstance(collabels, (list, tuple)) or len(collabels) < 2:
+                continue
+            if key in collabels[1]:
+                found = True
+                y = curve.y()
+                curves_of_interest[key]["curve"] = curve
+                curves_of_interest[key]["collabely"] = collabels[1]
+                curves_of_interest[key]["y"] = y
+                if len(y) > 0:
+                    curves_of_interest[key]["average"] = np.average(y)
+                    curves_of_interest[key]["median"] = np.average(y)
+                    curves_of_interest[key]["argmax"] = np.argmax(y)
+                break
+        if not found:
+            print("ScriptJV: loop curves could NOT find key:", key)
+
     # start to compile output in variable out
     out = ""
     if withHeader:
@@ -451,16 +504,16 @@ def writeFileAvgMax(
         if colSample:
             out += "\t"
         # column headers
-        out += "Best cell (eff.)" + "\t" * len(colOfInterest)
-        out += "Parameter average" + "\t" * len(colOfInterest)
-        out += "Parameter median" + "\t" * len(colOfInterest)
+        out += "Best cell (eff.)" + "\t" * len(cols_of_interest)
+        out += "Parameter average" + "\t" * len(cols_of_interest)
+        out += "Parameter median" + "\t" * len(cols_of_interest)
         out += "\n"
         # column name
         if colSample:
             out += "Sample\t"
         for i in range(3):
-            for c in idxs:
-                out += (colLbl[c] if c is not np.isnan(c) else "") + "\t"
+            for _, item in curves_of_interest.items():
+                out += item["collabely"] + "\t"
         out += "\n"
     # sample name
     if colSample:
@@ -476,28 +529,27 @@ def writeFileAvgMax(
         samplename = samplename.replace("\n", " ")
         out += samplename + "\t"
     # best cell
-    eff = None
-    for i in range(len(colLbl)):
-        if "Eff" in colLbl[i]:
-            eff = content[i].y()
-    if eff is not None and len(eff) > 0:
-        idx = np.argmax(eff)
-        for c in cols:
-            out += str(c[idx]) + "\t"
-    else:
+    idx_best = curves_of_interest["Eff"]["argmax"]
+    for _, item in curves_of_interest.items():
+        if idx_best is not None:
+            val = item["y"][idx_best] if len(item["y"]) > idx_best else ""
+        else:
+            val = ""
+        out += str(val) + "\t"
+    if idx_best is None:
         print("Could not find column Eff")
     # averages
-    for c in cols:
-        out += str(np.average(c)) + "\t"
+    for _, item in curves_of_interest.items():
+        out += str(item["average"]) + "\t"
     # averages
-    for c in cols:
-        out += str(np.median(c)) + "\t"
+    for _, item in curves_of_interest.items():
+        out += str(item["median"]) + "\t"
     # new line
     out += "\n"
     # maybe save result in a file
     if isinstance(filename, str) and filesave is True:
         fname = filename.replace(".txt", "_avgmax.txt")
-        with open(fname, "w") as f:
+        with open(fname, "w", encoding=encoding) as f:
             f.write(out)
     if ifPrint:
         print(out)
@@ -507,6 +559,8 @@ def writeFileAvgMax(
 def processSampleCellsMap(
     file, colorscale=None, figAx=None, pltClose=True, newGraphKwargs={}
 ):
+    """Process a file containing summary of solar cell parameters for different cells,
+    and plot maps of the different parameters."""
     newGraphKwargs = deepcopy(newGraphKwargs)
     newGraphKwargs.update({"silent": True})
 
@@ -558,86 +612,91 @@ def processSampleCellsMap(
     )
     # locate possible warnings for poor fits - in view of modifying markersize
     rsquare = 1
-    for j in range(len(cols)):
-        if cols[j].startswith("Rsquare"):
+    for j, colsj in enumerate(cols):
+        if colsj.startswith("Rsquare"):
             rsquare = content[j].y()
             # print("rsquare", j, rsquare)
 
     # combined plots
-    graphs = []
+    graphs: List[Graph] = []
     # axisheights = [[], []]
     figsize = [6, 4]
     sadjust = [0.1, 0.1, 0.9, 0.9]
     # main loop
-    for i in range(len(colToPlot)):
-        look = colToPlot[i]
+    for i, look in enumerate(colToPlot):
         AB = 0 if i < 4 else 1
         while len(graphs) <= AB:
             graphs.append(Graph("", **newGraphKwargs))
-        colFound = False
+        col_found = False
 
         if look == "":  # blank space is desired
             graphs[AB].append(curveblank)
             continue
 
-        for j in range(len(cols)):
-            c = cols[j]
-            if c[: len(look)] == look and (
-                len(c) <= len(look)
-                or c[len(look)] in [" ", "_", "-", ".", "[", "]", "(", ")"]
+        for j, c in enumerate(cols):
+            if not (
+                c[: len(look)] == look
+                and (
+                    len(c) <= len(look)
+                    or c[len(look)] in [" ", "_", "-", ".", "[", "]", "(", ")"]
+                )
             ):
-                c = c.replace("_", " [").replace("(", "[")
-                if "[" in c and "]" not in c:
-                    c += "]"
-                c = c.replace("[pc]", "[%]").replace("mApcm2", "mA/cm2")
-                # sort somehow identical cells?
-                vals = content[j].y()
-                lookfname = look.replace(".", "").replace(" ", "").lower()
-                filesave = ".".join(file.split(".")[:-1]) + "_" + lookfname
-                filelist.append(filesave + ".txt")
+                continue
 
-                sizefactor = 1
-                # reduce marker size if fit was poor: Rp, Rs, J0 , n, Rsquare
-                if i in [4, 5, 6, 7, 11]:
-                    if isinstance(rsquare, int):  # not a list, or np.array
-                        rsquare = [rsquare] * len(vals)
-                    sizefactor = [
+            c = c.replace("_", " [").replace("(", "[")
+            if "[" in c and "]" not in c:
+                c += "]"
+            c = c.replace("[pc]", "[%]").replace("mApcm2", "mA/cm2")
+            # sort somehow identical cells?
+            vals = content[j].y()
+            lookfname = look.replace(".", "").replace(" ", "").lower()
+            filesave = ".".join(file.split(".")[:-1]) + "_" + lookfname
+            filelist.append(filesave + ".txt")
+
+            sizefactor = 1
+            # reduce marker size if fit was poor: Rp, Rs, J0 , n, Rsquare
+            if i in [4, 5, 6, 7, 11]:
+                if isinstance(rsquare, int):  # not a list, or np.array
+                    rsquare = [rsquare] * len(vals)
+                sizefactor = [
+                    (
                         1
                         if rsquare[k] > 0.995
                         else (0.25 if rsquare[k] > 0.95 else 1 / 9)
-                        for k in range(len(vals))
-                    ]
-                # no marker if data nonsensical
-                if i in [4, 8]:  # if Rp < 0
-                    sf = np.array([1 if val > 0 else 0 for val in vals])
-                    sizefactor = sf * sizefactor
+                    )
+                    for k in range(len(vals))
+                ]
+            # no marker if data nonsensical
+            if i in [4, 8]:  # if Rp < 0
+                sf = np.array([1 if val > 0 else 0 for val in vals])
+                sizefactor = sf * sizefactor
 
-                res = plotSampleCellsMap(
-                    rows,
-                    vals,
-                    c,
-                    sizefactor,
-                    colorscale=colorscale,
-                    filesave=filesave,
-                    figAx=figAx,
-                    inverseScale=inveScale[i],
-                    pltClose=pltClose,
-                )
+            res = plotSampleCellsMap(
+                rows,
+                vals,
+                c,
+                sizefactor,
+                colorscale=colorscale,
+                filesave=filesave,
+                figAx=figAx,
+                inverseScale=inveScale[i],
+                pltClose=pltClose,
+            )
 
-                if isinstance(res, Graph) and len(res) > 0:
-                    fname = res.attr("filesave")
-                    attrs = {
-                        "subplotfile": fname + ".txt",
-                        "label": "Subplot " + str(look),
-                    }
-                    graphs[AB].append(Curve_Subplot([[0], [0]], attrs))
-                    figsize = res.attr("figsize", [6, 4])  # will be same for all plots
-                    sadjust = res.attr(
-                        "subplots_adjust", [0.1, 0.1, 0.9, 0.9]
-                    )  # will be same for all plots
-                colFound = True
-                break
-        if not colFound:
+            if isinstance(res, Graph) and len(res) > 0:
+                fname = res.attr("filesave")
+                attrs = {
+                    "subplotfile": fname + ".txt",
+                    "label": "Subplot " + str(look),
+                }
+                graphs[AB].append(Curve_Subplot([[0], [0]], attrs))
+                figsize = res.attr("figsize", [6, 4])  # will be same for all plots
+                sadjust = res.attr(
+                    "subplots_adjust", [0.1, 0.1, 0.9, 0.9]
+                )  # will be same for all plots
+            col_found = True
+            break
+        if not col_found:
             msg = "Warning processSampleCellsMap: column not found ({} or similar)"
             print(msg.format(look))
             graphs[AB].append(curveblank)
@@ -646,7 +705,7 @@ def processSampleCellsMap(
     for graph in graphs:
         for i in range(len(graph) - 1, -1, -1):
             if graph[i] == curveblank:
-                graph.curve_delete(i)
+                del graph[i]
             else:
                 break
         if len(graph) == 1:  # at least 2 subplots, otherwise grapa may not show well
@@ -700,12 +759,13 @@ def plotSampleCellsMap(
     pltClose=True,
     newGraphKwargs={},
 ):
+    """Plot a map of solar cell parameters for different cells."""
     # sizefactor: float, or np.array for each item in values. e.g. 0.25 to reduce markersize
-    sizeCell = np.array([0.6, 0.6])
+    size_cell = np.array([0.6, 0.6])
     margin = np.array([0.4, 0.4])
 
-    newGraphKwargs = deepcopy(newGraphKwargs)
-    newGraphKwargs.update({"silent": True})
+    newgraphkwargs = deepcopy(newGraphKwargs)
+    newgraphkwargs.update({"silent": True})
 
     if len(values) == 0:
         return False
@@ -714,14 +774,14 @@ def plotSampleCellsMap(
     ticklabeldash = False
     x, y, val = [], [], []
     split = [research(r"([a-zA-Z#])([0-9]*)", c).groups() for c in cells]
-    for i in range(len(split)):
-        if len(split[i]) == 2 and len(split[i][1]) > 0:
+    for i, spliti in enumerate(split):
+        if len(spliti) == 2 and len(spliti[1]) > 0:
             # max(1, ...): to convert "#" into "a"
-            x.append(max(1, float(ord(split[i][0].lower()) - 96)))
-            y.append(float(split[i][1]))
+            x.append(max(1, float(ord(spliti[0].lower()) - 96)))
+            y.append(float(spliti[1]))
             # prefer to work on a copy and not modifying the list values
             val.append(values[i])
-            if split[i][0] == "#":
+            if spliti[0] == "#":
                 ticklabeldash = True
         else:
             print("plotSampleCellsMap: cell name not legal:", split)
@@ -738,20 +798,20 @@ def plotSampleCellsMap(
     if title == "Voc [V]":
         title = "Voc [mV]"
         val *= 1000
-    title = (
-        title.replace("Voc_V", "Voc [V]")
-        .replace("Jsc_mApcm2", "Jsc [mA/cm2]")
-        .replace("FF_pc", "FF [%]")
-        .replace("Eff_pc", "Eff. [%]")
-        .replace("_Ohmcm2", " [Ohmcm2]")
-    )
-    title = (
-        title.replace("A/cm2", "A cm$^{-2}$")
-        .replace("J0 ", "J$_0$ ")
-        .replace("Ohmcm2", "$\\Omega$ cm$^2$")
-    )
+    replacement = {
+        "Voc_V": "Voc [V]",
+        "Jsc_mApcm2": "Jsc [mA/cm2]",
+        "FF_pc": "FF [%]",
+        "Eff_pc": "Eff. [%]",
+        "_Ohmcm2": " [Ohmcm2]",
+        "A/cm2": "A cm$^{-2}$",
+        "J0 ": "J$_0$ ",
+        "Ohmcm2": "$\\Omega$ cm$^2$",
+    }
+    for old, new in replacement.items():
+        title = title.replace(old, new)
 
-    valNorm = val if not (val == 0).all() and not len(val) == 1 else [0.5] * len(val)
+    val_norm = val if not (val == 0).all() and not len(val) == 1 else [0.5] * len(val)
     if isinstance(colorscale, Colorscale):
         colorscale = colorscale.get_colorscale()
     if isinstance(colorscale, str):
@@ -764,57 +824,54 @@ def plotSampleCellsMap(
 
     xticks = np.arange(0, max(x) + 1, 1)  # if max(x) > 6 else np.arange(0,max(x)+1,1)
     yticks = np.arange(0, max(y) + 1, 1)
-    axSize = np.array(
+    ax_size = np.array(
         [
-            sizeCell[0] * (max(xticks) - min(xticks)),
-            sizeCell[1] * (max(yticks) - min(yticks)),
+            size_cell[0] * (max(xticks) - min(xticks)),
+            size_cell[1] * (max(yticks) - min(yticks)),
         ]
     )
-    figsize = axSize + 2 * margin[1]
+    figsize = ax_size + 2 * margin[1]
     marg = margin / figsize
-    txtCoords = np.transpose(
+    txt_coords = np.transpose(
         [
             (x - 0.5 - min(xticks)) / (max(xticks) - min(xticks)),
             (y - 0.5 - min(yticks)) / (max(yticks) - min(yticks)),
         ]
     )
-    toPrint = [roundSignificant(v, 3) for v in val]
+    to_print = [roundSignificant(v, 3) for v in val]
     if np.average(val) > 1e2:
-        toPrint = ["{:1.0f}".format(v) for v in toPrint]
+        to_print = ["{:1.0f}".format(v) for v in to_print]
     if np.average(val) < 1e-3:
-        toPrint = ["{:.1E}".format(v).replace("E-0", "E-") for v in toPrint]
+        to_print = ["{:.1E}".format(v).replace("E-0", "E-") for v in to_print]
     if title.startswith("Rsquare"):  # more digits for Rsquare
-        toPrint = [roundSignificant(v, 5) for v in val]
-    markersize = (sizeCell[0] * 72) ** 2
-    valSize = np.array([markersize for val in x])
-    valSize *= sizefactor
-    graph = Graph("", **newGraphKwargs)
+        to_print = [roundSignificant(v, 5) for v in val]
+    markersize = (size_cell[0] * 72) ** 2
+    val_size = np.array([markersize for val in x])
+    val_size *= sizefactor
+    graph = Graph("", **newgraphkwargs)
     texttxt = []
     textarg = []
     for i in range(len(val)):
-        texttxt.append(toPrint[i])
+        texttxt.append(to_print[i])
         textarg.append(
             {
-                "xytext": list(txtCoords[i]),
+                "xytext": list(txt_coords[i]),
                 "xycoords": "axes fraction",
                 "horizontalalignment": "center",
                 "verticalalignment": "center",
             }
         )
-    graph.append(
-        Curve(
-            [x - 0.5, y - 0.5],
-            {
-                "type": "scatter",
-                "marker": "s",
-                # 'markersize': (sizeCell[0]*72)**2,
-                "markeredgewidth": 0,
-                "cmap": colorscale,
-            },
-        )
-    )
-    graph.append(Curve([x - 0.5, valNorm], {"type": "scatter_c"}))
-    graph.append(Curve([x - 0.5, valSize], {"type": "scatter_s"}))
+
+    curveattr = {
+        "type": "scatter",
+        "marker": "s",
+        "markeredgewidth": 0,
+        "cmap": colorscale,
+        # 'markersize': (sizeCell[0]*72)**2,
+    }
+    graph.append(Curve([x - 0.5, y - 0.5], curveattr))
+    graph.append(Curve([x - 0.5, val_norm], {"type": "scatter_c"}))
+    graph.append(Curve([x - 0.5, val_size], {"type": "scatter_s"}))
 
     graph.update(
         {
@@ -836,14 +893,14 @@ def plotSampleCellsMap(
         ["set_yticks", [list(yticks[1:] - 0.5)], {"minor": True}],
     ]
     letterticks_base = yticks if transpose else xticks
-    letterricks = [[chr(int(i) - 1 + ord("a")) for i in letterticks_base[1:]]]
+    letterticks = [[chr(int(i) - 1 + ord("a")) for i in letterticks_base[1:]]]
     if ticklabeldash:
-        letterricks[0] = "#"
+        letterticks[0] = "#"
     if transpose:
-        fct.append(["set_yticklabels", letterricks, {"minor": True}])
+        fct.append(["set_yticklabels", letterticks, {"minor": True}])
         fct.append(["set_xticklabels", [[int(i) for i in xticks[1:]]], {"minor": True}])
     else:  # usual case
-        fct.append(["set_xticklabels", letterricks, {"minor": True}])
+        fct.append(["set_xticklabels", letterticks, {"minor": True}])
         fct.append(["set_yticklabels", [[int(i) for i in yticks[1:]]], {"minor": True}])
 
     fct.append(["tick_params", [], {"axis": "both", "which": "minor", "length": 0}])
@@ -861,9 +918,11 @@ def plotSampleCellsMap(
     return graph
 
 
-if __name__ == "__main__":
+def standalone():
+    """Standalone function to test the script"""
     # go through files, store files content in order to later select pairs
     folder = "./../examples/JV/SAMPLE_A/"
+
     processJVfolder(folder, fitDiodeWeight=5, pltClose=True, groupCell=True)
     # processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
 
@@ -873,3 +932,7 @@ if __name__ == "__main__":
     # writeFileAvgMax(file)
 
     plt.show()
+
+
+if __name__ == "__main__":
+    standalone()

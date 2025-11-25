@@ -9,17 +9,21 @@ import logging
 
 import numpy as np
 
+from grapa.utils.error_management import issue_warning, IncorrectInputError
+
 logger = logging.getLogger(__name__)
 
 SMOOTH_WINDOW = ["flat", "hanning", "hamming", "bartlett", "blackman"]
 
 
 def find_nearest(array, value):
+    """Finds in array the value nearest to value. Returns that value."""
     idx = (np.abs(array - value)).argmin()
     return array[idx]
 
 
 def is_number(s):
+    """Returns True is s can be converted to a float."""
     try:
         float(s)
         return True
@@ -28,24 +32,28 @@ def is_number(s):
 
 
 def roundSignificant(series, n_digits):
+    """Rounds the values in series to n_digits significant digits."""
     if isinstance(series, (int, float)):
         out = roundSignificant([series], n_digits)
         return out[0]
     try:
         out = [
-            x
-            if (x == 0 or np.isnan(x) or np.isinf(x))
-            else np.round(x, int(n_digits - 1 - np.floor(np.log10(np.abs(x)))))
+            (
+                x
+                if (x == 0 or np.isnan(x) or np.isinf(x))
+                else np.round(x, int(n_digits - 1 - np.floor(np.log10(np.abs(x)))))
+            )
             for x in series
         ]
     except TypeError:
         msg = "roundSignificant TypeError, returned input ({}, {})."
-        logger.error(msg.format(type(series), series), exc_info=True)
+        issue_warning(logger, msg.format(type(series), series), exc_info=True)
         out = series
     return np.array(out)
 
 
 def roundSignificantRange(series, n_digits):
+    """Rounds the values in series to n_digits significant digits"""
     n_digits_add = 0
     span = np.abs(series[1] - series[0])
     refs = np.abs([span, (series[1] + series[0]) / 2, series[0], series[1]])
@@ -82,9 +90,10 @@ def derivative(x, y):
     if not isinstance(y, (np.ndarray,)):
         y = np.array(y)
     if len(x) != len(y):
-        msg = "derivative: x and y not same length! ({}, {})"
-        logger.error(msg.format(x, y))
-        return False
+        msg = "mathModule derivative: x and y not same length! ({}, {})"
+        logger.error(msg, x, y)
+        raise IncorrectInputError(msg.format(x, y))
+
     if len(y) == 0:
         return np.array([])
     if len(y) == 1:
@@ -108,8 +117,9 @@ def derivative2nd(x, y):
         y = np.array(y)
     if len(x) != len(y):
         msg = "derivative2nd: x and y not same length! ({}, {})"
-        logger.error(msg.format(x, y))
+        issue_warning(logger, msg.format(x, y))
         return False
+
     d = (y[1:] - y[:-1]) / (x[1:] - x[:-1])
     dd = (d[1:] - d[:-1]) / (x[2:] - x[:-2]) * 2
     return np.append(
@@ -150,7 +160,7 @@ def smooth(x, window_len=11, window="hanning"):
             "smooth: cannot interpret window_len value (got {}, request int "
             "larger than 0). Set 1."
         )
-        logger.warning(msg.format(window_len))
+        issue_warning(logger, msg.format(window_len))
         window_len = 1
     window_len = int(window_len)
 
@@ -167,23 +177,29 @@ def smooth(x, window_len=11, window="hanning"):
     # print(len(s))
     if window == "flat":  # moving average
         w = np.ones(window_len, "d")
+    elif hasattr(np, window):
+        w = getattr(np, window)(window_len)
+        # w = eval("np." + window + "(window_len)")
     else:
-        w = eval("np." + window + "(window_len)")
+        msg = "smooth: unknown window function in numpy (%s)."
+        logger.error(msg, window)
+        raise IncorrectInputError(msg % window)
 
     y = np.convolve(w / w.sum(), s, mode="valid")
     return y[int((window_len - 1) / 2) : int(len(y) - (window_len - 1) / 2)]
 
 
 def xAtValue(x_series, y_series, value, xmin_xmax=[-np.inf, np.inf], silent=False):
+    """Returns the x value where y_series crosses value."""
     x = np.nan
     # find x value at intercept
     if len(x_series) - len(y_series) != 0:
         msg = "xAtValues: x_series and y_series not same lenght! Return 0. ({}, {})"
-        logger.error(msg.format(len(x_series), len(y_series)))
+        issue_warning(logger, msg.format(len(x_series), len(y_series)))
         return 0
 
-    idxBot = -1
-    idxTop = -1
+    idx_bot = -1
+    idx_top = -1
     limits = 2 - (x_series > min(xmin_xmax)) - (x_series < max(xmin_xmax))
     for i in range(len(x_series)):
         if limits[i]:
@@ -192,47 +208,44 @@ def xAtValue(x_series, y_series, value, xmin_xmax=[-np.inf, np.inf], silent=Fals
         y = y_series[i]
         #        print (i, x, y, idxBot, idxTop)
         if y <= value:
-            if idxBot < 0 or np.abs(y - value) < np.abs(y_series[idxBot] - value):
-                idxBot = i
+            if idx_bot < 0 or np.abs(y - value) < np.abs(y_series[idx_bot] - value):
+                idx_bot = i
 
         else:
-            if idxTop < 0 or np.abs(y - value) < np.abs(y_series[idxTop] - value):
-                idxTop = i
+            if idx_top < 0 or np.abs(y - value) < np.abs(y_series[idx_top] - value):
+                idx_top = i
 
-    if np.abs(idxBot - idxTop) != 1:
+    if np.abs(idx_bot - idx_top) != 1:
         if not silent:
-            print(
-                "Error function xAtValues: possibly 2 crossing values, or",
-                "data not sorted.",
-                idxBot,
-                idxTop,
-                value,
+            msg = (
+                "mathoMOdule xAtValues: possibly 2 crossing values, or data not"
+                "sorted. {}. {}. {}.\n{}"
             )
-            print(y_series)
+            issue_warning(logger, msg.format(idx_bot, idx_top, value, y_series))
 
-    if idxBot + idxTop == -2:
-        logger.error("xAtValues: no suitable data found.")
-    elif idxBot != -1 and idxTop != -1:
+    if idx_bot + idx_top == -2:
+        issue_warning(logger, "xAtValues: no suitable data found.")
+    elif idx_bot != -1 and idx_top != -1:
         # linear interpolation
-        x = x_series[idxBot] + (x_series[idxTop] - x_series[idxBot]) * (
-            value - y_series[idxBot]
-        ) / (y_series[idxTop] - y_series[idxBot])
-    elif idxBot != -1:
-        x = x_series[idxBot]
-    elif idxTop != -1:
-        x = x_series[idxTop]
+        x = x_series[idx_bot] + (x_series[idx_top] - x_series[idx_bot]) * (
+            value - y_series[idx_bot]
+        ) / (y_series[idx_top] - y_series[idx_bot])
+    elif idx_bot != -1:
+        x = x_series[idx_bot]
+    elif idx_top != -1:
+        x = x_series[idx_top]
     if np.isnan(x):
         msg = "xAtValue: cannot find. Value: {}\n  x_series: {}\n  y_series: {}"
-        logger.error(msg.format(value, x_series, y_series))
+        issue_warning(logger, msg.format(value, x_series, y_series))
     return x
 
 
 def trapz(y, x, *args):
     """At some point numpy changed the function name for its trapz function"""
-    if hasattr(np, "trapz"):
-        return np.trapz(y, x, *args)
     if hasattr(np, "trapezoid"):
         return np.trapezoid(y, x, *args)
+    if hasattr(np, "trapz"):
+        return np.trapz(y, x, *args)
     return RuntimeError("Cannot find trapz nor trapezoid in numpy")
 
 
@@ -245,7 +258,7 @@ def _fractionstr_to_float(frac_str):
             num, denom = frac_str.split("/")
         except ValueError:
             msg = "_fractionstr_to_float: cannot make sense of input, return nan: {}."
-            logger.warning(msg.format(frac_str))  # maybe just or logger.warning ?
+            issue_warning(logger, msg.format(frac_str))
             return np.nan
         return float(num) / float(denom)
 
@@ -282,5 +295,5 @@ class MathOperator:  # pylint: disable=too-few-public-methods
         if operator in cls._operations:
             return cls._operations[operator](xseries, yseries)
         msg = "MathOperator.operate: unexpected operator ({}), performs '+'."
-        logger.warning(msg.format(operator))
+        issue_warning(logger, msg.format(operator))
         return cls._operations[cls.ADD](xseries, yseries)

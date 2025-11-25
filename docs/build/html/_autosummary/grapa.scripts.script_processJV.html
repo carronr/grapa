@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.scripts.script_processJV &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.scripts.script_processJV &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grapa.scripts.script_processJV.dictToListSorted" href="grapa.scripts.script_processJV.dictToListSorted.html" />
+    <link rel="next" title="grapa.scripts.script_processJV.dict_to_list_sorted" href="grapa.scripts.script_processJV.dict_to_list_sorted.html" />
     <link rel="prev" title="grapa.scripts.script_processCVfT.WarningCollector" href="grapa.scripts.script_processCVfT.WarningCollector.html" /> 
 </head>
 
@@ -68,14 +68,16 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processCVCf.html">grapa.scripts.script_processCVCf</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processCVfT.html">grapa.scripts.script_processCVfT</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.scripts.script_processJV</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.dictToListSorted.html">grapa.scripts.script_processJV.dictToListSorted</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.dict_to_list_sorted.html">grapa.scripts.script_processJV.dict_to_list_sorted</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.plotSampleCellsMap.html">grapa.scripts.script_processJV.plotSampleCellsMap</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.processJVfolder.html">grapa.scripts.script_processJV.processJVfolder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.processSampleCellsMap.html">grapa.scripts.script_processJV.processSampleCellsMap</a></li>
-<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.promptForFolder.html">grapa.scripts.script_processJV.promptForFolder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.prompt_for_folder.html">grapa.scripts.script_processJV.prompt_for_folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.standalone.html">grapa.scripts.script_processJV.standalone</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.writeFileAvgMax.html">grapa.scripts.script_processJV.writeFileAvgMax</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.AreaDB.html">grapa.scripts.script_processJV.AreaDB</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.AreaDBHandler.html">grapa.scripts.script_processJV.AreaDBHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.scripts.script_processJV.IvDataLocator.html">grapa.scripts.script_processJV.IvDataLocator</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.scripts.script_processJscVoc.html">grapa.scripts.script_processJscVoc</a></li>
@@ -125,23 +127,26 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.dictToListSorted.html#grapa.scripts.script_processJV.dictToListSorted" title="grapa.scripts.script_processJV.dictToListSorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dictToListSorted</span></code></a>(d)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.dict_to_list_sorted.html#grapa.scripts.script_processJV.dict_to_list_sorted" title="grapa.scripts.script_processJV.dict_to_list_sorted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict_to_list_sorted</span></code></a>(d)</p></td>
+<td><p>Convert dictionary keys to a sorted list</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.plotSampleCellsMap.html#grapa.scripts.script_processJV.plotSampleCellsMap" title="grapa.scripts.script_processJV.plotSampleCellsMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotSampleCellsMap</span></code></a>(cells, values, title[, ...])</p></td>
-<td><p></p></td>
+<td><p>Plot a map of solar cell parameters for different cells.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.processJVfolder.html#grapa.scripts.script_processJV.processJVfolder" title="grapa.scripts.script_processJV.processJVfolder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processJVfolder</span></code></a>(folder[, ylim, sampleName, ...])</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.processJVfolder.html#grapa.scripts.script_processJV.processJVfolder" title="grapa.scripts.script_processJV.processJVfolder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processJVfolder</span></code></a>(folder[, ylim, ...])</p></td>
+<td><p>Process a folder containing JV files, identify pairs of dark-illum files,</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.processSampleCellsMap.html#grapa.scripts.script_processJV.processSampleCellsMap" title="grapa.scripts.script_processJV.processSampleCellsMap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processSampleCellsMap</span></code></a>(file[, colorscale, ...])</p></td>
-<td><p></p></td>
+<td><p>Process a file containing summary of solar cell parameters for different cells, and plot maps of the different parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.promptForFolder.html#grapa.scripts.script_processJV.promptForFolder" title="grapa.scripts.script_processJV.promptForFolder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">promptForFolder</span></code></a>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.prompt_for_folder.html#grapa.scripts.script_processJV.prompt_for_folder" title="grapa.scripts.script_processJV.prompt_for_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prompt_for_folder</span></code></a>()</p></td>
+<td><p>Prompt user for a folder, return path as string.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.writeFileAvgMax.html#grapa.scripts.script_processJV.writeFileAvgMax" title="grapa.scripts.script_processJV.writeFileAvgMax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writeFileAvgMax</span></code></a>(fileOrContent[, filesave, ...])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.standalone.html#grapa.scripts.script_processJV.standalone" title="grapa.scripts.script_processJV.standalone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">standalone</span></code></a>()</p></td>
+<td><p>Standalone function to test the script</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.writeFileAvgMax.html#grapa.scripts.script_processJV.writeFileAvgMax" title="grapa.scripts.script_processJV.writeFileAvgMax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">writeFileAvgMax</span></code></a>(fileOrContent[, filesave, ...])</p></td>
+<td><p>Process a file or Graph containing summary of solar cell parameters for different cells.</p></td>
 </tr>
 </tbody>
 </table>
@@ -149,9 +154,12 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.AreaDB.html#grapa.scripts.script_processJV.AreaDB" title="grapa.scripts.script_processJV.AreaDB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AreaDB</span></code></a>(folder, sample)</p></td>
-<td><p></p></td>
+<td><p>Class to handle area database files</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.AreaDBHandler.html#grapa.scripts.script_processJV.AreaDBHandler" title="grapa.scripts.script_processJV.AreaDBHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AreaDBHandler</span></code></a>()</p></td>
+<td><p>Handler for area databases, to avoid opening the same database multiple times .get(folder, sample) returns an AreaDB object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_processJV.IvDataLocator.html#grapa.scripts.script_processJV.IvDataLocator" title="grapa.scripts.script_processJV.IvDataLocator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IvDataLocator</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -163,7 +171,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="grapa.scripts.script_processCVfT.WarningCollector.html" class="btn btn-neutral float-left" title="grapa.scripts.script_processCVfT.WarningCollector" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grapa.scripts.script_processJV.dictToListSorted.html" class="btn btn-neutral float-right" title="grapa.scripts.script_processJV.dictToListSorted" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grapa.scripts.script_processJV.dict_to_list_sorted.html" class="btn btn-neutral float-right" title="grapa.scripts.script_processJV.dict_to_list_sorted" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

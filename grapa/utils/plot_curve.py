@@ -1,41 +1,49 @@
 """functions to plot a curve onto and ax"""
+
 import inspect
 import logging
+from dataclasses import dataclass
+from typing import Tuple, Any, TYPE_CHECKING
 
-import matplotlib.axes
+from matplotlib.axes import Axes
 import numpy as np
 
 from grapa import KEYWORDS_CURVE
 from grapa.colorscale import Colorscale
 from grapa.curve_image import Curve_Image
 from grapa.utils.plot_graph_aux import GroupedPlotters
+from grapa.utils.error_management import IncorrectInputError, issue_warning
+
+if TYPE_CHECKING:
+    from grapa.graph import Graph
+    from grapa.curve import Curve
 
 logger = logging.getLogger(__name__)
 
 
-class DataStruct:  # pylint: disable=too-few-public-methods
-    """To pass parameters around. In essence a dataclass, compatible with python 3.4
+@dataclass
+class DataStruct:
+    """To pass parameters around.
 
     :meta private
     """
 
-    def __init__(
-        self,
-        ax_x_y_fmt: tuple,  # [matplotlib.axes.Axes, np.ndarray, np.ndarray, dict]
-        alter: list,
-        plot_method: str,
-        graph_i_curve: tuple,  # [Graph, int, Curve]
-    ):
-        self.ax_x_y_fmt = ax_x_y_fmt
-        self.alter = alter
-        self.plot_method = plot_method
-        self.graph_i_curve = graph_i_curve
+    ax_x_y_fmt: Tuple[
+        Axes, np.ndarray, np.ndarray, dict
+    ]  # [matplotlib.axes.Axes, np.ndarray, np.ndarray, dict]
+    alter: list
+    plot_method: str
+    graph: "Graph"
+    graph_i: int
+    curve: "Curve"
 
 
 def plot_curve(
-    ax: matplotlib.axes.Axes,
+    ax: Axes,
     groupedplotters: GroupedPlotters,
-    graph_i_curve: tuple,  # [Graph, int, Curve]
+    graph: "Graph",
+    graph_i: int,
+    curve: "Curve",
     ignore_next: int = 0,
 ):
     """
@@ -50,7 +58,6 @@ def plot_curve(
         plotted (multi-Curve plotting such as scatter)
     :return: handle, ignore_next
     """
-    (graph, graph_i, curve) = graph_i_curve
     handle = None
     # any reason to not plot anything?
     if curve.attr("curve") == "subplot":
@@ -71,7 +78,8 @@ def plot_curve(
                 pass  # graph_i remains None
         if graph_i is None:
             graph = None  # curve was not found in graph
-            logger.warning("Warning Curve.plot: Curve not found in provided Graph")
+            msg = "Warning Curve.plot: Curve not found in provided Graph"
+            issue_warning(logger, msg)
 
     # retrieve basic information, data after transform including of offset and muloffset
     attr = curve.get_attributes()
@@ -91,7 +99,7 @@ def plot_curve(
     fmt = _build_fmt(attr, ax, plot_method)
 
     # Start plotting
-    struct = DataStruct((ax, x, y, fmt), alter, plot_method, (graph, graph_i, curve))
+    struct = DataStruct((ax, x, y, fmt), alter, plot_method, graph, graph_i, curve)
 
     # No support for the following methods (either 2D data, or complicated
     # to implement):
@@ -109,7 +117,9 @@ def plot_curve(
     return handle, ignore_next
 
 
-def _choose_plot_method(struct, attr, groupedplotters, linespec, ignore_next):
+def _choose_plot_method(
+    struct: DataStruct, attr, groupedplotters, linespec, ignore_next
+):
     """Choose the appropriate matplotlib method and organize the call to it"""
     attr_ignore = [
         "label",
@@ -125,8 +135,8 @@ def _choose_plot_method(struct, attr, groupedplotters, linespec, ignore_next):
     ]
 
     (ax, x, y, fmt) = struct.ax_x_y_fmt
-    (_, _, curve) = struct.graph_i_curve
-    alter, plot_method = struct.alter, struct.plot_method
+    curve = struct.curve
+    plot_method = struct.plot_method
     handle = None
 
     # "simple" plotting methods, with prototype similar to plot()
@@ -192,9 +202,11 @@ def _choose_plot_method(struct, attr, groupedplotters, linespec, ignore_next):
         # stored, aka returned ''
         try:
             handle = ax.plot(x, y, linespec, **fmt)
-        except (ValueError, AttributeError) as e:
-            msg = "_choose_plot_method ax.plot. linespec: {}, fmt: {}. {}: {}."
-            logger.error(msg.format(linespec, fmt, type(e), e))
+        except (TypeError, ValueError, AttributeError) as e:
+            msg = "Exception _choose_plot_method ax.plot. linespec %s. fmt %s. %s: %s."
+            msa = (linespec, fmt, type(e), e)
+            logger.error(msg, *msa)
+            raise IncorrectInputError(msg % msa) from None
     return handle, ignore_next, attr_ignore
 
 
@@ -207,18 +219,22 @@ def _apply_attr_to_handle(handle, attr: dict, fmt: dict, attr_ignore: list) -> N
                 if hasattr(h, "set_" + key):
                     try:
                         getattr(h, "set_" + key)(attr[key])
-                    except Exception:
-                        msg = "plot_curve _apply_attr_to_handle() .set_xxx(), key {}."
-                        logger.error(msg.format(key), exc_info=True)
+                    except ValueError as e:
+                        msg = "plot_curve _apply_attr_to_handle() .set_xxx, {}. {}"
+                        issue_warning(logger, msg.format(key, e))
+                    except Exception as e:
+                        msg = "plot_curve _apply_attr_to_handle() .set_xxx, {}. {}: {}"
+                        msgfull = msg.format(key, type(e), e)
+                        issue_warning(logger, msgfull, exc_info=True)
 
 
-def _build_fmt(attr: dict, ax: matplotlib.axes.Axes, plot_method: str) -> dict:
+def _build_fmt(attr: dict, ax: Axes, plot_method: str) -> dict:
     """internal details: construction of the fmt keyword used in ax.plot"""
     fmt = {}
     for key in attr:
         if not isinstance(key, str):
             msg = "TO CHECK THIS {} {} {}"
-            logger.warning(msg.format(type(key), key, attr[key]))
+            issue_warning(logger, msg.format(type(key), key, attr[key]))
         keys_not_fmt = ["plot", "linespec", "type", "ax_twinx", "ax_twiny", "colorbar"]
         keys_not_fmt += ["offset", "muloffset", "labelhide", "xerr", "yerr"]
         if (
@@ -259,12 +275,14 @@ def _build_fmt(attr: dict, ax: matplotlib.axes.Axes, plot_method: str) -> dict:
                 fmt.update({key: attr[key]})
     except AttributeError:
         msg = "plot_curve: desired plotting method not found ({}). Going for default."
-        print(msg.format(plot_method))
+        issue_warning(logger, msg.format(plot_method))
         # for example 'errorbar_yerr' after suppression of previous Curve 'errorbar'.
         # To be 'plot' anyway.
-    except Exception:
-        msg = "Exception in plot_curve while identifying keyword arguments."
-        logger.error(msg, exc_info=True)
+    except Exception as e:
+        msg = "Exception in plot_curve while identifying keyword arguments. %s. %s: %s."
+        msa = (plot_method, type(e), e)
+        logger.error(msg, *msa, exc_info=True)
+        raise IncorrectInputError(msg % msa) from e
 
     if "labelhide" in attr and attr["labelhide"]:
         if "label" in fmt:
@@ -272,7 +290,7 @@ def _build_fmt(attr: dict, ax: matplotlib.axes.Axes, plot_method: str) -> dict:
     return fmt
 
 
-def _identify_curve_within_range_same_x(x_ref, range_, graph, alter, where):
+def _identify_curve_within_range_same_x(x_ref, range_, graph: "Graph", alter, where):
     """function used for bar, bah. Possibly others could make good use of it"""
     if graph is None:
         return None, None, None
@@ -294,7 +312,7 @@ def _identify_curve_within_range_same_x(x_ref, range_, graph, alter, where):
 def _plot_imshowetc(struct: DataStruct, attr: dict, ignore_next: int) -> tuple:
     """Plot imshow, contour, contourf"""
     (ax, _, _, fmt) = struct.ax_x_y_fmt
-    (graph, graph_i, curve) = struct.graph_i_curve
+    (graph, graph_i, curve) = struct.graph, struct.graph_i, struct.curve
     alter, plot_method = struct.alter, struct.plot_method
 
     handle = None
@@ -337,15 +355,18 @@ def _plot_imshowetc(struct: DataStruct, attr: dict, ignore_next: int) -> tuple:
         args = [xdata, ydata] + args
     try:
         handle = getattr(ax, plot_method)(*args, **fmt)
-    except (TypeError, ValueError, IndexError):
-        logger.error("Curve plot {}".format(plot_method), exc_info=True)
+    except (TypeError, ValueError, IndexError) as e:
+        msg = "Curve plot {}. {}: {}."
+        msa = (plot_method, type(e), e)
+        logger.error(msg, *msa, exc_info=True)
+        raise IncorrectInputError(msg % msa) from e
     return handle, ignore_next
 
 
 def _plot_scatter(struct: DataStruct, ignore_next: int) -> tuple:
     """Plot curve using scatter"""
     (ax, x, y, fmt) = struct.ax_x_y_fmt
-    (graph, graph_i, _curve) = struct.graph_i_curve
+    graph, graph_i = struct.graph, struct.graph_i
     alter = struct.alter
 
     handle = None
@@ -377,9 +398,11 @@ def _plot_scatter(struct: DataStruct, ignore_next: int) -> tuple:
             break
     try:
         handle = ax.scatter(x, y, **fmt)
-    except Exception:
-        msg = "Exception occured in curve _plot_scatter during scatter."
-        logger.error(msg, exc_info=True)
+    except (ValueError, Exception) as e:  # Exception to remove once dummy-proof
+        msg = "Exception occured in curve _plot_scatter during scatter. %s: %s"
+        msa = (type(e), e)
+        logger.error(msg, *msa)
+        raise IncorrectInputError(msg % msa) from e
     return handle, ignore_next
 
 
@@ -388,7 +411,7 @@ def _plot_errorbar(
 ) -> tuple:
     """errorbar. look for next Curves, maybe xerr/yerr was provided"""
     (ax, x, y, fmt) = struct.ax_x_y_fmt
-    (graph, graph_i, _curve) = struct.graph_i_curve
+    graph, graph_i = struct.graph, struct.graph_i
 
     if "xerr" in attr:
         fmt.update({"xerr": attr["xerr"]})
@@ -417,7 +440,7 @@ def _plot_stackplot(struct: DataStruct, attr_ignore: list, ignore_next: int):
     """Plot stackplot. look for next Curves with type == 'stackplot', and same x
     attr_ignore gets modified (also fmt but that is expected"""
     (ax, x, y, fmt) = struct.ax_x_y_fmt
-    (graph, graph_i, curve) = struct.graph_i_curve
+    graph, graph_i, curve = struct.graph, struct.graph_i, struct.curve
     alter, plot_method = struct.alter, struct.plot_method
 
     nexty = []
@@ -453,7 +476,7 @@ def _plot_stackplot(struct: DataStruct, attr_ignore: list, ignore_next: int):
 def _plot_bar_barh(struct: DataStruct):
     """Plot bar and barh"""
     (ax, x, y, fmt) = struct.ax_x_y_fmt
-    (graph, graph_i, curve) = struct.graph_i_curve
+    graph, graph_i, curve = struct.graph, struct.graph_i, struct.curve
     alter, plot_method = struct.alter, struct.plot_method
 
     if graph is not None:
@@ -475,7 +498,7 @@ def _plot_bar_barh(struct: DataStruct):
                 fmt.update({key: y2})
             else:
                 msg = "plot_curve {}: no suitable Curve found ({}, {}, {})"
-                logger.warning(msg.format(plot_method, graph_i, key, value))
+                issue_warning(logger, msg.format(plot_method, graph_i, key, value))
     handle = getattr(ax, plot_method)(x, y, **fmt)
     return handle
 
@@ -483,7 +506,7 @@ def _plot_bar_barh(struct: DataStruct):
 def _plot_fillbetweenetc(struct: DataStruct, ignore_next: int) -> tuple:
     """plot fill_between and fill_betweenx"""
     (ax, x, y, fmt) = struct.ax_x_y_fmt
-    (graph, graph_i, _curve) = struct.graph_i_curve
+    graph, graph_i = struct.graph, struct.graph_i
     alter, plot_method = struct.alter, struct.plot_method
 
     handle = None
@@ -496,7 +519,7 @@ def _plot_fillbetweenetc(struct: DataStruct, ignore_next: int) -> tuple:
                 "Curve {} and {}: fill_between, fill_betweenx: x series must be "
                 "equal. Fill to 0."
             )
-            logger.warning(msg.format(graph_i, graph_i + 1))
+            issue_warning(logger, msg.format(graph_i, graph_i + 1))
         else:
             ignore_next += 1
             success = True

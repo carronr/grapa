@@ -24,20 +24,20 @@ class GraphMBE_TinyTusker(Graph):
     # second axis
 
     @classmethod
-    def isFileReadable(cls, _filename, fileext, line1="", line3="", **_kwargs):
+    def isFileReadable(cls, _filename, fileext, line1="", **_kwargs):
         if fileext == ".csv" and line1.startswith("data label"):
             return True
         return False
 
     def readDataFromFile(self, attributes, **_kwargs):
         # Summary element
-        self.data.append(Curve(np.vstack(([], [])), attributes))
+        self.append(Curve(np.vstack(([], [])), attributes))
         self[-1].update({"label": "Summary"})
 
         # determine header lines
 
         header = []
-        with open(self.filename, "rb") as file:
+        with open(str(self.filename), "rb") as file:
             header_lines = 0
             for line in file:
                 # Decoding the binary line to string
@@ -64,7 +64,7 @@ class GraphMBE_TinyTusker(Graph):
 
         # Read the data from the file
         data = np.genfromtxt(
-            self.filename,
+            str(self.filename),
             skip_header=header_lines + 1,
             delimiter=",",
             dtype=dtype,
@@ -99,20 +99,22 @@ class GraphMBE_TinyTusker(Graph):
             if objectIDs[i].startswith("shutter"):
                 continue
             elif property_names[i] == "ActiveOut":
-                self.data.append(Curve(np.vstack((datax, datay)), attributes))
-                self.curve(-1).update(
+                self.append(Curve(np.vstack((datax, datay)), attributes))
+                self[-1].update(
                     {
                         "label": object_titles[i] + " ActiveOut",
                         "sample": attributes["label"].replace(" TT export", ""),
                         "ax_twinx": 1,
+                        "_collabels": ["Time [min]", ""],
                     }
                 )
             else:
-                self.data.append(Curve(np.vstack((datax, datay)), attributes))
-                self.curve(-1).update(
+                self.append(Curve(np.vstack((datax, datay)), attributes))
+                self[-1].update(
                     {
                         "label": object_titles[i] + " " + property_names[i],
                         "sample": attributes["label"].replace(" TT export", ""),
+                        "_collabels": ["Time [min]", "Temperature [°C]"],
                     }
                 )
 
@@ -121,8 +123,7 @@ class GraphMBE_TinyTusker(Graph):
         #             'ylabel': self.formatAxisLabel(['Current density', 'J', 'mA cm$^{-2}$'])})
         # self.update({'axhline': [0, {'linewidth': 0.5}], 'axvline': [0, {'linewidth': 0.5}]})
 
-        # self.data.append(Curve(np.transpose(data_2d[:,0:2]), attributes))
-        self.headers.update({"collabels": ["Time [min]", "Temperature [°C]"]})
+        # self.append(Curve(np.transpose(data_2d[:,0:2]), attributes))
         self.update(
             {
                 "xlabel": self.formatAxisLabel(GraphMBE_TinyTusker.AXISLABELS[0]),
@@ -241,10 +242,8 @@ class GraphMBE_TinyTusker(Graph):
 
             # Adjust time 0 of graph to main shutter opening time
             index = 0
-            while self.curve(index) is not None:
-                self.curve(index).setX(
-                    self.curve(index).x() - main_shutter_opening_time
-                )
+            while self[index] is not None:
+                self[index].setX(self[index].x() - main_shutter_opening_time)
                 index += 1
 
             minus3_time_index = np.argmin(
@@ -416,7 +415,7 @@ class GraphMBE_TinyTusker(Graph):
 
             # Parameters for summary element, used for Openbis upload
 
-            self.curve(0).update(
+            self[0].update(
                 {
                     "Timestamp Start": str(
                         file_start_date
@@ -436,9 +435,9 @@ class GraphMBE_TinyTusker(Graph):
                     "T RbF PDT": "{:1.1f}".format(rbf_t_shutter_opening),
                 }
             )
-
-        except:
-            print("There was an error in the analysis, check exported file format.")
+        except Exception as e:
+            msg = "There was an error in the analysis, check exported file format.{},{}"
+            print(msg.format(type(e), e))
 
     @staticmethod
     def targetSpLevels(data):

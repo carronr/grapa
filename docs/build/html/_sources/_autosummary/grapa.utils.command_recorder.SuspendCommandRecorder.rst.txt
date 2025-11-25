@@ -1,0 +1,25 @@
+grapa.utils.command\_recorder.SuspendCommandRecorder
+====================================================
+
+.. currentmodule:: grapa.utils.command_recorder
+
+.. autoclass:: SuspendCommandRecorder
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~SuspendCommandRecorder.__init__
+   
+   
+
+   
+   
+   

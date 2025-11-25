@@ -26,6 +26,7 @@ from grapa.mathModule import (
     SMOOTH_WINDOW,
 )
 from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
+from grapa.utils.error_management import GrapaError
 
 
 def bin_data(x, y, binning=4):
@@ -363,17 +364,17 @@ class CurveTRPL(Curve):
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = super().funcListGUI(**kwargs)
-        out += _gui_funclist_trpl_xoffset(self)
-        out += _gui_funclist_trpl_yoffset(self)
-        out += _gui_funclist_trpl_normalize(self)
-        out += _gui_funclist_trpl_fit(self)
-        out += _gui_funclist_trpl_difflifetime(self)
-        out += _gui_funclist_trpl_difflifetimevssignal(self)
-        out += _gui_funclist_trpl_smoothbin(self)
-        out += _gui_funclist_trpl_integration(self, **kwargs)
-        out += _gui_funclist_trpl_printhelp(self)
+        out += GuiFunclistTrpl.xoffset(self)
+        out += GuiFunclistTrpl.yoffset(self)
+        out += GuiFunclistTrpl.normalize(self)
+        out += GuiFunclistTrpl.fit(self)
+        out += GuiFunclistTrpl.difflifetime(self)
+        out += GuiFunclistTrpl.difflifetimevssignal(self)
+        out += GuiFunclistTrpl.smoothbin(self)
+        out += GuiFunclistTrpl.integration(self, **kwargs)
+        out += GuiFunclistTrpl.printhelp(self)
 
-        out += _funclistgui_graph_auto_axislabels(self, **kwargs)
+        out += GuiFunclistTrpl.graph_auto_axislabels(self, **kwargs)
 
         self._funclistgui_memorize(out)
         return out
@@ -508,6 +509,7 @@ class CurveTRPL(Curve):
                 showResiduals = False
         # fit
         popt = list(fit_exponentials(self.x(), self.y(), roi=ROI, fixed=fixed))
+
         # output
         attr = {
             "color": "k",
@@ -596,10 +598,15 @@ class CurveTRPL(Curve):
             if roiact[1] >= roi[1]:
                 flagend = True
             roiact[1] = min(roiact[1], roi[1])
+
             try:
                 res = self.CurveTRPL_fitExp(
                     nbExp=nb_exp, ROI=roiact, showfitonroi=True, silent=True
                 )
+            except RuntimeError as e:
+                msg = "Exception during fitting ROI {}, ignore and proceed."
+                print(msg.format(roiact), type(e), e)
+            else:
                 if maxpoints is not None:
                     x = res.x()
                     if len(x) > maxpoints:
@@ -613,9 +620,7 @@ class CurveTRPL(Curve):
                     lbl = "fit #{} {}".format(len(out), lbl[4:])
                     res.update({"label": lbl})
                 out.append(res)
-            except RuntimeError as e:
-                msg = "Exception during fitting ROI {}, ignore and proceed."
-                print(msg.format(roiact), type(e), e)
+
             roiact = [roiact[0] * multiplier, roiact[1] * multiplier]
         if len(out) == nfitmax:
             msg = (
@@ -693,7 +698,7 @@ class CurveTRPL(Curve):
         # if valid input, modfy self
         # recreate data container, with new x values both in x and y positions.
         # next step it to compute new y values
-        self.data = np.array([newx, newx])
+        self.set_data(np.array([newx, newx]))
         self.updateFitParam(*self.attr("_popt"))
         return True
 
@@ -856,217 +861,221 @@ def _fit_resample_x_newx(x, spacing):
     raise RuntimeError("fit_resampleX_newx is rather crude, sorry for that")
 
 
-def _gui_funclist_trpl_printhelp(curve):
-    item = [curve.print_help, "Help!", [], []]
-    return [item]
+class GuiFunclistTrpl:
 
+    @staticmethod
+    def printhelp(curve):
+        item = [curve.print_help, "Help!", [], []]
+        return [item]
 
-def _gui_funclist_trpl_integration(curve, **kwargs):
-    # integration
-    alter = str(kwargs["graph"].attr("alter")) if "graph" in kwargs else "['', '']"
-    ROI = roundSignificantRange([min(curve.x()), max(curve.x())], 2)
-    item = FuncGUI(curve.integrate, "Integrate")
-    item.append("ROI", ROI)
-    item.appendcbb("data transform", alter, ["raw", alter])
-    return [item]
+    @staticmethod
+    def integration(curve, **kwargs):
+        # integration
+        alter = str(kwargs["graph"].attr("alter")) if "graph" in kwargs else "['', '']"
+        ROI = roundSignificantRange([min(curve.x()), max(curve.x())], 2)
+        item = FuncGUI(curve.integrate, "Integrate")
+        item.append("ROI", ROI)
+        item.appendcbb("data transform", alter, ["raw", alter])
+        return [item]
 
-
-def _gui_funclist_trpl_smoothbin(curve):
-    # smooth & bin
-    item = [
-        curve.CurveTRPL_smoothBin,
-        "Smooth & bin",
-        ["width", "convolution", "binning"],
-        ["9", "hanning", "1"],
-        {},
-        [
+    @staticmethod
+    def smoothbin(curve):
+        # smooth & bin
+        item = [
+            curve.CurveTRPL_smoothBin,
+            "Smooth & bin",
+            ["width", "convolution", "binning"],
+            ["9", "hanning", "1"],
             {},
-            {"field": "Combobox", "values": SMOOTH_WINDOW},
-            {"field": "Combobox", "values": ["1", "2", "4", "8", "16"]},
-        ],
-    ]
-    return [item]
+            [
+                {},
+                {"field": "Combobox", "values": SMOOTH_WINDOW},
+                {"field": "Combobox", "values": ["1", "2", "4", "8", "16"]},
+            ],
+        ]
+        return [item]
 
+    @staticmethod
+    def difflifetime(curve):
+        # differential lifetime
+        msg = "First remove background. Tip: apply on fit, or smooth before."
+        item = FuncGUI(curve.Curve_differential_lifetime, "Differential lifetime")
+        item.append(msg, None, widgetclass=None)
+        return [item]
 
-def _gui_funclist_trpl_difflifetime(curve):
-    # differential lifetime
-    msg = "First remove background. Tip: apply on fit, or smooth before."
-    item = FuncGUI(curve.Curve_differential_lifetime, "Differential lifetime")
-    item.append(msg, None, widgetclass=None)
-    return [item]
-
-
-def _gui_funclist_trpl_difflifetimevssignal(curve):
-    # differential lifetime vs signal
-    msg = "See above."
-    item = FuncGUI(
-        curve.Curve_differential_lifetime_vs_signal, "Differential lifetime vs signal"
-    )
-    item.append(msg, None, widgetclass=None)
-    msg = (
-        "Differential lifetime vs signal to be visualised in log-log plot.\n"
-        "Consider first reducing the number of datapoints on the fit curve."
-    )
-    item.set_tooltiptext(msg)
-    return [item]
-
-
-def _gui_funclist_trpl_fit(curve):
-    # fit
-    out = []
-    if curve.attr("_fitFunc", None) is None or curve.attr("_popt", None) is None:
-        ROI = roundSignificantRange([10, max(curve.x())], 2)
-        line = FuncGUI(curve.CurveTRPL_fitExp, "Fit exp")
-        line.appendcbb("# exp", 2, ["1", "2", "3", "4"], width=3)
-        line.append("ROI", ROI, width=12)
-        line.append("Fixed values", [0, "", ""])
-        line.append("", "", "Frame")
-        line.append("      show residuals", False, options={"field": "Checkbutton"})
-        line.append(
-            "fit curve restricted to ROI", True, options={"field": "Checkbutton"}
+    @staticmethod
+    def difflifetimevssignal(curve):
+        # differential lifetime vs signal
+        msg = "See above."
+        item = FuncGUI(
+            curve.Curve_differential_lifetime_vs_signal,
+            "Differential lifetime vs signal",
         )
-        out.append(line)
-        # fit as a series of fits
-        ROI = roundSignificantRange([1, np.max(curve.x())], 2)
-        ROI0 = roundSignificantRange([1, min(50, np.max(curve.x()))], 2)
-        line = FuncGUI(curve.CurveTRPL_sequence_fitexp, "Fit piece-wise")
-        line.appendcbb("# exp", 3, ["1", "2", "3", "4"], width=2)
-        line.append("ROI", ROI, width=9)
-        line.append("first", ROI0, width=6)
-        line.append("mult", 4)
-        line.append("fit max #pts", 1000, width=4)
+        item.append(msg, None, widgetclass=None)
         msg = (
-            "Use-case: fit piece-wise, then\ncompute Differential lifetime vs "
-            "signal on the fits, and\ndisplay in loglog tau vs signal."
+            "Differential lifetime vs signal to be visualised in log-log plot.\n"
+            "Consider first reducing the number of datapoints on the fit curve."
         )
-        line.set_tooltiptext(msg)
-        out.append(line)
-        # fit using splines
-        roi = roundSignificantRange([0.5, np.max(curve.x())], 2)
-        line = FuncGUI(curve.CurveTRPL_spline, "Fit spline")
-        line.append("ROI", roi, width=12)
-        line.appendcbb("data", "semilogx", ["", "semilogx", "semilogy", "loglog"])
-        line.append("target # knots", 30)
-        line.append("", "", "Frame")
-        line.append("      knots spacing min # datapts", 4)
-        line.append("spacing max fraction range", 0.1)
-        msg = (
-            "Fit data with a spline. Knots are chosen to be uniform in log "
-            "scale, with minimal spacing every # datapoints, and max spacing "
-            "as a fraction of the full range.\nDon't forget to first put peak "
-            "at t=0 mand remove background!"
-        )
-        line.set_tooltiptext(msg)
-        out.append(line)
-    # if is fit
-    else:
-        if curve.attr("_fitFunc") in ["func_fitExp"]:
-            values = roundSignificant(curve.attr("_popt"), 5)
-            params = ["BG"]
-            fieldred = {}  # {'width': 6} if len(values)-1 > 4 else {}
-            fields = [fieldred]
-            while len(values) > len(params) + 1:
-                n = "{:1.0f}".format((len(params) + 1) / 2)
-                params += ["A" + n, "\u03C4" + n]
-                fields += [fieldred, fieldred]
-            item = FuncGUI(curve.updateFitParam, "Update fit")
-            for i in range(len(params)):
-                item.append(params[i], values[i], options=fields[i])
-                if i > 2 and (i + 1) % 4 == 1:
-                    item.append("", "", widgetclass="Frame")
-            out.append(item)
-            # fits params to clipboard
-            item = FuncGUI(curve.fitparams_to_clipboard, "Send to clipboard")
-            item.append("fit parameters and averages", None, widgetclass=None)
-            out.append(item)
-            # fit weighted averages
-            item = FuncGUI(curve.fitparams_weightedaverage, "Calculate tau_eff")
-            item.append("tau weighted averages", None, widgetclass=None)
-            out.append(item)
-            # resample X
-            x = curve.x()
-            xmin, xmax = min(x[0], x[-1]), max(x[0], x[-1])
-            step = np.abs((x[-1] - x[0]) / (len(x) - 1))
-            roi = [xmin, xmax, step]
-            msg = "delta t, or [0, 1000, 0.5] (now: {} points)"
+        item.set_tooltiptext(msg)
+        return [item]
+
+    @staticmethod
+    def fit(curve):
+        # fit
+        out = []
+        if curve.attr("_fitFunc", None) is None or curve.attr("_popt", None) is None:
+            ROI = roundSignificantRange([10, max(curve.x())], 2)
+            line = FuncGUI(curve.CurveTRPL_fitExp, "Fit exp")
+            line.appendcbb("# exp", 2, ["1", "2", "3", "4"], width=3)
+            line.append("ROI", ROI, width=12)
+            line.append("Fixed values", [0, "", ""])
+            line.append("", "", "Frame")
+            line.append("      show residuals", False, options={"field": "Checkbutton"})
+            line.append(
+                "fit curve restricted to ROI", True, options={"field": "Checkbutton"}
+            )
+            out.append(line)
+            # fit as a series of fits
+            ROI = roundSignificantRange([1, np.max(curve.x())], 2)
+            ROI0 = roundSignificantRange([1, min(50, np.max(curve.x()))], 2)
+            line = FuncGUI(curve.CurveTRPL_sequence_fitexp, "Fit piece-wise")
+            line.appendcbb("# exp", 3, ["1", "2", "3", "4"], width=2)
+            line.append("ROI", ROI, width=9)
+            line.append("first", ROI0, width=6)
+            line.append("mult", 4)
+            line.append("fit max #pts", 1000, width=4)
+            msg = (
+                "Use-case: fit piece-wise, then\ncompute Differential lifetime vs "
+                "signal on the fits, and\ndisplay in loglog tau vs signal."
+            )
+            line.set_tooltiptext(msg)
+            out.append(line)
+            # fit using splines
+            roi = roundSignificantRange([0.5, np.max(curve.x())], 2)
+            line = FuncGUI(curve.CurveTRPL_spline, "Fit spline")
+            line.append("ROI", roi, width=12)
+            line.appendcbb("data", "semilogx", ["", "semilogx", "semilogy", "loglog"])
+            line.append("target # knots", 30)
+            line.append("", "", "Frame")
+            line.append("      knots spacing min # datapts", 4)
+            line.append("spacing max fraction range", 0.1)
+            msg = (
+                "Fit data with a spline. Knots are chosen to be uniform in log "
+                "scale, with minimal spacing every # datapoints, and max spacing "
+                "as a fraction of the full range.\nDon't forget to first put peak "
+                "at t=0 mand remove background!"
+            )
+            line.set_tooltiptext(msg)
+            out.append(line)
+        # if is fit
+        else:
+            if curve.attr("_fitFunc") in ["func_fitExp"]:
+                values = roundSignificant(curve.attr("_popt"), 5)
+                params = ["BG"]
+                fieldred = {}  # {'width': 6} if len(values)-1 > 4 else {}
+                fields = [fieldred]
+                while len(values) > len(params) + 1:
+                    n = "{:1.0f}".format((len(params) + 1) / 2)
+                    params += ["A" + n, "\u03C4" + n]
+                    fields += [fieldred, fieldred]
+                item = FuncGUI(curve.updateFitParam, "Update fit")
+                for i in range(len(params)):
+                    item.append(params[i], values[i], options=fields[i])
+                    if i > 2 and (i + 1) % 4 == 1:
+                        item.append("", "", widgetclass="Frame")
+                out.append(item)
+                # fits params to clipboard
+                item = FuncGUI(curve.fitparams_to_clipboard, "Send to clipboard")
+                item.append("fit parameters and averages", None, widgetclass=None)
+                out.append(item)
+                # fit weighted averages
+                item = FuncGUI(curve.fitparams_weightedaverage, "Calculate tau_eff")
+                item.append("tau weighted averages", None, widgetclass=None)
+                out.append(item)
+                # resample X
+                x = curve.x()
+                xmin, xmax = min(x[0], x[-1]), max(x[0], x[-1])
+                step = np.abs((x[-1] - x[0]) / (len(x) - 1))
+                roi = [xmin, xmax, step]
+                msg = "delta t, or [0, 1000, 0.5] (now: {} points)"
+                out.append(
+                    [
+                        curve.fit_resampleX,
+                        "Resample time",
+                        [msg.format(len(curve.x()))],
+                        [roundSignificant(roi, 5)],
+                    ]
+                )
+        return out
+
+    @staticmethod
+    def normalize(curve):
+        # normalization
+        out = []
+        unit = curve.data_units()[1]
+        revert = False if unit == "" else True
+        if not revert:
             out.append(
                 [
-                    curve.fit_resampleX,
-                    "Resample time",
-                    [msg.format(len(curve.x()))],
-                    [roundSignificant(roi, 5)],
+                    curve.normalize,
+                    "Normalize intensity",
+                    ["pulse freq Hz", "acquis time s", "bin ps"],
+                    [
+                        curve.attr("_repetfreq_Hz", 1),
+                        curve.attr("_acquistime_s", 1),
+                        curve.attr("_binwidth_s", 1) * 1e12,
+                    ],
+                    {},
+                    [{"width": 10}, {"width": 7}, {"width": 6}],
                 ]
             )
-    return out
-
-
-def _gui_funclist_trpl_normalize(curve):
-    # normalization
-    out = []
-    unit = curve.data_units()[1]
-    revert = False if unit == "" else True
-    if not revert:
-        out.append(
-            [
-                curve.normalize,
-                "Normalize intensity",
-                ["pulse freq Hz", "acquis time s", "bin ps"],
+        else:  # get back cts data
+            out.append(
                 [
-                    curve.attr("_repetfreq_Hz", 1),
-                    curve.attr("_acquistime_s", 1),
-                    curve.attr("_binwidth_s", 1) * 1e12,
-                ],
-                {},
-                [{"width": 10}, {"width": 7}, {"width": 6}],
-            ]
+                    curve.normalizerevert,
+                    "Restore intensity cts",
+                    ["Current intensity unit: " + str(unit) + ". factor"],
+                    [curve.getFactor()],
+                    {},
+                    [{"field": "Label"}],
+                ]
+            )
+        return out
+
+    @staticmethod
+    def yoffset(curve):
+        # y offset (background)
+        unit = curve.data_units()[1]
+        if unit == "":
+            unit = "cts"
+        line = FuncGUI(curve.addOffset, "Add offset")
+        line.append("new vertical offset (" + unit + ")", curve.getOffset())
+        msg = (
+            "Remove background.\nTip: Smooth data and display data in lin scale to "
+            "be more precise!"
         )
-    else:  # get back cts data
-        out.append(
-            [
-                curve.normalizerevert,
-                "Restore intensity cts",
-                ["Current intensity unit: " + str(unit) + ". factor"],
-                [curve.getFactor()],
-                {},
-                [{"field": "Label"}],
-            ]
+        line.set_tooltiptext(msg)
+        return [line]
+
+    @staticmethod
+    def xoffset(curve):
+        # x offset
+        xOffset = curve.getXOffset()
+        xOffsetval = xOffset if xOffset != 0 else ""
+        line = FuncGUI(curve.addXOffset, "Time offset")
+        line.append("new horizontal offset (leave empty for autodetect)", xOffsetval)
+        line.set_tooltiptext("The laser pulse should be at t=0")
+        return [line]
+
+    @staticmethod
+    def graph_auto_axislabels(curve, **kwargs):
+        unitx, unity = curve.data_units()
+        lookup_x = {} if unitx == "" else {"": unitx}
+        if unity == "":
+            unity = "cts"
+        lookup_y = {}
+        for key in curve.AXISLABELS_Y:
+            lookup_y[key] = unity
+        return FuncListGUIHelper.graph_axislabels(
+            curve, lookup_y=lookup_y, lookup_x=lookup_x, **kwargs
         )
-    return out
-
-
-def _gui_funclist_trpl_yoffset(curve):
-    # y offset (background)
-    unit = curve.data_units()[1]
-    if unit == "":
-        unit = "cts"
-    line = FuncGUI(curve.addOffset, "Add offset")
-    line.append("new vertical offset (" + unit + ")", curve.getOffset())
-    msg = (
-        "Remove background.\nTip: Smooth data and display data in lin scale to "
-        "be more precise!"
-    )
-    line.set_tooltiptext(msg)
-    return [line]
-
-
-def _gui_funclist_trpl_xoffset(curve):
-    # x offset
-    xOffset = curve.getXOffset()
-    xOffsetval = xOffset if xOffset != 0 else ""
-    line = FuncGUI(curve.addXOffset, "Time offset")
-    line.append("new horizontal offset (leave empty for autodetect)", xOffsetval)
-    line.set_tooltiptext("The laser pulse should be at t=0")
-    return [line]
-
-
-def _funclistgui_graph_auto_axislabels(curve, **kwargs):
-    unitx, unity = curve.data_units()
-    lookup_x = {} if unitx == "" else {"": unitx}
-    if unity == "":
-        unity = "cts"
-    lookup_y = {}
-    for key in curve.AXISLABELS_Y:
-        lookup_y[key] = unity
-    return FuncListGUIHelper.graph_axislabels(
-        curve, lookup_y=lookup_y, lookup_x=lookup_x, **kwargs
-    )

@@ -1,0 +1,6 @@
+grapa.utils.error\_management.FileNotCreatedError
+=================================================
+
+.. currentmodule:: grapa.utils.error_management
+
+.. autoexception:: FileNotCreatedError

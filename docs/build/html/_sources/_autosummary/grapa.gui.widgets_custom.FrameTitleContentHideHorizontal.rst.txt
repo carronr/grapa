@@ -16,11 +16,17 @@ grapa.gui.widgets\_custom.FrameTitleContentHideHorizontal
 
    .. autosummary::
    
-       ~FrameTitleContentHideHorizontal.createWidgets
-       ~FrameTitleContentHideHorizontal.setButtonLabels
+       ~FrameTitleContentHideHorizontal.create_widgets
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FrameTitleContentHideHorizontal.BUTTON_LABEL_IN
+      ~FrameTitleContentHideHorizontal.BUTTON_LABEL_OUT
    
    

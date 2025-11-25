@@ -2,12 +2,14 @@
 Provides a script that performs correlation analysis on a data input.
 possibly, SCAPS 2-D parameter sweeps
 """
+
 import os
 import sys
 import copy
 import fnmatch
 import itertools
 import logging
+from typing import Optional, Union, List
 
 import numpy as np
 from scipy.stats import pearsonr
@@ -23,11 +25,14 @@ from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.datatypes.graphScaps import GraphScaps
 from grapa.colorscale import Color
+from grapa.utils.error_management import issue_warning
 
 logger = logging.getLogger(__name__)
 
 
 class CONF:
+    """Configuration constants"""
+
     AS_DATATABLE = "AS_DATATABLE"
     AS_SCAPS = "AS_SCAPS"
     AUTO = "AUTO"
@@ -200,13 +205,12 @@ def plot_correlations(
     graph.update({"subplotsncols": lenx, "figsize": fs, "subplots_adjust": sa})
     pearson = np.zeros((lenx, leny, 2))
     pearson.fill(np.nan)
-    for j_ in range(len(idx_labels)):
-        j = idx_labels[j_]
+    for j_, j in enumerate(idx_labels):
         pvalsj = pvals[j, :]
         if np.isnan(pvalsj).all():
             continue  # no point to proceed if only nan in data
-        for i_ in range(len(idx_pattern)):
-            i = idx_pattern[i_]
+
+        for i_, i in enumerate(idx_pattern):
             pvalsi = np.array(pvals[i, :])
             # Curve subplot
             attri = {
@@ -258,7 +262,8 @@ def plot_correlations(
                 pass  # maybe not >= 2 numbers to compute correlation
 
     if np.isnan(pearson).all():
-        logger.warning("plot_correlations: only Nan in Pearson matrix. Stop here.")
+        msg = "plot_correlations: only Nan in Pearson matrix. Script end."
+        issue_warning(logger, msg)
         return None, None
     return graph, pearson
 
@@ -460,6 +465,7 @@ def guess_is_logarithm_quantity(series):
 
 
 def values_to_lim(values, is_log=False):
+    """Returns limits [min, max] for a list of values."""
     if is_log:
         return list(np.exp(values_to_lim(np.log(values))))
     mi, ma = np.nanmin(values), np.nanmax(values)
@@ -470,7 +476,8 @@ def values_to_lim(values, is_log=False):
     return lim
 
 
-def filter_pvals(pkeys, pvals, filters: list = None):
+def filter_pvals(pkeys, pvals, filters: Optional[list] = None):
+    """Filter pvals according to filters."""
     # cleanup of data input
     if filters is None:
         filters = []
@@ -513,10 +520,11 @@ def filter_pvals(pkeys, pvals, filters: list = None):
 
 
 def process_datatable(pkeys, pvals, idx_pattern=None, idx_labels=None, **ngkwargs):
+    """Main function to process a datatable type of input"""
     graphshow = None
-    if len(idx_pattern) == 1:
+    if idx_pattern is not None and len(idx_pattern) == 1:
         graphshow = plot_parameters_1d(pkeys, pvals, **ngkwargs)
-    if len(idx_pattern) == 2:
+    if idx_pattern is not None and len(idx_pattern) == 2:
         graphshow = plot_parameters_2d(
             pkeys, pvals, idx_pattern, idx_labels, **ngkwargs
         )
@@ -540,11 +548,15 @@ def process_datatable(pkeys, pvals, idx_pattern=None, idx_labels=None, **ngkwarg
 
 
 def colorize_graph(graph, idx_pattern, pvals):
-    # Modifies object graph
-    # for 2D parameter sweeps: colorize in sweeps in hls colorspace, with
-    # - hue between 0 and 1 according to the first parameter, starting with red,
-    #   with additional small increment according to 2nd parameter,
-    # - luminance from 0.25 to 0.75 according to the second parameter
+    """Colorize a graph based on parameter values.
+    Modifies object graph
+    for 2D parameter sweeps: colorize in sweeps in hls colorspace, with
+
+    - hue between 0 and 1 according to the first parameter, starting with red,
+      with additional small increment according to 2nd parameter,
+
+    - luminance from 0.25 to 0.75 according to the second parameter
+    """
     if idx_pattern is None:
         return
 
@@ -573,14 +585,18 @@ def colorize_graph(graph, idx_pattern, pvals):
 
 
 class Helper:
+    """Base helper class for parameter sweeps"""
+
     @classmethod
     def idx_pattern_labels(cls, pkeys):
+        """Returns indices of pattern and label parameters"""
         idx_pattern = range(len(pkeys))
         idx_labels = range(len(pkeys))
         return idx_pattern, idx_labels
 
     @classmethod
     def as_labels_datatable(cls, graph, keys):
+        """Transforms a Graph into a list of labels pkeys, data table pvals"""
         pkeys = keys
         pvals = []
         for key in keys:
@@ -591,6 +607,8 @@ class Helper:
 
 
 class HelperScaps(Helper):
+    """Specialized helper for SCAPS 2-D parameter sweeps"""
+
     @classmethod
     def idx_pattern_labels(cls, pkeys):
         nresults = 6
@@ -640,11 +658,11 @@ class HelperScaps(Helper):
 
 
 class HelperDatatable(Helper):
+    """Specialized helper for datatable type of input"""
+
     @classmethod
     def as_labels_datatable(cls, graph, *args):
-        """
-        Transforms a Graph into a list of labels pkeys, data table pvals
-        """
+        """Transforms a Graph into a list of labels pkeys, data table pvals"""
         pkeys = graph.attr("collabelsdetail", None)
         if isinstance(pkeys, list):
             if (
@@ -696,9 +714,13 @@ class HelperDatatable(Helper):
                 "ERROR HelperDatatable.as_labels_datatable size issue. len pkeys {"
                 "}, len pvals {}."
             )
-            logger.error(msg.format(len(pkeys), len(pvals)))
+            issue_warning(logger, msg.format(len(pkeys), len(pvals)))
             print(pkeys)
-        return pkeys, np.array(pvals), len(pkeys)
+
+        # pad with nan, in case pvals have different lengths
+        max_len = max(len(row) for row in pvals)
+        padded_pvals = [list(row) + [np.nan] * (max_len - len(row)) for row in pvals]
+        return pkeys, np.array(padded_pvals), len(pkeys)
 
 
 def _choice_helper_datakeys(datakeys, graph):
@@ -726,8 +748,8 @@ def _choice_helper_datakeys(datakeys, graph):
 
 def process_file(
     filename: str,
-    datakeys=CONF.AUTO,
-    filters: list = None,
+    datakeys: Union[str, List[str]] = CONF.AUTO,
+    filters: Optional[list] = None,
     idx_pattern=None,
     idx_labels=None,
     newGraphKwargs={},
@@ -746,7 +768,7 @@ def process_file(
 
            - CONF.AUTO: first open the graph, then auto detect
 
-           -  [key1, key2, ...]: to retrieve from graph Graph, each Curve is one
+           - [key1, key2, ...]: to retrieve from graph Graph, each Curve is one
               "experiment"
 
     :param filters: list of conditions to exclude specific "experiments" (e.g. rows in
@@ -764,7 +786,8 @@ def process_file(
     # open input data
     graph = Graph(filename, **newGraphKwargs)
     if len(graph) == 0:
-        logger.error("Could not find data in file {}. Script end.".format(filename))
+        msg = "File seems contains not data: {}. Script end."
+        issue_warning(logger, msg.format(filename))
         return False
 
     helper, datakeys = _choice_helper_datakeys(datakeys, graph)
@@ -786,9 +809,9 @@ def process_file(
         graph.plot(fnamebase + "_parseddata" + dataext)  # before coloring
         if CONF.pltclose:
             plt.close()
-        msg = "Data table of parameters contains only NaN, script stops here."
+        msg = "Data table of parameters contains only NaN. Script end."
         msg += "\npkeys: {}\npvals.shape: {}"
-        logger.error(msg.format(pkeys, pvals.shape))
+        issue_warning(logger, msg.format(pkeys, pvals.shape))
         return graph
 
     # export and plot results
@@ -809,7 +832,29 @@ def process_file(
     if CONF.pltclose:
         plt.close()
 
+    # process datatable
+    msg = "script correlation, reached datatable {}"
+    print(msg.format(len(idx_pattern)))
+    graphtable, graphpearson, pearson, graphshow = process_datatable(
+        pkeys, pvals, idx_pattern=idx_pattern, idx_labels=idx_labels, **ngkwargs
+    )
+    print("script correlation, reached datatable save graphs")
+    if isinstance(graphshow, Graph):
+        graphshow.plot(fnamebase + "_summary")
+        if CONF.pltclose:
+            plt.close()
+    if isinstance(graphtable, Graph):
+        graphtable.plot(fnamebase + "_correlation_data")
+        if CONF.pltclose:
+            plt.close()
+    if isinstance(graphpearson, Graph):
+        graphpearson.plot(fnamebase + "_correlation_pearson")
+        if CONF.pltclose:
+            plt.close()
+
     # cross-correlations
+    msg = "script correlation, reached crosscorrelation len(idx_pattern) {}"
+    print(msg.format(len(idx_pattern)))
     if len(idx_pattern) > 1:
         for idx_l in idx_labels:
             if idx_l in idx_pattern:
@@ -830,23 +875,6 @@ def process_file(
             if CONF.pltclose:
                 plt.close()
 
-    # process datatable
-    graphtable, graphpearson, pearson, graphshow = process_datatable(
-        pkeys, pvals, idx_pattern=idx_pattern, idx_labels=idx_labels, **ngkwargs
-    )
-    if isinstance(graphtable, Graph):
-        graphtable.plot(fnamebase + "_correlation_data")
-        if CONF.pltclose:
-            plt.close()
-    if isinstance(graphpearson, Graph):
-        graphpearson.plot(fnamebase + "_correlation_pearson")
-        if CONF.pltclose:
-            plt.close()
-    if isinstance(graphshow, Graph):
-        graphshow.plot(fnamebase + "_summary")
-        if CONF.pltclose:
-            plt.close()
-
     print("Script ended successfully")
     if graphtable is not None:
         return graphtable
@@ -854,27 +882,28 @@ def process_file(
 
 
 def run_standalone():
+    """Run the script as a standalone program."""
     datakeys = CONF.AUTO
     idx_pattern = None
     idx_labels = None
     filters = []
 
     # Example
-    # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
-    # # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CIGStau_CIGSp.iv'
-    # datakeys = ['batch parameters 0 value', 'batch parameters 1 value','temperature [k]']
-    # filters = [["i_ZnO*affinit*", CONF.HIGHER, 4.45], [1, '>', 220]]
-
-    # # Example
     filename = r"..\examples\JV\SAMPLE_B_3layerMo\I-V_SAMPLE_B_3LayerMo_Param.txt"
-    # datakeys_ = CONF.AS_DATATABLE  # not necessarily needed, autodetection should work
+    datakeys = CONF.AS_DATATABLE  # not necessarily needed, autodetection should work
     filters = [["Jsc_mApcm2", CONF.HIGHER, 10]]
     idx_pattern = range(11)
+    idx_labels = range(11)
 
-    # Example
+    # # Example  -  please first run script JV first to generate file ...summary_allJV
     # filename = r"..\examples\JV\SAMPLE_B_3layerMo\export_SAMPLE_B_3LayerMo_summary_allJV.txt"
     # datakeys = ["Voc", "Jsc", "FF", "area"]  # , 'Eff', 'Rp', 'acquis soft rs']
     # filters = [["Jsc", CONF.HIGHER, 10]]
+
+    # # Example
+    # filename = r'G:\CIGS\RC\_simulations\20230508_Scaps_windowlayers\CIGS_RC\test\CdSX_CdSd_CdSn_ZnOd_ZnOX_AZOX.iv'
+    # # datakeys = ['batch parameters 0 value', 'batch parameters 1 value']  # , 'temperature [k]']
+    # filters = [["i_ZnO*affinit*", CONF.HIGHER, 4.45], [1, '>', 0.03]]
 
     process_file(
         filename,

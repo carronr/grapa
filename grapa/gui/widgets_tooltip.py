@@ -11,11 +11,11 @@ Modified to allow user-defined wraplength, Romain Carron, 12nov2017
 
 
 try:
-    # for Python2
-    import Tkinter as tk
-except ImportError:
     # for Python3
     import tkinter as tk
+except ImportError:
+    # for Python2
+    import Tkinter as tk
 
 
 class CreateToolTip(object):
@@ -53,7 +53,7 @@ class CreateToolTip(object):
 
     def showtip(self, _event=None):
         # x = y = 0
-        x, y, cx, cy = self.widget.bbox("insert")
+        x, y, _cx, _cy = self.widget.bbox("insert")
         x += self.widget.winfo_rootx() + 25
         y += self.widget.winfo_rooty() + 20
         # creates a toplevel window

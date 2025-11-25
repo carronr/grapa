@@ -56,11 +56,11 @@ class CurveArrhenius(Curve):
         out = Curve.funcListGUI(self, **kwargs)
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...]]
         variant = self.getVariant()
-        isFit = True
+        is_fit = True
         if self.attr("_fitFunc", None) is None or self.attr("_popt", None) is None:
-            isFit = False
+            is_fit = False
 
-        if not isFit:
+        if not is_fit:
             out.append(
                 [
                     self.CurveArrhenius_fit,
@@ -142,7 +142,7 @@ class CurveArrhenius(Curve):
                         ]
                     )
         # resample X
-        if isFit:
+        if is_fit:
             xmin, xmax = np.min(self.x()), np.max(self.x())
             tmp = roundSignificantRange([xmin, xmax], 3)
             xmin, xmax = tmp[0], tmp[1]
@@ -306,7 +306,7 @@ class CurveArrhenius(Curve):
         """
         variant = self.getVariant()
         if hasattr(variant, "func_Arrhenius"):
-            return variant.func_Arrhenius(T, E, prefactor)
+            return variant.func_Arrhenius(self, T, E, prefactor)
         print(
             "CurveArrhenius func_Arrhenius, normally should not come to", "this point!"
         )
@@ -418,7 +418,7 @@ class CurveArrheniusDefault(CurveArrhenius):
     def y_Arrhenius(self, index=np.nan, **kwargs):
         return self.y(index, **kwargs)
 
-    def func_Arrhenius(T, E, prefactor):
+    def func_Arrhenius(self, T, E, prefactor):
         return prefactor - E / (CurveArrhenius.k_eVoverK * T)
 
 
@@ -439,7 +439,7 @@ class CurveArrheniusJscVocJ00(CurveArrhenius):
     def popt(z):  # fit polynom z to desired output values
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, np.exp(z[1])]
 
-    def func_Arrhenius(T, E, prefactor):  # replace default fit function
+    def func_Arrhenius(self, T, E, prefactor):  # replace default fit function
         return np.exp(np.log(prefactor) - E / (CurveArrhenius.k_eVoverK * T))
 
     def y_Arrhenius(self, index=np.nan, **kwargs):
@@ -480,10 +480,8 @@ class CurveArrheniusCfDefects(CurveArrhenius):
     def popt(z):
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, 0.5 * np.exp(z[1])]
 
-    def func_Arrhenius(T, E, prefactor):
-        return T**2 * np.exp(
-            np.log(2 * prefactor) - E / (CurveArrhenius.k_eVoverK * T)
-        )
+    def func_Arrhenius(self, T, E, prefactor):
+        return T**2 * np.exp(np.log(2 * prefactor) - E / (CurveArrhenius.k_eVoverK * T))
 
     def y_Arrhenius(self, index=np.nan, **kwargs):
         # must compute omega T**-2 and show log, corresponding fit expression
@@ -522,7 +520,7 @@ class CurveArrheniusCfdefault(CurveArrhenius):
     def popt(z):
         return [-z[0] * CurveArrhenius.k_eVoverK * 1000, 0.5 * np.exp(z[1])]
 
-    def func_Arrhenius(T, E, prefactor):
+    def func_Arrhenius(self, T, E, prefactor):
         return np.exp(np.log(2 * prefactor) - E / (CurveArrhenius.k_eVoverK * T))
 
     def y_Arrhenius(self, index=np.nan, **kwargs):
@@ -566,7 +564,7 @@ class CurveArrheniusExtrapolToZero(CurveArrhenius):
     def popt(z):
         return [z[0], z[1]]
 
-    def func_Arrhenius(T, E, prefactor):
+    def func_Arrhenius(self, T, E, prefactor):
         return prefactor + E * T
 
     def y_Arrhenius(self, index=np.nan, **kwargs):
@@ -614,7 +612,7 @@ class CurveArrheniusExpDecay(CurveArrhenius):
     def popt(z):
         return [1 / z[0] * 1000, -z[1] / z[0]]
 
-    def func_Arrhenius(nm, U, E_at_1):
+    def func_Arrhenius(self, nm, U, E_at_1):
         return np.exp(((CST.nm_eV / nm) - (E_at_1)) / (U * 0.001))
 
     def y_Arrhenius(self, index=np.nan, **kwargs):
@@ -671,7 +669,7 @@ class CurveArrheniusPowerLaw(CurveArrhenius):
     def popt(z):
         return [np.exp(z[1]), z[0]]
 
-    def func_Arrhenius(x, A, k):
+    def func_Arrhenius(self, x, A, k):
         return np.exp(np.log(A) + k * np.log(x))
 
     def y_Arrhenius(self, index=np.nan, **kwargs):

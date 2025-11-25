@@ -1,0 +1,27 @@
+grapa.utils.parser\_generic.FileParserGeneric
+=============================================
+
+.. currentmodule:: grapa.utils.parser_generic
+
+.. autoclass:: FileParserGeneric
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FileParserGeneric.cast_curves
+       ~FileParserGeneric.read
+       ~FileParserGeneric.read_lines
+   
+   
+
+   
+   
+   

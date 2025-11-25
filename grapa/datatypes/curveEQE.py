@@ -451,7 +451,7 @@ class CurveEQE(Curve):
         if len(new) > 0 or new != "":
             # recreate data container, with new x values both in x and y
             # positions. next step it to compute new y values
-            self.data = np.array([new, new])
+            self.set_data(np.array([new, new]))
             self.updateFitParam(*self.attr("_popt"))
             return 1
         return "Invalid input."

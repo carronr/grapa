@@ -1,0 +1,6 @@
+grapa.datatypes.curveJV.ideality\_differential
+==============================================
+
+.. currentmodule:: grapa.datatypes.curveJV
+
+.. autofunction:: ideality_differential

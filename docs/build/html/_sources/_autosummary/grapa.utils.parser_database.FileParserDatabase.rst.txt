@@ -1,0 +1,32 @@
+grapa.utils.parser\_database.FileParserDatabase
+===============================================
+
+.. currentmodule:: grapa.utils.parser_database
+
+.. autoclass:: FileParserDatabase
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FileParserDatabase.read
+       ~FileParserDatabase.read_file_content
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FileParserDatabase.GRAPHTYPE_DATABASE
+   
+   

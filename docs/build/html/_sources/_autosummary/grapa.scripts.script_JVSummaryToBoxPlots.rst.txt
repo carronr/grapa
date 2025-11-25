@@ -15,11 +15,28 @@ grapa.scripts.script\_JVSummaryToBoxPlots
       :toctree:
    
       JVSummaryToBoxPlots
+      demo
+      generate_file_list
+      graph_size
+      graph_summary
+      jv_extract_stats
+      jv_title_data
       label_from_graph
+      plot_individual_graphs
+      save_statistics
+      temporary_chdir
    
    
 
    
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      ManyArgs
    
    
 

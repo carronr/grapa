@@ -1,0 +1,26 @@
+grapa.utils.parser\_dispatcher.ReadAs
+=====================================
+
+.. currentmodule:: grapa.utils.parser_dispatcher
+
+.. autoclass:: ReadAs
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ReadAs.DATABASE
+      ~ReadAs.GENERIC
+   
+   

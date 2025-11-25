@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.scripts.script_correlations &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.scripts.script_correlations &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="grapa.scripts.script_correlations.colorize_graph" href="grapa.scripts.script_correlations.colorize_graph.html" />
-    <link rel="prev" title="grapa.scripts.script_JVSummaryToBoxPlots.label_from_graph" href="grapa.scripts.script_JVSummaryToBoxPlots.label_from_graph.html" /> 
+    <link rel="prev" title="grapa.scripts.script_JVSummaryToBoxPlots.ManyArgs" href="grapa.scripts.script_JVSummaryToBoxPlots.ManyArgs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -135,7 +135,7 @@ possibly, SCAPS 2-D parameter sweeps</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.colorize_graph.html#grapa.scripts.script_correlations.colorize_graph" title="grapa.scripts.script_correlations.colorize_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorize_graph</span></code></a>(graph, idx_pattern, pvals)</p></td>
-<td><p></p></td>
+<td><p>Colorize a graph based on parameter values.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.crosscorrelations_plot.html#grapa.scripts.script_correlations.crosscorrelations_plot" title="grapa.scripts.script_correlations.crosscorrelations_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosscorrelations_plot</span></code></a>(stats, pkeys, pvals, ...)</p></td>
 <td><p>Plots cross-correlations between parameters.</p></td>
@@ -144,7 +144,7 @@ possibly, SCAPS 2-D parameter sweeps</p>
 <td><p>Computes cross-correlation statistics for given parameter indices.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.filter_pvals.html#grapa.scripts.script_correlations.filter_pvals" title="grapa.scripts.script_correlations.filter_pvals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_pvals</span></code></a>(pkeys, pvals[, filters])</p></td>
-<td><p></p></td>
+<td><p>Filter pvals according to filters.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.guess_is_logarithm_quantity.html#grapa.scripts.script_correlations.guess_is_logarithm_quantity" title="grapa.scripts.script_correlations.guess_is_logarithm_quantity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">guess_is_logarithm_quantity</span></code></a>(series)</p></td>
 <td><p></p></td>
@@ -162,16 +162,16 @@ possibly, SCAPS 2-D parameter sweeps</p>
 <td><p>Plots a Pearson correlation heatmap.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.process_datatable.html#grapa.scripts.script_correlations.process_datatable" title="grapa.scripts.script_correlations.process_datatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_datatable</span></code></a>(pkeys, pvals[, ...])</p></td>
-<td><p></p></td>
+<td><p>Main function to process a datatable type of input</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.process_file.html#grapa.scripts.script_correlations.process_file" title="grapa.scripts.script_correlations.process_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_file</span></code></a>(filename[, datakeys, filters, ...])</p></td>
 <td><p>Process a file contaiing correleation data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.run_standalone.html#grapa.scripts.script_correlations.run_standalone" title="grapa.scripts.script_correlations.run_standalone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_standalone</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Run the script as a standalone program.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.values_to_lim.html#grapa.scripts.script_correlations.values_to_lim" title="grapa.scripts.script_correlations.values_to_lim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values_to_lim</span></code></a>(values[, is_log])</p></td>
-<td><p></p></td>
+<td><p>Returns limits [min, max] for a list of values.</p></td>
 </tr>
 </tbody>
 </table>
@@ -179,16 +179,16 @@ possibly, SCAPS 2-D parameter sweeps</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.CONF.html#grapa.scripts.script_correlations.CONF" title="grapa.scripts.script_correlations.CONF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONF</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Configuration constants</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.Helper.html#grapa.scripts.script_correlations.Helper" title="grapa.scripts.script_correlations.Helper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Helper</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Base helper class for parameter sweeps</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.HelperDatatable.html#grapa.scripts.script_correlations.HelperDatatable" title="grapa.scripts.script_correlations.HelperDatatable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelperDatatable</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Specialized helper for datatable type of input</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.scripts.script_correlations.HelperScaps.html#grapa.scripts.script_correlations.HelperScaps" title="grapa.scripts.script_correlations.HelperScaps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelperScaps</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Specialized helper for SCAPS 2-D parameter sweeps</p></td>
 </tr>
 </tbody>
 </table>
@@ -198,7 +198,7 @@ possibly, SCAPS 2-D parameter sweeps</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="grapa.scripts.script_JVSummaryToBoxPlots.label_from_graph.html" class="btn btn-neutral float-left" title="grapa.scripts.script_JVSummaryToBoxPlots.label_from_graph" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.scripts.script_JVSummaryToBoxPlots.ManyArgs.html" class="btn btn-neutral float-left" title="grapa.scripts.script_JVSummaryToBoxPlots.ManyArgs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="grapa.scripts.script_correlations.colorize_graph.html" class="btn btn-neutral float-right" title="grapa.scripts.script_correlations.colorize_graph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

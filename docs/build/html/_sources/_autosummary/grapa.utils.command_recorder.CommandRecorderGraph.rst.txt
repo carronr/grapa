@@ -1,0 +1,32 @@
+grapa.utils.command\_recorder.CommandRecorderGraph
+==================================================
+
+.. currentmodule:: grapa.utils.command_recorder
+
+.. autoclass:: CommandRecorderGraph
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CommandRecorderGraph.__init__
+       ~CommandRecorderGraph.caller_description
+       ~CommandRecorderGraph.caller_reference
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+   
+   

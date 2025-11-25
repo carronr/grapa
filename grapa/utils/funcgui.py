@@ -1,3 +1,6 @@
+"""Provides the FuncGUI class, and related functions to suggest to the user
+possible actions depending on the Curve typeplot."""
+
 import logging
 
 import numpy as np
@@ -5,6 +8,7 @@ import numpy as np
 from grapa import KEYWORDS_CURVE
 from grapa.utils.plot_graph_aux import Plotter
 from grapa.utils.string_manipulations import listToString, restructuredtext_to_text
+from grapa.utils.error_management import issue_warning
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +57,21 @@ class FuncGUI:
         self.set_tooltiptext(tooltiptext)
 
     def set_hiddenvars(self, hiddenvars):
+        """hiddenvars is a dict of variables that will be provided to func
+        when called by the GUI, in addition to the values provided by the user"""
         if isinstance(hiddenvars, dict):
             self.hiddenvars = dict(hiddenvars)
         elif hiddenvars is not None:
             msg = "FuncGUI: hiddenvars must be a dict, will be ignored: {}"
-            logger.warning(msg.format(hiddenvars))
+            issue_warning(logger, msg.format(hiddenvars))
 
     def set_tooltiptext(self, tooltiptext):
+        """A short text that will be displayed as tooltip in the GUI"""
         if tooltiptext is None or isinstance(tooltiptext, str):
             self.tooltiptext = tooltiptext
         else:
             msg = "FuncGUI: tooltiptext must be a str, will be ignored: {}"
-            logger.warning(msg.format(tooltiptext))
+            issue_warning(logger, msg.format(tooltiptext))
 
     def set_funcdocstring_alt(self, documentation):
         """for use in printHelp"""
@@ -72,7 +79,7 @@ class FuncGUI:
             self.funcdocstring_alt = documentation
         else:
             msg = "FuncGUI: documentation must be a str, will be ignored: {}."
-            logger.warning(msg.format(documentation))
+            issue_warning(logger, msg.format(documentation))
 
     def append(
         self,
@@ -137,6 +144,7 @@ class FuncGUI:
         )
 
     def append_newline(self):
+        """Shortcut to append a new line in the GUI"""
         self.append("", "", widgetclass="Frame")
 
     def move_item(self, old_idx, new_idx):
@@ -146,6 +154,7 @@ class FuncGUI:
         self.fields.insert(new_idx, self.fields.pop(old_idx))
 
     def init_legacy(self, line):
+        """Initialize a FuncGUI object from the legacy list format."""
         self.func = line[0]
         self.textsave = line[1]
         if len(line) > 4 and isinstance(line[4], dict):
@@ -193,8 +202,8 @@ class FuncGUI:
             and len(self.fields) == len(other.fields)
             and len(self.hiddenvars) == len(other.hiddenvars)
         ):
-            for i in range(len(self.fields)):
-                if self.fields[i]["label"] != other.fields[i]["label"]:
+            for i, fieldi in enumerate(self.fields):
+                if fieldi["label"] != other.fields[i]["label"]:
                     return False
             return True
         return False
@@ -230,6 +239,7 @@ class FuncListGUIHelper:
 
     @classmethod
     def typeplot(cls, curve, **kwargs) -> list:
+        """Suggests to the user possible actions depending on curve typeplot."""
         out = []
         typeplot = curve.attr("type")
         try:
@@ -237,11 +247,12 @@ class FuncListGUIHelper:
             c = kwargs["graph_i"]
         except KeyError:
             msg = (
-                "WARNING CurveHelperFuncListGUI.funcListGUI something wrong, kwargs"
-                "graph or graph_i not provided, output not complete."
+                "FuncListGUIHelper.typeplot: missing kwarg 'graph' or 'graph_i',"
+                " output not complete. kwargs: {}."
             )
-            logger.error(msg)
+            issue_warning(logger, msg.format(kwargs))
             return out
+
         try:
             if typeplot == "errorbar":  # helper for type errorbar
                 out += cls._errorbar(curve, graph, c)
@@ -270,21 +281,21 @@ class FuncListGUIHelper:
             types.append(graph[c + 1].attr("type"))
         if c + 2 < len(graph):
             types.append(graph[c + 2].attr("type"))
-        xyerrOR = ""
+        xyerr_or = ""
         if len(types) > 0:
             choices = ["", "errorbar_xerr", "errorbar_yerr"]
             labels = ["next Curves type: (" + str(c + 1) + ")"]
             labels += ["(" + str(i) + ")" for i in range(c + 2, c + 1 + len(types))]
             line = FuncGUI(curve.update_scatter_next_curves, "Save")
             line.set_hiddenvars({"graph": graph, "graph_i": c})
-            for i in range(len(labels)):
-                line.appendcbb(labels[i], types[i], choices)
+            for i, labelvalue in enumerate(labels):
+                line.appendcbb(labelvalue, types[i], choices)
             out.append(line)
-            xyerrOR = "OR "
+            xyerr_or = "OR "
         # xerr, yerr values
         line = FuncGUI(curve.updateValuesDictkeys, "Save")
         line.set_hiddenvars({"keys": ["xerr", "yerr"]})
-        line.append(xyerrOR + "error values x", curve.attr("xerr"))
+        line.append(xyerr_or + "error values x", curve.attr("xerr"))
         line.append("y", curve.attr("yerr"))
         out.append(line)
         # capsize, ecolor
@@ -310,8 +321,8 @@ class FuncListGUIHelper:
             ]
             line = FuncGUI(curve.update_scatter_next_curves, "Save")
             line.set_hiddenvars({"graph": graph, "graph_i": c})
-            for i in range(len(labels)):
-                line.appendcbb(labels[i], types[i], choices)
+            for i, labelvalue in enumerate(labels):
+                line.appendcbb(labelvalue, types[i], choices)
             out.append(line)
         # cmap, vminmax
         keys = ["cmap", "vminmax"]
@@ -342,8 +353,8 @@ class FuncListGUIHelper:
         at = ["boxplot_position", "color"]
         at2 = ["position", "color"]
         line = FuncGUI(curve.updateValuesDictkeys, "Save", hiddenvars={"keys": at})
-        for i in range(len(at)):
-            line.append(at2[i], curve.attr(at[i]))
+        for i, value in enumerate(at):
+            line.append(at2[i], curve.attr(value))
         out.append(line)
         # additional parameters
         at = ["widths", "notch", "vert", "showfliers"]
@@ -353,11 +364,27 @@ class FuncListGUIHelper:
             "also_attr": ["type"],
             "also_vals": ["boxplot"],
         }
+        txt = "Applies to all data in boxplot"
         line = FuncGUI(curve.updateValuesDictkeysGraph, "Save", hiddenvars=hv)
+        line.set_tooltiptext(txt)
         line.append(at[0], curve.attr(at[0]))
         line.appendcbb(at[1], curve.attr(at[1]), ["True", "False"])
         line.appendcbb(at[2], curve.attr(at[2]), ["True", "False"])
         line.appendcbb(at[3], curve.attr(at[3]), ["True", "False"])
+        out.append(line)
+        # another batch of additional parameters
+        at = ["patch_artist"]
+        hv = {
+            "keys": at,
+            "graph": graph,
+            "also_attr": ["type"],
+            "also_vals": ["boxplot"],
+        }
+        txt = "Applies to all data in boxplot."
+        txt += "\n- patch_artist: to color box. Best if color specifies transparency."
+        line = FuncGUI(curve.updateValuesDictkeysGraph, "Save", hiddenvars=hv)
+        line.set_tooltiptext(txt)
+        line.appendcbb(at[0], curve.attr(at[0]), ["", "True", "False"])
         out.append(line)
         # seaborn stripplot and swamplot
         out += Plotter.funcListGUI(curve)
@@ -369,8 +396,8 @@ class FuncListGUIHelper:
         at = ["boxplot_position", "color"]
         at2 = ["position", "color"]
         line = FuncGUI(curve.updateValuesDictkeys, "Save", hiddenvars={"keys": at})
-        for i in range(len(at)):
-            line.append(at2[i], curve.attr(at[i]))
+        for i, value in enumerate(at):
+            line.append(at2[i], curve.attr(value))
         out.append(line)
         # seaborn stripplot and swamplot
         out += Plotter.funcListGUI(curve)
@@ -451,6 +478,8 @@ class FuncListGUIHelper:
 
     @staticmethod
     def offset_muloffset(curve, **_kwargs) -> list:
+        """Suggests to the user to modify offset and muloffset keywords
+        if the curve has these attributes."""
         out = []
         if curve.has_attr("offset") or curve.has_attr("muloffset"):
             at = ["offset", "muloffset"]
@@ -536,6 +565,7 @@ class AlterListItem:
     :param typeplot: one of TYPEPLOTS items
     :param doc: a short human-readable description
     """
+
     # vs list: custom equality, ensure typeplot valid, TYPEPLOTS not part of gui
 
     TYPEPLOTS = [
@@ -556,7 +586,7 @@ class AlterListItem:
         if typeplot not in self.TYPEPLOTS:
             self.typeplot = self.TYPEPLOT_DEF
             msg = "AlterListItem: typeplot not in autorized list ({}), replace with {}."
-            logger.warning(msg.format(typeplot, self.typeplot))
+            issue_warning(logger, msg.format(typeplot, self.typeplot))
         self.doc = str(doc)
 
     def __getitem__(self, idx):

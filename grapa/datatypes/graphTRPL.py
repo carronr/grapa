@@ -9,7 +9,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 from os import path as ospath
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveTRPL import CurveTRPL
 
 
@@ -49,11 +49,11 @@ class GraphTRPL(Graph):
         kw = {}
         if "line1" in kwargs and kwargs["line1"] == "Parameters:":
             kw.update({"delimiterHeaders": " : "})
-        GraphIO.readDataFromFileGeneric(self, attributes, **kw)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes, **kw)
         self.castCurve(CurveTRPL.CURVE, len0, silentSuccess=True)
         # label management
-        filenam_, fileext = ospath.splitext(self.filename)  # , fileExt
-        # self.curve(len0).update({'label': filenam_.split('/')[-1].split('\\')[-1]})
+        filenam_, _fileext = ospath.splitext(self.filename)  # , fileExt
+        # self[len0].update({'label': filenam_.split('/')[-1].split('\\')[-1]})
         lbl = filenam_.split("/")[-1].split("\\")[-1].replace("_", " ").split(" ")
         smp = str(self[len0].attr("sample"))
         try:

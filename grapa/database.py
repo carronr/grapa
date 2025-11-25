@@ -13,6 +13,7 @@ import numpy as np
 
 from grapa.graph import Graph
 from grapa.mathModule import is_number
+from grapa.utils.error_management import issue_warning
 
 
 logger = logging.getLogger(__name__)
@@ -37,19 +38,19 @@ class Database:
             self.rowLabelNums = data.attr("rowlabelnums")
             if data.attr("rowLabel") != "":
                 self.rowLabel = data.attr("rowLabel")
-            if data.curve(0).shape(1) == 0:
+            if data[0].shape(1) == 0:
                 self.data = np.ndarray([])
             else:
-                # assumes all xyCurves have identical x data
-                self.data = np.ndarray((data.curve(0).shape(1), len(data)))
-                for i in range(len(data)):
-                    self.data[:, i] = data.curve(i).y()
-                    if not np.array_equiv(data.curve(i).x(), data.curve(0).x()):
+                # assumes all Curves have identical x data
+                self.data = np.ndarray((data[0].shape(1), len(data)))
+                for i, datai in enumerate(data):
+                    self.data[:, i] = datai.y()
+                    if not np.array_equiv(datai.x(), data[0].x()):
                         msg = (
                             "Database init: columns with different rows x "
-                            "values! (col {})"
+                            "values! (col %s)"
                         )
-                        logger.error(msg.format(i))
+                        logger.error(msg, i)
         else:
             self.data = np.array(data)
             self.colLabels = colLabels
@@ -105,7 +106,7 @@ class Database:
             self.colLabels[self.colLabels.index(oldname)] = newname
         else:
             msg = "database renameColumn: column {} not found, collabels: {}."
-            logger.warning(msg.format(newname, self.colLabels))
+            issue_warning(logger, msg.format(newname, self.colLabels))
 
     def setRowLabel(self, newlabel, i=-1):
         """
@@ -184,7 +185,7 @@ class Database:
         except Exception:
             if not silent:
                 msg = "Database value: cannot find col {}, row {}, i {}, val {}."
-                logger.warning(msg.format(col, row, i, val))
+                issue_warning(logger, msg.format(col, row, i, val))
         return np.nan
 
     def setValue(self, col, row, value, silent=False):

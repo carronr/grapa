@@ -63,6 +63,7 @@ grapa.datatypes.curveJV.CurveJV
        ~CurveJV.update
        ~CurveJV.xinversejminusjsc
        ~CurveJV.yDifferentialR
+       ~CurveJV.y_idealitydifferential
    
    
 

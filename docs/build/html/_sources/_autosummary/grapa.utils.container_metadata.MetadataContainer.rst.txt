@@ -1,0 +1,40 @@
+grapa.utils.container\_metadata.MetadataContainer
+=================================================
+
+.. currentmodule:: grapa.utils.container_metadata
+
+.. autoclass:: MetadataContainer
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~MetadataContainer.__init__
+       ~MetadataContainer.clear
+       ~MetadataContainer.format
+       ~MetadataContainer.get
+       ~MetadataContainer.has_attr
+       ~MetadataContainer.is_attr_value_default
+       ~MetadataContainer.items
+       ~MetadataContainer.pop
+       ~MetadataContainer.update
+       ~MetadataContainer.values
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MetadataContainer.VALUE_DEFAULT
+   
+   

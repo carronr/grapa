@@ -1,0 +1,6 @@
+grapa.scripts.script\_JVSummaryToBoxPlots.jv\_extract\_stats
+============================================================
+
+.. currentmodule:: grapa.scripts.script_JVSummaryToBoxPlots
+
+.. autofunction:: jv_extract_stats

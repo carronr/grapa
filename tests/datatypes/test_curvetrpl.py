@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
+import warnings
 
-from .. import HiddenPrints, Graph
+from .. import HiddenPrints, Graph, GrapaWarning
 
 
 from grapa.datatypes.curveTRPL import CurveTRPL, find_onset, _roi_to_mask
@@ -46,7 +47,6 @@ def graph(curve1, curve2, curvefit):
     return graph
 
 
-@pytest.mark.dependency()
 def test_funcListGUI(graph):
     # About good enough to check the code can actually execute.
     # The sensible choice of default values may be best evaluated by users
@@ -58,14 +58,16 @@ def test_funcListGUI(graph):
         raise AssertionError("an Exception occured {} {}".format(type(e), e))
 
 
-@pytest.mark.dependency()
 def test_printHelp(curve1):
     # only about good enough that the code can execute
-    with HiddenPrints():
+    with warnings.catch_warnings():
+        # because curve1 not part of a graph and FunclistGui not called beforehand,
+        # not the help may not be as complete as if embedded into a graph
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        # with HiddenPrints():
         assert curve1.print_help()
 
 
-@pytest.mark.dependency()
 def test_alterListGUI(graph):
     # About good enough that the code can execute
     for curve in graph:
@@ -73,7 +75,6 @@ def test_alterListGUI(graph):
         assert isinstance(out, list)
 
 
-@pytest.mark.dependency()
 def test_add_getOffset(curve1):
     offset = 123.4
     y = list(curve1.y())
@@ -86,14 +87,11 @@ def test_add_getOffset(curve1):
     assert not curve1.addOffset("a"), "input should fail with non-numeric"
 
 
-@pytest.mark.dependency()
-# @pytest.mark.xfail(reason="deliberate fail")  # somehow does not seem to work for skipping test_add_getXoffset
 def test_find_onset(curve1):
     assert 0.4 <= find_onset(curve1.x(), curve1.y()) <= 0.5
     # assert 0
 
 
-@pytest.mark.dependency(depends=["test_find_onset"])
 def test_add_getXoffset(curve1):
     curve1.addXOffset(-curve1.findOnset())
     # not good test in case rise time covers several datapoints, to release somehow
@@ -102,7 +100,6 @@ def test_add_getXoffset(curve1):
     # assert False  # SHOULD BE SKIPPED, BUT IS NOT???
 
 
-@pytest.mark.dependency()
 def test_roi_to_mask(curve1):
     mask, xmasked = _roi_to_mask(curve1.x(), [0.3, 0.6])
     assert (curve1.x()[mask] == xmasked).all()
@@ -111,7 +108,6 @@ def test_roi_to_mask(curve1):
     assert (curve1.x() == xmasked).all()
 
 
-@pytest.mark.dependency()
 def test_normalize_revert(curve1):
     y = np.array(list(curve1.y()))
     mask = ~np.isclose(y, 0)
@@ -131,7 +127,6 @@ def test_normalize_revert(curve1):
         assert curve1.attr("_unit") == ""
 
 
-@pytest.mark.dependency()
 def test_fitexp(curve2):
     target = curve2.attr("target")
     kwargs = {
@@ -143,11 +138,10 @@ def test_fitexp(curve2):
         out = curve2.CurveTRPL_fitExp(**kwargs)
     popt = out.attr("_popt")
     for i in range(len(target)):
-        errorrel = np.abs(popt[i] - target[i]) / target[i]
+        errorrel = np.abs(popt[i] - target[i]) / max(1e-300, target[i])
         assert errorrel < 0.1 or np.isclose(popt[i], target[i])
 
 
-@pytest.mark.dependency()
 def test_CurveTRPL_sequence_fitexp(curve2):
     target = curve2.attr("target")
     targettaumin = np.min(target[2::2])
@@ -169,7 +163,6 @@ def test_CurveTRPL_sequence_fitexp(curve2):
         assert targettaumin <= popt[2] <= targettaumax
 
 
-@pytest.mark.dependency()
 # maybe make this depend on testing function spline()
 def test_CurveTRPL_spline(curve2):
     try:
@@ -190,7 +183,6 @@ def test_CurveTRPL_spline(curve2):
     # Honestly would recommend to evaluate visually the quality of the spline fit
 
 
-@pytest.mark.dependency()
 def test_differential_lifetime(curvefit):
     try:
         out = curvefit.Curve_differential_lifetime()
@@ -203,7 +195,6 @@ def test_differential_lifetime(curvefit):
     assert ((y[1:] - y[:-1]) > 0).all()  # differential lifetime expected to increase
 
 
-@pytest.mark.dependency()
 def test_differential_lifetime_vs_signal(curvefit):
     try:
         out = curvefit.Curve_differential_lifetime_vs_signal()
@@ -216,7 +207,6 @@ def test_differential_lifetime_vs_signal(curvefit):
     assert ((y[1:] - y[:-1]) > 0).all()  # differential lifetime expected to increase
 
 
-@pytest.mark.dependency()
 def test_fit_resampleX(curvefit):
     def test_with(curve, x, y, spacing):
         # by construction of test, provide initial x, y, please make sure to not
@@ -251,7 +241,6 @@ def test_fit_resampleX(curvefit):
     test_with(curvefit, x, y, 5.0)
 
 
-@pytest.mark.dependency()
 def test_CurveTRPL_smoothBin(curve2):
     ymin, ymax = np.min(curve2.y()), np.max(curve2.y())
     out = curve2.CurveTRPL_smoothBin(window_len=1, binning=1)
@@ -284,18 +273,23 @@ def test_integrate(curve2):
     out = curve2.integrate()
     res = integr(y)
     assert np.isclose(out, res), "sum not match {}, {}".format(out, res)
+
     roi = [10, 20]
     out = curve2.integrate(ROI=roi)
     ys = [y[i] for i in range(len(x)) if roi[0] <= x[i] <= roi[1]]
     res = integr(ys)
     assert np.isclose(out, res), "sum not match {}, {}".format(out, res)
+
     curve = 0 - curve2
     out = curve.integrate()
     res = -integr(y)
     # print("sum curve2.integrate", out, "-integry", res)
     assert np.isclose(out, res), "sum not match {}, {}".format(out, res)
-    out = curve2.integrate(alter=["", "log10abs"])
-    res = integr(np.log10(np.abs(y)))
+
+    with warnings.catch_warnings():  # y contains 0, A RuntimeWarning is expected
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        out = curve2.integrate(alter=["", "log10abs"])
+        res = integr(np.log10(np.abs(y)))
     assert np.isclose(out, res), "sum not match {}, {}".format(out, res)
 
 

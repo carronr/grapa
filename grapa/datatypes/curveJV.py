@@ -6,7 +6,7 @@ Created on Fri Jul 15 15:46:13 2016
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import interpolate
@@ -21,6 +21,35 @@ from grapa.curve import Curve
 from grapa.constants import CST
 from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, smooth
 from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI
+
+
+def ideality_differential(v, j_minus_jsc_ma, temperature):
+    """Computes differential ideality factor.
+    From J = J0 exp(-qV/AkT),
+    therefore (maybe sign error) A = -q(deltaV)/ kT / ln((J_i - Jsc) / (J_i+1 - Jsc))
+    Boundary condition: repeat next value
+
+    :param v: np.array, in volts
+    :param j_minus_jsc_ma: current density, in mA cm-2, Jsc already subtrated (J(0V)=0)
+    :param temperature: in K
+    :return: np.array same size as v and j_minus_jsc_ma
+    """
+    if len(v) < 3 or len(j_minus_jsc_ma) < 3:
+        msg = "differentialideality: Need at least 3 points to compute differential ideality!"
+        raise RuntimeError(msg)
+    if len(v) != len(j_minus_jsc_ma):
+        msg = "differentialideality: same length required v and j_minus_jsc_ma"
+        raise RuntimeError(msg)
+
+    j = j_minus_jsc_ma * 0.001  # in A
+    kb_t = CST.kb * temperature
+    dv = v[2:] - v[:-2]  # symmetrical difference
+    ratioj = (j[2:]) / (j[:-2])  # symmetrical ratio
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        ideality = CST.q * dv / kb_t / (np.log(ratioj))
+    ideality[np.isnan(ideality)] = 0  # ideality 0 at V=0 from reversing initial equatio
+    return np.append(np.append(ideality[0], ideality), ideality[-1])
 
 
 class CurveJV(Curve):
@@ -38,6 +67,7 @@ class CurveJV(Curve):
     AXISLABELS_Y = {
         "": ["Current density", "J", "mA cm$^{-2}$"],
         "CurveJV.yDifferentialR": ["Differential resistance dV/dJ", "", "Ohm cm$^2$"],
+        "CurveJV.y_idealitydifferential": ["Differential ideality factor", "", " - "],
     }
 
     defaultIllumPower = 1000  # W/m2
@@ -225,6 +255,18 @@ class CurveJV(Curve):
                 doc,
             ]
         )
+        doc = (
+            "from J = J0 exp(-qV/AkT) + Jsc ->"
+            " A = -q(V_A-V_B)/ kT / ln((J_A-Jsc) / (J_B-Jsc))"
+        )
+        out.append(
+            [
+                "Differential ideality factor",
+                ["", "CurveJV.y_idealitydifferential"],
+                "",
+                doc,
+            ]
+        )
         out.append(
             [
                 "dV/dJ vs 1/(J-Jsc) - [Ohm cm2] vs [cm2/A] - Sites",
@@ -330,6 +372,15 @@ class CurveJV(Curve):
         # return value in [A-1 cm2]
         return 1 / (j + jsc) * 1000
 
+    def y_idealitydifferential(self, index=np.nan, xyValue=None):
+        if xyValue is not None:
+            return np.array(xyValue)[1]
+        jsc = self.attr("jsc", default=0)
+        out = ideality_differential(self.x(), self.y() + jsc, self.T)
+        if np.isnan(index).any():
+            return out
+        return out[index]
+
     def interpJ(self, V):
         # returns values of a spline interpolation degree 3 at the V values
         f = interpolate.interp1d(self.V(), self.J())
@@ -352,7 +403,7 @@ class CurveJV(Curve):
             self.update({"label": old})
         return self.attr("label")
 
-    def parse_filename(self, to_attr=False):
+    def parse_filename(self, to_attr=False, force=False):
         """Parse the filename to extract information contained in it.
         Parsing regexp: see CurveJV.FILENAMEPARSE_EXPR and CurveJV.FILENAMEPARSE_KEYS.
 
@@ -377,7 +428,10 @@ class CurveJV(Curve):
                 if key is not None:
                     out[key] = res[0][j]
             if to_attr:
-                self.update(out)
+                # self.update(out)
+                for key, val in out.items():
+                    if not self.has_attr(key) or force:
+                        self.update({key: val})
             return out
 
         if to_attr:
@@ -567,9 +621,11 @@ class CurveJV(Curve):
             st(rsquare_diode, 6),
             st(self.T, 1),
             st(
-                attr["acquis soft temperature"]
-                if "acquis soft temperature" in attr
-                else np.nan,
+                (
+                    attr["acquis soft temperature"]
+                    if "acquis soft temperature" in attr
+                    else np.nan
+                ),
                 1,
             ),
             st(attr["acquis soft rp"] if "acquis soft rp" in attr else np.nan, 1),
@@ -1018,7 +1074,7 @@ class CurveJV(Curve):
         if len(newV) > 0 or newV != "":
             # recreate data container, with new x values both in x and y
             # positions. next step it to compute new y values
-            self.data = np.array([newV, newV])
+            self.set_data(np.array([newV, newV]))
             self.updateFitParam(*self.attr("_popt"))
             return 1
         return "Invalid input."

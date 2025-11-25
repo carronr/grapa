@@ -48,45 +48,45 @@ class GuiDataEditor(tk.Frame):
         # --- create canvas with scrollbar ---
         def _on_configure(_event):
             self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-            self.canTop.configure(scrollregion=self.canTop.bbox("all"))
-            self.canLef.configure(scrollregion=self.canLef.bbox("all"))
+            self.ca_top.configure(scrollregion=self.ca_top.bbox("all"))
+            self.ca_lef.configure(scrollregion=self.ca_lef.bbox("all"))
 
         def _on_click_canvas(event):
             self._click_canvas(event)
 
         def _scrollx(*args):
             self.canvas.xview(*args)
-            self.canTop.xview(*args)
-            self.canLef.xview(*args)
+            self.ca_top.xview(*args)
+            self.ca_lef.xview(*args)
 
         def _scrolly(*args):
             self.canvas.yview(*args)
-            self.canTop.yview(*args)
-            self.canLef.yview(*args)
+            self.ca_top.yview(*args)
+            self.ca_lef.yview(*args)
 
         scrollbarx = tk.Scrollbar(frame, command=_scrollx, orient=tk.HORIZONTAL)
         scrollbary = tk.Scrollbar(frame, command=_scrolly, orient=tk.VERTICAL)
         self.canvas = tk.Canvas(frame, bg="white")
-        self.canTop = tk.Canvas(frame, height=30)
-        self.canLef = tk.Canvas(frame, width=45)
-        self.canToL = tk.Canvas(frame, width=45, height=30)
+        self.ca_top = tk.Canvas(frame, height=30)
+        self.ca_lef = tk.Canvas(frame, width=45)
+        self.ca_tol = tk.Canvas(frame, width=45, height=30)
         self.canvas.configure(yscrollcommand=scrollbary.set)
         self.canvas.configure(xscrollcommand=scrollbarx.set)
-        self.canTop.configure(xscrollcommand=scrollbarx.set)
-        self.canLef.configure(yscrollcommand=scrollbary.set)
+        self.ca_top.configure(xscrollcommand=scrollbarx.set)
+        self.ca_lef.configure(yscrollcommand=scrollbary.set)
         scrollbarx.grid(row=2, column=1, sticky="we")
         scrollbary.grid(row=1, column=2, sticky="ns")
         self.canvas.grid(row=1, column=1, sticky="nsew")
-        self.canTop.grid(row=0, column=1, sticky="we")
-        self.canLef.grid(row=1, column=0, sticky="ns")
-        self.canToL.grid(row=0, column=0, sticky="")
+        self.ca_top.grid(row=0, column=1, sticky="we")
+        self.ca_lef.grid(row=1, column=0, sticky="ns")
+        self.ca_tol.grid(row=0, column=0, sticky="")
         frame.columnconfigure(1, weight=1)
         frame.rowconfigure(1, weight=1)
         # update scrollregion after starting 'mainloop'
         # when all widgets are in canvas
         self.canvas.bind("<Configure>", _on_configure)
-        self.canTop.bind("<Configure>", _on_configure)
-        self.canLef.bind("<Configure>", _on_configure)
+        self.ca_top.bind("<Configure>", _on_configure)
+        self.ca_lef.bind("<Configure>", _on_configure)
         self.canvas.bind("<Button-1>", _on_click_canvas)
         # populate different canvas
         self._fill_ui_head()
@@ -96,8 +96,8 @@ class GuiDataEditor(tk.Frame):
         import tkinter.font as font
 
         a = tk.Label(frame, text="")
-        self.fontBold = font.Font(font=a["font"])
-        self.fontBold.configure(weight="bold")
+        self.fontbold = font.Font(font=a["font"])
+        self.fontbold.configure(weight="bold")
 
     def _click_canvas(self, event, c=None, i=None):
         if event is not None:
@@ -115,8 +115,8 @@ class GuiDataEditor(tk.Frame):
             pass
         else:
             return
-        x = self.graph.curve(c).x()
-        y = self.graph.curve(c).y()
+        x = self.graph[c].x()
+        y = self.graph[c].y()
         if i < len(x):
             x, y = x[i], y[i]
         else:
@@ -128,18 +128,16 @@ class GuiDataEditor(tk.Frame):
         self._headCurBo1.set(str(c))
         self._headCurBo3.set(str(i))
 
-    #        print('clicked at ', event.x, event.y, 'curve', c, 'idx', i)
-
     def save_data(self):
         c = int(self._headCurve1.get())
         i = int(self._headCurve3.get())
         x = float(self._headCurve5.get())
         y = float(self._headCurve7.get())
-        x_, y_ = self.graph.curve(c).x(), self.graph.curve(c).y()
+        x_, y_ = self.graph[c].x(), self.graph[c].y()
         x_[i] = x
         y_[i] = y
-        self.graph.curve(c).setX(x_)
-        self.graph.curve(c).setY(y_)
+        self.graph[c].setX(x_)
+        self.graph[c].setY(y_)
         self._fill_ui_curve_data(c)
         self._click_canvas(None, c=c, i=i)
         if self.callback is not None:
@@ -148,9 +146,9 @@ class GuiDataEditor(tk.Frame):
     def delete_point(self):
         c = int(self._headCurve1.get())
         i = int(self._headCurve3.get())
-        curve = self.graph.curve(c)
+        curve = self.graph[c]
         data = np.delete(curve.getData(), i, axis=1)
-        curve.data = data
+        curve.set_data(data)
         self._fill_ui_curve_data(c)
         self._fill_ui_curves_index()
         self._click_canvas(None, c=c, i=i)
@@ -162,11 +160,11 @@ class GuiDataEditor(tk.Frame):
         i = int(self._headCurBo3.get())
         x = float(self._headCurBo5.get())
         y = float(self._headCurBo7.get())
-        curve = self.graph.curve(c)
+        curve = self.graph[c]
         x_, y_ = curve.x(), curve.y()
         x_ = np.insert(x_, i, x)
         y_ = np.insert(y_, i, y)
-        curve.data = np.array([x_, y_])
+        curve.set_data(np.array([x_, y_]))
         self._fill_ui_curve_data(c)
         self._fill_ui_curves_index()
         self._click_canvas(None, c=c, i=i)
@@ -257,20 +255,20 @@ class GuiDataEditor(tk.Frame):
             maxlen = max(maxlen, len(self.graph[c].x()))
         if len(self._fields["idx"]) > 0:
             for f in self._fields["idx"]:
-                self.canLef.delete(f)
-        self.canToL.create_text(
-            0, 0 * self.fieldHeight, anchor="nw", font=self.fontBold, text=" Curve"
+                self.ca_lef.delete(f)
+        self.ca_tol.create_text(
+            0, 0 * self.fieldHeight, anchor="nw", font=self.fontbold, text=" Curve"
         )
-        self.canToL.create_text(
-            0, 1 * self.fieldHeight, anchor="nw", font=self.fontBold, text=" Label"
+        self.ca_tol.create_text(
+            0, 1 * self.fieldHeight, anchor="nw", font=self.fontbold, text=" Label"
         )
         for i in range(maxlen):
             self._fields["idx"].append(
-                self.canLef.create_text(
+                self.ca_lef.create_text(
                     0,
                     (i) * self.fieldHeight,
                     anchor="nw",
-                    font=self.fontBold,
+                    font=self.fontbold,
                     text=" " + str(i),
                 )
             )
@@ -278,7 +276,7 @@ class GuiDataEditor(tk.Frame):
         self.canvas.create_text(
             len(self.graph) * self.curveWidth, 0, anchor="nw", text=" "
         )
-        self.canTop.create_text(
+        self.ca_top.create_text(
             len(self.graph) * self.curveWidth, 0, anchor="nw", text=" "
         )
 
@@ -288,11 +286,11 @@ class GuiDataEditor(tk.Frame):
             for f in column:
                 self.canvas.delete(f)
         for f in self._fields["curve"][c]["head"]:
-            self.canTop.delete(f)
+            self.ca_top.delete(f)
         self._fields["curve"][c]["data"] = [[], []]
         self._fields["curve"][c]["head"] = []
         # make new display
-        curve = self.graph.curve(c)
+        curve = self.graph[c]
         lbl = str(curve.attr("label"))
         if len(lbl) > 25:
             lbl = lbl[:20] + "..."
@@ -301,11 +299,11 @@ class GuiDataEditor(tk.Frame):
         self._fields["curve"][c]["dx"] = dx
         self._fields["curve"][c]["dy0"] = (0) * self.fieldHeight
         self._fields["curve"][c]["head"].append(
-            self.canTop.create_text(dx, 0, anchor="nw", font=self.fontBold, text=str(c))
+            self.ca_top.create_text(dx, 0, anchor="nw", font=self.fontbold, text=str(c))
         )
         self._fields["curve"][c]["head"].append(
-            self.canTop.create_text(
-                dx, self.fieldHeight, anchor="nw", font=self.fontBold, text=lbl
+            self.ca_top.create_text(
+                dx, self.fieldHeight, anchor="nw", font=self.fontbold, text=lbl
             )
         )
         for i in range(len(x)):
@@ -329,7 +327,7 @@ def build_ui():
     root = tk.Tk()
 
     graph = Graph(r"./../examples/EQE/SAMPLE_A_d1_1.sr")
-    curve = graph.curve(0)
+    curve = graph[0]
     from copy import deepcopy
 
     for i in range(6):

@@ -41,6 +41,7 @@ grapa.curve.Curve
        ~Curve.selectData
        ~Curve.setX
        ~Curve.setY
+       ~Curve.set_data
        ~Curve.shape
        ~Curve.swapShowHide
        ~Curve.update

@@ -5,24 +5,27 @@
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
-
 import os
 import sys
 import contextlib
 from datetime import datetime
 import logging
+import warnings
+from typing import Union
 
-print("Loading tkinter...")
+print("Loading tkinter...")  # pylint: disable=wrong-import-position
 import tkinter as tk
+from tkinter import filedialog
+from tkinter import font as tkfont
 from dateutil import parser
 
-print("Loading numpy...")
+print("Loading numpy...")  # pylint: disable=wrong-import-position
 import numpy as np
 
-print("Loading matplotlib...")
+print("Loading matplotlib...")  # pylint: disable=wrong-import-position
 import matplotlib.pyplot as plt
 
-print("Loading grapa...")
+print("Loading grapa...")  # pylint: disable=wrong-import-position
 path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 if path not in sys.path:
     sys.path.append(path)
@@ -30,7 +33,13 @@ if path not in sys.path:
 from grapa import __version__, logger_handler
 from grapa.curve import Curve
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.utils.error_management import (
+    GrapaError,
+    GrapaWarning,
+    IncorrectInputError,
+    issue_warning,
+)
 from grapa.gui.observable import Observable
 from grapa.gui.GUIMainElements import (
     GUIFrameMenuMain,
@@ -41,7 +50,9 @@ from grapa.gui.GUIMainElements import (
     GUIFrameTree,
     GUIFramePropertyEditor,
     GUIFrameActionsCurves,
+    GUIFrameCanvasGraph,  # for type hint
 )
+from grapa.gui.widgets_graphmanager import GraphsTabManager, RecorderSpecialKeys
 
 logger = logging.getLogger(__name__)
 
@@ -85,14 +96,15 @@ class Application(tk.Frame):
         super().__init__(master)
         self.master.title("Grapa software v" + __version__)
         self.initiated = False
-        self.newgraph_kwargs = {"silent": True}
+        self.newgraph_kwargs: dict = {"silent": True}
         try:  # possibly retrieve arguments from command line
-            self.newgraph_kwargs.update({"config": sys.argv[1]})
+            self.newgraph_kwargs["config"] = sys.argv[1]
             # argv[1] is the config.txt file to be used in this session
         except Exception:
             pass
         # create observable before UI -> element can register at initialization
         self.observables = {"focusTree": Observable()}
+        self.frames = {}
         # handles some GUI changes when changing the selected curve
         # there is 1 other observable, buried in the tabs. See below.
         # start define GUI
@@ -108,8 +120,11 @@ class Application(tk.Frame):
             "examples",
             "subplots_examples.txt",
         )
+        filename = "C:/_python/_python_packages/grapa/grapa/examples/JV/SAMPLE_A/I-V_SAMPLE_A_a2_01.txt"
         self.open_file(filename)
         self.update_ui()
+        self.graph().recorder.log_special(RecorderSpecialKeys.OPEN)
+        # TODO: remove the .OPEN line above, add modifs to graphs within update_ui within earlier transaction
         # register updates of UI when user changes tabs
         self.get_tabs().register(self.callback_tab_changed)
         # .initiated is a flag to allow update of UI, set True after init of UI
@@ -120,7 +135,7 @@ class Application(tk.Frame):
     def _init_fonts(self, frame):
         """Initialize fonts that are used throughout the GUI"""
         a = tk.Label(frame, text="")
-        self.fonts["bold"] = tk.font.Font(font=a["font"])
+        self.fonts["bold"] = tkfont.Font(font=a["font"])
         self.fonts["bold"].configure(weight="bold")
         self.fonts["fg_default"] = a.cget("fg")
 
@@ -138,15 +153,17 @@ class Application(tk.Frame):
     def _cw_frame_main(self, frame):
         """Create widgets main frame"""
         # create console, indicators
-        self.frame_console = GUIFrameConsole(frame, self)
-        self.frame_console.frame.pack(side="bottom", fill=tk.X)
+        self.frames["console"] = GUIFrameConsole(frame, self)
+        self.frames["console"].frame.pack(side="bottom", fill=tk.X)
         # create graph and left menu
         fr = tk.Frame(frame)
         fr.pack(side="top", fill=tk.BOTH, expand=True)
-        self.menu_left = GUIFrameMenuMain(fr, self)
-        self.menu_left.frame.pack(side="left", anchor="n", fill=tk.Y, pady=2)
-        self.frame_central = GUIFrameCentral(fr, self, relief="raised", borderwidth=2)
-        self.frame_central.frame.pack(
+        self.frames["menu_left"] = GUIFrameMenuMain(fr, self)
+        self.frames["menu_left"].frame.pack(side="left", anchor="n", fill=tk.Y, pady=2)
+        self.frames["central"] = GUIFrameCentral(
+            fr, self, relief="raised", borderwidth=2
+        )
+        self.frames["central"].frame.pack(
             side="left", anchor="n", fill=tk.BOTH, pady=2, expand=True
         )
 
@@ -154,20 +171,20 @@ class Application(tk.Frame):
         """Create widgets from on the right"""
         pady = 5
         # template actions
-        self.frame_tpl_col = GUIFrameTemplateColorize(frame, self)
-        self.frame_tpl_col.frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
+        self.frames["tpl_col"] = GUIFrameTemplateColorize(frame, self)
+        self.frames["tpl_col"].frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
         # properties
-        self.frame_tree = GUIFrameTree(frame, self)
-        self.frame_tree.frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
+        self.frames["tree"] = GUIFrameTree(frame, self)
+        self.frames["tree"].frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
         # NEW property
-        self.frame_prop = GUIFramePropertyEditor(frame, self)
-        self.frame_prop.frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
+        self.frames["prop"] = GUIFramePropertyEditor(frame, self)
+        self.frames["prop"].frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
         # actions on Curves
-        self.frame_act_gen = GUIFrameActionsGeneric(frame, self)
-        self.frame_act_gen.frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
+        self.frames["act_gen"] = GUIFrameActionsGeneric(frame, self)
+        self.frames["act_gen"].frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
         # Actions on curves
-        self.frame_act_crv = GUIFrameActionsCurves(frame, self)
-        self.frame_act_crv.frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
+        self.frames["act_crv"] = GUIFrameActionsCurves(frame, self)
+        self.frames["act_crv"].frame.pack(side="top", fill=tk.X, anchor="w", pady=pady)
 
     # update_ui function
     def update_ui(self):
@@ -175,32 +192,34 @@ class Application(tk.Frame):
         # print('update_ui main')
         # import time
         sectionstoupdate = [
-            [self.frame_tpl_col, "section Template & Colorize"],
-            [self.frame_tree, "Treeview property box"],
-            [self.frame_prop, "Property editor"],
-            [self.frame_act_gen, "section Actions of Curves "],
-            [self.frame_act_crv, "section Actions specific"],
-            [self.frame_central, "central section (plot and editor)"],
-            [self.frame_console, "section Console"],
+            [self.frames["menu_left"], "Menu left"],
+            [self.frames["tpl_col"], "section Template & Colorize"],
+            [self.frames["tpl_col"], "section Template & Colorize"],
+            [self.frames["tree"], "Treeview property box"],
+            [self.frames["prop"], "Property editor"],
+            [self.frames["act_gen"], "section Actions of Curves "],
+            [self.frames["act_crv"], "section Actions specific"],
+            [self.frames["central"], "central section (plot and editor)"],
+            [self.frames["console"], "section Console"],
         ]
         for section in sectionstoupdate:
             # t0 = time.perf_counter()
             try:
                 section[0].update_ui()
             except Exception:
-                msg = "Exception during update of {}."
-                logger.error(msg.format(section[1]), exc_info=True)
+                msg = "Exception during update of %s."
+                logger.error(msg, section[1], exc_info=True)
             # t1 = time.perf_counter()
             # print('update_ui elapsed time:', t1-t0, section[1])
 
     # getters and setters
-    def get_frame_graph(self):
+    def get_frame_graph(self) -> GUIFrameCanvasGraph:
         """Return the Frame containg the graph"""
-        return self.frame_central.get_frame_graph()
+        return self.frames["central"].get_frame_graph()
 
     def get_frame_options(self):
         """Return the Frame Options"""
-        return self.frame_central.get_frame_options()
+        return self.frames["central"].get_frame_options()
 
     def graph(self, newgraph=None, **kwargs) -> Graph:
         """Get current Graph
@@ -217,8 +236,9 @@ class Application(tk.Frame):
                 tabs.select(-1)
                 self.set_auto_screendpi()
             else:
-                logger.error("GUI.graph(), newgraph must be a Graph.")
-        # return self.back_graph
+                msg = "GUI.graph(), newgraph must be a Graph (provided %s)."
+                logger.error(msg, type(newgraph))
+                raise IncorrectInputError(msg % type(newgraph))
         return tabs.get_graph()
 
     def get_ax(self):
@@ -233,9 +253,9 @@ class Application(tk.Frame):
         """Return the canvas"""
         return self.get_frame_graph().get_canvas()
 
-    def get_tabs(self):
+    def get_tabs(self) -> GraphsTabManager:
         """Returns the tabs widget"""
-        return self.frame_central.get_tabs()
+        return self.frames["central"].get_tabs()
 
     def get_tab_properties(self, **kwargs):
         """
@@ -271,7 +291,7 @@ class Application(tk.Frame):
 
     def get_selected_curves(self, multiple=False):
         """Returns a list of unique, sorted indices [idx0, idx1, ...]"""
-        curves, keys = self.frame_tree.get_tree_active_curve(multiple=multiple)
+        curves, _keys = self.frames["tree"].get_tree_active_curve(multiple=multiple)
         return sorted(list(set(curves)))
 
     def get_clipboard(self):
@@ -310,7 +330,7 @@ class Application(tk.Frame):
         (esp. order, number, new Curves etc. Changes in attributes should be
         safe)
         """
-        self.frame_tree.store_selected_curves()
+        self.frames["tree"].store_selected_curves()
 
     @staticmethod
     def args_to_str(*args, **kwargs):
@@ -326,7 +346,7 @@ class Application(tk.Frame):
             return str(a)
 
         p = [to_str(a) for a in args]
-        p += [(key + "=" + to_str(kwargs[key])) for key in kwargs]
+        p += [(key + "=" + to_str(value)) for key, value in kwargs.items()]
         return ", ".join(p)
 
     def call_graph_method(self, method, *args, **kwargs):
@@ -349,56 +369,64 @@ class Application(tk.Frame):
         if initialdir == "":
             initialdir = self.get_folder()
         if type_ == "save":
-            return tk.filedialog.asksaveasfilename(initialdir=initialdir, **kwargs)
+            return filedialog.asksaveasfilename(initialdir=initialdir, **kwargs)
 
         if multiple:
-            out = list(tk.filedialog.askopenfilenames(initialdir=initialdir, **kwargs))
+            out = list(filedialog.askopenfilenames(initialdir=initialdir, **kwargs))
             if len(out) == 0:
                 return None
             if len(out) == 1:
                 return out[0]
             return out
         # if not multiple
-        return tk.filedialog.askopenfilename(initialdir=initialdir, **kwargs)
+        return filedialog.askopenfilename(initialdir=initialdir, **kwargs)
 
     def prompt_folder(self, initialdir=""):
         """Prompts for folder open"""
         if initialdir == "":
             initialdir = self.get_folder()
-        return tk.filedialog.askdirectory(initialdir=initialdir)
+        return filedialog.askdirectory(initialdir=initialdir)
 
     def if_print_commands(self):
         """Returns if the checkbox Print Commands is ticked"""
-        return self.menu_left.if_print_commands()
+        return self.frames["menu_left"].if_print_commands()
 
-    def open_file(self, file):
+    def open_file(self, file: Union[str, list, Graph, None]):
         """Open a file.
 
         :paramfile: a str, or a list of str to open multiple files, or a Graph
         """
+        if file is None:
+            return
         lbl = file
         if isinstance(file, Graph):
             # do not print anything
             graph = file
             lbl = ""
-            if hasattr(graph, "fileexport"):
+            if hasattr(graph, "fileexport") and graph.fileexport is not None:
                 lbl = graph.fileexport
             elif hasattr(graph, "filename"):
                 lbl = graph.filename
+            graph.recorder.is_log_active(True)  # make sure is active regardless
         elif isinstance(file, list):
             print("Open multiple files (first:", lbl[0], ")")
             lbl = file[0]
-            graph = Graph(file, **self.newgraph_kwargs)
+            graph = Graph(file, log_active=True, **self.newgraph_kwargs)
+        elif isinstance(file, str):
+            print("Open file:", str(lbl).replace("/", "\\"))
+            graph = Graph(file, log_active=True, **self.newgraph_kwargs)
         else:
-            print("Open file:", lbl.replace("/", "\\"))
-            graph = Graph(file, **self.newgraph_kwargs)
+            print("Cannot open file:", lbl)
+            return
         if lbl == "":
             lbl = None
+        # record the fact the graph has been opened
+        graph.recorder.log_special(RecorderSpecialKeys.OPEN)
         self.graph(newgraph=graph, filename=lbl)
         if self.if_print_commands():
             print("graph = Graph('" + str(file) + "')")
         # updateUI triggerd by apparition (and selection) and new tab
-        pass
+        # pass
 
     def merge_graph(self, graph):
         """graph can be a str (filename), or a Graph"""
@@ -414,8 +442,9 @@ class Application(tk.Frame):
         # change default save folder only if was empty
         if self.get_folder() == "" and file != "":
             self.get_folder(file)
+        # no special tag in .recording
         if self.if_print_commands():
-            print("graph.merge(Graph('" + file + "'))")
+            print("graph.merge(Graph('{}'))".format(file))
         self.update_ui()
 
     def save_graph(self, filesave, fileext="", save_altered=False, if_compact=True):
@@ -429,25 +458,37 @@ class Application(tk.Frame):
         """
         graph = self.graph()
         if graph.attr("meastype") == "":
-            graph.update({"meastype": GraphIO.GRAPHTYPE_GRAPH})
+            graph.update({"meastype": FileParserDispatcher.GRAPHTYPE_GRAPH})
+
         try:
-            fig, ax = graph.plot(
-                filesave=filesave,
-                img_format=fileext,
-                if_save=True,
-                if_export=False,
-                fig_ax=[self.get_fig(), None],
-            )
-            while isinstance(ax, (list, np.ndarray)) and len(ax) > 0:
-                ax = ax[0]
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", GrapaWarning)
+                _fig, ax = graph.plot(
+                    filesave=filesave,
+                    img_format=fileext,
+                    if_save=True,
+                    if_export=False,
+                    fig_ax=[self.get_fig(), None],
+                )
+                while isinstance(ax, (list, np.ndarray)) and len(ax) > 0:
+                    ax = ax[0]
+        except GrapaError as e:
+            if e.report_in_gui:
+                msg = "Exception during plotting of Graph: %s, %s."
+                logger.error(msg, *(type(e), e))
+            else:
+                pass  # already handled at lower level: logger w/ print to user
         except Exception:
             logger.error("Exception during plotting of the Graph.", exc_info=True)
+
         if fileext in [".xml"]:
             filesave += fileext
         graph.export(
             filesave=filesave, save_altered=save_altered, if_compact=if_compact
         )
         self.get_file(filesave)  # updates file, folder and tab title
+        # record that has been saved
+        self.graph().recorder.log_special(RecorderSpecialKeys.SAVE)
         if self.if_print_commands():
             msg = "graph.plot(filesave='{}', imgFormat='{}', ifExport=False))"
             print(msg.format(filesave, fileext))
@@ -470,7 +511,7 @@ class Application(tk.Frame):
             self.graph().append(curve, **kw)
         else:
             msg = "insert_curve_to_graph:could not handle class of curve {}."
-            logger.error(msg.format(type(curve)))
+            issue_warning(logger, msg.format(type(curve)))
         if update_ui:
             self.update_ui()
 
@@ -482,8 +523,8 @@ class Application(tk.Frame):
             values = ["", "red"]
         if "" in values:  # if default value - retrieve current setting
             values = list(values)  # work on duplicate
-            for i in range(len(values)):
-                if values[i] == "":
+            for i, val in enumerate(values):
+                if val == "":
                     values[i] = widget.cget(property_)
 
         widget.config(**{property_: values[niter % len(values)]})
@@ -527,8 +568,8 @@ class Application(tk.Frame):
             dayssincelast = (datetime.now() - parser.parse(date)).days
         except ValueError as e:
             dayssincelast = 0
-            logger.error("print_last_release: Exception, date", date, type(e), e)
-
+            msg = "print_last_release, date {}. {}: {}."
+            issue_warning(logger, msg.format(date, type(e), e))
         if dayssincelast < 15:
             print("\n".join(title + content))
         return
@@ -551,7 +592,7 @@ def build_ui():
     app = Application(master=root)
 
     # starts running programm
-    with _stdout_redirect(app.frame_console.get_console()):
+    with _stdout_redirect(app.frames["console"].get_console()):
         app.print_last_release()
         app.mainloop()
 

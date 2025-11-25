@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.curve &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.curve &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -58,7 +58,9 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.math_on_curves.html">grapa.curve.math_on_curves</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.update_curve_values_dictkeys.html">grapa.curve.update_curve_values_dictkeys</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.update_graph_values_dictkeys_conditional.html">grapa.curve.update_graph_values_dictkeys_conditional</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.curve.CommandRecorderCurve.html">grapa.curve.CommandRecorderCurve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.Curve.html">grapa.curve.Curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.curve.CurveGraphsReferrer.html">grapa.curve.CurveGraphsReferrer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
@@ -131,8 +133,14 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Curve</span></code></a>(data, attributes[, silent])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.curve.CommandRecorderCurve.html#grapa.curve.CommandRecorderCurve" title="grapa.curve.CommandRecorderCurve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CommandRecorderCurve</span></code></a>(curve)</p></td>
+<td><p>Records operations performed on a Curve, to allow undo/redo functionality.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Curve</span></code></a>(data, attributes[, silent])</p></td>
 <td><p>A Curve object, fundamental to grapa.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.curve.CurveGraphsReferrer.html#grapa.curve.CurveGraphsReferrer" title="grapa.curve.CurveGraphsReferrer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveGraphsReferrer</span></code></a>()</p></td>
+<td><p>Keeps track of Graphs containing a Curve.</p></td>
 </tr>
 </tbody>
 </table>

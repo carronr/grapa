@@ -28,6 +28,7 @@ grapa.utils.plot\_graph
       :toctree:
       :template: custom-class-template.rst
    
+      Container
       ScaErrorHandler
    
    

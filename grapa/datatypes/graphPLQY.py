@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.curve import Curve
 from grapa.datatypes.curveJscVoc import CurveJscVoc
 
@@ -30,7 +30,7 @@ class GraphPLQY(Graph):
     AXISLABEL_PLQY = ["PLQY", "", "-"]
 
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **_kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", **_kwargs):
         if fileext == ".txt":
             if line1.startswith(
                 "Output file of Abt207 PLQY setup"
@@ -43,7 +43,7 @@ class GraphPLQY(Graph):
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
-        filename = os.path.basename(self.filename)
+        filename = os.path.basename(str(self.filename))
         if filename.startswith("PLQY"):
             return GraphPLQY.readDataFromFilePLQY(self, attributes, **kwargs)
         elif filename.startswith("PLPowerDep_"):
@@ -55,7 +55,7 @@ class GraphPLQY(Graph):
     def readDataFromFilePLPowDep(self, attributes, **kwargs):
         """to open Power dependency module"""
         le = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes, **kwargs)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes, **kwargs)
         # remove unnecessary Curves
         while len(self) > le + 1:
             del self[le + 1]
@@ -79,14 +79,14 @@ class GraphPLQY(Graph):
 
     def readDataFromFilePLQY(self, attributes, **kwargs):
         """To open the rest - output of measurements with lockin"""
-        fname, _ = os.path.splitext(os.path.basename(self.filename))
+        fname, _ = os.path.splitext(os.path.basename(str(self.filename)))
         split = fname.split("_")
         label = ""
         if len(split) > 1:
             label = " ".join(split[1:])
         # read data
         le = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes, **kwargs)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes, **kwargs)
         # add R vs time (not R average) - before modifying other curves
         curve_time_r = None
         if len(self) > le + 1:
@@ -154,7 +154,6 @@ class GraphPLQY(Graph):
                 "axhline": axhline,
                 "axvline": axvline,
                 "typeplot": typeplot,
-                "collabels": "",
                 "subplots_adjust": [0.20, 0.15],
             }
         )

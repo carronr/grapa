@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.widgets_graphmanager &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.gui.widgets_graphmanager &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -69,9 +69,11 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_custom.html">grapa.gui.widgets_custom</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.gui.widgets_graphmanager</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.test_all.html">grapa.gui.widgets_graphmanager.test_all</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved.html">grapa.gui.widgets_graphmanager.userconfirm_close_notsaved</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.CustomNotebook.html">grapa.gui.widgets_graphmanager.CustomNotebook</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphHandler.html">grapa.gui.widgets_graphmanager.GraphHandler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphsTabManager.html">grapa.gui.widgets_graphmanager.GraphsTabManager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.RecorderSpecialKeys.html">grapa.gui.widgets_graphmanager.RecorderSpecialKeys</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_tooltip.html">grapa.gui.widgets_tooltip</a></li>
@@ -126,12 +128,15 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.test_all.html#grapa.gui.widgets_graphmanager.test_all" title="grapa.gui.widgets_graphmanager.test_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_all</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved.html#grapa.gui.widgets_graphmanager.userconfirm_close_notsaved" title="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved"><code class="xref py py-obj docutils literal notranslate"><span class="pre">userconfirm_close_notsaved</span></code></a>(graph)</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.CustomNotebook.html#grapa.gui.widgets_graphmanager.CustomNotebook" title="grapa.gui.widgets_graphmanager.CustomNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomNotebook</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.CustomNotebook.html#grapa.gui.widgets_graphmanager.CustomNotebook" title="grapa.gui.widgets_graphmanager.CustomNotebook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CustomNotebook</span></code></a>(*args[, graphstabmanager])</p></td>
 <td><p>A ttk Notebook with close buttons on each tab <a class="reference external" href="https://stackoverflow.com/questions/39458337/is-there-a-way-to-add-close-buttons-to-tabs-in-tkinter-ttk-notebook">https://stackoverflow.com/questions/39458337/is-there-a-way-to-add-close-buttons-to-tabs-in-tkinter-ttk-notebook</a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphHandler.html#grapa.gui.widgets_graphmanager.GraphHandler" title="grapa.gui.widgets_graphmanager.GraphHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GraphHandler</span></code></a>(title, child, **kwargs)</p></td>
@@ -139,6 +144,9 @@
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphsTabManager.html#grapa.gui.widgets_graphmanager.GraphsTabManager" title="grapa.gui.widgets_graphmanager.GraphsTabManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GraphsTabManager</span></code></a>(*args[, defdict])</p></td>
 <td><p>Combines a ttk.Notebook with a list of items, 1 item per tab Ensures that the content of Notebook and list of items are synchronized ._item and ._notebook should not be modified separately</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grapa.gui.widgets_graphmanager.RecorderSpecialKeys.html#grapa.gui.widgets_graphmanager.RecorderSpecialKeys" title="grapa.gui.widgets_graphmanager.RecorderSpecialKeys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecorderSpecialKeys</span></code></a>(value)</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>

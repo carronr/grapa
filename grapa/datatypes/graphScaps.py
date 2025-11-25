@@ -136,6 +136,10 @@ class Simulations:
                             value = float(splittmp[0]) * 0.01
                         else:
                             key = key + " (" + splittmp[1] + ")"
+                            # happened with very high intensities, unclear meaning
+                            if splittmp[0].endswith("*"):
+                                key += " *"
+                                splittmp[0] = splittmp[0][:-1]
                             value = float(splittmp[0])
                 attrs.update({key: value})
             num += 1

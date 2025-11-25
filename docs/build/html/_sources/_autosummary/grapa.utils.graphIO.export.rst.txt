@@ -1,6 +1,0 @@
-grapa.utils.graphIO.export
-==========================
-
-.. currentmodule:: grapa.utils.graphIO
-
-.. autofunction:: export

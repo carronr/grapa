@@ -1,0 +1,30 @@
+grapa.utils.container\_curves.CurveContainer
+============================================
+
+.. currentmodule:: grapa.utils.container_curves
+
+.. autoclass:: CurveContainer
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveContainer.__init__
+       ~CurveContainer.append
+       ~CurveContainer.clear
+       ~CurveContainer.insert
+       ~CurveContainer.pop
+       ~CurveContainer.reverse
+   
+   
+
+   
+   
+   

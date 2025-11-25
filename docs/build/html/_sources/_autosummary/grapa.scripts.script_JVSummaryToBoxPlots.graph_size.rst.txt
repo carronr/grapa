@@ -1,0 +1,6 @@
+grapa.scripts.script\_JVSummaryToBoxPlots.graph\_size
+=====================================================
+
+.. currentmodule:: grapa.scripts.script_JVSummaryToBoxPlots
+
+.. autofunction:: graph_size

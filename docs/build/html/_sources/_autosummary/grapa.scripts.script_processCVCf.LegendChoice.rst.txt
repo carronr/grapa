@@ -1,0 +1,28 @@
+grapa.scripts.script\_processCVCf.LegendChoice
+==============================================
+
+.. currentmodule:: grapa.scripts.script_processCVCf
+
+.. autoclass:: LegendChoice
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LegendChoice.NONE
+      ~LegendChoice.MINMAX
+      ~LegendChoice.ALL
+      ~LegendChoice.AUTO
+   
+   

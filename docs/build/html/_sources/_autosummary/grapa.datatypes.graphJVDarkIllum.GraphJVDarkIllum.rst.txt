@@ -17,12 +17,12 @@ grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum
    .. autosummary::
    
        ~GraphJVDarkIllum.__init__
+       ~GraphJVDarkIllum.get_datacurves
        ~GraphJVDarkIllum.plot
-       ~GraphJVDarkIllum.plotDiff
-       ~GraphJVDarkIllum.plotLogAbs
-       ~GraphJVDarkIllum.plotStd
+       ~GraphJVDarkIllum.plot_diff
+       ~GraphJVDarkIllum.plot_logabs
+       ~GraphJVDarkIllum.plot_std
        ~GraphJVDarkIllum.printShort
-       ~GraphJVDarkIllum.returnDataCurves
    
    
 

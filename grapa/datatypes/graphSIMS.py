@@ -5,16 +5,22 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 import os
-import numpy as np
 import copy
+from typing import Any
+import logging
+
+import numpy as np
 from scipy.optimize import fsolve
 
-
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.utils.error_management import GrapaError
 from grapa.datatypes.curveSIMS import CurveSIMS
 
 from grapa.mathModule import roundSignificant, is_number
+
+
+logger = logging.getLogger(__name__)
 
 
 class GraphSIMS(Graph):
@@ -83,26 +89,37 @@ class GraphSIMS(Graph):
     def isFileReadable(
         cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
     ):
-        if fileext == ".txt" and (
-            line1.startswith("\ttotal\t") or line3.startswith("Sputter Time (s)")
-        ):
-            return True
-        line1 = line1.strip(" #")
-        line2 = line2.strip(" #")
-        line3 = line3.strip(" #")
+        if fileext not in [".txt", ".TXT"]:
+            return False
+
+        if line1.startswith("\ttotal\t") or line3.startswith("Sputter Time (s)"):
+            return True  # legacy format?
+
+        if line1.startswith("# Profile ") and line2.startswith("# Profile "):
+            if all(what in line3 for what in ["Na+", "Cu+", "Se+", "^113In+"]):
+                return True  # without Total column
+
+        line1, line2, line3 = line1.strip(" #"), line2.strip(" #"), line3.strip(" #")
         if line2.startswith("\ttotal\t") and line3.startswith("\tN/A\t"):
+            return True
+
+        if (
+            line1.startswith("Profile ")
+            and line2.startswith("Profile ")
+            and line3.startswith("\ttotal\t")
+        ):
             return True
         return False
 
     def readDataFromFile(self, attributes, **_kwargs):
         # open using fileGeneric
-        GraphIO.readDataFromFileGeneric(self, attributes)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes)
         tot, nan = 0, 0
         for curve in self:
             tot += len(curve.y())
             nan += np.sum(np.isnan(curve.y()))
         if len(self) == 0 or nan > tot / 10:
-            GraphIO.readDataFromFileGeneric(
+            FileParserDispatcher.readDataFromFileGeneric(
                 self, attributes, ifReplaceCommaByPoint=True, lstrip=" #"
             )
         # print(self[1].get_attributes())
@@ -130,9 +147,11 @@ class GraphSIMS(Graph):
         msmtid = self[-1].attr("_SIMSmsmt")
         GraphSIMS.setYieldCoefs(self, msmtid, ifAuto=True)
         # add temporary Ga+In curve
-        ok = GraphSIMS.appendReplaceCurveRatio(self, msmtid, "GI", "Ga+In")
-        if ok:
-            # find edges of Ga+In curve
+        try:
+            ok = GraphSIMS.appendReplaceCurveRatio(self, msmtid, "GI", "Ga+In")
+        except GrapaError:
+            pass
+        else:  # if possible, then find edges of Ga+In curve
             c = GraphSIMS.getCurve(self, msmtid, "Ga+In", silent=True)
             ROI = (
                 c.findLayerBorders(returnIdx=False)
@@ -140,6 +159,7 @@ class GraphSIMS(Graph):
                 else self[-1].x(index=[0, self[-1].shape(1)])
             )
             GraphSIMS.setLayerBoundaries(self, msmtid, ROI)
+
         # by default, hide some curves - add others, for kestertes?
         hidden = []
         toHide = GraphSIMS.TOHIDE
@@ -202,10 +222,10 @@ class GraphSIMS(Graph):
         return GraphSIMS.setLayerBoundariesDepthParameters(self, msmtid, ROI, depth)
 
     def getCurve(self, msmtid, element, silent=False, returnIdx=False):
-        for c in range(len(self)):
+        for c, curve in enumerate(self):
             if (
-                self[c].attr("_SIMSelement") == element
-                and self[c].attr("_SIMSmsmt") == msmtid
+                curve.attr("_SIMSelement") == element
+                and curve.attr("_SIMSmsmt") == msmtid
             ):
                 if returnIdx:
                     return c
@@ -216,7 +236,7 @@ class GraphSIMS(Graph):
                 "id {}."
             )
             print(msg.format(element, msmtid))
-            return False
+            return None
         return None
 
     # function setting custom or defaults SIMS yields
@@ -266,9 +286,9 @@ class GraphSIMS(Graph):
 
         ratio_curves = GraphSIMS.getRatioProcessRatiocurves(self, ratioCurves)
         ret = True
-        ratio = None
+        ratio: np.ndarray = None
         x = None
-        attrs = {
+        attrs: dict[str, Any] = {
             "filename": "",
             "_SIMSlayerBoundaries": "",
             "_simsdepth_offset": "",
@@ -276,17 +296,15 @@ class GraphSIMS(Graph):
             "sample": "",
         }
         yieldcoefs = []
-        for i in range(len(ratio_curves)):
+        for i, rci in enumerate(ratio_curves):
             yieldcoefs.append([])
-            for j in range(len(ratio_curves[i])):
-                curve = GraphSIMS.getCurve(
-                    self, msmtid, ratio_curves[i][j], silent=True
-                )
+            for _j, rcij in enumerate(rci):
+                curve = GraphSIMS.getCurve(self, msmtid, rcij, silent=True)
                 if curve is None:
-                    msg = "WARNING SIMS appendReplaceCurveRatio Curve not found: {}."
-                    print(msg.format(ratio_curves[i][j]))
-                    ret = False
-                    return False
+                    msg = "ERROR SIMS appendReplaceCurveRatio Curve not found: %s."
+                    print(msg % rcij)
+                    raise GrapaError(msg, rcij)
+
                 GraphSIMS.check_saturation(curve)
                 if ratio is None:
                     tmp = copy.deepcopy(curve.y())
@@ -299,29 +317,32 @@ class GraphSIMS(Graph):
                 try:
                     ratio[i, :] += tmp
                 except ValueError as e:
-                    msg = (
-                        "ERROR GraphSIMS appendReplaceCurveRatio: curve not same size."
-                    )
-                    print(msg)
-                    msg = "{} shape curve.y {} into array {}."
-                    print(
-                        msg.format(
-                            ratio_curves[i][j], curve.y().shape, ratio[i, :].shape
-                        )
-                    )
-                    print(e)
+                    msg = "%s SIMS appendReplaceCurveRatio: curve not same size (%s)."
+                    print(msg % (type(e), e))
+                    msg2 = "{} shape curve.y {} into array {}."
+                    print(msg2.format(rcij, curve.y().shape, ratio[i, :].shape))
                     print(curve.y())
+                    raise GrapaError(msg, type(e), e) from e
+
                 if x is None:
                     x = curve.x()
-                for key in attrs:
-                    if attrs[key] == "":
+                for key, value in attrs.items():
+                    if value == "":
                         attrs[key] = curve.attr(key)
-        for i in range(len(ratio_curves)):
-            if len(ratio_curves[i]) == 0:
+
+        for i, rci in enumerate(ratio_curves):
+            if len(rci) == 0:
                 ratio[i, :] = 1
+
         msg = "Create/replace ratio curves {}, using coefficients: {}."
         print(msg.format(ratioCurves, str(yieldcoefs)))
-        attrs.update({"label": curveId})
+        attrs.update(
+            {
+                "label": curveId,
+                "_simsratiocurves": ratio_curves,
+                "_simsratioyields": yieldcoefs,
+            }
+        )
         attrs.update(attributes)
         new = CurveSIMS([x, ratio[0] / ratio[1]], attributes=attrs)
         c = GraphSIMS.getCurve(self, msmtid, curveId, silent=True, returnIdx=True)

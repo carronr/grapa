@@ -5,25 +5,25 @@ Created on Fri Jul 15 15:46:13 2016
 @author: Romain Carron
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
-
 import numpy as np
-
 
 from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
 from grapa.constants import CST
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.utils.funcgui import FuncListGUIHelper
 
 
 class GraphJscVoc(Graph):
+    """Open files containing Jsc-Voc data"""
+
     FILEIO_GRAPHTYPE = "Jsc-Voc curve"
 
     AXISLABELS = [["Voc", "", "V"], ["Jsc", "", "mA cm$^{-2}$"]]
 
     @classmethod
-    def isFileReadable(cls, filename, fileext, line1="", line2="", line3="", **_kwargs):
+    def isFileReadable(cls, filename, fileext, line1="", **_kwargs):
         if (
             fileext == ".txt"
             and filename[:7] == "JscVoc_"
@@ -34,7 +34,7 @@ class GraphJscVoc(Graph):
 
     def readDataFromFile(self, attributes, **kwargs):
         le = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes, **kwargs)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes, **kwargs)
         # expect 3 columns data
         self.castCurve(CurveJscVoc.CURVE, le, silentSuccess=True)
         # remove strange characters from attributes keys
@@ -70,7 +70,7 @@ class GraphJscVoc(Graph):
         self[le].data_units(unit_x="V", unit_y="mA cm-2")
         self[le + 1].update({"type": "scatter_c"})
         self[le + 1].data_units(unit_x="V", unit_y="K")
-        # self.curve(le+1).visible(False) # hide T curve
+        # self[le+1].visible(False) # hide T curve
         self.update(
             {
                 "typeplot": "semilogy",
@@ -138,7 +138,7 @@ class GraphJscVoc(Graph):
         temps.append(np.average(temp))
         return datas, temps
 
-    def CurvesJscVocSplitTemperature(self, threshold=3, curve=None):
+    def CurvesJscVocSplitTemperature(self, threshold=3, curve: Curve = None):
         """Splits the compiled data into different data (one for each T)
 
         :param threshold: in K
@@ -244,35 +244,24 @@ class GraphJscVoc(Graph):
             lbl = curve.attr("label")
             if len(lbl) > 0:
                 lbl += " "
-            out.append(
-                Curve(
-                    [temps, ns],
-                    {
-                        "linestyle": "none",
-                        "linespec": "o",
-                        "label": lbl + "Ideality factor A vs T [K]",
-                        Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
-                        Curve.KEY_AXISLABEL_Y: ["Ideality factor", "A", ""],
-                    },
-                )
-            )
-            out.append(
-                Curve(
-                    [temps, J0s],
-                    {
-                        "linestyle": "none",
-                        "linespec": "o",
-                        "label": lbl + "J0 vs T [K]",
-                        Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
-                        Curve.KEY_AXISLABEL_Y: ylabel_j0,
-                    },
-                )
-            )
-            out.append(
-                CurveArrhenius(
-                    [np.array(temps) * np.array(ns), J0s], CurveArrheniusJscVocJ00.attr
-                )
-            )
+            attrc = {
+                "linestyle": "none",
+                "linespec": "o",
+                "label": lbl + "Ideality factor A vs T [K]",
+                Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
+                Curve.KEY_AXISLABEL_Y: ["Ideality factor", "A", ""],
+            }
+            out.append(Curve([temps, ns], attrc))
+            attrc = {
+                "linestyle": "none",
+                "linespec": "o",
+                "label": lbl + "J0 vs T [K]",
+                Curve.KEY_AXISLABEL_X: ["Temperature", "T", "K"],
+                Curve.KEY_AXISLABEL_Y: ylabel_j0,
+            }
+            out.append(Curve([temps, J0s], attrc))
+            attrc = CurveArrheniusJscVocJ00.attr
+            out.append(CurveArrhenius([np.array(temps) * np.array(ns), J0s], attrc))
             out[-1].update(
                 {
                     "label": lbl + out[-1].attr("label"),
@@ -446,23 +435,23 @@ class CurveJscVoc(Curve):
             ]
         )
         # split according to illumination intensities (Voc vs T)
-        Tlim = [0, 350]
+        temp_lim = [0, 350]
         if graph is not None:
             for c in range(len(graph) - 1):
                 if graph[c] == self:
                     if np.array_equiv(graph[c + 1].x(), graph[c].x()):
-                        Tlim = [
-                            0.99 * np.min(graph.curve(c + 1).y()),
-                            1.01 * np.max(graph.curve(c + 1).y()),
+                        temp_lim = [
+                            0.99 * np.min(graph[c + 1].y()),
+                            1.01 * np.max(graph[c + 1].y()),
                         ]
                         break
-        Tlim = roundSignificantRange(Tlim, 3)
+        temp_lim = roundSignificantRange(temp_lim, 3)
         out.append(
             [
                 GraphJscVoc.split_illumination,
                 "Separate Voc vs T",
                 ["T max fluct.", "fit Voc(T)", "T limits", "extend to 0"],
-                [3, True, Tlim, True],
+                [3, True, temp_lim, True],
                 {"curve": self},
                 [{}, {"field": "Checkbutton"}, {}, {"field": "Checkbutton"}],
             ]
@@ -526,7 +515,7 @@ class CurveJscVoc(Curve):
             return CurveJscVoc.Tdefault
         return default
 
-    def splitIllumination(self, curve, threshold=3):
+    def splitIllumination(self, curve: Curve, threshold=3):
         """
         Splits the compiled data into different data (one for each intensity)
         curve: stores the Jsc-Voc pairs - will need to find the T
@@ -569,7 +558,7 @@ class CurveJscVoc(Curve):
         temps.append(np.average(temp))
         return datas, temps
 
-    def CurvesJscVocSplitIllumination(self, curve=None):
+    def CurvesJscVocSplitIllumination(self, curve: Curve = None):
         """
         Splits the compiled data into different curves (one for each intensity)
 

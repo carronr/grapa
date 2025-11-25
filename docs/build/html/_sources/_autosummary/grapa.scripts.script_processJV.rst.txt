@@ -14,11 +14,12 @@ grapa.scripts.script\_processJV
    .. autosummary::
       :toctree:
    
-      dictToListSorted
+      dict_to_list_sorted
       plotSampleCellsMap
       processJVfolder
       processSampleCellsMap
-      promptForFolder
+      prompt_for_folder
+      standalone
       writeFileAvgMax
    
    
@@ -33,6 +34,7 @@ grapa.scripts.script\_processJV
    
       AreaDB
       AreaDBHandler
+      IvDataLocator
    
    
 

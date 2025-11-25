@@ -1,0 +1,6 @@
+grapa.scripts.script\_JVSummaryToBoxPlots.jv\_title\_data
+=========================================================
+
+.. currentmodule:: grapa.scripts.script_JVSummaryToBoxPlots
+
+.. autofunction:: jv_title_data

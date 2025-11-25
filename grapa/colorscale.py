@@ -20,6 +20,7 @@ with warnings.catch_warnings():
 
 from grapa.mathModule import is_number
 from grapa.utils.string_manipulations import strToVar
+from grapa.utils.error_management import issue_warning, IncorrectInputError
 
 if np.__version__ >= "2.0":
     np.set_printoptions(legacy="1.25")  # in fields: 1.0, not np.float64(1.0)
@@ -55,9 +56,11 @@ def colorize_graph(
     if curvesselection is not None:
         try:
             curves = [int(c) for c in curvesselection]
-        except Exception:
-            msg = "colorize_graph Exception, invalid curvesselection list of Curves."
-            logger.error(msg)
+        except Exception as e:
+            msg = "colorize_graph Exception, invalid curvesselection: %s. %s: %s."
+            msa = (curvesselection, type(e), e)
+            logger.error(msg, *msa)
+            raise IncorrectInputError(msg % msa) from e
     # special cases
     if len(curves) < 1:
         return
@@ -70,14 +73,10 @@ def colorize_graph(
     if same_if_empty_label:  # if it needs to have several curves with same color
         show = np.array([0.0] * len(curves))
         val = 0.0
-        for i in range(len(curves)):
+        for i, c in enumerate(curves):
             show[i] = val
-            labelhide = graph[curves[i]].attr("labelhide")
-            if (
-                graph[curves[i]].attr("label") != ""
-                and not labelhide
-                and graph[curves[i]].visible()
-            ):
+            labelhide = graph[c].attr("labelhide")
+            if graph[c].attr("label") != "" and not labelhide and graph[c].visible():
                 val += 1.0
             elif i > 0:
                 show[i] = show[i - 1]
@@ -85,8 +84,8 @@ def colorize_graph(
     cols = colorscale.values_to_color(
         show / max(max(show), 1.0), avoid_white=avoid_white
     )
-    for i in range(len(curves)):
-        graph[curves[i]].update({"color": list(cols[i])})
+    for i, c in enumerate(curves):
+        graph[c].update({"color": list(cols[i])})
 
 
 class Color:
@@ -97,6 +96,7 @@ class Color:
         self.code = code
 
     def get(self, space="rgb"):
+        """Returns the color in the requested colorspace."""
         space = space.lower()
         # want to avoid unnecessary conversions (ie. hls -> rgb -> hls)
         if space == self.space:
@@ -110,7 +110,7 @@ class Color:
                     "Color.get: please check input, only RBGA accepts color "
                     "quadruplets (here colorspace is {})"
                 )
-                logger.error(msg.format(self.space))  # raise an exception?
+                issue_warning(logger, msg.format(self.space))  # raise an exception?
                 return None
 
             if self.space == "hls":
@@ -119,7 +119,7 @@ class Color:
                 code = colorsys.hsv_to_rgb(*self.code)
             else:
                 msg = "Color.get, source colorspace not supported ({})"
-                logger.error(msg.format(self.space))
+                issue_warning(logger, msg.format(self.space))
                 return None
 
         # now code is in rgb space
@@ -130,11 +130,14 @@ class Color:
         elif space == "hsv":
             return colorsys.rgb_to_hsv(*code)
 
-        logger.error("Color.get, target space not supported ({})".format(space))
+        msg = "Color.get, target space not supported ({})"
+        issue_warning(logger, msg.format(space))
         return None
 
 
 class PhotoImageColorscale(PhotoImage):
+    """A PhotoImage that can be filled with a Colorscale gradient."""
+
     def __init__(self, width=32, height=32, **args):
         # typical call: (with=32, height=32)
         PhotoImage.__init__(self, width=width, height=height, **args)
@@ -227,15 +230,16 @@ class Colorscale:
         valuesN being between 0 and 1
         """
         space_out = space_out.lower()
-        avoidWhiteParam = 0.85
+        avoid_white_param = 0.85
         if is_number(values):
-            return list(
-                self.values_to_color(
-                    [values], space_out=space_out, avoid_white=avoid_white
-                )[0]
+            color = self.values_to_color(
+                [values], space_out=space_out, avoid_white=avoid_white
             )
+            return list(color[0])
+
         if not isinstance(values, np.ndarray):
             values = np.array(values)
+
         # from here we know values is a np.array
         # if predefined matplotlib colorsmap (input was a colormap name str,
         # i.e. 'inferno', etc.)
@@ -246,41 +250,43 @@ class Colorscale:
             # check if colorscale ends with white
             if avoid_white:
                 if list(col(0.0))[0:3] == [1, 1, 1]:
-                    values = avoidWhiteParam * values + (1 - avoidWhiteParam)
+                    values = avoid_white_param * values + (1 - avoid_white_param)
                 if list(col(1.0))[0:3] == [1, 1, 1]:
-                    values = avoidWhiteParam * values
+                    values = avoid_white_param * values
             out = [list(o) for o in col(values)]
             if space_out != "rgb":
                 out = [Color(o, "rgb").get(space_out) for o in out]
-        else:
-            # normalize: colormap spaced by 1 every color, values scaled
-            # [0, nb(color)]
-            _3o4 = 4 if min([len(c) for c in self.colors]) > 3 else 3
-            values *= len(self.colors) - 1
-            i0 = np.floor(values).astype("int")
-            i1 = np.ceil(values).astype("int")
-            if avoid_white:
-                if (self.colors[0][:3] == [1, 1, 1]).all():
-                    values = avoidWhiteParam * values + (1 - avoidWhiteParam) * (
-                        len(self.colors) - 1
-                    )
-                if (self.colors[-1][:3] == [1, 1, 1]).all():
-                    values = avoidWhiteParam * values
-            out = [0] * len(values)
-            # there iscertainly a smarter way to program this than a loop
-            for i in range(len(values)):
-                if i0[i] == i1[i]:  # if values[i] is integer
-                    out[i] = self.colors[i0[i]][0:_3o4]
-                else:  # interpolate
-                    out[i] = self.colors[i0[i]][0:_3o4] * (
-                        float(i1[i]) - values[i]
-                    ) + self.colors[i1[i]][0:_3o4] * (values[i] - float(i0[i]))
-                out[i] = list(out[i])
-            if space_out != self.space:
-                out = [Color(o, self.space).get(space_out) for o in out]
+            return out
+
+        # normalize: colormap spaced by 1 every color, values scaled
+        # [0, nb(color)]
+        _3o4 = 4 if min([len(c) for c in self.colors]) > 3 else 3
+        values *= len(self.colors) - 1
+        i0 = np.floor(values).astype("int")
+        i1 = np.ceil(values).astype("int")
+        if avoid_white:
+            if (self.colors[0][:3] == [1, 1, 1]).all():
+                values = avoid_white_param * values + (1 - avoid_white_param) * (
+                    len(self.colors) - 1
+                )
+            if (self.colors[-1][:3] == [1, 1, 1]).all():
+                values = avoid_white_param * values
+        # there is certainly a smarter way to program this than a loop
+        out = [[]] * len(values)
+        for i, val in enumerate(values):
+            if i0[i] == i1[i]:  # if values[i] is integer
+                out[i] = self.colors[i0[i]][0:_3o4]
+            else:  # interpolate
+                out[i] = self.colors[i0[i]][0:_3o4] * (
+                    float(i1[i]) - val
+                ) + self.colors[i1[i]][0:_3o4] * (val - float(i0[i]))
+            out[i] = list(out[i])
+        if space_out != self.space:
+            out = [Color(o, self.space).get(space_out) for o in out]
         return out
 
     def cmap(self, nbins=256, avoid_white=False):
+        """Returns a matplotlib LinearSegmentedColormap object"""
         val = np.linspace(0, 1, nbins)
         colors = self.values_to_color(val, avoid_white=avoid_white)
         cm = LinearSegmentedColormap.from_list("custom_cmap", colors, N=nbins)
@@ -306,7 +312,7 @@ def colorscales_from_config(graph):
         for key in keys:
             vals.append(strToVar(attrs[key]))
     except Exception:
-        logger.error("colorscales_from_config: Exception.", exc_info=True)
+        issue_warning(logger, "colorscales_from_config: Exception.", exc_info=True)
         vals = []
     # process colorscales and return Colorscales objects
     if len(vals) > 0:
@@ -322,15 +328,15 @@ def colorscales_from_config(graph):
                 try:
                     plt.get_cmap(val, 1)
                     out.append(Colorscale(val))
-                except ValueError:
-                    # print('Exception in Colorscale with keyword', val, e)
-                    pass
+                except ValueError as e:
+                    msg = "ValueError in Colorscale with keyword {}, {}."
+                    issue_warning(logger, msg.format(val, e))
             else:
                 msg = (
                     "colorscales_from_config when loading default colorscales, "
                     "cannot interpret element {}."
                 )
-                logger.warning(msg.format(val))
+                issue_warning(logger, msg.format(val))
         if len(out) > 0:
             return out
     out = [

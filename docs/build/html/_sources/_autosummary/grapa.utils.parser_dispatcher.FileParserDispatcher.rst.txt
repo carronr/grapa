@@ -1,0 +1,36 @@
+grapa.utils.parser\_dispatcher.FileParserDispatcher
+===================================================
+
+.. currentmodule:: grapa.utils.parser_dispatcher
+
+.. autoclass:: FileParserDispatcher
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FileParserDispatcher.append_curve_from_datainput
+       ~FileParserDispatcher.read
+       ~FileParserDispatcher.readDataFromFileDatabase
+       ~FileParserDispatcher.readDataFromFileGeneric
+       ~FileParserDispatcher.readDataFromFileTxt
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FileParserDispatcher.GRAPHTYPE_GRAPH
+      ~FileParserDispatcher.GRAPHTYPE_UNDETERMINED
+   
+   

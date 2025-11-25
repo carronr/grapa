@@ -1,0 +1,28 @@
+grapa.curve.CurveGraphsReferrer
+===============================
+
+.. currentmodule:: grapa.curve
+
+.. autoclass:: CurveGraphsReferrer
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CurveGraphsReferrer.__init__
+       ~CurveGraphsReferrer.cleanup
+       ~CurveGraphsReferrer.register_graph
+       ~CurveGraphsReferrer.unregister_graph
+   
+   
+
+   
+   
+   

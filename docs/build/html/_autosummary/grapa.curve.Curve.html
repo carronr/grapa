@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.curve.Curve &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.curve.Curve &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="grapa.curve_image" href="grapa.curve_image.html" />
-    <link rel="prev" title="grapa.curve.update_graph_values_dictkeys_conditional" href="grapa.curve.update_graph_values_dictkeys_conditional.html" /> 
+    <link rel="next" title="grapa.curve.CurveGraphsReferrer" href="grapa.curve.CurveGraphsReferrer.html" />
+    <link rel="prev" title="grapa.curve.CommandRecorderCurve" href="grapa.curve.CommandRecorderCurve.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,10 +58,12 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.math_on_curves.html">grapa.curve.math_on_curves</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.update_curve_values_dictkeys.html">grapa.curve.update_curve_values_dictkeys</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.curve.update_graph_values_dictkeys_conditional.html">grapa.curve.update_graph_values_dictkeys_conditional</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.curve.CommandRecorderCurve.html">grapa.curve.CommandRecorderCurve</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">grapa.curve.Curve</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#grapa.curve.Curve"><code class="docutils literal notranslate"><span class="pre">Curve</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.curve.CurveGraphsReferrer.html">grapa.curve.CurveGraphsReferrer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
@@ -162,8 +164,8 @@ and metadata (can be thought as a dict of key, values). keys are lower-case.</p>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getAttributes</span></code>([keys_list])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">getData</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.getData" title="grapa.curve.Curve.getData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getData</span></code></a>()</p></td>
+<td><p>Returns the data as a np.array</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.getDataCustomPickerXY" title="grapa.curve.Curve.getDataCustomPickerXY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getDataCustomPickerXY</span></code></a>(idx[, alter, ...])</p></td>
 <td><p>Given an index in the Curve data, returns a modified data which has some sense to the user.</p></td>
@@ -201,46 +203,49 @@ and metadata (can be thought as a dict of key, values). keys are lower-case.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.setY" title="grapa.curve.Curve.setY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setY</span></code></a>(y[, index])</p></td>
 <td><p>Set new value for the y data.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code>([idx])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_data</span></code>(data)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapShowHide</span></code>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.shape" title="grapa.curve.Curve.shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></a>([idx])</p></td>
+<td><p>Returns the shape of the data array, or one of its dimension if idx is 0 or 1</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">swapShowHide</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.update" title="grapa.curve.Curve.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(attributes)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.update" title="grapa.curve.Curve.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(attributes)</p></td>
 <td><p>Updates attributes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateFitParam" title="grapa.curve.Curve.updateFitParam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParam</span></code></a>(*param[, func])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateFitParam" title="grapa.curve.Curve.updateFitParam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParam</span></code></a>(*param[, func])</p></td>
 <td><p>Update the curve y values of a fit curve.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParamFormatPopt</span></code>(f, param)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateFitParamFormatPopt" title="grapa.curve.Curve.updateFitParamFormatPopt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateFitParamFormatPopt</span></code></a>(_f, param)</p></td>
+<td><p>Format the input parameters to be stored in _popt, depending on the fit function f.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateValuesDictkeys" title="grapa.curve.Curve.updateValuesDictkeys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateValuesDictkeys</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateValuesDictkeys" title="grapa.curve.Curve.updateValuesDictkeys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateValuesDictkeys</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Performs update({key1: value1, key2: value2, ...}).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateValuesDictkeysGraph" title="grapa.curve.Curve.updateValuesDictkeysGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateValuesDictkeysGraph</span></code></a>(*args[, keys, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.updateValuesDictkeysGraph" title="grapa.curve.Curve.updateValuesDictkeysGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">updateValuesDictkeysGraph</span></code></a>(*args[, keys, ...])</p></td>
 <td><p>Similar as updateValuesDictkeys, for all curves inside a provided graph.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.update_plotter_boxplot_addon" title="grapa.curve.Curve.update_plotter_boxplot_addon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_plotter_boxplot_addon</span></code></a>(fun, kw)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.update_plotter_boxplot_addon" title="grapa.curve.Curve.update_plotter_boxplot_addon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_plotter_boxplot_addon</span></code></a>(fun, kw)</p></td>
 <td><p>set boxplot_addon keyword.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.update_scatter_next_curves" title="grapa.curve.Curve.update_scatter_next_curves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_scatter_next_curves</span></code></a>(*values[, graph, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.update_scatter_next_curves" title="grapa.curve.Curve.update_scatter_next_curves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_scatter_next_curves</span></code></a>(*values[, graph, ...])</p></td>
 <td><p>To receive update instructions for Curves following self in graph, when self &quot;type&quot; is &quot;scatter&quot;.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.visible" title="grapa.curve.Curve.visible"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible</span></code></a>([state])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.visible" title="grapa.curve.Curve.visible"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible</span></code></a>([state])</p></td>
 <td><p>Set/get state of visibility.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.x" title="grapa.curve.Curve.x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></a>([index, alter, xyValue, errorIfxyMix, neutral])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.x" title="grapa.curve.Curve.x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code></a>([index, alter, xyValue, errorIfxyMix, neutral])</p></td>
 <td><p>Returns the x data over the range index.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.x_offsets" title="grapa.curve.Curve.x_offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_offsets</span></code></a>(**kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.x_offsets" title="grapa.curve.Curve.x_offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_offsets</span></code></a>(**kwargs)</p></td>
 <td><p>Calls y(), and apply the effects of offset and muloffset on output.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.y" title="grapa.curve.Curve.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a>([index, alter, xyValue, errorIfxyMix, neutral])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.y" title="grapa.curve.Curve.y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y</span></code></a>([index, alter, xyValue, errorIfxyMix, neutral])</p></td>
 <td><p>Returns the y data over the range index.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.curve.Curve.y_offsets" title="grapa.curve.Curve.y_offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_offsets</span></code></a>(**kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.curve.Curve.y_offsets" title="grapa.curve.Curve.y_offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_offsets</span></code></a>(**kwargs)</p></td>
 <td><p>Calls y(), and apply the effects of offset and muloffset on output.</p></td>
 </tr>
 </tbody>
@@ -337,7 +342,7 @@ By default only neutral (i.e. raw data) is provided</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.attr">
-<span class="sig-name descname"><span class="pre">attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.attr" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#grapa.curve.Curve.attr" title="Link to this definition"></a></dt>
 <dd><p>Get attribute value</p>
 </dd></dl>
 
@@ -407,8 +412,14 @@ graph.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="grapa.curve.Curve.getData">
+<span class="sig-name descname"><span class="pre">getData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.getData" title="Link to this definition"></a></dt>
+<dd><p>Returns the data as a np.array</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.getDataCustomPickerXY">
-<span class="sig-name descname"><span class="pre">getDataCustomPickerXY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strDescription</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.getDataCustomPickerXY" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getDataCustomPickerXY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strDescription</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.getDataCustomPickerXY" title="Link to this definition"></a></dt>
 <dd><p>Given an index in the Curve data, returns a modified data which has
 some sense to the user. Can be overridden in child classes, see e.g. CurveCf
 If strDescription is True, then returns a string which describes what
@@ -417,7 +428,7 @@ this method is doing.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.get_attributes">
-<span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.curve.Curve.get_attributes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#grapa.curve.Curve.get_attributes" title="Link to this definition"></a></dt>
 <dd><p>Returns all attributes, or a subset with keys given in keyList</p>
 </dd></dl>
 
@@ -483,16 +494,22 @@ are ignored.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.setX">
-<span class="sig-name descname"><span class="pre">setX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.setX" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.setX" title="Link to this definition"></a></dt>
 <dd><p>Set new value for the x data.
 Index can be provided (self.data[0,index] = x).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.setY">
-<span class="sig-name descname"><span class="pre">setY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.setY" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.setY" title="Link to this definition"></a></dt>
 <dd><p>Set new value for the y data.
 Index can be provided (self.data[1,index] = y).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.curve.Curve.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">':'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.shape" title="Link to this definition"></a></dt>
+<dd><p>Returns the shape of the data array, or one of its dimension if idx is 0 or 1</p>
 </dd></dl>
 
 <dl class="py method">
@@ -521,6 +538,14 @@ self.attr(“fitfunc”))(), used (at least) in curveMCA for fit</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="grapa.curve.Curve.updateFitParamFormatPopt">
+<span class="sig-name descname"><span class="pre">updateFitParamFormatPopt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.updateFitParamFormatPopt" title="Link to this definition"></a></dt>
+<dd><p>Format the input parameters to be stored in _popt, depending on the fit
+function f. This is useful when the fit function has some fixed parameters, or
+when the input needs to be reshaped.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.updateValuesDictkeys">
 <span class="sig-name descname"><span class="pre">updateValuesDictkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.updateValuesDictkeys" title="Link to this definition"></a></dt>
 <dd><p>Performs update({key1: value1, key2: value2, …}). Handy to call from GUI</p>
@@ -539,7 +564,7 @@ self.attr(“fitfunc”))(), used (at least) in curveMCA for fit</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.updateValuesDictkeysGraph">
-<span class="sig-name descname"><span class="pre">updateValuesDictkeysGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.updateValuesDictkeysGraph" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">updateValuesDictkeysGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">also_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.updateValuesDictkeysGraph" title="Link to this definition"></a></dt>
 <dd><p>Similar as updateValuesDictkeys, for all curves inside a provided graph.
 Implemented as curve method for easier integration into GUI.</p>
 <dl class="field-list simple">
@@ -585,7 +610,7 @@ in graph.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.curve.Curve.visible">
-<span class="sig-name descname"><span class="pre">visible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.visible" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">visible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.curve.Curve.visible" title="Link to this definition"></a></dt>
 <dd><p>Set/get state of visibility.
 Replaces .isHidden(), with added setter functionality.</p>
 <dl class="field-list simple">
@@ -664,8 +689,8 @@ ylim, where y do not know x in advance.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="grapa.curve.update_graph_values_dictkeys_conditional.html" class="btn btn-neutral float-left" title="grapa.curve.update_graph_values_dictkeys_conditional" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grapa.curve_image.html" class="btn btn-neutral float-right" title="grapa.curve_image" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grapa.curve.CommandRecorderCurve.html" class="btn btn-neutral float-left" title="grapa.curve.CommandRecorderCurve" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.curve.CurveGraphsReferrer.html" class="btn btn-neutral float-right" title="grapa.curve.CurveGraphsReferrer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

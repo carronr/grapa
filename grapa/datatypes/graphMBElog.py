@@ -37,12 +37,17 @@ class GraphMBElog(Graph):
             usecols=[0, 1],
             invalid_raise=False,
         )
-        self.data.append(Curve(np.transpose(data), attributes))
-        self.headers.update({"collabels": ["Time [min]", "Substrate heating [a.u.]"]})
+        self.append(Curve(np.transpose(data), attributes))
+        self[-1].update(
+            {
+                "_collabels": ["Time [min]", "Substrate heating [a.u.]"],
+                "label": sample,
+                "sample": sample,
+            }
+        )
         self.update(
             {
                 "xlabel": self.formatAxisLabel(GraphMBElog.AXISLABELS[0]),
                 "ylabel": self.formatAxisLabel(GraphMBElog.AXISLABELS[1]),
             }
         )
-        self.curve(-1).update({"label": sample, "sample": sample})

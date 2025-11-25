@@ -1,0 +1,31 @@
+grapa.utils.container\_metadata
+===============================
+
+.. automodule:: grapa.utils.container_metadata
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      MetadataContainer
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,35 @@
+grapa.utils.command\_recorder.Command
+=====================================
+
+.. currentmodule:: grapa.utils.command_recorder
+
+.. autoclass:: Command
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~Command.__init__
+       ~Command.is_end_transaction
+       ~Command.is_null
+       ~Command.redo
+       ~Command.undo
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Command.ACTION_NULL
+   
+   

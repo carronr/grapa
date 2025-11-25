@@ -1,9 +1,10 @@
 import os
 import pytest
+import warnings
 
 import numpy as np
 
-from . import grapa_folder, Graph, HiddenPrints
+from . import grapa_folder, Graph, HiddenPrints, GrapaWarning
 from grapa.graph import ConditionalPropertyApplier
 from grapa.utils.string_manipulations import TextHandler
 from grapa.curve import Curve
@@ -63,7 +64,9 @@ def test_ConditionalPropertyApplier(graph):
     cpa.apply(graph, "label", ">", "SAMPLE f1 123 K", "color", "k")
     assert graph[0].attr("color") == "r"
     assert graph[1].attr("color") == "k"
-    with HiddenPrints():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        # with HiddenPrints():
         cpa.apply(graph, "linewidth", "<", 2, "color", "c")
     assert graph[0].attr("color") == "c"
     assert graph[1].attr("color") == "k"
@@ -136,7 +139,10 @@ def test_TextHandler_repair1(graph):
     TextHandler.add(graph, "def", textxy, textargs)
 
     graph.update({"textargs": ""})
-    with HiddenPrints():
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        # with HiddenPrints():
         TextHandler.check_valid(graph)
     assert graph.attr("text") == ["abc", "def"]
     assert graph.attr("textxy") == [textxy, textxy]
@@ -163,7 +169,9 @@ def test_TextHandler_repair1(graph):
     graph.update({"text": ""})
     TextHandler.check_valid(graph)
     graph.update({"text": ["a", "b", "c"]})
-    with HiddenPrints():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        #with HiddenPrints():
         TextHandler.check_valid(graph)
     assert graph.attr("text") == ["a", "b", "c"]
     assert graph.attr("textxy") == ["", "", ""]
@@ -172,21 +180,27 @@ def test_TextHandler_repair1(graph):
 
 def test_TextHandler_repair2(graph):
     graph.update({"text": ["a"], "textxy": "", "textargs": ""})
-    with HiddenPrints():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        # with HiddenPrints():
         TextHandler.check_valid(graph)
     assert graph.attr("text") == ["a"]
     assert graph.attr("textxy") == [""]
     assert graph.attr("textargs") == [{}]
 
     graph.update({"text": ["a"], "textxy": "abc", "textargs": [{}, {}]})
-    with HiddenPrints():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        #with HiddenPrints():
         TextHandler.check_valid(graph)
     assert graph.attr("text") == ["a"]
     assert graph.attr("textxy") == [""]
     assert graph.attr("textargs") == [{}]
 
     graph.update({"text": ["a"], "textxy": [0.1, 0.2], "textargs": [{}, {}]})
-    with HiddenPrints():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=GrapaWarning)
+        # with HiddenPrints():
         TextHandler.check_valid(graph)
     assert graph.attr("text") == ["a"]
     assert graph.attr("textxy") == [[0.1, 0.2]]

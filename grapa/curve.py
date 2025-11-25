@@ -9,23 +9,29 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 import warnings
 import importlib
 import logging
+from copy import deepcopy
+from typing import Tuple, List, Union, Optional, Any, TYPE_CHECKING
 
 import numpy as np
 from scipy.interpolate import interp1d
 
 from grapa.constants import CST
 from grapa.mathModule import _fractionstr_to_float, MathOperator
-from grapa.utils.metadata import MetadataContainer
+from grapa.utils.container_metadata import MetadataContainer
 from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
+from grapa.utils.error_management import IncorrectInputError, GrapaError, issue_warning
 from grapa.utils.string_manipulations import (
     format_string_curveattr,
     restructuredtext_to_text,
 )
 
+if TYPE_CHECKING:
+    from grapa.graph import Graph
+
 logger = logging.getLogger(__name__)
 
 
-def update_curve_values_dictkeys(curve, *args, keys: list = None):
+def update_curve_values_dictkeys(curve, *args, keys: Optional[list] = None):
     """
     Performs update({key1: value1, key2: value2, ...}).
 
@@ -34,12 +40,14 @@ def update_curve_values_dictkeys(curve, *args, keys: list = None):
     :param keys: ['key1', 'key2', ...]. list[str]
     :returns: True if success, False otherwise
     """
+    if keys is None:
+        keys = []
     if not isinstance(keys, list) or len(keys) != len(args):
         msg = (
             "update_curve_values_dictkeys: 'keys' must be a list, same len as "
             "*args. Provided ({}), len {}, expected len {}."
         )
-        logger.error(msg.format(keys), len(keys), len(args))
+        issue_warning(logger, msg.format(keys), len(keys), len(args))
         return False
 
     if len(keys) != len(args):
@@ -48,14 +56,14 @@ def update_curve_values_dictkeys(curve, *args, keys: list = None):
             '"keys=list[str]" ({}) must match the number of provided values as '
             "args ({}). Stop at minimal len."
         )
-        logger.warning(msg.format(len(keys), len(args)))
+        issue_warning(logger, msg.format(len(keys), len(args)))
     for i in range(min(len(keys), len(args))):
         curve.update({keys[i]: args[i]})
     return True
 
 
 def update_graph_values_dictkeys_conditional(
-    graph, *args, keys=None, also_attr=None, also_vals=None
+    graph, *args, keys: Optional[list] = None, also_attr=None, also_vals=None
 ) -> bool:
     """Similar as updateValuesDictkeys, for all curves inside a provided graph.
 
@@ -66,12 +74,14 @@ def update_graph_values_dictkeys_conditional(
     :param also_vals: list, same len as also_attr. Test each curve in graph, only perfom
            modifications if curve.attr(also_attr[i]) == also_vals[i], for all i in range
     """
+    if keys is None:
+        keys = []
     if not isinstance(keys, list) or len(keys) != len(args):
         msg = (
             "update_graph_values_dictkeys_conditional: 'keys' must be a list, "
             "same len as *args. Provided ({}), len {}, expected len {}."
         )
-        logger.error(msg.format(keys), len(keys), len(args))
+        issue_warning(logger, msg.format(keys), len(keys), len(args))
         return False
 
     for curve in graph:
@@ -111,12 +121,128 @@ def get_point_closest_to_xy(curve, x, y, alter="", offsets=False):
             idx = idx[idX[0]]
         else:  # equally close in x and y -> returns first datapoint found
             idx = idx[idX[0]]
-    idxOut = idx if len(idx) <= 1 else idx[0]
+    idx_out = idx if len(idx) <= 1 else idx[0]
     if offsets:
         # no alter, but offset for the return value
-        return curve.x_offsets(index=idx)[0], curve.y_offsets(index=idx)[0], idxOut
+        return curve.x_offsets(index=idx)[0], curve.y_offsets(index=idx)[0], idx_out
     # no alter, no offsets for the return value
-    return curve.x(index=idx)[0], curve.y(index=idx)[0], idxOut
+    return curve.x(index=idx)[0], curve.y(index=idx)[0], idx_out
+
+
+class CurveGraphsReferrer:
+    """Keeps track of Graphs containing a Curve.
+    Used by Curve to know which Graphs it belongs to. Taken advantage by CommandRecorder
+    Workflow: action on Graph.ContainerCurves, which triggers action onto
+    CurveGraphsReferrer"""
+
+    def __init__(self):
+        self._list_graphs: List["Graph"] = []
+
+    def __len__(self):
+        return len(self._list_graphs)
+
+    def __iter__(self):
+        return self._list_graphs.__iter__()
+
+    def register_graph(self, graph):
+        """Register a graph as containing the Curve."""
+        if graph in self._list_graphs:
+            msg = "CurveGraphsReferrer.register: graph already in _list. Proceed."
+            msg += str([item for item in self._list_graphs])
+            for c, curve in enumerate(graph):
+                args = [
+                    c,
+                    curve.attr("label"),
+                    curve.graphs_membersof is self,
+                    self in [curve.graphs_membersof],
+                ]
+                msg += "\n  {} {} {} {}".format(*args)
+            issue_warning(logger, msg, exc_info=True)
+            return
+        self._list_graphs.append(graph)
+        self.cleanup()
+
+    def unregister_graph(self, graph):
+        """Unregister a graph as containing the Curve."""
+        if graph not in self._list_graphs:
+            msg = "CurveGraphsReferrer.unregister: graph not in _list. Proceed."
+            issue_warning(logger, msg, exc_info=True)
+            return
+        if self in [curve.graphs_membersof for curve in graph]:
+            msg = "CurveGraphsReferrer.unregister: curve still in graph, keep."
+            issue_warning(logger, msg, exc_info=True)
+            return
+        self._list_graphs.remove(graph)
+        self.cleanup()
+
+    def cleanup(self):
+        """Cleans up _list_graphs from invalid/outdated entries.
+        purose: bug tracking. Should never find anything.
+        REMOVE FUNCTION at some point"""
+        to_remove = []
+        for i, gr in enumerate(self._list_graphs):
+            if self not in [curve.graphs_membersof for curve in gr]:
+                to_remove.append(i)
+        for i in to_remove[::-1]:
+            del self._list_graphs[i]
+            msg = "CurveGraphsReferrer.cleanup: graph %s del from list. Proceed."
+            logger.error(msg, i)
+
+        for graph in self._list_graphs:
+            for c, curve in enumerate(graph):
+                if graph not in curve.graphs_membersof:
+                    msg = (
+                        "CurveGraphsReferrer.cleanup, issue with graph %s, curve %s"
+                        " %s, graph not registered. Not attempted correction."
+                    )
+                    logger.error(msg, graph.filename, c, curve.attr("label"))
+
+
+class CommandRecorderCurve:
+    """Records operations performed on a Curve, to allow undo/redo functionality.
+    Used by Curve.recorder.
+    Similar interfaces as CommandRecorderGraph.
+    NB: log an operation makes sense irrespective of which Graphs the Curve belongs to
+    but undo_last_transaction() may screw up -> open door for undesired changes on
+    unrelated Graphs
+    -> undo_last_transaction() and redo_last_transaction() are NOT implemented in
+    CommandRecorderCurve
+    """
+
+    def __init__(self, curve: "Curve"):
+        self.curve = curve
+
+    def is_log_active(self, new: Optional[bool] = None):
+        """Get/set if logging is active for any of the Graphs containing the Curve.
+        See CommandRecorderGraph.is_log_active().
+        :param new: if not None, set new logging state"""
+        al = [gr.recorder.is_log_active(new=new) for gr in self.curve.graphs_membersof]
+        return np.array(al).any()
+
+    def log(
+        self,
+        caller,
+        do: Tuple[str, list, dict],
+        undo: Tuple[str, list, dict],
+        tag_special: str = "",
+        blend_into_transaction=False,
+    ):
+        """Log an operation performed on the Curve."""
+        for graph in self.curve.graphs_membersof:
+            graph.recorder.log(
+                caller,
+                do,
+                undo,
+                tag_special=tag_special,
+                blend_into_transaction=blend_into_transaction,
+            )
+
+    def log_special(self, tag: str, blend_into_transaction=True):
+        """Log a special operation performed on the Curve."""
+        for graph in self.curve.graphs_membersof:
+            graph.recorder.log_special(
+                tag, blend_into_transaction=blend_into_transaction
+            )
 
 
 class Curve:
@@ -158,32 +284,36 @@ class Curve:
     def __init__(self, data, attributes: dict, silent: bool = True):
         # silent: for debugging purpose. Subclasses may print additional information
         self.silent = silent
-        self._attr = MetadataContainer()
-        self._attr.update(attributes)
-        self.data = np.array([])
+        self.graphs_membersof = CurveGraphsReferrer()
+        self.data: np.ndarray = np.array([])
+        self._attr = MetadataContainer(self)
+        self.recorder = CommandRecorderCurve(self)
         self._init_data(data)
+        self._attr.update(attributes)
         self._funclistgui_last = []
 
-    def _init_data(self, data) -> None:
+    def _init_data(self, newdata) -> None:
         """Format input data"""
-        if isinstance(data, (np.ndarray, np.generic)):
-            self.data = data
+        if isinstance(newdata, (np.ndarray, np.generic)):
+            self.data = newdata
         else:
-            self.data = np.array(data)
+            self.data = np.array(newdata)
         if self.data.shape[0] < 2:
             self.data = self.data.reshape((2, len(self.data)))
             msg = "Curve: data need to contain at least 2 columns. Shape of data: {}"
-            logger.warning(msg.format(self.data.shape))
+            issue_warning(logger, msg.format(self.data.shape))
+        if len(self.data.shape) == 1:
+            self.data = self.data.reshape((2, 1))
         # clean nan pairs at end of data
-        iMax = self.data.shape[1]
+        imax = self.data.shape[1]
         # loop down to 1 only, not 0
         for i in range(self.data.shape[1] - 1, 0, -1):
             if np.isnan(self.data[:, i]).all():
-                iMax -= 1
+                imax -= 1
             else:
                 break
-        if iMax < self.data.shape[1]:
-            self.data = self.data[:, :iMax]
+        if imax < self.data.shape[1]:
+            self.data = self.data[:, :imax]
 
     # *** Methods related to GUI
     @classmethod
@@ -210,12 +340,10 @@ class Curve:
                graph.
         """
         out = []
-        # Curve typeplot eg scatter, fill, boxplot etc.
-        out += FuncListGUIHelper.typeplot(self, **kwargs)
-        # offset and muloffset can be directly accessed if already set
+        out += FuncListGUIHelper.typeplot(self, **kwargs)  # e.g. scatter, boxplot etc.
         out += FuncListGUIHelper.offset_muloffset(self, **kwargs)
-        # only if type Curve specifically - not subclass
-        if type(self) is Curve:
+        if type(self) is Curve:  # pylint: disable=unidiomatic-typecheck
+            # only if type Curve specifically - not subclass
             out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
         return out
 
@@ -233,7 +361,7 @@ class Curve:
         return []
 
     # *** Methods about _attr
-    def attr(self, key: str, default=MetadataContainer.VALUE_DEFAULT):
+    def attr(self, key: str, default: Any = MetadataContainer.VALUE_DEFAULT) -> Any:
         """Get attribute value"""
         return self._attr(key, default=default)
 
@@ -245,7 +373,7 @@ class Curve:
         """True is value is default (or does not exist), False if defined"""
         return self._attr.is_attr_value_default(value)
 
-    def get_attributes(self, keys_list=None) -> dict:
+    def get_attributes(self, keys_list: Optional[list] = None) -> dict:
         """Returns all attributes, or a subset with keys given in keyList"""
         return self._attr.values(keys_list=keys_list)
 
@@ -269,7 +397,7 @@ class Curve:
         self.update({"label": string.replace("  ", " ").strip()})
         return True
 
-    def visible(self, state: bool = None):
+    def visible(self, state: Optional[bool] = None):
         """Set/get state of visibility.
         Replaces .isHidden(), with added setter functionality.
 
@@ -312,11 +440,13 @@ class Curve:
         if isinstance(value, (int, float, str)):
             return [1, value]
         if isinstance(value, (list, tuple)):
+            if isinstance(value, tuple):
+                value = list(value)
             while len(value) < 2:
                 value.append(1)
             return value[:2]
-        msg = "Curve.get_muloffset, weird value not properly managed {}."
-        logger.warning(msg.format(value))
+        msg = "Curve.get_muloffset, weird value not properly managed %s."
+        issue_warning(logger, msg, value)
         return [1, 1]
 
     def updateValuesDictkeys(self, *args, **kwargs):
@@ -332,10 +462,10 @@ class Curve:
     def updateValuesDictkeysGraph(
         self,
         *args,
-        keys: list = None,
+        keys: Optional[list] = None,
         graph=None,
-        also_attr: list = None,
-        also_vals: list = None
+        also_attr: Optional[list] = None,
+        also_vals: Optional[list] = None
     ):
         """Similar as updateValuesDictkeys, for all curves inside a provided graph.
         Implemented as curve method for easier integration into GUI.
@@ -364,7 +494,7 @@ class Curve:
                     kw = dict(kw)
                 except ValueError:
                     msg = "update_plotter_boxplot_addon invalid input, failed ({})."
-                    logger.error(msg.format(kw))
+                    issue_warning(logger, msg.format(kw))
                     return False
             self.update({"boxplot_addon": [fun, kw]})
         return True
@@ -384,18 +514,34 @@ class Curve:
                 'Error in Curve.update_scatter_next_curves: keyword arguments "graph" '
                 'and "graph_i" are mandatory, and graph[graph_i] must be equal to self.'
             )
-            logger.error(msg)
+            issue_warning(logger, msg)
             return False
-        for i in range(len(values)):
+        for i, val in enumerate(values):
             if graph_i + i + 1 < len(graph):
-                graph[graph_i + 1 + i].update({"type": values[i]})
+                graph[graph_i + 1 + i].update({"type": val})
         return True
 
     # *** Methods about data
     def getData(self):
+        """Returns the data as a np.array"""
         return self.data
 
+    def set_data(self, data: np.ndarray):
+        if isinstance(data, np.ndarray):
+            if self.recorder.is_log_active():
+                old = deepcopy(self.data)
+            self.data = data
+            if self.recorder.is_log_active():
+                self.recorder.log(
+                    self, ("set_data", [data], {}), ("set_data", [old], {})
+                )
+        else:
+            msg = "Curve.set_data: data must be ndarray. type %s."
+            logger.error(msg, type(data))
+            raise IncorrectInputError(msg % type(data))
+
     def shape(self, idx=":"):
+        """Returns the shape of the data array, or one of its dimension if idx is 0 or 1"""
         if idx == ":":
             return self.data.shape
         return self.data.shape[idx]
@@ -459,11 +605,13 @@ class Curve:
                         met = getattr(getattr(mod, split[0]), split[1])
                         return met(self, index=index, xyValue=xyValue)
                     except ImportError:
-                        msg = "Curve.x Exception raised during module import {}:"
-                        logger.error(msg.format(module_name), exc_info=True)
+                        msg = "Curve.x Exception raised during module import %s:"
+                        logger.error(msg, module_name, exc_info=True)
+                        raise GrapaError(msg % module_name) from None
                 else:
-                    msg = "Curve.x: cannot identify alter keyword ({})."
-                    logger.error(msg.format(alter))
+                    msg = "Curve.x: cannot identify alter keyword (%s)."
+                    logger.error(msg, alter)
+                    raise IncorrectInputError(msg % alter) from None
 
         # alter might be used by subclasses
         val = self.data if xyValue is None else np.array(xyValue)
@@ -499,7 +647,7 @@ class Curve:
                 return np.abs(self.y(index, xyValue=xyValue) + jsc)
             elif alter == self.ALTER_ABS0:  # "abs0":
                 return np.abs(self.y(index, xyValue=xyValue))
-            elif alter == self.ALTER_TAUC:  # "tauc":
+            elif alter == self.ALTER_TAUC:  # "tauc":  (eV * eqe)**2
                 if errorIfxyMix:
                     raise ValueError
                 return np.power(
@@ -534,12 +682,14 @@ class Curve:
                         met = getattr(getattr(mod, split[0]), split[1])
                         return met(self, index=index, xyValue=xyValue)
                     except ImportError:
-                        msg = "Curve.y Exception raised during module import {}:"
-                        logger.error(msg.format(module_name), exc_info=True)
+                        msg = "Curve.y Exception raised during module import %s:"
+                        logger.error(msg, module_name, exc_info=True)
+                        raise GrapaError(msg % module_name) from None
                 else:
                     if not alter.startswith("idle"):
-                        msg = "Error Curve.y: cannot identify alter keyword ({})."
-                        logger.error(msg.format(alter))  # maybe better to raise ??
+                        msg = "Error Curve.y: cannot identify alter keyword (%s)."
+                        logger.error(msg, alter)
+                        raise IncorrectInputError(msg % alter) from None
         # return (subset of) data
         val = self.data if xyValue is None else np.array(xyValue)
         if len(val.shape) > 1:
@@ -598,28 +748,61 @@ class Curve:
                 series = series / M
         return series
 
-    def setX(self, x, index=np.nan):
+    def setX(self, x, index=None):
         """
         Set new value for the x data.
         Index can be provided (self.data[0,index] = x).
         """
-        if np.isnan(index):
+        if index is None:
+            if self.recorder.is_log_active():
+                old = deepcopy(self.data[0, :])
             self.data[0, :] = x
+            if self.recorder.is_log_active():
+                self.recorder.log(
+                    self, ("setX", [deepcopy(x)], {}), ("setX", [old], {})
+                )
         else:
+            if self.recorder.is_log_active():
+                old = deepcopy(self.data[0, index])
             self.data[0, index] = x
+            if self.recorder.is_log_active():
+                self.recorder.log(
+                    self,
+                    ("setX", [deepcopy(x)], {"index": index}),
+                    ("setX", [old], {"index": index}),
+                )
 
-    def setY(self, y, index=np.nan):
+    def setY(self, y, index=None):
         """
         Set new value for the y data.
         Index can be provided (self.data[1,index] = y).
         """
         if len(self.shape()) > 1:
-            if np.isnan(index):
+            if index is None:
+                if self.recorder.is_log_active():
+                    old = deepcopy(self.data[1, :])
                 self.data[1, :] = y
+                if self.recorder.is_log_active():
+                    ynew = deepcopy(y)
+                    self.recorder.log(self, ("setY", [ynew], {}), ("setY", [old], {}))
             else:
+                if self.recorder.is_log_active():
+                    old = deepcopy(self.data[1, index])
                 self.data[1, index] = y
+                if self.recorder.is_log_active():
+                    ynew = deepcopy(y)
+                    self.recorder.log(
+                        self,
+                        ("setY", [ynew], {"index": index}),
+                        ("setY", [old], {"index": index}),
+                    )
         else:
+            if self.recorder.is_log_active():
+                old = deepcopy(self.data[1])
             self.data[1] = y
+            if self.recorder.is_log_active():
+                ynew = deepcopy(y)
+                self.recorder.log(self, ("setY", [ynew], {}), ("setY", [old], {}))
 
     def appendPoints(self, x_series, y_series) -> bool:
         """Append datapoints.
@@ -630,15 +813,23 @@ class Curve:
         """
         x_series, y_series = np.array(x_series), np.array(y_series)
         if len(x_series) == 0:
-            logger.error("Curve.appendPoints: empty xSeries provided.")
+            issue_warning(logger, "Curve.appendPoints: empty x_series provided.")
             return False
 
         if len(y_series) != len(x_series):
             msg = "Curve.appendPoints: cannot handle series with different lengths."
-            logger.error(msg)
+            issue_warning(logger, msg)
             return False
 
+        if self.recorder.is_log_active():
+            old = deepcopy(self.data)
         self.data = np.append(self.data, np.array([x_series, y_series]), axis=1)
+        if self.recorder.is_log_active():
+            self.recorder.log(
+                self,
+                ("appendPoints", [x_series, y_series], {}),
+                ("set_data", [old], {}),
+            )
         return True
 
     # Function related to Fits
@@ -661,12 +852,15 @@ class Curve:
                 self.setY(func(self.x(), *param))
                 self.update({"_popt": list(self.updateFitParamFormatPopt(f, param))})
                 return True
-            return "ERROR Update fit parameter: No such fit function (", f, ")."
+            return "ERROR Update fit parameter: No such fit function ({}).".format(f)
 
         msg = "ERROR Update fit parameter: Empty parameter (_fitFunc: {}, _popt: {})."
         return msg.format(f, self.attr("_popt"))
 
-    def updateFitParamFormatPopt(self, f, param):
+    def updateFitParamFormatPopt(self, _f, param):
+        """Format the input parameters to be stored in _popt, depending on the fit
+        function f. This is useful when the fit function has some fixed parameters, or
+        when the input needs to be reshaped."""
         # possibility to override in subclasses, esp. when handling of test
         # input is required.
         # by default, assumes all numeric -> best stored in a np.array
@@ -702,8 +896,8 @@ class Curve:
         if type(self).__name__ == new_type_gui:
             return self
         attributes = self.get_attributes()
-        curveTypes = self.castCurveListGUI()
-        for typ_ in curveTypes:
+        curve_types = self.castCurveListGUI()
+        for typ_ in curve_types:
             if new_type_gui == "Curve":
                 return Curve(self.data, attributes=attributes, silent=True)
             if (
@@ -712,13 +906,16 @@ class Curve:
                 or new_type_gui.replace(" ", "") == typ_[1]
             ):
                 if isinstance(self, typ_[2]):
-                    logger.warning("Curve.castCurve: already that type!")
+                    issue_warning(logger, "Curve.castCurve: already that type!")
                 else:
                     return typ_[2](self.data, attributes=attributes, silent=True)
+
                 break
-        msg = "Curve.castCurve: Cannot understand new type: {} (possible types: {})"
-        logger.error(msg.format(new_type_gui, list(curveTypes)))
-        return False
+        msg = "Curve.castCurve: Cannot understand new type: %s (possible types: %s)"
+        msa = (new_type_gui, list(curve_types))
+        logger.error(msg, *msa)
+        raise IncorrectInputError(msg % msa)
+        # return False
 
     # *** Other methods...
     def selectData(self, xlim=None, ylim=None, alter="", offsets=False, data=None):
@@ -757,7 +954,9 @@ class Curve:
                 mask[i] = False
         return x[mask], y[mask]
 
-    def getDataCustomPickerXY(self, idx, alter="", strDescription=False):
+    def getDataCustomPickerXY(
+        self, idx, alter: Union[str, List[str]] = "", strDescription=False
+    ):
         """
         Given an index in the Curve data, returns a modified data which has
         some sense to the user. Can be overridden in child classes, see e.g. CurveCf
@@ -789,7 +988,7 @@ class Curve:
     def print_help(self):
         """Prints help for the Curve subclass, generated from docstrings."""
         print("*** *** ***")
-        print(type(self).__doc__.strip())
+        print(str(type(self).__doc__).strip())
         # List of data transform
         alterlist = self.alterListGUI()
         if len(alterlist) > 0:
@@ -805,9 +1004,9 @@ class Curve:
         if len(self._funclistgui_last) == 0:
             msg = (
                 "ERROR Curve.printHelp. One should execute self._funclistgui_memorize()"
-                "in funcListGUI, or override printHelp to override in subclass {}."
+                "in funcListGUI, or override printHelp to override in subclass %s."
             )
-            raise NotImplementedError(msg.format(type(self)))
+            raise NotImplementedError(msg % type(self))
         if len(self._funclistgui_last) > 0:
             print("\nAnalysis functions:")
         not_document = [self.print_help]
@@ -874,26 +1073,28 @@ class Curve:
         out = Curve([self.x(), 1 / self.y()], self.get_attributes())
         return out.castCurve(self.classNameGUI())
 
-    def swapShowHide(self) -> bool:
+    def swapShowHide(self) -> bool:  # @pylint: disable=C0103
         """. Deprecated. Toogle on/off if Curve is displayed or not.
 
         :meta private:"""
         self.update({"linestyle": "none" if self.visible() else ""})
         return True
 
-    def isHidden(self) -> bool:
+    def isHidden(self) -> bool:  # @pylint: disable=C0103
         """. Deprecated. True if Curve is hidden, False if displayed.
 
         :meta private:"""
         return True if self.attr("linestyle") in Curve.LINESTYLEHIDE else False
 
-    def getAttribute(self, key: str, default=MetadataContainer.VALUE_DEFAULT):
+    def getAttribute(
+        self, key: str, default=MetadataContainer.VALUE_DEFAULT
+    ):  # @pylint: disable=C0103
         """. Deprecated. Legacy getter of attribute
 
         :meta private:"""
         return self.attr(key, default=default)
 
-    def getAttributes(self, keys_list=None) -> dict:
+    def getAttributes(self, keys_list=None) -> dict:  # @pylint: disable=C0103
         """. Deprecated. Use get_attributes instead
 
         :meta private:"""
@@ -957,13 +1158,13 @@ def math_on_curves(
         r = range(0, le)
         if le < len(ca_y()):
             msg = "math_on_curves: Curves not same length, clip to shortest ({}, {})"
-            logger.warning(msg.format(len(ca_y()), len(cb_y())))
+            issue_warning(logger, msg.format(len(ca_y()), len(cb_y())))
         if not np.array_equal(curve_a.x(index=r), curve_b.x(index=r)):
             msg = (
                 "math_on_curves ({}): Curves not same x axis values. Consider "
                 "interpolation (interpolate=1)."
             )
-            logger.warning(msg.format(operator))
+            issue_warning(logger, msg.format(operator))
         datay = MathOperator.operate(curve_a.y(index=r), curve_b.y(index=r), operator)
         out = Curve([curve_a.x(index=r), datay], curve_b.get_attributes())
         return finalize(out, curve_a, offsets)
@@ -980,8 +1181,8 @@ def math_on_curves(
         # interpolate 2: copy x from self, restrict to min&max of other
         xmin, xmax = min(cb_x()), max(cb_x())
     datax = [x for x in datax if xmax >= x >= xmin]
-    reverse = (curve_a.x(index=0) > curve_a.x(index=1)) if len(ca_x()) > 1 else False
-    datax.sort(reverse=reverse)
+    revers_ = (curve_a.x()[0] > curve_a.x()[1]) if len(ca_x()) > 1 else False
+    datax.sort(reverse=revers_)
     f0 = interp1d(ca_x(), ca_y(), kind="linear")
     f1 = interp1d(cb_x(), cb_y(), kind="linear")
     datay = [MathOperator.operate(f0(x), f1(x), operator) for x in datax]

@@ -256,7 +256,7 @@ class Curve_Image(Curve):
         if data.shape[0] < 3:
             print("ERROR Curve Image convert_xyz_matrix: not enough data columns.")
             return False
-        vectorx, vectory, matrix = self.xyz_to_x_y_z(data)
+        _vectorx, _vectory, matrix = self.xyz_to_x_y_z(data)
         out = Graph()
         for x in range(1, matrix.shape[0]):
             out.append(Curve([matrix[0, :], matrix[x, :]], {}))

@@ -6,13 +6,17 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 from copy import deepcopy
-import warnings
+import logging
+
 import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveCV import CurveCV
+from grapa.utils.error_management import issue_warning
+
+logger = logging.getLogger(__name__)
 
 
 class GraphCV(Graph):
@@ -35,13 +39,15 @@ class GraphCV(Graph):
 
     def readDataFromFile(self, attributes, **_kwargs):
         len0 = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes)
         self.castCurve("Curve CV", len0, silentSuccess=True)
         # label based on file name, maybe want to base it on file content
         label = (
             self[len0]
             .attr("label")
             .replace("C-V ", "")
+            .replace("citance[F]", "citance [F]")
+            .replace(" [F]", "")
             .replace(" [nF]", "")
             .replace(" Capacitance", "")
             .replace("T=", "")
@@ -57,9 +63,15 @@ class GraphCV(Graph):
         # set [nF] units
         units = ["V", "nF"]
         self[len0].setY(1e9 * self[len0].y())
+        if np.max(self[len0].y()) > 1e5:
+            msg = (
+                "WARNING: GraphCV, expected raw data in F, performing internal"
+                "conversion into nF. Please check if units are correct (min %s, max %s)"
+            )
+            print(msg % (np.min(self[len0].y()), np.max(self[len0].y())))
         # compute phase angle if required
         nb_add = 0
-        if self.attr("_CVLoadPhase", False) is not False:
+        if "_cvloadphase" in attributes and attributes["_cvloadphase"]:
             f = 1e5  # [Hz]
             C = self[len0].y() * 1e-9  # in [F], not [nF]
             conductance = None
@@ -70,19 +82,13 @@ class GraphCV(Graph):
                     conductance = 1 / self[c].y()
                     break
             if conductance is None:
-                msg = (
-                    "ERROR GraphCV Read"
-                    + self.filename
-                    + "as CurveCf with phase: cannot find R."
-                )
-                print(msg)
-                warnings.warn(msg)
+                msg = "ERROR GraphCV Read %s as CurveCf with phase: cannot find R."
+                issue_warning(logger, msg, self.filename)
             else:
                 phase_angle = np.arctan(f * 2 * np.pi * C / conductance) * 180.0 / np.pi
                 #                phase_angle = np.arctan(C / conductance) * 180. / np.pi
-                self.append(
-                    Curve([self[len0].x(), phase_angle], self[len0].get_attributes())
-                )
+                attr = self[len0].get_attributes()
+                self.append(Curve([self[len0].x(), phase_angle], attr))
                 nb_add += 1
         # delete unneeded Curves
         for c in range(len(self) - 1 - nb_add, len0, -1):

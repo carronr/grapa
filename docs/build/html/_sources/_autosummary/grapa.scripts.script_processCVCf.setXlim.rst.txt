@@ -1,6 +1,0 @@
-grapa.scripts.script\_processCVCf.setXlim
-=========================================
-
-.. currentmodule:: grapa.scripts.script_processCVCf
-
-.. autofunction:: setXlim

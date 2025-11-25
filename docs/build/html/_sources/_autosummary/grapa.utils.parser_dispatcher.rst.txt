@@ -1,0 +1,39 @@
+grapa.utils.parser\_dispatcher
+==============================
+
+.. automodule:: grapa.utils.parser_dispatcher
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      file_read_first3lines
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      FileParserDispatcher
+      ReadAs
+   
+   
+
+   
+   
+   
+
+
+

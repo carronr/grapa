@@ -5,9 +5,14 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics,
 Romain Carron
 """
 
+import logging
 from tkinter import ttk
 import tkinter as tk
 from tkinter import X
+
+from grapa.utils.error_management import issue_warning
+
+logger = logging.getLogger(__name__)
 
 
 def bind_tree(widget, event, callback, add=""):
@@ -24,11 +29,12 @@ class TextWriteable(tk.Text):
     """
 
     def write(self, string):
+        """called by StreamHandler setStream, as this widget is the console"""
         self.insert(tk.END, string)
         self.see(tk.END)
 
     def flush(self):
-        # called by StreamHandler setStream, as this widget is the console
+        """called by StreamHandler setStream, as this widget is the console"""
         self.update_idletasks()
 
 
@@ -51,9 +57,11 @@ class OptionMenuVar(tk.OptionMenu):
             self.configure(width=width)
 
     def get(self):
+        """Returns the current value of the OptionMenuVar."""
         return self.var.get()
 
     def set(self, val, force=False):
+        """Sets the current value of the OptionMenuVar."""
         if val in self.values or force:
             self.var.set(val)
 
@@ -64,11 +72,11 @@ class OptionMenuVar(tk.OptionMenu):
         self.values = values
         if labels is None or len(values) != len(labels):
             if labels is not None and len(labels) != len(values):
-                print("OptionMenuVar resetValues wrong len", values, labels)
+                msg = "OptionMenuVar resetValues wrong len. {}, {}."
+                issue_warning(logger, msg.format(values, labels))
             labels = values
         self["menu"].delete(0, "end")
-        for i in range(len(values)):
-            val, lbl = values[i], labels[i]
+        for val, lbl in zip(values, labels):
             if func is not None:
                 self["menu"].add_command(label=lbl, command=lambda v=val: func(v))
             else:
@@ -91,9 +99,11 @@ class EntryVar(tk.Entry):
         tk.Entry.__init__(self, frame, textvariable=self.var, **kwargs)
 
     def get(self):
+        """Returns the current value of the EntryVar."""
         return self.var.get()
 
     def set(self, val):
+        """Sets the current value of the EntryVar."""
         self.var.set(val)
 
 
@@ -106,9 +116,11 @@ class LabelVar(tk.Label):
         tk.Label.__init__(self, frame, textvariable=self.var, **kwargs)
 
     def get(self):
+        """Returns the current value of the LabelVar."""
         return self.var.get()
 
     def set(self, val):
+        """Sets the current value of the LabelVar."""
         self.var.set(val)
 
 
@@ -124,12 +136,15 @@ class ComboboxVar(ttk.Combobox):
         )
 
     def get(self):
+        """Returns the current value of the ComboboxVar."""
         return self.var.get()
 
     def set(self, val):
+        """Sets the current value of the ComboboxVar."""
         self.var.set(val)
 
     def reset_values(self, values):
+        """Resets the possible values of the ComboboxVar."""
         self["values"] = values
 
 
@@ -142,9 +157,11 @@ class CheckbuttonVar(tk.Checkbutton):
         tk.Checkbutton.__init__(self, frame, text=text, variable=self.var, **kwargs)
 
     def get(self):
+        """Returns the current value of the CheckbuttonVar."""
         return self.var.get()
 
     def set(self, value):
+        """Sets the current value of the CheckbuttonVar."""
         self.var.set(value)
 
 
@@ -159,15 +176,19 @@ class ButtonSmall(tk.Frame):
 
 
 class ButtonVar(tk.Button):
+    """replacement for tk.Button, with embedded tk.Stringvar for the text"""
+
     def __init__(self, frame, text, command, **kwargs):
         self.var = tk.StringVar()
         super().__init__(frame, textvariable=self.var, command=command, **kwargs)
         self.var.set(text)
 
     def get(self):
+        """Returns the current value of the ButtonVar."""
         return self.var.get()
 
     def set(self, text):
+        """Sets the current value of the ButtonVar."""
         return self.var.set(text)
 
 
@@ -199,7 +220,7 @@ class FrameScrollable(tk.Frame):
         # assign ref to be able to uncind if necessary
         self._upd_idle = self.child.bind("<Configure>", self.update_idletasks)
 
-    def update_idletasks(self, event=None):
+    def update_idletasks(self, _event=None):
         """
         Updates the child Frame and resizes the canvas accordingly.
         Normally handled by event self.child <Configure>
@@ -210,12 +231,16 @@ class FrameScrollable(tk.Frame):
         self.canvas.config(width=w, height=h)
 
     def on_configure(self, _event):
+        """Called when the child frame is configured.
+        Updates the scrollregion of the canvas."""
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     def scrolly(self, *args):
+        """Scroll vertically the canvas."""
         self.canvas.yview(*args)
 
     def on_mousewheel(self, event):
+        """Scroll vertically the canvas with the mouse wheel."""
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
 
@@ -232,6 +257,9 @@ class FrameTitleContentHide(tk.Frame):
     # FrameTitleContentHide without buttons and make other versions derive
     # from it
 
+    BUTTON_LABEL_IN = "\u25b3"
+    BUTTON_LABEL_OUT = "\u25bc"
+
     def __init__(
         self,
         master,
@@ -246,66 +274,70 @@ class FrameTitleContentHide(tk.Frame):
         **kwargs
     ):
         tk.Frame.__init__(self, master, **kwargs)
-        self.setButtonLabels()
         self._visiblecontent = True
-        self.showHideTitle = showHideTitle
+        self.show_hide_title = showHideTitle
         self._layout = layout
         self._contentkwargs = contentkwargs
-        self.createButtons = createButtons
-        self.horizLineFrame = horizLineFrame
+        self.if_create_buttons = createButtons
+        self.if_horizlineframe = horizLineFrame
+        self._horizlineframe: tk.Frame  # namespace placeholder
         # define elements inside
-        self._title = None
-        self.createWidgets()
+        self._title: tk.Frame  # namespace placeholder
+        self._buttonframe: tk.Frame  # namespace placeholder
+        self.create_widgets()
         # fill title and content
-        if self.createButtons:
+        if self.if_create_buttons:
             if funcFillTitle is not None and self._title is not None:
                 funcFillTitle(self._title)
             if funcFillContent is not None:
                 funcFillContent(self._content)
         if self._title is not None:
-            bind_tree(self._title, "<Button-1>", self.showHide)
+            bind_tree(self._title, "<Button-1>", self.show_hide)
         if default == "hide":
-            self.showHide()
+            self.show_hide()
 
     @classmethod
-    def frameHline(cls, frame):
+    def frame_hline(cls, frame):
+        """Create a horizontal line frame"""
         return tk.Frame(frame, height=3, background="gainsboro")
 
-    def setButtonLabels(self):
-        self.btnlbl_in = "\u25B3"
-        self.btnlbl_out = "\u25BC"
-
-    def createButton(self, frame, symbol="auto", size=None):
+    def cw_button_sized(self, frame, symbol="auto", size="auto"):
         """
-        size: None: return Button. 'auto': [20, 20]. Or size [x, y]
+        size: None:
+        auto: [20, 20]. Or size [x, y]
+        return Button.
         """
-        if symbol == "auto":
-            symbol = self.btnlbl_in
         if size == "auto":
             size = [20, 20]
-        if size is None:
-            return tk.Button(frame, text=symbol, command=self.showHide)
-        else:
-            fr = tk.Frame(frame, width=size[0], height=size[1])
-            fr.propagate(False)
-            btn = tk.Button(fr, text=symbol, command=self.showHide)
-            btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=1)
-            return fr, btn
+        fr = tk.Frame(frame, width=size[0], height=size[1])
+        fr.propagate(False)
+        btn = self.cw_button_only(fr, symbol)
+        btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=1)
+        return fr, btn
 
-    def createWidgets(self):
-        side, anchor, fill = self.sideAnchorFill()
+    def cw_button_only(self, frame, symbol):
+        """Create only the button."""
+        if symbol == "auto":
+            symbol = self.BUTTON_LABEL_IN
+        return tk.Button(frame, text=symbol, command=self.show_hide)
+
+    def create_widgets(self):
+        """Create the internal widgets."""
+        side, anchor, fill = self._side_anchor_fill()
         self._up = tk.Frame(self)
         dwn = tk.Frame(self)
         self._up.pack(side="top", anchor="w", fill=X)
         dwn.pack(side="top", anchor="w", fill=X)
         self._title = tk.Frame(self._up)
         self._title.pack(side=side, anchor=anchor, fill=fill)
-        if self.createButtons:
-            self._buttonFrame, self._button = self.createButton(self._up, size="auto")
-            self._buttonFrame.pack(side="left", anchor="center", padx=5)
-        if self.horizLineFrame:
-            self._horizLineFrame = self.frameHline(self._up)
-            self._horizLineFrame.pack(
+        if self.if_create_buttons:
+            self._buttonframe, self._button = self.cw_button_sized(
+                self._up, size="auto"
+            )
+            self._buttonframe.pack(side="left", anchor="center", padx=5)
+        if self.if_horizlineframe:
+            self._horizlineframe = self.frame_hline(self._up)
+            self._horizlineframe.pack(
                 side="left", anchor="center", fill=X, expand=1, padx=5
             )
         self._content = tk.Frame(dwn, **self._contentkwargs)
@@ -314,55 +346,62 @@ class FrameTitleContentHide(tk.Frame):
         self._dummy.pack(side=side, anchor=anchor, fill=fill)
 
     def get_frame_title(self):
+        """Returns the title frame."""
         return self._title
 
     def get_frame_content(self):
+        """Returns the content frame."""
         return self._content
 
-    def getButton(self):
+    def get_button(self):
+        """Returns the show/hide button."""
         return self._button
 
-    def isvisible(self):
+    def is_visible(self):
+        """Returns True if the content is visible, False otherwise."""
         return self._visiblecontent
 
-    def sideAnchorFill(self):
+    def _side_anchor_fill(self):
         side = "left" if self._layout == "horizontal" else "top"
         anchor = "center" if self._layout == "horizontal" else "w"
         fill = tk.X if self._layout == "horizontal" else tk.Y
         return side, anchor, fill
 
-    def showHide(self, *_args):
-        side, anchor, fill = self.sideAnchorFill()
+    def show_hide(self, *_args):
+        """Show or hide the content frame."""
+        side, anchor, fill = self._side_anchor_fill()
         if self._visiblecontent:
-            if self.showHideTitle:
+            if self.show_hide_title:
                 self._title.pack(side=side, anchor=anchor, fill=fill)
-                if not self.createButtons and not self.horizLineFrame:
+                if not self.if_create_buttons and not self.if_horizlineframe:
                     self._up.pack(side=side, anchor=anchor, fill=fill)
             self._content.pack_forget()
-            if self.createButtons:
-                self._button.configure({"text": self.btnlbl_out})
+            if self.if_create_buttons:
+                self._button.configure({"text": self.BUTTON_LABEL_OUT})
         else:
             self._content.pack(side=side, anchor=anchor, fill=fill)
-            if self.showHideTitle:
+            if self.show_hide_title:
                 self._title.pack_forget()
-                if not self.createButtons and not self.horizLineFrame:
+                if not self.if_create_buttons and not self.if_horizlineframe:
                     self._up.pack_forget()
-            if self.createButtons:
-                self._button.configure({"text": self.btnlbl_in})
+            if self.if_create_buttons:
+                self._button.configure({"text": self.BUTTON_LABEL_IN})
         self._visiblecontent = not self._visiblecontent
 
 
 class FrameTitleContentHideHorizontal(FrameTitleContentHide):
-    def setButtonLabels(self):
-        self.btnlbl_in = "\u25C1"
-        self.btnlbl_out = "\u25B6"
+    """Frame with title and content area that can be shown/hidden horizontally."""
 
-    def createWidgets(self):
-        if self.createButtons:
+    BUTTON_LABEL_IN = "\u25c1"
+    BUTTON_LABEL_OUT = "\u25b6"
+
+    def create_widgets(self):
+        """Create the internal widgets."""
+        if self.if_create_buttons:
             left = tk.Frame(self, width=30)  # height=60,
             left.pack(side="left", anchor="w")
-            self._buttonFrame, self._button = self.createButton(left, size="auto")
-            self._buttonFrame.pack(side="left", anchor="center", padx=5)
+            self._buttonframe, self._button = self.cw_button_sized(left, size="auto")
+            self._buttonframe.pack(side="left", anchor="center", padx=5)
             # left.propagate(0)  # to reserve space also when hidden
         righ = tk.Frame(self)
         righ.pack(side="left", anchor="w", fill=X)

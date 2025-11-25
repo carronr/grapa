@@ -167,8 +167,8 @@ def script_processJscVoc(
     grap2.update(presets["VocvsT"])
     grap2.curve_delete(-1)  # previous fit
     grap2.curve_delete(-1)  # ln(Jo) vs A*T
-    curve = grap2.curve(0)
-    Tlim = [0.99 * np.min(graph.curve(1).y()), 1.01 * np.max(graph.curve(1).y())]
+    curve = grap2[0]
+    Tlim = [0.99 * np.min(graph[1].y()), 1.01 * np.max(graph[1].y())]
     Tlim[0] = max(Tlim[0], Tlim[1] - 80)  # restrict fit to highest 100K
     if ROITlim is not None:
         if isinstance(ROITlim, list):
@@ -188,8 +188,8 @@ def script_processJscVoc(
     if pltClose:
         plt.close()
 
-    graph.curve(-1).visible(False)
-    graph.curve(-3).visible(False)
+    graph[-1].visible(False)
+    graph[-3].visible(False)
     print(
         "WARNING: fits limits are chosen automatically. It is YOUR",
         "responsibility to check for the goodness of fit, and manually",

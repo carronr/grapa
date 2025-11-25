@@ -1,0 +1,45 @@
+grapa.utils.command\_recorder.CommandRecorderBase
+=================================================
+
+.. currentmodule:: grapa.utils.command_recorder
+
+.. autoclass:: CommandRecorderBase
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CommandRecorderBase.__init__
+       ~CommandRecorderBase.caller_description
+       ~CommandRecorderBase.caller_reference
+       ~CommandRecorderBase.delete_oldest_transaction
+       ~CommandRecorderBase.is_log_active
+       ~CommandRecorderBase.last_command
+       ~CommandRecorderBase.log
+       ~CommandRecorderBase.log_special
+       ~CommandRecorderBase.redo_next_transaction
+       ~CommandRecorderBase.redo_once
+       ~CommandRecorderBase.tag_as_end_transaction
+       ~CommandRecorderBase.transactions_length
+       ~CommandRecorderBase.undo_last_transaction
+       ~CommandRecorderBase.undo_once
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CommandRecorderBase.COMMAND_NULL
+      ~CommandRecorderBase.MAX_N_TRANSACTIONS
+   
+   

@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.utils.command_recorder.CommandRecorderGraph &mdash; grapa 0.7.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.utils.command_recorder.SuspendCommandRecorder" href="grapa.utils.command_recorder.SuspendCommandRecorder.html" />
+    <link rel="prev" title="grapa.utils.command_recorder.CommandRecorderBase" href="grapa.utils.command_recorder.CommandRecorderBase.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.command_recorder.html">grapa.utils.command_recorder</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.command_recorder.Action.html">grapa.utils.command_recorder.Action</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.command_recorder.Command.html">grapa.utils.command_recorder.Command</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.command_recorder.CommandRecorderBase.html">grapa.utils.command_recorder.CommandRecorderBase</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.utils.command_recorder.CommandRecorderGraph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.utils.command_recorder.SuspendCommandRecorder.html">grapa.utils.command_recorder.SuspendCommandRecorder</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_curves.html">grapa.utils.container_curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_metadata.html">grapa.utils.container_metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.error_management.html">grapa.utils.error_management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.export.html">grapa.utils.export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_database.html">grapa.utils.parser_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_dispatcher.html">grapa.utils.parser_dispatcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_generic.html">grapa.utils.parser_generic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph_aux.html">grapa.utils.plot_graph_aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.string_manipulations.html">grapa.utils.string_manipulations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.utils.html">grapa.utils</a></li>
+          <li class="breadcrumb-item"><a href="grapa.utils.command_recorder.html">grapa.utils.command_recorder</a></li>
+      <li class="breadcrumb-item active">grapa.utils.command_recorder.CommandRecorderGraph</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.utils.command_recorder.CommandRecorderGraph.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-utils-command-recorder-commandrecordergraph">
+<h1>grapa.utils.command_recorder.CommandRecorderGraph<a class="headerlink" href="#grapa-utils-command-recorder-commandrecordergraph" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.utils.command_recorder.CommandRecorderGraph">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.utils.command_recorder.</span></span><span class="sig-name descname"><span class="pre">CommandRecorderGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.command_recorder.CommandRecorderGraph" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="grapa.utils.command_recorder.CommandRecorderBase.html#grapa.utils.command_recorder.CommandRecorderBase" title="grapa.utils.command_recorder.CommandRecorderBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommandRecorderBase</span></code></a></p>
+<p>Decouple: CommandRecorderBase takes care of the logic, and
+implementation details specific to grapa in CommandRecorderGraph e.g. how to
+retrieve caller from description, and how to dscribe caller</p>
+<p>The Curves must be part of the Graph on which the CommandRecorder was defined.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.command_recorder.CommandRecorderGraph.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.command_recorder.CommandRecorderGraph.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.command_recorder.CommandRecorderGraph.__init__" title="grapa.utils.command_recorder.CommandRecorderGraph.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(graph[, log_active])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.command_recorder.CommandRecorderGraph.caller_description" title="grapa.utils.command_recorder.CommandRecorderGraph.caller_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">caller_description</span></code></a>(reference)</p></td>
+<td><p>Opposite of caller_reference</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.command_recorder.CommandRecorderGraph.caller_reference" title="grapa.utils.command_recorder.CommandRecorderGraph.caller_reference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">caller_reference</span></code></a>(description)</p></td>
+<td><p>Return the object on which the actions will be performed.xx E.g.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.command_recorder.CommandRecorderGraph.caller_description">
+<span class="sig-name descname"><span class="pre">caller_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="grapa.utils.command_recorder.Action.html#grapa.utils.command_recorder.Action" title="grapa.utils.command_recorder.Action"><span class="pre">Action</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#grapa.utils.command_recorder.CommandRecorderGraph.caller_description" title="Link to this definition"></a></dt>
+<dd><p>Opposite of caller_reference</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.command_recorder.CommandRecorderGraph.caller_reference">
+<span class="sig-name descname"><span class="pre">caller_reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="grapa.utils.command_recorder.Action.html#grapa.utils.command_recorder.Action" title="grapa.utils.command_recorder.Action"><span class="pre">Action</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.command_recorder.CommandRecorderGraph.caller_reference" title="Link to this definition"></a></dt>
+<dd><p>Return the object on which the actions will be performed.xx
+E.g. graph, graph.headers, graph.graphinfo, graph.curve(c), graph.curve(c).data
+Opposite of caller_reference
+Search by whitelist, not aggressive search.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.utils.command_recorder.CommandRecorderBase.html" class="btn btn-neutral float-left" title="grapa.utils.command_recorder.CommandRecorderBase" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.utils.command_recorder.SuspendCommandRecorder.html" class="btn btn-neutral float-right" title="grapa.utils.command_recorder.SuspendCommandRecorder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

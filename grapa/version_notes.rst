@@ -1,6 +1,6 @@
 GRAPA: GRAphing and Photovoltaics Analysis
 ===========================================
-Empa TFPV data reading software
+Empa TFPV data reading and processing software
 
 ** KNOWN BUGS **
 
@@ -11,9 +11,29 @@ Empa TFPV data reading software
 
 
 
+** Version 0.7.1.0
+
+Release 25.11.2025
+
+New
+- GUI functionality: Undo, and Redo. Keyboard shortcuts Ctrl+Z, Ctrl+Y
+- Added confirmation box when closing a graph that has been modified
+- CurveJV: added data transform "Differential ideality" (factor)
+Modifications
+- GraphSIMS: widened acceptance test to accept parsing the file as SIMS data.
+- GraphSIMS: added ratio elements and coefficients when computing curve ratios.
+- Boxplot: can now directly specify patch_artist=True directly in th GUI, to color the inside of the box.
+- Script boxplot: improve handling of metadata in input files. Can now specify e.g. boxplot_position\t1 directly in the input file.
+- Script JV: can now process a folder where one .txt file is present, containing only CurveJV curves and at least 2 of them. Also, tidy up a bit the code, more work would be needed.
+- Improvements to error logging.
+- Various corrections of small bugs and code improvement.
+
+
+
+
 ** Version 0.7.0.1
 
-ONGOING
+Release 11.06.2025
 
 * Additions *
 

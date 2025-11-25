@@ -7,17 +7,20 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain
 Carron
 """
 
+import os
 from re import findall as refindall
 from copy import deepcopy
 import numpy as np
 
 from grapa.mathModule import is_number
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.curve import Curve
 
 
 class GraphCf(Graph):
+    """Opens files containing C-f data"""
+
     FILEIO_GRAPHTYPE = "C-f curve"
 
     AXISLABELS = [["Frequency", "f", "Hz"], ["Capacitance", "C", "nF"]]
@@ -25,6 +28,7 @@ class GraphCf(Graph):
 
     @classmethod
     def isFileReadable(cls, filename, fileext, line1="", **_kwargs):
+        """Decides if the file can be opened by this module"""
         line1filtered = line1.encode("ascii", errors="ignore").decode()
         if (
             fileext == ".txt"
@@ -40,7 +44,7 @@ class GraphCf(Graph):
             - _CfLoadPhase: also load the phase, in degrees
         """
         len0 = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes)
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes)
         self.castCurve("Curve Cf", len0, silentSuccess=True)
         # label based on file name, maybe want to base it on file content
         lbl = (
@@ -61,13 +65,13 @@ class GraphCf(Graph):
             }
         )  # standardization within grapa
         # retrieve units, change label
-        colName = self[len0].attr("frequency [Hz]", -1)  # retrieve actual unit
+        col_name = self[len0].attr("frequency [Hz]", -1)  # retrieve actual unit
         ylabel = GraphCf.AXISLABELS
-        convertToF = 1e-9
-        if isinstance(colName, str):
+        convert_to_f = 1e-9
+        if isinstance(col_name, str):
             # retrieve yaxis information in file, interpret it
             ylabel = (
-                colName.replace("C ", "Capacitance ")
+                col_name.replace("C ", "Capacitance ")
                 .replace("Cp ", "Capacitance ")
                 .replace("(", "[")
                 .replace(")", "]")
@@ -82,9 +86,9 @@ class GraphCf(Graph):
                     "further with phase and Nyquist..."
                 )
                 print(msg.format(f[0][1]))
-                convertToF = None
+                convert_to_f = None
         # identify Rp curve
-        idxRp = None
+        idx_rp = None
         for c in range(len0, len(self)):  # retrieve resistance curve
             lbl = self[c].attr("frequency [Hz]", None)  # retrieve actual unit
             if lbl is None:
@@ -95,7 +99,7 @@ class GraphCf(Graph):
                 or lbl.endswith("Rp")
                 or lbl in ["Rp [Ohm]", "Parameter2"]
             ):
-                idxRp = c
+                idx_rp = c
                 break
         # normalize with area C, R
         area = self[len0].attr("cell area (cm2)", None)
@@ -105,8 +109,8 @@ class GraphCf(Graph):
             area = self[len0].attr("area", None)
         if area is not None:
             self[len0].setY(self[len0].y() / area)
-            if idxRp is not None:
-                self[idxRp].setY(self[idxRp].y() * area)
+            if idx_rp is not None:
+                self[idx_rp].setY(self[idx_rp].y() * area)
             self[len0].update({"cell area (cm2)": area})
             if not self.silent:
                 print("Capacitance normalized to area", self[len0].getArea(), "cm2.")
@@ -116,23 +120,25 @@ class GraphCf(Graph):
         if self.attr("_CfLoadPhase", False) is not False:
             f = self[len0].x()
             # C input assumed to be [nF], need [F] for calculation
-            C = self[len0].y() * convertToF
-            if idxRp is None:
+            capa = self[len0].y() * convert_to_f
+            if idx_rp is None:
                 msg = (
                     "Warning GraphCf read file {}: cannot find R. Cannot compute phase."
                 )
                 print(msg.format(self.filename))
             else:
-                conductance = 1 / self[idxRp].y()
-                phase_angle = np.arctan(f * 2 * np.pi * C / conductance) * 180.0 / np.pi
+                conductance = 1 / self[idx_rp].y()
+                phase_angle = (
+                    np.arctan(f * 2 * np.pi * capa / conductance) * 180.0 / np.pi
+                )
                 self.append(
                     Curve([f, phase_angle], deepcopy(self[len0].get_attributes()))
                 )
                 self[-1].update({"_CfPhase": True})
                 nb_add += 1
 
-        if self.attr("_CfLoadNyquist", False) is not False:
-            if idxRp is None:
+        if self.attr("_CfLoadNyquist", False) not in [False]:
+            if idx_rp is None:
                 msg = (
                     "ERROR GraphCf read file {}: cannot find Rp. Cannot compute "
                     "Nyquist plot."
@@ -140,12 +146,12 @@ class GraphCf(Graph):
                 print(msg.format(self.filename))
             else:
                 # C input assumed to be [nF], need [F] for calculation
-                C = self[len0].y() * convertToF
+                capa = self[len0].y() * convert_to_f
                 omega = self[len0].x() * 2 * np.pi
-                Rp = self[idxRp].y()
-                Z = 1 / (1 / Rp + 1j * omega * C)
+                rp = self[idx_rp].y()
+                z = 1 / (1 / rp + 1j * omega * capa)
                 self.append(
-                    Curve([Z.real, -Z.imag], deepcopy(self[len0].get_attributes()))
+                    Curve([z.real, -z.imag], deepcopy(self[len0].get_attributes()))
                 )
                 self[-1].update({"_CfNyquist": True})
                 nb_add += 1
@@ -156,10 +162,8 @@ class GraphCf(Graph):
             def guessed(value):
                 if 5 < value < 1000:
                     # plausibility check for guessed temperature
-                    import os
-
                     _msg = "File {} temperature guessed {}"
-                    print(_msg.format(os.path.basename(self.filename), value))
+                    print(_msg.format(os.path.basename(str(self.filename)), value))
                     self[len0].update({"temperature": value})
                     return True
                 return False

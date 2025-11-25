@@ -210,7 +210,7 @@ class GraphXML(Graph):
 
         # loop over children - modify child tags to prevent duplicates
         children, childtags, duplicates = [], [], {}
-        for idx, child in enumerate(element, 1):
+        for _idx, child in enumerate(element, 1):
             children.append(child)
             childtag = child.tag
             if childtag not in childtags:
@@ -309,7 +309,7 @@ class GraphXML(Graph):
         return output
 
     @classmethod
-    def split_format_datasets(cls, datainput, filename, preset=None):
+    def split_format_datasets(cls, datainput, filename, preset):
         """retrieve data from within metadata
         Splits content according to possibly several datasets.
         Datasets consist in metadata, and 2 1-D vectors of data: datax, datay

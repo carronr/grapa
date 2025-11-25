@@ -15,14 +15,22 @@ grapa.scripts.script\_processCVCf
       :toctree:
    
       execute_standalone
-      maskUndesiredLegends
+      mask_undesired_legends
       script_processCV
       script_processCf
-      setXlim
    
    
 
    
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      LegendChoice
+      UtilsCv
    
    
 

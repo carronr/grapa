@@ -7,7 +7,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 
-__version__ = "0.7.0.1"
+__version__ = "0.7.1.0"
 __author__ = "Romain Carron"
 
 import os
@@ -16,7 +16,7 @@ import json
 import logging
 
 logger = logging.getLogger(__name__)
-_logfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "grapalog.log")
+_logfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log_grapa.log")
 logging.basicConfig(
     filename=_logfile,
     level=logging.WARNING,

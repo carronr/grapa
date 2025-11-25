@@ -9,6 +9,8 @@ import os
 import copy
 import warnings
 import logging
+from typing import TYPE_CHECKING
+import textwrap
 import tkinter as tk
 from tkinter import ttk
 from tkinter.colorchooser import askcolor
@@ -19,6 +21,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import hex2color, rgb2hex
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.units import ConversionError
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 
 try:
@@ -35,9 +40,11 @@ from grapa.mathModule import roundSignificant, is_number
 from grapa.colorscale import Colorscale, PhotoImageColorscale, colorscales_from_config
 
 from grapa.utils.funcgui import FuncGUI, AlterListItem
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.utils.plot_graph import image_to_clipboard
 from grapa.utils.string_manipulations import strToVar, varToStr, listToString
+from grapa.utils.error_management import GrapaWarning, GrapaError, issue_warning
+from grapa.utils.command_recorder import CommandRecorderGraph
 
 from grapa.datatypes.curveCV import CurveCV
 from grapa.datatypes.curveJscVoc import CurveJscVoc
@@ -55,7 +62,7 @@ from grapa.gui.widgets_custom import (
     LabelVar,
     ButtonVar,
 )
-from grapa.gui.widgets_graphmanager import GraphsTabManager
+from grapa.gui.widgets_graphmanager import GraphsTabManager, userconfirm_close_notsaved
 from grapa.gui.GUIdataEditor import GuiDataEditor
 from grapa.gui.GUITexts import GuiManagerAnnotations
 from grapa.gui.interface_openbis import GrapaOpenbis
@@ -67,6 +74,8 @@ from grapa.scripts.script_processCVCf import script_processCf, script_processCV
 from grapa.scripts.script_processJV import processSampleCellsMap, processJVfolder
 from grapa.scripts.script_processJscVoc import script_processJscVoc
 
+if TYPE_CHECKING:
+    from grapa.GUI import Application
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +87,7 @@ class GUIFrameCanvasGraph:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         # store a list of custom canvas event, to easily remove them
@@ -86,9 +95,10 @@ class GUIFrameCanvasGraph:
         # mechanism to fire events only when mouse is pressed
         self._mouse_pressed = False
         self.callback_notifycanvas_registered = []
-        self.tabs = None  # will be created later, here to reserve the name
-        self.fig, self.ax = None, None
-        self.canvas: FigureCanvasTkAgg = None
+        self.tabs: GraphsTabManager  # = None  # namespace placeholder
+        self.fig: Figure  # = None  # namespace placeholder
+        self.ax: Axes  # = None  # namespace placeholder
+        self.canvas: FigureCanvasTkAgg  # = None  # namespace placeholder
         self._create_widgets(self.frame)
         self.app.master.bind("<Control-w>", lambda e: self.close_tab())
         self.canvas.get_tk_widget().bind("<MouseWheel>", self.on_mousewheel)
@@ -99,27 +109,38 @@ class GUIFrameCanvasGraph:
             warnings.filterwarnings("ignore", message="Attempt to set non-positive")
             self.fig.clear()
             self.canvas.draw()
-        # background color
+
         self.set_canvas_background()
-        # screen DPI: to update before the update_ui() call
-        self.fig.set_dpi(self.app.get_tab_properties()["dpi"])
-        fig, ax = Graph.plot(self.app.graph(), fig_ax=[self.fig, None])
+        self.fig.set_dpi(self.app.get_tab_properties()["dpi"])  # before update_ui
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", GrapaWarning)
+                fig, ax = Graph.plot(self.app.graph(), fig_ax=[self.fig, None])
+        except GrapaError as e:
+            fig, ax = [self.fig, None]
+            if e.report_in_gui:
+                msg = "Exception during plotting of Graph: %s, %s."
+                logger.error(msg, type(e), e)
+            else:
+                pass  # already handled at lower level: logger w/ print to user
+        # only GrapaErrors will be cought her, not ValueError etc.
+
         while isinstance(ax, (list, np.ndarray)) and len(ax) > 0:
             ax = ax[-1]
         self.fig, self.ax = fig, ax
-        # draw canvas
+        if hasattr(self.canvas, "show"):
+            self.canvas.show()  # deprecated in recent version of matplotlib
         try:
-            self.canvas.show()
-        except AttributeError:
-            # FigureCanvasTkAgg has no attribute show in later versions of matplotlib
-            pass
-        self.canvas.draw()
+            self.canvas.draw()  # this may cause exception in e.g annotation xytext 'ab'
+        except (ValueError, ConversionError) as e:
+            msg = "ValueError during canvas.draw(): %s, %s."
+            issue_warning(logger, msg, type(e), e)
 
     def get_canvas(self):
         """Returns the canvas"""
         return self.canvas
 
-    def get_tabs(self):
+    def get_tabs(self) -> GraphsTabManager:
         """Returns the tabs element"""
         return self.tabs
 
@@ -185,17 +206,17 @@ class GUIFrameCanvasGraph:
             self.canvas.get_tk_widget().configure(background=color)
         except TclError:
             msg = (
-                "set_canvas_background: illegal color name ({}). Please use either"
+                "set_canvas_background: illegal color name (%s). Please use either"
                 "tkinter color names, or RGB as #90ee90."
             )
-            logger.error(msg.format(color), exc_info=True)
+            logger.error(msg, color)
             self.canvas.get_tk_widget().configure(background="white")
 
     def update_upon_resize_window(self, *_args):
         """Updates the frame including the canvas, but only when main app is ready"""
         if self.app.initiated:
             # print('updateUponResizeWindow args', _args)
-            self.app.frame_central.update_ui()  # only central part of UI
+            self.app.frames["central"].update_ui()  # only central part of UI
 
     def enable_canvas_callbacks(self):
         """restore suitable list of canvas callbacks, for datapicker"""
@@ -233,7 +254,8 @@ class GUIFrameCanvasGraph:
 
     def close_tab(self):
         """Closes current tab"""
-        self.tabs.pop()
+        if userconfirm_close_notsaved(self.app.graph()):
+            self.tabs.pop()
 
     def on_mousewheel(self, event) -> None:
         """
@@ -269,7 +291,7 @@ class GUIFrameCanvasGraph:
         def adaptlim(lim, scale, reverse=False):
             if scale in ["log"]:
                 return np.log(lim) if not reverse else np.exp(lim)
-            return lim
+            return tuple(lim)
 
         xscale = ax.get_xscale()
         yscale = ax.get_yscale()
@@ -293,7 +315,7 @@ class GUIFrameCentralOptions:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, canvas, **kwargs):
+    def __init__(self, master, application: "Application", canvas, **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self.toolbar = None  # here to reserve the name, will be created later
@@ -518,7 +540,6 @@ class GUIFrameCentralOptions:
     def set_screendpi_bgcolor_from_entry(self):
         """Updates both screen DPI and background color"""
         self.app.store_selected_curves()  # before modifications, to prepare update_ui
-        self.set_bgcolor_from_entry(update_ui=False)
         self.set_screendpi_from_entry(update_ui=False)
         if self.app.initiated:
             self.app.update_ui()
@@ -598,7 +619,7 @@ class GUIFrameDataPicker:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self.var_idx = np.nan  # datapoint index on curve
@@ -709,7 +730,7 @@ class GUIFrameDataPicker:
             # if datapicker was restricted to existing data point
             graph = self.app.graph()
             c = self._widgets["curve"].get()
-            print("get_x_y_attrupd c", type(c), c)
+            # print("get_x_y_attrupd c", type(c), c)
             if c >= 0:
                 idx = self.var_idx
                 alter = graph.get_alter()
@@ -752,7 +773,7 @@ class GUIFrameDataPicker:
         if len(c) == 0:
             # must create datapicker Curve
             curve = Curve(np.array([[x], [y]]), attr)
-            if curve.attr("Curve", None) is not None:
+            if curve.has_attr("Curve"):
                 casted = curve.castCurve(curve.attr("Curve"))
                 if casted is not False:
                     curve = casted
@@ -769,10 +790,16 @@ class GUIFrameDataPicker:
         """
         # first, delete existing crosshair
         if self.crosshairx is not None:
-            self.crosshairx.remove()
+            try:
+                self.crosshairx.remove()
+            except NotImplementedError:
+                print("Could not remove crosshairx, notImplementedError")
             self.crosshairx = None
         if self.crosshairy is not None:
-            self.crosshairy.remove()
+            try:
+                self.crosshairy.remove()
+            except NotImplementedError:
+                print("Could not remove crosshairy, notImplementedError")
             self.crosshairy = None
         # then makes new ones
         if self._widgets["crosshair"].get():
@@ -830,7 +857,7 @@ class GUIFrameCentral:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self._widgets = {}
@@ -845,7 +872,7 @@ class GUIFrameCentral:
         self._widgets["frameOptions"].update_ui()
         self._widgets["frameDataPicker"].update_ui()
 
-    def get_frame_graph(self):
+    def get_frame_graph(self) -> GUIFrameCanvasGraph:
         """Returns: Frame frameGraph"""
         return self._widgets["frameGraph"]
 
@@ -881,7 +908,7 @@ class GUIFrameConsole:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self._consoleheight_roll = [8, 20, 0]
         self._consoleheight = self._consoleheight_roll[0]
 
@@ -923,10 +950,10 @@ class GUIFrameConsole:
         # button, horizontal line
         fr = tk.Frame(frame, width=20, height=20)
         fr.propagate(False)
-        btn = tk.Button(fr, text="\u21F3")
+        btn = tk.Button(fr, text="\u21f3")
         btn.pack(side="left", anchor="n", fill=tk.BOTH, expand=1)
         fr.pack(side="left", anchor="center")
-        line = FrameTitleContentHide.frameHline(frame)
+        line = FrameTitleContentHide.frame_hline(frame)
         line.pack(side="left", anchor="center", fill=tk.X, expand=1, padx=5)
         bind_tree(frame, "<Button-1>", self._change_text_height)
 
@@ -974,10 +1001,10 @@ class GUIFrameMenuMain:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.showhide = None  # defined later, here reserve the variable
+        self.showhide: FrameTitleContentHide  # reserve namespace variable
         self._widgets = {}
         self._create_widgets(self.frame)
         self._bind_keystrokes()
@@ -997,6 +1024,38 @@ class GUIFrameMenuMain:
         # self.master.bind('<Control-v>', lambda e: self.openClipboard())
         frame.bind("<Control-Shift-V>", lambda e: self.merge_clipboard())
         frame.bind("<Control-Shift-N>", lambda e: self.insert_curve_empty())
+        frame.bind("<Control-z>", lambda e: self.graph_undo())
+        frame.bind("<Control-y>", lambda e: self.graph_redo())
+
+    def update_ui(self):
+        """Update the GUI elements"""
+        recorder: CommandRecorderGraph = self.app.graph().recorder
+        if recorder.is_log_active():
+            txtundo = "Undo (Ctrl+Z)"
+            txtredo = "Redo (Ctrl+Y)"
+            if self.app.initiated:
+                recorder.tag_as_end_transaction()  # make sure to start with that
+            past, future = recorder.transactions_length()
+            if len(past) > 0:  # GUI starting point: after graph init, not include init
+                past = past[1:]
+            # print("past, future", past, future)
+            if len(past) > 0:
+                txtundo += " ({} operations)".format(len(past))
+                self._widgets["undo"].config(state="normal")
+            else:
+                self._widgets["undo"].config(state="disabled")
+            CreateToolTip(self._widgets["undo"], txtundo)
+            if len(future) > 0:
+                txtredo += " ({} operations)".format(len(future))
+                self._widgets["redo"].config(state="normal")
+            else:
+                self._widgets["redo"].config(state="disabled")
+            CreateToolTip(self._widgets["redo"], txtredo)
+        else:
+            self._widgets["undo"].config(state="disabled")
+            self._widgets["redo"].config(state="disabled")
+            msg = "graph.recorder should not be active. File %s."
+            logger.warning(msg, self.app.get_file())
 
     def if_print_commands(self):
         """Returns status of checkbox printCommands"""
@@ -1020,7 +1079,7 @@ class GUIFrameMenuMain:
         self.showhide.get_frame_title().pack_forget()
 
     def _cw_all_hide(self, frame):
-        fr, _ = self.showhide.createButton(frame, symbol="\u25B6", size="auto")
+        fr, _ = self.showhide.cw_button_sized(frame, symbol="\u25b6", size="auto")
         fr.pack(side="top", anchor="w")
         canvas = tk.Canvas(frame, width=20, height=40)
         canvas.pack(side="top", anchor="w")
@@ -1043,14 +1102,14 @@ class GUIFrameMenuMain:
         fr.pack(side="top", fill=tk.X)
         lbl = tk.Label(fr, text=title, font=self.app.fonts["bold"])
         lbl.pack(side="left", anchor="center")
-        hline = FrameTitleContentHide.frameHline(fr)
+        hline = FrameTitleContentHide.frame_hline(fr)
         hline.pack(side="left", anchor="center", fill=tk.X, expand=1, padx=5)
         return fr
 
     def _cw_open_merge(self, frame):
         """Section open & merge"""
         fr = self._cw_section_title(frame, "Open or merge files")
-        fr_, _ = self.showhide.createButton(fr, symbol="\u25C1", size="auto")
+        fr_, _ = self.showhide.cw_button_sized(fr, symbol="\u25c1", size="auto")
         fr_.pack(side="right", anchor="center")
         # buttons
         fr = tk.Frame(frame)
@@ -1097,8 +1156,8 @@ class GUIFrameMenuMain:
 
     def _cw_save(self, frame):
         """Widgets Save data and graphs"""
-        fr = tk.Label(frame, text="")
-        fr.pack(side="top")
+        # fr = tk.Label(frame, text="")
+        # fr.pack(side="top")
         # Section Save title
         self._cw_section_title(frame, "Save data & graph")
         # Buttons
@@ -1120,6 +1179,18 @@ class GUIFrameMenuMain:
         self._widgets["saveScreen"].pack(side="top", anchor="w", padx=5)
         self._widgets["saveSepara"] = CheckbuttonVar(fr, "Keep separated x columns", 0)
         self._widgets["saveSepara"].pack(side="top", anchor="w", padx=5)
+
+        # Section Save title
+        self._cw_section_title(frame, "Undo, redo")
+        # Undo - Redo
+        fr = tk.Frame(frame)
+        fr.pack(side="top", fill=tk.X, padx=10)
+        self._widgets["undo"] = tk.Button(fr, text=" \u21ba ", command=self.graph_undo)
+        self._widgets["undo"].pack(side="left")
+        self._widgets["redo"] = tk.Button(fr, text=" \u21bb ", command=self.graph_redo)
+        self._widgets["redo"].pack(side="left")
+        # tk.Label(fr, text="Undo - redo").pack(side="left")
+        # tooltips: created/updated in update_ui()
 
     def _cw_scripts(self, frame):
         """Section Scripts"""
@@ -1297,7 +1368,10 @@ class GUIFrameMenuMain:
 
     def save_graph(self):
         """Saves the graph (image & data) with same filename as last time"""
-        if self.app.graph().attr("meastype") not in ["", GraphIO.GRAPHTYPE_GRAPH]:
+        if self.app.graph().attr("meastype") not in [
+            "",
+            FileParserDispatcher.GRAPHTYPE_GRAPH,
+        ]:
             msg = (
                 "WARNING saving data: are you sure you are not overwriting a graph "
                 "file?\nClick on Save As... to save the current graph (or delete "
@@ -1362,6 +1436,26 @@ class GUIFrameMenuMain:
         folder = self.app.get_folder()
         return image_to_clipboard(self.app.graph(), folder=folder)
 
+    def graph_undo(self):
+        """Undo last transaction in graph"""
+        recorder: CommandRecorderGraph = self.app.graph().recorder
+        if recorder.is_log_active():
+            recorder.undo_last_transaction()
+        else:
+            msg = "graph_undo but recorder is not active"
+            logger.error(msg)
+        self.app.update_ui()
+
+    def graph_redo(self):
+        """Redo next transaction in graph"""
+        recorder: CommandRecorderGraph = self.app.graph().recorder
+        if recorder.is_log_active():
+            recorder.redo_next_transaction()
+        else:
+            msg = "graph_redo but recorder is not active"
+            logger.error(msg)
+        self.app.update_ui()
+
     def script_fit_jv_combined(self, group_cell: bool = True):
         """Script JV process, grouped by cells or not.
 
@@ -1375,7 +1469,7 @@ class GUIFrameMenuMain:
             ngkw = self.app.newgraph_kwargs
             graph = processJVfolder(
                 folder,
-                ylim=(-np.inf, np.inf),
+                ylim=[-np.inf, np.inf],
                 groupCell=group_cell,
                 fitDiodeWeight=weight,
                 newGraphKwargs=ngkw,
@@ -1406,7 +1500,7 @@ class GUIFrameMenuMain:
         if folder is not None and folder != "":
             print("...creating boxplots...")
             tmp = JVSummaryToBoxPlots(
-                folder=folder,
+                folder,
                 exportPrefix="boxplots_",
                 replace=[],
                 silent=True,
@@ -1470,11 +1564,11 @@ class GUIFrameTemplateColorize:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
-        self.colorlist = None  # defined later, here to reserve variable name
-        self.photoimages = None  # defined later, here to reserve variable name
+        self.colorlist = []  # defined later, here to reserve variable name
+        self.photoimages = []  # None  # defined later, here to reserve variable name
         self._widgets = {}
         self._create_widgets(self.frame)
 
@@ -1728,7 +1822,7 @@ class GUIFrameActionsGeneric:
 
     CASTCURVERENAMEGUI = {"Fit Arrhenius": "Fit"}
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self._widgets = {}
@@ -1744,7 +1838,6 @@ class GUIFrameActionsGeneric:
         """Update widgets"""
         # ShowHide: handled by Observable
         # cast curve optionmenu: handled by Observable
-        pass
 
     def _create_widgets(self, frame):
         """Create widgets"""
@@ -1778,15 +1871,15 @@ class GUIFrameActionsGeneric:
     def _cw_reorder(self, frame):
         """Create widgets reorder"""
         tk.Label(frame, text="Reorder").pack(side="left")
-        b0 = tk.Button(frame, text=" \u21E7 ", command=self.shift_curve_top)
+        b0 = tk.Button(frame, text=" \u21e7 ", command=self.shift_curve_top)
         b0.pack(side="left", padx=1)
-        b1 = tk.Button(frame, text=" \u21D1 ", command=self.shift_curve_up)
+        b1 = tk.Button(frame, text=" \u21d1 ", command=self.shift_curve_up)
         b1.pack(side="left", padx=1)
-        b2 = tk.Button(frame, text=" \u21F5 ", command=self.shift_curve_reverse)
+        b2 = tk.Button(frame, text=" \u21f5 ", command=self.shift_curve_reverse)
         b2.pack(side="left", padx=1)
-        b3 = tk.Button(frame, text=" \u21D3 ", command=self.shift_curve_down)
+        b3 = tk.Button(frame, text=" \u21d3 ", command=self.shift_curve_down)
         b3.pack(side="left", padx=1)
-        b4 = tk.Button(frame, text=" \u21E9 ", command=self.shift_curve_bottom)
+        b4 = tk.Button(frame, text=" \u21e9 ", command=self.shift_curve_bottom)
         b4.pack(side="left", padx=1)
         CreateToolTip(b0, "Selection to Top")
         CreateToolTip(b1, "Selection Up")
@@ -1923,8 +2016,8 @@ class GUIFrameActionsGeneric:
                     up_down += 1
                 elif idx2 > curve or (idx2 == curve and curve >= len(graph) - 1):
                     up_down -= 1
-        for i in range(len(selected)):
-            selected[i] = max(0, min(len(graph) - 1, selected[i]))
+
+        selected = [max(0, min(len(graph) - 1, sel)) for sel in selected]
         if len(selected) > 0:
             sel = [graph[c] for c in selected]
             keys = [""] * len(sel)
@@ -1952,7 +2045,8 @@ class GUIFrameActionsGeneric:
 
     def shift_curve_reverse(self):
         """Reverse the order of  the Curves within the Graph"""
-        self.app.graph().curves_reverse()
+        self.app.call_graph_method("curves_reverse")
+        # self.app.graph().curves_reverse()
         self.app.update_ui()
 
     def delete_curve(self):
@@ -2097,7 +2191,7 @@ class GUIFrameActionsGeneric:
                 if not test:
                     logger.error("castCurve impossible.")
             else:
-                logger.error("castCurve impossible ({}, {})".format(type_new, curve))
+                logger.error("castCurve impossible (%s, %s)", type_new, curve)
         if len(selected) > 0:
             sel = [graph[c] for c in selected]
             keys = [""] * len(sel)
@@ -2152,7 +2246,7 @@ class GUIFramePropertyEditor:
 
     VARVALUEWIDTH = 30
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self._widgets = {}
@@ -2232,7 +2326,9 @@ class GUIFramePropertyEditor:
             i = keywords["keys"].index(key)
             valuesnew = [str(v) for v in keywords["guiexamples"][i]]
             self._widgets["value"]["values"] = valuesnew
-            self._widgets["example"].set(keywords["guitexts"][i])
+            extmp = keywords["guitexts"][i].split("\n")
+            example = "\n".join(["\n".join(textwrap.wrap(t, width=90)) for t in extmp])
+            self._widgets["example"].set(example)
         except ValueError:
             self._widgets["value"]["values"] = []
             self._widgets["example"].set("")
@@ -2261,9 +2357,9 @@ class GUIFramePropertyEditor:
             if not isinstance(val, (list, tuple)) or len(val) < 2:
                 msg = (
                     "GUI.GUIFramePropertyEditor.save_key_value. Input must be a "
-                    "list or a tuple with 2 elements ({}, {})"
+                    "list or a tuple with 2 elements (%s, %s)"
                 )
-                logger.error(msg.format(val, type(val)))
+                logger.error(msg, val, type(val))
                 return
             key, val = val[0], val[1]
         self._update_key(curves, key, val)  # triggers update_ui
@@ -2297,8 +2393,8 @@ class GUIFramePropertyEditor:
             try:
                 c = int(c_)
             except (ValueError, TypeError):
-                msg = "Cannot edit property: curve {}, key {}, value {}."
-                logger.error(msg.format(c_, key, val))
+                msg = "Cannot edit property: curve %s, key %s, value %s."
+                logger.error(msg, c_, key, val)
                 return
             if c < 0:
                 self.app.call_graph_method("update", {key: val})
@@ -2315,7 +2411,7 @@ class GUIFrameTree:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self._widgets = {}
@@ -2326,14 +2422,13 @@ class GUIFrameTree:
         """Update content of Treeview"""
         graph = self.app.graph()
         tree = self._widgets["tree"]
-        select = {"toFocus": [], "toSelect": []}
+        select = {"toFocus": [], "toSelect": [], "focus": ([], []), "selec": ([], [])}
         try:
             props = self.app.get_tab_properties()
             select["focus"] = props["focusCurvesKeys"]
             select["selec"] = props["selectionCurvesKeys"]
         except KeyError:  # expected at initialisation
-            select["focus"] = ([], [])
-            select["selec"] = ([], [])
+            pass
         # print('update_ui prepare selection', select)
         # clear displayed content
         tree.delete(*tree.get_children())
@@ -2402,10 +2497,10 @@ class GUIFrameTree:
                 id_ = tree.insert(idx, "end", text=key, values=(val,), tag=key)
                 self._update_ui_check_select(id_, curve, key, select)
             except Exception:
-                msg = "_update_ui_add_treebranch: key {}:\n  {} {}\n  {} {}\n  {} {}"
+                msg = "_update_ui_add_treebranch: key %s:\n  %s %s\n  %s %s\n  %s %s"
                 msgargs = [key, type(attr[key]), attr[key], type(varToStr(attr[key]))]
                 msgargs += [varToStr(attr[key]), type(val), val]
-                logger.error(msg.format(*msgargs), exc_info=True)
+                logger.error(msg, *msgargs, exc_info=True)
                 # for v in val:
                 #     print('   ', v)
 
@@ -2520,19 +2615,18 @@ class GUIFrameTree:
 
     def store_selected_curves(self):
         """Store selected Curves and attributes to restore upon update_ui"""
-        # store Curve instead of indices, because indices can change
         graph = self.app.graph()
+        # focus: unique item
         idxs, keys = self.get_tree_active_curve(multiple=False)
-        for i in range(len(idxs)):
-            # print('storeSelectedCurves false', idxs[i], '.', keys[i], '.')
-            if 0 <= idxs[i] < len(graph):
-                idxs[i] = graph[idxs[i]]
+        for i, idx in enumerate(idxs):  # replace idx by Curve object, Graph may change
+            if 0 <= idx < len(graph):  # could be -1 for headers
+                idxs[i] = graph[idx]
         self.app.get_tab_properties(focusCurvesKeys=(idxs, keys))
+        # selection: multiple items
         idxs, keys = self.get_tree_active_curve(multiple=True)
-        for i in range(len(idxs)):
-            # print('storeSelectedCurves true', idxs[i], '.', keys[i], '.')
-            if 0 <= idxs[i] < len(graph):
-                idxs[i] = graph[idxs[i]]
+        for i, idx in enumerate(idxs):
+            if 0 <= idx < len(graph):
+                idxs[i] = graph[idx]
         self.app.get_tab_properties(selectionCurvesKeys=(idxs, keys))
 
     def forget_selected_curves(self):
@@ -2549,7 +2643,7 @@ class GUIFrameActionsCurves:
     Some methods will call methods of application
     """
 
-    def __init__(self, master, application, **kwargs):
+    def __init__(self, master, application: "Application", **kwargs):
         self.frame = tk.Frame(master, **kwargs)
         self.app = application
         self.list_callinfos = []
@@ -2574,7 +2668,7 @@ class GUIFrameActionsCurves:
             fr, text="Actions specific to selected Curve", font=self.app.fonts["bold"]
         )
         lbl.pack(side="left", anchor="center")
-        hline = FrameTitleContentHide.frameHline(fr)
+        hline = FrameTitleContentHide.frame_hline(fr)
         hline.pack(side="left", anchor="center", fill=tk.X, expand=1, padx=5)
         # content
         self.frame_action = tk.Frame(frame)
@@ -2594,10 +2688,12 @@ class GUIFrameActionsCurves:
         if graph_i is not None:
             try:
                 func_list = curve.funcListGUI(graph=graph, graph_i=graph_i)
-            except Exception:
-                msg = "{}.funcListGUI, graph_i {}, graph {}."
-                logger.error(msg.format(type(curve), graph_i, graph), exc_info=True)
-                return
+            except Exception as e:
+                msg = "{}.funcListGUI, graph_i {}, graph {}. {}: {}."
+                msg = msg.format(type(curve), graph_i, graph, type(e), e)
+                logger.error(msg, exc_info=True)
+                return  # no need to raise here
+
         # args: specific attribute selected. Useless here
         if (
             not force
@@ -2727,9 +2823,11 @@ class GUIFrameActionsCurves:
             try:
                 widget = widgetclass(fr, **options)
             except Exception as e:
-                print("Exception", type(e), e)
-                msg = "Could not create widget {}, {}, {}"
-                print(msg.format(field["label"], widgetclass.__name__, options))
+                msg = "Could not create widget {}, {}, {}. {}: {}."
+                msgformat = msg.format(
+                    field["label"], widgetclass.__name__, options, type(e), e
+                )
+                issue_warning(logger, msgformat)
                 continue
             widget.pack(side="left", anchor="w")
             widgets.append(widget)
@@ -2783,11 +2881,27 @@ class GUIFrameActionsCurves:
             # execute curve action
             graph = self.app.graph()
             try:
-                res = func(*args, **kwargs)
-            except Exception:
-                msg = "While executing function {} with args {} kwargs {}."
-                logger.error(msg.format(func, args, kwargs), exc_info=True)
-                return
+                with warnings.catch_warnings(record=True) as w:
+                    res = func(*args, **kwargs)
+                    # now must ignore, otherwise issue_warning() result in infinite loop
+                    warnings.simplefilter("ignore")
+                    for wa in w:
+                        ms = "While executing function {}. {}: {}."
+                        msg = ms.format(func.__name__, wa.category.__name__, wa.message)
+                        issue_warning(logger, msg)
+            except GrapaError as e:
+                if e.report_in_gui:
+                    ms = "While executing function {} with args {} kwargs {}. {}: {}."
+                    msg = ms.format(func, args, kwargs, type(e), e)
+                    logger.error(msg, exc_info=True)
+                return False
+            except Exception as e:  # cannot afford to fail
+                ms = "While executing function {} with args {} kwargs {}. {}: {}."
+                msg = ms.format(func, args, kwargs, type(e), e)
+                logger.error(msg, exc_info=True)
+                # raise GrapaError(msg) from e
+                return False
+
             if self.app.if_print_commands():
                 try:
                     subject = func.__module__
@@ -2796,10 +2910,10 @@ class GUIFrameActionsCurves:
                     elif "curve" in subject:
                         subject = "graph[" + str(curve) + "]"
                     else:
-                        msg = "callAction print: subject not determined ({}, {}, {})"
-                        logger.warning(msg.format(subject, func.__name__, j))
-                    msg = "curve = {}.{}({})"
-                    msgformat = msg.format(
+                        ms = "callAction print: subject not determined ({}, {}, {})"
+                        issue_warning(logger, ms.format(subject, func.__name__, j))
+                    ms = "curve = {}.{}({})"
+                    msgformat = ms.format(
                         subject, func.__name__, self.app.args_to_str(*args, **kwargs)
                     )
                     print(msgformat)
@@ -2828,6 +2942,7 @@ class GUIFrameActionsCurves:
                 print("Curve action output:")
                 print(res)
             # TO CHECK: if want to print anything if True, etc.
+            return True
 
         # handling actions on multiple Curves
         to_execute = {curve: func}

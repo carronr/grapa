@@ -10,7 +10,7 @@ import os
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveJV import CurveJV
 
 
@@ -27,6 +27,7 @@ class GraphJV(Graph):
     def isFileReadable(
         cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
     ):
+        """Can this module open the file?"""
         if fileext == ".txt" and line1[-11:] == "_ParamDescr":
             return True  # JV
         if (
@@ -46,6 +47,7 @@ class GraphJV(Graph):
         return False
 
     def readDataFromFile(self, attributes, **kwargs):
+        """Decides how to open the file"""
         line1 = kwargs["line1"] if "line1" in kwargs else ""
         fileName = kwargs["fileName"] if "fileName" in kwargs else ""
         if (
@@ -65,7 +67,7 @@ class GraphJV(Graph):
             self[-1].update({"sample": self[-1].attr("label")})
 
     def readDataFromFileJV(self, attributes):
-        _filename, _fileext = os.path.splitext(self.filename)  # , fileExt
+        """File format of the in-house JV setup"""
         # extract data analysis from acquisition software
         # - requires a priori knowledge of file structure
         # especially want to know cell area before creation of the CurveJV object
@@ -129,9 +131,9 @@ class GraphJV(Graph):
             silent=self.silent,
         )
         self.append(curve)
+        self[-1].update({"_collabels": ["Voltage [V]", "Current density [mA cm-2]"]})
         self.update(
             {
-                "collabels": ["Voltage [V]", "Current density [mA cm-2]"],
                 "xlabel": self.formatAxisLabel(GraphJV.AXISLABELS[0]),
                 "ylabel": self.formatAxisLabel(GraphJV.AXISLABELS[1]),
                 "axhline": [0, {"linewidth": 0.5}],
@@ -140,16 +142,16 @@ class GraphJV(Graph):
         )
 
     def readDataFromFileTIV(self, attributes):
-        GraphIO.readDataFromFileGeneric(self, attributes)
+        """File format of in-house TIV setup"""
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes)
         # check if we can actually read some TIV data, otherwise this might be
         # a processed I-V_ database (summary of cells properties)
         if len(self) == 0:
-            GraphIO.readDataFromFileTxt(self, attributes)
+            FileParserDispatcher.readDataFromFileTxt(self, attributes)
             return
         # back to TIV data reading
         self.update(
             {
-                "collabels": "",
                 "xlabel": self.formatAxisLabel(GraphJV.AXISLABELS[0]),
                 "ylabel": self.formatAxisLabel(GraphJV.AXISLABELS[1]),
             }
@@ -161,7 +163,9 @@ class GraphJV(Graph):
             if self[-1].attr("voltage (v)") == "T stage (K)":
                 self.curve_delete(-1)
         self[0].update({"voltage (v)": ""})  # artifact from file reading
-        filebasename, fileExt = os.path.splitext(os.path.basename(self.filename))
+        filebasename, _fileextfileext = os.path.splitext(
+            os.path.basename(self.filename)
+        )
         self[0].update({"label": filebasename.replace("_", " ")})
         # rename attributes to match these of JV setup
         key = [
@@ -207,12 +211,13 @@ class GraphJV(Graph):
         c.update({"temperature": c.attr("Acquis soft Temperature")})
         c.update({"measId": str(c.attr("temperature"))})
         # recreate curve as a CurveJV
-        self.data[0] = CurveJV(c.data, attributes=c.get_attributes(), silent=True)
+        self[0] = CurveJV(c.data, attributes=c.get_attributes(), silent=True)
         self.update({"meastype": GraphJV.FILEIO_GRAPHTYPE_TIV})
 
     def readDataFromFileIV_HLS(self, attributes):
+        """File format of in-house HLS setup"""
         le = len(self)
-        GraphIO.readDataFromFileGeneric(self, attributes, delimiter=";")
+        FileParserDispatcher.readDataFromFileGeneric(self, attributes, delimiter=";")
         self[le].update({"area": 1.0})
         if max(abs(self[le].x())) > 10:  # want units in [V], not [mV]
             self[le].setX(self[le].x() * 0.001)

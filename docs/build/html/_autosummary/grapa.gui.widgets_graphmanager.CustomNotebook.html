@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.gui.widgets_graphmanager.CustomNotebook &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.gui.widgets_graphmanager.CustomNotebook &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="grapa.gui.widgets_graphmanager.GraphHandler" href="grapa.gui.widgets_graphmanager.GraphHandler.html" />
-    <link rel="prev" title="grapa.gui.widgets_graphmanager.test_all" href="grapa.gui.widgets_graphmanager.test_all.html" /> 
+    <link rel="prev" title="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved" href="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -69,9 +69,11 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_custom.html">grapa.gui.widgets_custom</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.gui.widgets_graphmanager.html">grapa.gui.widgets_graphmanager</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.test_all.html">grapa.gui.widgets_graphmanager.test_all</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved.html">grapa.gui.widgets_graphmanager.userconfirm_close_notsaved</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.gui.widgets_graphmanager.CustomNotebook</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphHandler.html">grapa.gui.widgets_graphmanager.GraphHandler</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphsTabManager.html">grapa.gui.widgets_graphmanager.GraphsTabManager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.gui.widgets_graphmanager.RecorderSpecialKeys.html">grapa.gui.widgets_graphmanager.RecorderSpecialKeys</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.gui.widgets_tooltip.html">grapa.gui.widgets_tooltip</a></li>
@@ -121,13 +123,13 @@
 <h1>grapa.gui.widgets_graphmanager.CustomNotebook<a class="headerlink" href="#grapa-gui-widgets-graphmanager-customnotebook" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.CustomNotebook">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.gui.widgets_graphmanager.</span></span><span class="sig-name descname"><span class="pre">CustomNotebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.CustomNotebook" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.gui.widgets_graphmanager.</span></span><span class="sig-name descname"><span class="pre">CustomNotebook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphstabmanager</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphsTabManager.html#grapa.gui.widgets_graphmanager.GraphsTabManager" title="grapa.gui.widgets_graphmanager.GraphsTabManager"><span class="pre">GraphsTabManager</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.CustomNotebook" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Notebook</span></code></p>
 <p>A ttk Notebook with close buttons on each tab
 <a class="reference external" href="https://stackoverflow.com/questions/39458337/is-there-a-way-to-add-close-buttons-to-tabs-in-tkinter-ttk-notebook">https://stackoverflow.com/questions/39458337/is-there-a-way-to-add-close-buttons-to-tabs-in-tkinter-ttk-notebook</a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.gui.widgets_graphmanager.CustomNotebook.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.CustomNotebook.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphstabmanager</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.gui.widgets_graphmanager.GraphsTabManager.html#grapa.gui.widgets_graphmanager.GraphsTabManager" title="grapa.gui.widgets_graphmanager.GraphsTabManager"><span class="pre">GraphsTabManager</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.gui.widgets_graphmanager.CustomNotebook.__init__" title="Link to this definition"></a></dt>
 <dd><p>Construct a Ttk Notebook with parent master.</p>
 <p>STANDARD OPTIONS</p>
 <blockquote>
@@ -163,7 +165,7 @@ valid for method index)</p></li>
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.CustomNotebook.__init__" title="grapa.gui.widgets_graphmanager.CustomNotebook.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.CustomNotebook.__init__" title="grapa.gui.widgets_graphmanager.CustomNotebook.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args[, graphstabmanager])</p></td>
 <td><p>Construct a Ttk Notebook with parent master.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.gui.widgets_graphmanager.CustomNotebook.on_close_press" title="grapa.gui.widgets_graphmanager.CustomNotebook.on_close_press"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_close_press</span></code></a>(event)</p></td>
@@ -194,7 +196,7 @@ valid for method index)</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="grapa.gui.widgets_graphmanager.test_all.html" class="btn btn-neutral float-left" title="grapa.gui.widgets_graphmanager.test_all" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved.html" class="btn btn-neutral float-left" title="grapa.gui.widgets_graphmanager.userconfirm_close_notsaved" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="grapa.gui.widgets_graphmanager.GraphHandler.html" class="btn btn-neutral float-right" title="grapa.gui.widgets_graphmanager.GraphHandler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

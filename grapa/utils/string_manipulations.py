@@ -7,8 +7,11 @@ import ast
 import codecs
 from string import Formatter, Template
 import logging
+from typing import List, Dict, Tuple
 
 import numpy as np
+
+from grapa.utils.error_management import issue_warning
 
 logger = logging.getLogger(__name__)
 
@@ -58,10 +61,10 @@ def format_string_curveattr(curve, formatter: str):
                 except ValueError:
                     try:
                         attrs[key] = form.format(float(val))
-                    except Exception:
-                        msg = "format_string_curveattr: format '{}', {}, {}, {}"
-                        msgargs = [form, type(val), val, curve.attr("filename")]
-                        logger.warning(msg.format(*msgargs), exc_info=True)
+                    except Exception as e:
+                        msg = "format_string_curveattr: '%s', %s, %s, %s. %s: %s."
+                        msa = (form, type(val), val, curve.attr("filename"), type(e), e)
+                        issue_warning(logger, msg, *msa, exc_info=True)
                         attrs[key] = str(curve.attr(ke))
             else:
                 attrs[key] = str(curve.attr(ke))
@@ -85,26 +88,21 @@ def strToVar(val):
     # val = codecs.getdecoder("unicode_escape")(val)[0]
     flagast = False
     try:
-        val = float(val)
-    except ValueError:
-        try:
-            val = ast.literal_eval(val)
-            flagast = True
-        except Exception:
-            if isinstance(val, str) and len(val) > 1:
-                if (val[0] == "[" and val[-1] == "]") or (
-                    val[0] == "(" and val[-1] == ")"
-                ):
-                    try:
-                        val = [
-                            float(v)
-                            for v in val[1:-1]
-                            .replace(" ", "")
-                            .replace("np.inf", "inf")
-                            .split(",")
-                        ]
-                    except ValueError:
-                        pass
+        val = ast.literal_eval(val)
+        flagast = True
+    except (ValueError, SyntaxError, TypeError):
+        if isinstance(val, str) and len(val) > 1:
+            if (val[0] == "[" and val[-1] == "]") or (val[0] == "(" and val[-1] == ")"):
+                try:
+                    val = [
+                        float(v)
+                        for v in val[1:-1]
+                        .replace(" ", "")
+                        .replace("np.inf", "inf")
+                        .split(",")
+                    ]
+                except ValueError:
+                    pass
     # print('strToVar', val, flagast)
     if not flagast:  # not needed when created through ast.literal_eval
         val = strUnescapeIter(val)
@@ -118,17 +116,18 @@ def strUnescapeIter(var):
     Iterates over the elements of lists and dicts"""
     # likely, implementation not robust and could be much more elegant.
     if isinstance(var, list):
-        for i in range(len(var)):
-            var[i] = strUnescapeIter(var[i])
+        for i, vari in enumerate(var):
+            var[i] = strUnescapeIter(vari)
     elif isinstance(var, dict):
         for key in var:
             var[key] = strUnescapeIter(var[key])
     elif isinstance(var, str):
         try:
             var = codecs.getdecoder("unicode_escape")(var)[0]
-        except Exception:
-            msg = "strUnescapeIter: Exception in codecs.getdecoder, input ({})."
-            logger.error(msg.format(var))
+        except (UnicodeDecodeError, TypeError) as _e:
+            # msg = "strUnescapeIter: Exception in codecs.getdecoder (%s). %s: %s."
+            # issue_warning(logger, msg, var, type(e), e)
+            pass
         try:
             # handling of special characters transformed into mojibake
             # The 2-pass code below can clean inputs with special characters
@@ -146,19 +145,19 @@ def strUnescapeIter(var):
                     # print('Suspicion mojibake (2), latin-1-utf-8 conversion')
                     var = var.encode("latin-1").decode("utf-8")
                     break
-            for key in ESCAPE_WARNING:
-                if ESCAPE_WARNING[key] in var:
+            for key, value in ESCAPE_WARNING.items():
+                if value in var:
                     msg = (
-                        "strUnescapeIter: escape character detected (\\{}). "
-                        "Consider double backslash (\\\\{}) for Latex code."
+                        "strUnescapeIter: escape character detected (\\%s). "
+                        "Consider double backslash (\\\\%s) for Latex code."
                     )
-                    logger.warning(msg.format(key, key))
+                    issue_warning(logger, msg, key, key)
         except Exception:
             msg = (
                 "strUnescapeIter (mojibake). Possibly, mix of special characters "
-                "and escape sequences in same input ({})."
+                "and escape sequences in same input (%s)."
             )
-            logger.error(msg.format(var), exc_info=True)
+            issue_warning(logger, msg, var, exc_info=True)
             # keep current out value. Likely to fail
     return var
 
@@ -169,21 +168,16 @@ def varToStr(val):
     try:
         out = repr(val).strip("'")
     except Exception:
-        msg = "varToStr Exception, input {}."
-        logger.error(msg.format(val), exc_info=True)
+        msg = "varToStr Exception, input %s."
+        issue_warning(logger, msg, val, exc_info=True)
         out = ""
     return out
 
 
 def listToString(val):
     """Converts a list to a string with suitable formatting"""
-    return (
-        "["
-        + ", ".join(
-            [str(el) if not isinstance(el, str) else "'" + el + "'" for el in val]
-        )
-        + "]"
-    )
+    lst = [str(el) if not isinstance(el, str) else "'" + el + "'" for el in val]
+    return "[" + ", ".join(lst) + "]"
 
 
 def restructuredtext_to_text(string: str, nparammax: int = -1) -> list:
@@ -249,30 +243,31 @@ class TextHandler:
     """text are draw onto plot as Annotations"""
 
     @classmethod
-    def check_valid(cls, graph):
+    def check_valid(cls, graph) -> Tuple[List[str], List, List[Dict]]:
         """validates"""
-        text = graph.attr("text", None)
-        texy = graph.attr("textxy", "")
-        targ = graph.attr("textargs", "")
-        if text is None:
+        text_ = graph.attr("text", None)
+        texy_ = graph.attr("textxy", "")
+        targ_ = graph.attr("textargs", "")
+        if text_ is None:
             graph.update({"textxy": "", "textargs": ""})
             return "", "", ""
 
-        onlyfirst = False if isinstance(text, list) else True
+        onlyfirst = False if isinstance(text_, list) else True
         # transform everything into lists
-        text, texy, targ = cls._sanitize_text_input(text, texy, targ)
+        text, texy, targ = cls._sanitize_text_input(text_, texy_, targ_)
         if onlyfirst:
             text, texy, targ = text[0], texy[0], targ[0]
         if text != graph.attr("text"):
             msg = "Corrected attribute text {} (former {})"
-            logger.warning(msg.format(text, graph.attr("text")))
+            issue_warning(logger, msg.format(text, graph.attr("text")))
         if texy != graph.attr("textxy") and graph.attr("textxy", None) is not None:
             msg = "Corrected attribute textxy {} (former {})."
-            logger.warning(msg.format(texy, graph.attr("textxy")))
+            issue_warning(logger, msg.format(texy, graph.attr("textxy")))
         if targ != graph.attr("textargs"):
             msg = "Corrected attribute textargs {} (former {})."
-            logger.warning(msg.format(targ, graph.attr("textargs")))
-        graph.update({"text": text, "textxy": texy, "textargs": targ})
+            issue_warning(logger, msg.format(targ, graph.attr("textargs")))
+        if text not in [text_] or texy not in [texy_] or targ not in [targ_]:
+            graph.update({"text": text, "textxy": texy, "textargs": targ})
         return text, texy, targ
 
     @staticmethod
@@ -290,11 +285,11 @@ class TextHandler:
             and texy[1] != ""
         ):
             texy = [texy]  # if texy was like (0.5,0.8)
-        for i in range(len(targ)):
-            if not isinstance(targ[i], dict):
+        for i, targi in enumerate(targ):
+            if not isinstance(targi, dict):
                 targ[i] = {}
-        for i in range(len(texy)):
-            if not isinstance(texy[i], (tuple, list)):
+        for i, texyi in enumerate(texy):
+            if not isinstance(texyi, (tuple, list)):
                 texy[i] = ""
         while len(texy) < len(text):
             texy.append(texy[-1])

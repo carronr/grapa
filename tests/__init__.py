@@ -4,6 +4,7 @@ import glob
 import pytest
 
 from grapa import Graph, logger, logger_handler
+from grapa.utils.error_management import GrapaWarning
 
 
 @pytest.fixture

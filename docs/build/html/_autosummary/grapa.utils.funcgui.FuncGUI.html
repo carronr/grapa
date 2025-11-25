@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.utils.funcgui.FuncGUI &mdash; grapa 0.7.0.1 documentation</title>
+  <title>grapa.utils.funcgui.FuncGUI &mdash; grapa 0.7.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=0146b746"></script>
+      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -64,15 +64,21 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="grapa.utils.html">grapa.utils</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.command_recorder.html">grapa.utils.command_recorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_curves.html">grapa.utils.container_curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.container_metadata.html">grapa.utils.container_metadata</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.curve_subclasses_utils.html">grapa.utils.curve_subclasses_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.error_management.html">grapa.utils.error_management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.export.html">grapa.utils.export</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="grapa.utils.funcgui.html">grapa.utils.funcgui</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="grapa.utils.funcgui.AlterListItem.html">grapa.utils.funcgui.AlterListItem</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.utils.funcgui.FuncGUI</a></li>
 <li class="toctree-l4"><a class="reference internal" href="grapa.utils.funcgui.FuncListGUIHelper.html">grapa.utils.funcgui.FuncListGUIHelper</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.graphIO.html">grapa.utils.graphIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="grapa.utils.metadata.html">grapa.utils.metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_database.html">grapa.utils.parser_database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_dispatcher.html">grapa.utils.parser_dispatcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.utils.parser_generic.html">grapa.utils.parser_generic</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_curve.html">grapa.utils.plot_curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph.html">grapa.utils.plot_graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="grapa.utils.plot_graph_aux.html">grapa.utils.plot_graph_aux</a></li>
@@ -161,8 +167,8 @@ One may also do FuncGUI(None, None).initLegacy(oldformat)</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.append" title="grapa.utils.funcgui.FuncGUI.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(label, value[, widgetclass, bind, ...])</p></td>
 <td><p>Examples</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_newline</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.append_newline" title="grapa.utils.funcgui.FuncGUI.append_newline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_newline</span></code></a>()</p></td>
+<td><p>Shortcut to append a new line in the GUI</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.appendcbb" title="grapa.utils.funcgui.FuncGUI.appendcbb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">appendcbb</span></code></a>(label, value, values[, bind, ...])</p></td>
 <td><p>Notation shortcut to .append(), append a Combobox: .appendcbb(&quot;my value&quot;, &quot;a&quot;, [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])</p></td>
@@ -170,8 +176,8 @@ One may also do FuncGUI(None, None).initLegacy(oldformat)</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.func_docstring_to_text" title="grapa.utils.funcgui.FuncGUI.func_docstring_to_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">func_docstring_to_text</span></code></a>()</p></td>
 <td><p>Returns str lines, with slight reformatting from function docstring</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_legacy</span></code>(line)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.init_legacy" title="grapa.utils.funcgui.FuncGUI.init_legacy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_legacy</span></code></a>(line)</p></td>
+<td><p>Initialize a FuncGUI object from the legacy list format.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.is_similar" title="grapa.utils.funcgui.FuncGUI.is_similar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_similar</span></code></a>(other)</p></td>
 <td><p>Determines if 2 FuncGUI objects are similar Checks for function name, textsave, hidden vars, fields labels Does NOT check for field values - user force same value for all</p></td>
@@ -182,11 +188,11 @@ One may also do FuncGUI(None, None).initLegacy(oldformat)</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt" title="grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_funcdocstring_alt</span></code></a>(documentation)</p></td>
 <td><p>for use in printHelp</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_hiddenvars</span></code>(hiddenvars)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.set_hiddenvars" title="grapa.utils.funcgui.FuncGUI.set_hiddenvars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_hiddenvars</span></code></a>(hiddenvars)</p></td>
+<td><p>hiddenvars is a dict of variables that will be provided to func when called by the GUI, in addition to the values provided by the user</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_tooltiptext</span></code>(tooltiptext)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.utils.funcgui.FuncGUI.set_tooltiptext" title="grapa.utils.funcgui.FuncGUI.set_tooltiptext"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_tooltiptext</span></code></a>(tooltiptext)</p></td>
+<td><p>A short text that will be displayed as tooltip in the GUI</p></td>
 </tr>
 </tbody>
 </table>
@@ -219,6 +225,12 @@ None: to not show in the GUI and not provide a value (e.g. display label)</p></l
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.append_newline">
+<span class="sig-name descname"><span class="pre">append_newline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.append_newline" title="Link to this definition"></a></dt>
+<dd><p>Shortcut to append a new line in the GUI</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.appendcbb">
 <span class="sig-name descname"><span class="pre">appendcbb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keyword</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.appendcbb" title="Link to this definition"></a></dt>
 <dd><p>Notation shortcut to .append(), append a Combobox:
@@ -229,6 +241,12 @@ None: to not show in the GUI and not provide a value (e.g. display label)</p></l
 <dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.func_docstring_to_text">
 <span class="sig-name descname"><span class="pre">func_docstring_to_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.func_docstring_to_text" title="Link to this definition"></a></dt>
 <dd><p>Returns str lines, with slight reformatting from function docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.init_legacy">
+<span class="sig-name descname"><span class="pre">init_legacy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.init_legacy" title="Link to this definition"></a></dt>
+<dd><p>Initialize a FuncGUI object from the legacy list format.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -251,6 +269,19 @@ Beware index if moving after old_idx.</p>
 <dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt">
 <span class="sig-name descname"><span class="pre">set_funcdocstring_alt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">documentation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.set_funcdocstring_alt" title="Link to this definition"></a></dt>
 <dd><p>for use in printHelp</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.set_hiddenvars">
+<span class="sig-name descname"><span class="pre">set_hiddenvars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hiddenvars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.set_hiddenvars" title="Link to this definition"></a></dt>
+<dd><p>hiddenvars is a dict of variables that will be provided to func
+when called by the GUI, in addition to the values provided by the user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.utils.funcgui.FuncGUI.set_tooltiptext">
+<span class="sig-name descname"><span class="pre">set_tooltiptext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tooltiptext</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.utils.funcgui.FuncGUI.set_tooltiptext" title="Link to this definition"></a></dt>
+<dd><p>A short text that will be displayed as tooltip in the GUI</p>
 </dd></dl>
 
 </dd></dl>

@@ -12,7 +12,7 @@ import os
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.graphIO import GraphIO
+from grapa.utils.parser_dispatcher import FileParserDispatcher
 
 
 class GraphPAIOS(Graph):
@@ -23,9 +23,11 @@ class GraphPAIOS(Graph):
     FILEIO_GRAPHTYPE = "PAIOS export"
 
     @classmethod
-    def isFileReadable(cls, fileName, fileExt, line1="", line2="", line3="", **kwargs):
+    def isFileReadable(
+        cls, _filename, fileext, line1="", line2="", line3="", **_kwargs
+    ):
         if (
-            fileExt == ".txt"
+            fileext == ".txt"
             and line1.startswith("### ----")
             and line2.startswith("### PAIOS: Platform for All-In-One")
             and line3.startswith("### Fluxim AG, www.fluxim.com")
@@ -33,8 +35,8 @@ class GraphPAIOS(Graph):
             return True
         return False
 
-    def readDataFromFile(self, attributes, **kwargs):
-        GraphIO.readDataFromFileGeneric(
+    def readDataFromFile(self, attributes, **_kwargs):
+        FileParserDispatcher.readDataFromFileGeneric(
             self, attributes, lstrip=" #", delimiterHeaders=": "
         )
         # retrieve data into separate columns

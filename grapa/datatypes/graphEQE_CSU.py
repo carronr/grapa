@@ -25,20 +25,19 @@ class GraphEQE_CSU(Graph):
     def readDataFromFile(self, attributes, **_kwargs):
         attrs = {}
         # interpret headers
-        f = open(self.filename, "r")
-        attrs["acquisition location"] = f.readline().strip()
-        attrs["sample"] = f.readline().strip()
-        attrs["label"] = attrs["sample"]
-        attrs["acquisition bias light"] = (
-            f.readline().replace("Bias Light ", "").strip()
-        )
-        attrs["acquisition cell area"] = float(f.readline().strip())
-        attrs["acquisition Eg"] = float(f.readline().strip().replace("Eg = ", ""))
-        f.readline()  # do nothing with it
-        nlines = int(f.readline().strip())
-        attrs["acquisition Jsc"] = float(f.readline().strip())
-        attrs["collabels"] = "[" + ", ".join(f.readline().strip().split("\t")) + "]"
-        f.close()
+        with open(self.filename, "r") as f:
+            attrs["acquisition location"] = f.readline().strip()
+            attrs["sample"] = f.readline().strip()
+            attrs["label"] = attrs["sample"]
+            attrs["acquisition bias light"] = (
+                f.readline().replace("Bias Light ", "").strip()
+            )
+            attrs["acquisition cell area"] = float(f.readline().strip())
+            attrs["acquisition Eg"] = float(f.readline().strip().replace("Eg = ", ""))
+            f.readline()  # do nothing with it
+            nlines = int(f.readline().strip())
+            attrs["acquisition Jsc"] = float(f.readline().strip())
+            attrs["_collabels"] = f.readline().strip().split("\t")
 
         # read data
         data = np.array([np.nan, np.nan])
@@ -57,13 +56,13 @@ class GraphEQE_CSU(Graph):
 
         # create data
         self.append(CurveEQE(data, attributes))
-        self.curve(-1).update(attrs)  # file content may override default attributes
-        if nlines != len(self.curve(-1).x()):
+        self[-1].update(attrs)  # file content may override default attributes
+        if nlines != len(self[-1].x()):
             print("WARNING GraphEQE_CSU: number of lines differ from expected")
 
         # cosmetics
         if len(data.shape) > 1:
-            self.curve(-1).update({"mulOffset": 100})
+            self[-1].update({"muloffset": 100})
         # some default settings
         self.update(
             {
