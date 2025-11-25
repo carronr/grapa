@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="grapa",
-    version="0.7.1.0",
+    version="0.7.1.0.post1",
     description="Grapa - graphing and photovoltaics analysis",
     author="Romain Carron",
     author_email="carron.romain@gmail.com",
