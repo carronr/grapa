@@ -120,7 +120,6 @@ class Application(tk.Frame):
             "examples",
             "subplots_examples.txt",
         )
-        filename = "C:/_python/_python_packages/grapa/grapa/examples/JV/SAMPLE_A/I-V_SAMPLE_A_a2_01.txt"
         self.open_file(filename)
         self.update_ui()
         self.graph().recorder.log_special(RecorderSpecialKeys.OPEN)
