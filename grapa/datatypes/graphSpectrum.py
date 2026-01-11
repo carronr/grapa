@@ -9,7 +9,7 @@ from os import path as ospath
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveSpectrum import CurveSpectrum
 
 
@@ -75,13 +75,13 @@ class GraphSpectrumSpectraSuite(GraphSpectrum):
         self.append(CurveSpectrum(data, attributes))
         # BG = 1140 # seems not generally valid
         bg = 0
-        self[-1].setY(self[-1].y() - bg)
+        self[-1].set_y(self[-1].y() - bg)
         self[-1].update({"label": filenam_.split("/")[-1]})
         self[-1].update({"_collabels": ["Wavelength [nm]", "Intensity [counts]"]})
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphSpectrum.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphSpectrum.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphSpectrum.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphSpectrum.AXISLABELS[1]),
             }
         )
         return True
@@ -121,12 +121,12 @@ class GraphSpectrumUVVIS(GraphSpectrum):
         else:
             sub = ""
         self[-1].update({"_spectrumSubclass": sub, "_spectrumunit": "%"})
-        self.castCurve("Curve Spectrum", len(self) - 1, silentSuccess=True)
+        self.curve_cast("Curve Spectrum", len(self) - 1)
         self[-1].update({"label": lbl, '"Wavelength nm."': ""})
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphSpectrumUVVIS.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(ylabel),
+                "xlabel": self.format_axis_label(GraphSpectrumUVVIS.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(ylabel),
             }
         )
         return True
@@ -144,14 +144,14 @@ class GraphSpectrumTRPLsetup(GraphSpectrum):
     def readDataFromFile(self, attributes, **kwargs):
         len0 = len(self)
         FileParserDispatcher.readDataFromFileGeneric(self, attributes)
-        self.castCurve("Curve Spectrum", len0, silentSuccess=True)
+        self.curve_cast("Curve Spectrum", len0)
         self[len0].update(
             {"label": self[len0].attr("label").replace(" crv[0] [Cnts.]", "")}
         )
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphSpectrum.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphSpectrum.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphSpectrum.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphSpectrum.AXISLABELS[1]),
             }
         )
         self.update({"subplots_adjust": [0.2, 0.15]})
@@ -212,8 +212,8 @@ class GraphSpectrumPerkinElmerASC(GraphSpectrum):
         for h, header in enumerate(headers):
             self[-1].update({"headers" + str(h): header})
         attrs = {
-            "xlabel": self.formatAxisLabel(GraphSpectrumPerkinElmerASC.AXISLABELS[0]),
-            "ylabel": self.formatAxisLabel(GraphSpectrumPerkinElmerASC.AXISLABELS[1]),
+            "xlabel": self.format_axis_label(GraphSpectrumPerkinElmerASC.AXISLABELS[0]),
+            "ylabel": self.format_axis_label(GraphSpectrumPerkinElmerASC.AXISLABELS[1]),
         }
 
         self.update(attrs)

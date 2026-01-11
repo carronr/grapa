@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 from grapa.curve import Curve
 from grapa.datatypes.curveJscVoc import CurveJscVoc
 
@@ -67,7 +67,7 @@ class GraphPLQY(Graph):
                 "label": self[-1].attr("sample"),
             }
         )
-        self.castCurve(CurveJscVoc.CURVE, -1, silentSuccess=True)
+        self.curve_cast(CurveJscVoc.CURVE, -1)
         self.update(
             {
                 "alter": ["", "abs"],
@@ -100,8 +100,8 @@ class GraphPLQY(Graph):
             plqy = r * convert_i_plqy
             curve_time_r = Curve([time, plqy], {})
         # tune X vs time into Y vs X
-        self[le].setX(self[le].y())
-        self[le].setY(self[le + 1].y())
+        self[le].set_x(self[le].y())
+        self[le].set_y(self[le + 1].y())
         if label == "":
             label = self[le].attr("label")
         if fname.startswith("PLQYcalibration"):

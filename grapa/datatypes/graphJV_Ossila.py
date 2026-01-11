@@ -60,8 +60,8 @@ class GraphJV_Ossila(Graph):
         # graph cosmetics
         self.update(
             {
-                "xlabel": self.formatAxisLabel(["Bias voltage", "V", "V"]),
-                "ylabel": self.formatAxisLabel(
+                "xlabel": self.format_axis_label(["Bias voltage", "V", "V"]),
+                "ylabel": self.format_axis_label(
                     ["Current density", "J", "mA cm$^{-2}$"]
                 ),
             }

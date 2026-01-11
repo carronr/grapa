@@ -130,9 +130,9 @@ def test_update_curve_values_dictkeys():
     raise NotImplementedError
 
 
-@pytest.mark.skip("Not implemented update_graph_values_dictkeys_conditional")
-def test_update_graph_values_dictkeys_conditional():
-    """test function update_update_graph_values_dictkeys_conditional"""
+@pytest.mark.skip("Not implemented update_graph_values_keys_conditional")
+def test_update_graph_values_keys_conditional():
+    """test function update_update_graph_values_keys_conditional"""
     raise NotImplementedError
 
 
@@ -186,7 +186,7 @@ def test_print_help(grapa_folder):
     # curve.print_help()
 
     graph = Graph([[1,2,3], [4, 5, 6]])
-    graph.castCurve("CurveXRD", 0, silentSuccess=True)
+    graph.curve_cast("CurveXRD", 0)
     curve = graph[0]
     curve.funcListGUI(graph=graph, graph_i=0)
     #curve.print_help()

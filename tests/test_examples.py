@@ -6,8 +6,8 @@ from grapa.curve import Curve
 from grapa.graph import Graph
 from grapa.curve_image import Curve_Image
 
-from grapa.utils.string_manipulations import strToVar
-from grapa.utils.funcgui import FuncGUI
+from grapa.shared.string_manipulations import strToVar
+from grapa.shared.funcgui import FuncGUI
 
 from grapa.datatypes.curveCf import CurveCf
 from grapa.datatypes.curveCV import CurveCV

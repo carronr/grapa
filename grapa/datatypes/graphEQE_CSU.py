@@ -68,7 +68,7 @@ class GraphEQE_CSU(Graph):
             {
                 "ylim": [0, 100],
                 "xlim": [300, np.nan],
-                "xlabel": self.formatAxisLabel(GraphEQE_CSU.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphEQE_CSU.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphEQE_CSU.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphEQE_CSU.AXISLABELS[1]),
             }
         )

@@ -9,11 +9,10 @@ import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.mathModule import is_number, roundSignificant, roundSignificantRange
-from grapa.constants import CST
-from grapa.utils.parser_dispatcher import FileParserDispatcher
-from grapa.utils.funcgui import FuncListGUIHelper
-
+from grapa.shared.constants import CST
+from grapa.shared.maths import is_number, roundSignificant, roundSignificantRange
+from grapa.shared.funcgui import funclistgui_graph_axislabels
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 
 class GraphJscVoc(Graph):
     """Open files containing Jsc-Voc data"""
@@ -36,7 +35,7 @@ class GraphJscVoc(Graph):
         le = len(self)
         FileParserDispatcher.readDataFromFileGeneric(self, attributes, **kwargs)
         # expect 3 columns data
-        self.castCurve(CurveJscVoc.CURVE, le, silentSuccess=True)
+        self.curve_cast(CurveJscVoc.CURVE, le)
         # remove strange characters from attributes keys
         attr = self[le].get_attributes()
         dictUpd = {}
@@ -75,12 +74,12 @@ class GraphJscVoc(Graph):
             {
                 "typeplot": "semilogy",
                 "alter": ["", "abs"],
-                "xlabel": self.formatAxisLabel(GraphJscVoc.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphJscVoc.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphJscVoc.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphJscVoc.AXISLABELS[1]),
             }
         )
 
-    def findCurveWithX(self, curve):
+    def findCurveWithX(self, curve: Curve):
         """
         Find the Curve with same x data as the given Curve
         JscVoc: that Curve should store temperatures
@@ -97,7 +96,7 @@ class GraphJscVoc(Graph):
                         return self[c]
                 return False
 
-    def split_temperatures(self, curve, threshold=3):
+    def split_temperatures(self, curve: Curve, threshold=3):
         """
         Splits the compiled data into different data (one for each T)
         curve: stores the Jsc-Voc pairs - will need to find the T
@@ -173,7 +172,7 @@ class GraphJscVoc(Graph):
         Jsclim=None,
         threshold=3,
         graphsnJ0=True,
-        curve=None,
+        curve: "CurveJscVoc"=None,
         silent=False,
     ):
         """Fit the Jsc-Voc data, returns fitted Curves.
@@ -229,7 +228,7 @@ class GraphJscVoc(Graph):
             if not silent:
                 msg = "Fit Jsc-Voc (T={}): ideality factor n={}, J0={:1.4e} [mA/cm2]."
                 print(msg.format(temps[i], n, J0))
-            x, y = curve.selectData(xlim=Voclim, ylim=Jsclim, data=datas[i])
+            x, y = curve.select_data(xlim=Voclim, ylim=Jsclim, data=datas[i])
             out.append(CurveJscVoc([x, curve.func_nJ0(x, n, J0, T=temps[i])], attr))
             ns.append(n)
             J0s.append(J0)
@@ -279,7 +278,7 @@ class GraphJscVoc(Graph):
         ifFit=False,
         fitTlim=None,
         extend0=False,
-        curve=None,
+        curve: Curve=None,
         silent=False,
     ):
         """
@@ -333,8 +332,8 @@ class GraphJscVoc(Graph):
         except Exception:
             colors = [""] * len(data)
         xylbls = [
-            self.formatAxisLabel(["Temperature", "T", "K"]),
-            self.formatAxisLabel(["Voc", "", "V"]),
+            self.format_axis_label(["Temperature", "T", "K"]),
+            self.format_axis_label(["Voc", "", "V"]),
         ]
         res = []
         out = []
@@ -458,7 +457,7 @@ class CurveJscVoc(Curve):
         )
         out.append([self.print_help, "Help!", [], []])
 
-        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
+        out += funclistgui_graph_axislabels(self, **kwargs)
         return out
 
     def alterListGUI(self):
@@ -477,13 +476,13 @@ class CurveJscVoc(Curve):
     def setArea(self, new):
         """correct the cell area, and scale the y (list of Jsc) accordingly"""
         old = self.getArea()
-        self.setY(self.y() * old / new)
+        self.set_y(self.y() * old / new)
         self.update({"area [cm2]": new})
         return True
 
     def fit_nJ0(self, Voclim=None, Jsclim=None, data=None, T=None):
         """perform fitting, returns best fit parameters"""
-        datax, datay = self.selectData(xlim=Voclim, ylim=Jsclim, data=data)
+        datax, datay = self.select_data(xlim=Voclim, ylim=Jsclim, data=data)
         if len(datax) < 2 or len(datay) < 2:
             return [np.nan, np.nan]
         if T is None:

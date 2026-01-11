@@ -6,18 +6,17 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 import os
 import copy
-from typing import Any
+from typing import Any, Dict
 import logging
 
 import numpy as np
 from scipy.optimize import fsolve
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
-from grapa.utils.error_management import GrapaError
 from grapa.datatypes.curveSIMS import CurveSIMS
-
-from grapa.mathModule import roundSignificant, is_number
+from grapa.parse.parser_dispatcher import FileParserDispatcher
+from grapa.shared.error_management import GrapaError
+from grapa.shared.maths import roundSignificant, is_number
 
 
 logger = logging.getLogger(__name__)
@@ -129,8 +128,8 @@ class GraphSIMS(Graph):
         if ylabel == "":
             ylabel = GraphSIMS.AXISLABELS[1]
         if self[-1].attr("sputter time (s)") != "":
-            self.update({"xlabel": self.formatAxisLabel(GraphSIMS.AXISLABELS[0])})
-            self.update({"ylabel": self.formatAxisLabel(ylabel)})
+            self.update({"xlabel": self.format_axis_label(GraphSIMS.AXISLABELS[0])})
+            self.update({"ylabel": self.format_axis_label(ylabel)})
         # set correct labels
         sample = self[-1].attr("sample")
         if sample == "":
@@ -138,7 +137,7 @@ class GraphSIMS(Graph):
             sample = " ".join(sample).replace("_", " ")
         for c in range(len(self)):
             self[c].update({"label": self[c].attr("total"), "sample": sample})
-            self.castCurve("CurveSIMS", c, silentSuccess=True)
+            self.curve_cast("CurveSIMS", c)
             self[c].label_auto("${_simselement}")  # BEWARE
         # prints default keywords
         msg = "SIMS available ratio keywords: {}."
@@ -288,7 +287,7 @@ class GraphSIMS(Graph):
         ret = True
         ratio: np.ndarray = None
         x = None
-        attrs: dict[str, Any] = {
+        attrs: Dict[str, Any] = {
             "filename": "",
             "_SIMSlayerBoundaries": "",
             "_simsdepth_offset": "",

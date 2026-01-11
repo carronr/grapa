@@ -108,13 +108,13 @@ def test_roi_to_mask(curve1):
     assert (curve1.x() == xmasked).all()
 
 
-def test_normalize_revert(curve1):
+def test_normalize_revert(curve1: "CurveTRPL"):
     y = np.array(list(curve1.y()))
     mask = ~np.isclose(y, 0)
     args = [1e6, 120, 100]
     offsets = [0, 10]
     for offset in offsets:
-        curve1.setY(y)  # make sure correct starting point
+        curve1.set_y(y)  # make sure correct starting point
         factor = 1 / (args[0] * args[1] * args[2] * 1e-12)  # last in ps versus s
         curve1.addOffset(offset)
         curve1.normalize(*args)

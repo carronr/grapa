@@ -26,3 +26,4 @@ GUI_colorscale14	'afmhot'
 
 # default saving image format
 save_imgformat	.png
+save_image_dpi	300

@@ -8,8 +8,9 @@ import numpy as np
 import copy
 
 from grapa.curve import Curve
-from grapa.mathModule import roundSignificant
-from grapa.utils.funcgui import FuncListGUIHelper, AlterListItem
+from grapa.shared.maths import roundSignificant
+from grapa.shared.funcgui import AlterListItem, funclistgui_graph_axislabels
+
 
 
 def findXAtValuePolynom(datax, datay, target, ifPlot=False):
@@ -223,7 +224,7 @@ class CurveSIMS(Curve):
         out.append([self.print_help, "Help!", [], []])
 
         lookup_x = {self.ALTER_SIMS_TIME_DEPTH: "nm"}
-        out += FuncListGUIHelper.graph_axislabels(self, lookup_x=lookup_x, **kwargs)
+        out += funclistgui_graph_axislabels(self, lookup_x=lookup_x, **kwargs)
 
         self._funclistgui_memorize(out)
         return out

@@ -4,10 +4,10 @@ import warnings
 
 import numpy as np
 
-from . import grapa_folder, Graph, HiddenPrints, GrapaWarning
-from grapa.graph import ConditionalPropertyApplier
-from grapa.utils.string_manipulations import TextHandler
 from grapa.curve import Curve
+from grapa.shared.conditional_property_applier import ConditionalPropertyApplier
+from grapa.shared.string_manipulations import TextHandler
+from . import grapa_folder, Graph, HiddenPrints, GrapaWarning
 
 
 def are_graphs_same(graph1, graph2):

@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ElementTree
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.curve_subclasses_utils import FileLoaderOnDemand
+from grapa.parse.curve_subclasses_utils import FileLoaderOnDemand
 
 
 class GraphXML(Graph):
@@ -96,7 +96,7 @@ class GraphXML(Graph):
                     self.update({attr: val})
                     self[-1].update({attr: ""})
             if preset["cast"] != "":
-                self.castCurve(preset["cast"], -1, silentSuccess=True)
+                self.curve_cast(preset["cast"], -1)
         # cosmetics, last changes
         val = presetc.attr("_meastype")
         if len(val) > 0:

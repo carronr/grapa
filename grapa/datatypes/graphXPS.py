@@ -65,8 +65,8 @@ class GraphXPS(Graph):
         # graph cosmetics
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphXPS.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphXPS.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphXPS.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphXPS.AXISLABELS[1]),
             }
         )
         self.update({"xlim": [max(self[-1].x()), min(self[-1].x())]})

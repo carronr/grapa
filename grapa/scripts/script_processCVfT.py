@@ -5,11 +5,12 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 import os
-import numpy as np
-import matplotlib.pyplot as plt
 import sys
 import copy
 import warnings
+from typing import Optional, Dict, Any
+
+import numpy as np
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -18,12 +19,13 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import file_read_first3lines
 from grapa.curve import Curve
 from grapa.curve_image import Curve_Image
 from grapa.curve_subplot import Curve_Subplot
-from grapa.mathModule import roundSignificant
 from grapa.colorscale import Colorscale
+from grapa.shared.maths import roundSignificant
+from grapa.shared.mpl_figure_factory import MplFigureFactory
+from grapa.parse.parser_dispatcher import file_read_first3lines
 from grapa.datatypes.graphCf import GraphCf
 from grapa.datatypes.curveCV import CurveCV
 
@@ -592,10 +594,19 @@ def plot_graphs_cf(
 
 
 def script_process_cvft(
-    folder, tolerance_temperature="default", pltClose=True, newGraphKwargs={}
+    folder,
+    tolerance_temperature="default",
+    pltClose=True,
+    newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
+    if newGraphKwargs is None:
+        newGraphKwargs = {}
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     newgraphkwargs = copy.deepcopy(newGraphKwargs)
     errorsmsg = WarningCollector()
+    kwplot: Dict[str, Any] = {"figure_factory": figure_factory}
     kw = {"newgraphkwargs": newgraphkwargs, "errorsmsg": errorsmsg, "folder": folder}
 
     # retrieve data from folder
@@ -640,18 +651,20 @@ def script_process_cvft(
 
     cwd = os.getcwd()
     os.chdir(folder)
-    graphmain.plot(fnamemap)
+    graphmain.plot(fnamemap, **kwplot)
     if pltClose:
-        plt.close()
+        figure_factory.close()
     with warnings.catch_warnings():  # if not enough volts to compute doping
         warnings.simplefilter("ignore", category=RuntimeWarning)
-        graphcmain.plot(fnamec)
-        graphchzmain.plot(fnamechz)
-    if pltClose:
-        plt.close()
+        graphcmain.plot(fnamec, **kwplot)
+        if pltClose:
+            figure_factory.close()
+        graphchzmain.plot(fnamechz, **kwplot)
+        if pltClose:
+            figure_factory.close()
     graphfmain.plot(fnamef)
     if pltClose:
-        plt.close()
+        figure_factory.close()
     os.chdir(cwd)
 
     # end
@@ -670,6 +683,7 @@ if __name__ == "__main__":
     From a set of C-f data acquired at different voltages and temperatures,
     provides C-V-f maps for each temperatures, as well as C-V and C-f plots.
     """
+    import matplotlib.pyplot as plt
 
     folder_ = "./../examples/Cf/"
     script_process_cvft(folder_, pltClose=False)  # , tolerance_temperature=5)

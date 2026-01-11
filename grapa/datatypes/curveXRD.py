@@ -8,9 +8,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 import os
 
 from grapa.curve import Curve
-from grapa.utils.curve_subclasses_utils import FitHandlerBasicFunc
-
-# from grapa.gui.GUIFuncGUI import FuncGUI
+from grapa.parse.curve_subclasses_utils import FitHandlerBasicFunc
 
 
 class CurveXRD(Curve):
@@ -55,10 +53,10 @@ class CurveXRD(Curve):
         # override default behavior, additional things to do
         param, revert, func = self.FITHANDLER.updateFitParam_before(self, *param)
         # call base function, including parameter func
-        out = super().updateFitParam(*param, func=func)
+        super().updateFitParam(*param, func=func)
         # revert callable parameter to its initial string value
         self.FITHANDLER.updateFitParam_after(self, revert)
-        return out
+        return True
 
     def fit_explicit(
         self, roi, *args, funcname="", preset_label="", p0_raw=None, **kwargs

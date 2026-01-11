@@ -14,11 +14,10 @@ from scipy.optimize import curve_fit
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.constants import CST
-from grapa.mathModule import roundSignificant, roundSignificantRange, is_number, trapz
-
-from grapa.utils.curve_subclasses_utils import FileLoaderOnDemand
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
+from grapa.shared.constants import CST
+from grapa.shared.maths import roundSignificant, roundSignificantRange, is_number, trapz
+from grapa.shared.funcgui import FuncGUI, AlterListItem, funclistgui_graph_axislabels
+from grapa.parse.curve_subclasses_utils import FileLoaderOnDemand
 
 
 class FileLoaderOnDemandAM0(FileLoaderOnDemand):
@@ -312,10 +311,10 @@ class CurveEQE(Curve):
 
     def updateFitParam(self, *args, **kwargs):
         """Override. Additional behavior when changing gaussian fit to derivative"""
-        out = super().updateFitParam(*args, **kwargs)
+        super().updateFitParam(*args, **kwargs)
         if self.attr("_fitfunc") == "func_gaussian_a_ev":
             self.print_popt_func_gaussian_a_ev(self.attr("_popt"), "Bandgap")
-        return out
+        return True
 
     # UTILITY FUNCTIONS
     @classmethod
@@ -989,11 +988,6 @@ class CurveEQE(Curve):
         ERE = 2 * np.pi * CST.q / CST.h**3 / CST.c**2 / jsc  # [J-3]
         ERE *= np.exp(CST.q * voc / CST.kb / T)  # new term unit-less
         ERE *= integral  # output [unit-less]
-        # lbl = ["ERE integrand to " + self.attr("label"), "", "eV$^2$"]
-        # out = Curve(
-        #     [nm[mask], integrand[mask] / (CST.q**2)],
-        #     {"label": Graph().formatAxisLabel(lbl)},
-        # )
         if not silent:
             msg = (
                 "External radiative efficiency [Green]: {:.3E} (input Voc: {}, "
@@ -1035,7 +1029,7 @@ class CurveEQE(Curve):
         lbl = [label + " q * EQE * $\\phi_{bb}$", "", "A m$^{-2}$ J$^{-1}$"]
         curve = Curve(
             [CST.q * CST.nm_eV / E[mask], CST.q * integrand[mask]],
-            {"label": Graph().formatAxisLabel(lbl), "color": "k", "ax_twinx": 1},
+            {"label": Graph().format_axis_label(lbl), "color": "k", "ax_twinx": 1},
         )
         out.append(curve)
         if not silent:
@@ -1337,16 +1331,16 @@ def _funcListGUI_derivativeanalysis(curve):
     xdata = curve.x()
     try:
         tmpmed = medfilt(curve.y(), 5)
-        ROI = [xdata[np.argmax(tmpmed)], np.max(xdata)]
+        roi = [xdata[np.argmax(tmpmed)], np.max(xdata)]
     except Exception:
         if len(xdata) > 0:
-            ROI = [np.min(xdata), np.max(xdata)]
+            roi = [np.min(xdata), np.max(xdata)]
         else:
-            ROI = [0, 0]
+            roi = [0, 0]
     line = FuncGUI(curve.CurveEQE_derivativeanalysis, "Bandgap derivative & PV")
     line.append("Savitzky–Golay width", 5)
     line.append("degree", 2)
-    line.append("nm range", roundSignificantRange(ROI, 3))
+    line.append("nm range", roundSignificantRange(roi, 3))
     line.set_hiddenvars({"silent": False})
     return [line]
 
@@ -1360,7 +1354,7 @@ def _funclistgui_graph_axislabels(curve, **kwargs):
         lookup_unity = curve.UNIT_LOOKUP_Y[unity]
     except (TypeError, KeyError, IndexError):
         lookup_unity = None
-    out += FuncListGUIHelper.graph_axislabels(curve, lookup_y=lookup_unity, **kwargs)
+    out += funclistgui_graph_axislabels(curve, lookup_y=lookup_unity, **kwargs)
     return out
 
 

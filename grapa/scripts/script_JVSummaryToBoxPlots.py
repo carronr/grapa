@@ -11,11 +11,10 @@ import os
 import copy
 import sys
 from typing import Optional, List, Tuple
-from contextlib import contextmanager
 from dataclasses import dataclass
+from contextlib import contextmanager
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -26,6 +25,7 @@ if path not in sys.path:
 from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.curve_subplot import Curve_Subplot
+from grapa.shared.mpl_figure_factory import MplFigureFactory
 
 try:
     from grapa.scripts.script_processJV import writeFileAvgMax
@@ -35,6 +35,7 @@ except ImportError:
 
 @contextmanager
 def temporary_chdir(new_path):
+    """Context manager to temporary change os.getcwd"""
     prev_cwd = os.getcwd()  # Save current working directory
     os.chdir(new_path)  # Change to new directory
     try:
@@ -51,6 +52,7 @@ class ManyArgs:
     export_prefix: str
     plotkwargs: dict
     pltclose: bool
+    figure_factory: MplFigureFactory
 
 
 def label_from_graph(graph, silent=False, file=""):
@@ -138,12 +140,13 @@ def _is_jv(files, newgraphkwargs):
 
 def JVSummaryToBoxPlots(
     folder: str,
-    exportPrefix="boxplot_",
+    exportPrefix="boxplots_",
     replace: Optional[List[Tuple[str, str]]] = None,
     plotkwargs: Optional[dict] = None,
     silent=False,
     pltClose=True,
     newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """Generate box plots from JV or general data files in a given folder.
 
@@ -165,11 +168,15 @@ def JVSummaryToBoxPlots(
         newGraphKwargs = {}
     ngkwargs = copy.deepcopy(newGraphKwargs)
     ngkwargs.update({"silent": silent})
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
+    if "figure_factory" not in plotkwargs:
+        plotkwargs["figure_factory"] = figure_factory
 
     # establish list of files
     files = generate_file_list(folder, exportPrefix)
     if len(files) == 0:
-        print("Script JV summary to boxplot: Cold not find suitable data files. Abort.")
+        print("Script JV summary to boxplot: Not found suitable data files. Abort.")
         return None
 
     # default mode: every column is shown, grouped by columns
@@ -236,10 +243,10 @@ def JVSummaryToBoxPlots(
 
         for i, c in enumerate(curves_of_interest):
             if c >= len(graph):
-                print("graph[c].getData()", len(graph), c)
+                print("WARNING inconsistency graph[c].get_data()", len(graph), c)
                 continue
 
-            data = graph[c].getData()
+            data = graph[c].get_data()
             # prepare graph title
             while i >= len(titles):
                 titles.append("")
@@ -257,17 +264,17 @@ def JVSummaryToBoxPlots(
 
             # prepare graph
             if title != "":
-                titles[i] = graph.formatAxisLabel(title)
+                titles[i] = graph.format_axis_label(title)
             while i >= len(graphs):
                 graphs.append(Graph("", **ngkwargs))
             graphs[i].append(Curve(data, complement))
         # go to next file
 
-    manyargs = ManyArgs(folder, exportPrefix, plotkwargs, pltClose)
+    manyargs = ManyArgs(folder, exportPrefix, plotkwargs, pltClose, figure_factory)
 
     graph_size(graphs, files, n_carriagereturn_label, boxplot_positions)
     filesaves = plot_individual_graphs(manyargs, graphs, titles, mode, jv_updates)
-    graphsum = graph_summary(manyargs, filesaves)
+    graphsum = graph_summary(manyargs, filesaves, ngkwargs)
     save_statistics(manyargs, str_statistics)
     print("JVSummaryToBoxPlots completed.")
     return graphsum
@@ -298,8 +305,7 @@ def jv_title_data(title, data, c, collabels, i, jv_titlei, file):
                 flag = True
                 break
     if not flag:
-        msg = "Wrong column name, no data plotted, file {} i {} column {}"
-        print(msg.format(file, i, c))
+        print(f"Wrong column name, no data plotted, file {file} i {i} column {c}")
         data = [[np.nan], [np.nan]]
         title = ""
 
@@ -337,7 +343,9 @@ def graph_size(graphs, files, n_carriagereturn_label, boxplot_positions):
         graph.update({"figsize": figsize, "subplots_adjust": subplots_adjust})
 
 
-def plot_individual_graphs(manyargs: ManyArgs, graphs, titles, mode, jv_updates):
+def plot_individual_graphs(
+    manyargs: ManyArgs, graphs: list[Graph], titles, mode, jv_updates
+):
     """Plot and save individual graphs"""
     filesaves = []
     for i, graph in enumerate(graphs):
@@ -358,14 +366,14 @@ def plot_individual_graphs(manyargs: ManyArgs, graphs, titles, mode, jv_updates)
             filesave = os.path.join(manyargs.folder, manyargs.export_prefix + tit)
         graph.plot(filesave=filesave, **manyargs.plotkwargs)
         if manyargs.pltclose:
-            plt.close()
+            manyargs.figure_factory.close()
         filesaves.append(filesave + ".txt")
     return filesaves
 
 
-def graph_summary(args: ManyArgs, filesaves):
+def graph_summary(args: ManyArgs, filesaves, ngkwargs):
     """Make a big graph with one panel per individual graph created previsouly"""
-    graphsum = Graph()
+    graphsum = Graph(**ngkwargs)
     if len(filesaves) == 0:
         return graphsum
 
@@ -389,10 +397,10 @@ def graph_summary(args: ManyArgs, filesaves):
     )
 
     with temporary_chdir(args.folder):
-        print("filesave", filesave)
+        # print("Save summary:", filesave)
         graphsum.plot(filesave=filesave, **args.plotkwargs)
         if args.pltclose:
-            plt.close()
+            args.figure_factory.close()
     return graphsum
 
 
@@ -401,7 +409,7 @@ def save_statistics(args: ManyArgs, str_statistics):
     if len(str_statistics) > 0:
         print(str_statistics)
         filesave = os.path.join(args.folder, args.export_prefix + "statistics.txt")
-        print("filesave", filesave)
+        print("Save statistics:", filesave)
         with open(filesave, "w") as f:
             f.write(str_statistics)
 
@@ -409,8 +417,10 @@ def save_statistics(args: ManyArgs, str_statistics):
 def demo():
     folder_ = "./../examples/boxplot/"
     JVSummaryToBoxPlots(folder_, pltClose=False, silent=True)
-    plt.show()
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
     demo()
+    plt.show()

@@ -144,7 +144,7 @@ class GraphSquidAdmiral(Graph):
             labels = [[l.split(" (")[0], "", l.split(" (")[-1]] for l in labels]
         self.update(
             {
-                "xlabel": self.formatAxisLabel(labels[0]),
-                "ylabel": self.formatAxisLabel(labels[1]),
+                "xlabel": self.format_axis_label(labels[0]),
+                "ylabel": self.format_axis_label(labels[1]),
             }
         )

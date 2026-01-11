@@ -16,7 +16,8 @@ import numpy as np
 
 
 from grapa.curve import Curve
-from grapa.mathModule import (
+from grapa.shared.funcgui import FuncGUI, AlterListItem, funclistgui_graph_axislabels
+from grapa.shared.maths import (
     is_number,
     roundSignificant,
     roundSignificantRange,
@@ -25,8 +26,6 @@ from grapa.mathModule import (
     smooth,
     SMOOTH_WINDOW,
 )
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
-from grapa.utils.error_management import GrapaError
 
 
 def bin_data(x, y, binning=4):
@@ -403,7 +402,7 @@ class CurveTRPL(Curve):
         if is_number(factornew):
             self.update({"_TRPLFactor": factornew})
             self.update({"_TRPLOffset": self.getOffset() * factornew / factorold})
-        self.setY((cts * self.getFactor()) + self.getOffset())
+        self.set_y((cts * self.getFactor()) + self.getOffset())
         # backward compatibility
         if self.attr("_spectrumOffset", None) is not None:
             self.update({"_spectrumOffset": self.attr("_TRPLOffset")})
@@ -460,7 +459,7 @@ class CurveTRPL(Curve):
                as the average of the 25% and 95% percentiles.
         """
         if is_number(value):
-            self.setX(self.x() + value - self.getXOffset())
+            self.set_x(self.x() + value - self.getXOffset())
             self.update({"_TRPLxOffset": value})
             return True
         return self.addXOffset(-self.findOnset())
@@ -762,7 +761,7 @@ class CurveTRPL(Curve):
         Make sure to remove background before calculating differential lifetime.
         """
         curve = self.Curve_differential_lifetime()
-        curve.setX(self.y())
+        curve.set_x(self.y())
         msg = "{} Differential lifetime vs signal"
         curve.update(
             {
@@ -1076,6 +1075,6 @@ class GuiFunclistTrpl:
         lookup_y = {}
         for key in curve.AXISLABELS_Y:
             lookup_y[key] = unity
-        return FuncListGUIHelper.graph_axislabels(
+        return funclistgui_graph_axislabels(
             curve, lookup_y=lookup_y, lookup_x=lookup_x, **kwargs
         )

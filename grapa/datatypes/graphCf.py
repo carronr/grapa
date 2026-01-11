@@ -12,10 +12,10 @@ from re import findall as refindall
 from copy import deepcopy
 import numpy as np
 
-from grapa.mathModule import is_number
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
 from grapa.curve import Curve
+from grapa.shared.maths import is_number
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 
 
 class GraphCf(Graph):
@@ -45,7 +45,7 @@ class GraphCf(Graph):
         """
         len0 = len(self)
         FileParserDispatcher.readDataFromFileGeneric(self, attributes)
-        self.castCurve("Curve Cf", len0, silentSuccess=True)
+        self.curve_cast("Curve Cf", len0)
         # label based on file name, maybe want to base it on file content
         lbl = (
             self[len0]
@@ -108,9 +108,9 @@ class GraphCf(Graph):
         if area is None:
             area = self[len0].attr("area", None)
         if area is not None:
-            self[len0].setY(self[len0].y() / area)
+            self[len0].set_y(self[len0].y() / area)
             if idx_rp is not None:
-                self[idx_rp].setY(self[idx_rp].y() * area)
+                self[idx_rp].set_y(self[idx_rp].y() * area)
             self[len0].update({"cell area (cm2)": area})
             if not self.silent:
                 print("Capacitance normalized to area", self[len0].getArea(), "cm2.")
@@ -195,8 +195,8 @@ class GraphCf(Graph):
         self.update({"typeplot": "semilogx", "alter": ["", "idle"]})
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphCf.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(ylabel),
+                "xlabel": self.format_axis_label(GraphCf.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(ylabel),
             }
         )  # default
         if self[len0].attr("cell area (cm2)", None) is not None:

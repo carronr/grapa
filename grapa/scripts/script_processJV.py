@@ -6,13 +6,13 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 import os
 import sys
+import glob
+import logging
 from copy import deepcopy
 from re import search as research
-import glob
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 path_ = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -21,17 +21,20 @@ if path_ not in sys.path:
     sys.path.append(path_)
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import file_read_first3lines
 from grapa.database import Database
-from grapa.mathModule import is_number, roundSignificant
-from grapa.utils.string_manipulations import strToVar
 from grapa.colorscale import Colorscale
 from grapa.curve import Curve
 from grapa.curve_subplot import Curve_Subplot
-
+from grapa.shared.maths import is_number, roundSignificant
+from grapa.shared.string_manipulations import strToVar
+from grapa.shared.mpl_figure_factory import MplFigureFactory
+from grapa.parse.parser_dispatcher import file_read_first3lines
 from grapa.datatypes.graphJV import GraphJV
 from grapa.datatypes.curveJV import CurveJV
 from grapa.datatypes.graphJVDarkIllum import GraphJVDarkIllum
+
+
+logger = logging.getLogger(__name__)
 
 
 # prompt for folder
@@ -65,7 +68,7 @@ class AreaDBHandler:
 
     def get(self, folder, sample):
         """.get(folder, sample) returns an AreaDB object"""
-        print("areaDBHandler", folder, sample)
+        # print("areaDBHandler", folder, sample)
         if folder not in self._dict:
             self._dict.update({folder: {}})
         if sample not in self._dict[folder]:
@@ -82,39 +85,45 @@ class AreaDB(Database):
         self.folder = folder
         self.sample = sample
         # different possible names for area databases
-        test = [
-            [os.path.join(folder, sample + ".txt"), ""],
-            [os.path.join(folder, sample + "_area.txt"), ""],
-            [os.path.join(folder, sample + "_areas.txt"), ""],
-            [os.path.join(folder, "area.txt"), ""],
-            [os.path.join(folder, "area.xlsx"), sample],
-            [os.path.join(folder, "areas.txt"), ""],
-            [os.path.join(folder, "areas.xlsx"), sample],
+        testfiles = [
+            (os.path.join(folder, sample + ".txt"), {}),  # ,  {"readas": "database"}),
+            (
+                os.path.join(folder, sample + "_area.txt"),
+                {},
+            ),  # ,  {"readas": "database"}),
+            (
+                os.path.join(folder, sample + "_areas.txt"),
+                {},
+            ),  # ,  {"readas": "database"}),
+            (os.path.join(folder, "area.txt"), {}),  # ,  {"readas": "database"}),
+            (os.path.join(folder, "area.xlsx"), {"complement": sample}),
+            (os.path.join(folder, "areas.txt"), {}),  # , {"readas": "database"}),
+            (os.path.join(folder, "areas.xlsx"), {"complement": sample}),
         ]
         self.flag = False
         self.flag_cheat = False
-        for t in test:
-            print("Area database: look for file ", t[0])
-            if not os.path.exists(t[0]):  # file not found
+        for testfile, testkwargs in testfiles:
+            print("Area database: try open file ", testfile)
+            if not os.path.exists(testfile):  # file not found
                 continue
-
-            graph = Graph(t[0], complement=t[1], silent=True, config=None)
+            graph = Graph(testfile, **testkwargs, silent=True, config=None)
             if len(graph) == 0:
                 continue
-            else:
-                try:
-                    # try convert it in database
-                    Database.__init__(self, graph)
-                    # identify suitable column
-                    for col in self.colLabels:
-                        if col.find("area") > -1:
-                            self.col_idx = col
-                    self.flag = True
-                    print("Database of cell area parsed and area identified.")
-                except Exception:
-                    print("-> database file data could not be interpreted correctly.")
-                    continue
-                break  # break if success
+
+            try:  # convert Graph into a database
+                Database.__init__(self, graph)
+                # identify suitable column
+                for col in self.colLabels:
+                    if col.find("area") > -1:
+                        self.col_idx = col
+                self.flag = True
+                print("Database of cell area parsed and area identified.")
+            except Exception as e:
+                msg = "-> database file data could not be interpreted correctly. %s, %s"
+                print(msg % (type(e), e))
+                # issue_warning(logger, msg, type(e), e, exc_info=True)
+                continue
+            break  # break if success
         if not self.flag:
             print("areaDB: cannot find area database file.")
 
@@ -127,7 +136,7 @@ class AreaDB(Database):
             return np.nan
         out = self.value(self.col_idx, cell)
         if isinstance(out, list):
-            print("Warning: please check that cell (picel) exists in database!", cell)
+            print("Warning: please check that cell (pixel) exists in database!", cell)
             return np.nan
         if np.isnan(out):
             out = self.value(self.col_idx, self.sample + " " + cell)
@@ -292,20 +301,44 @@ class IvDataLocator:
         return sampledict, areadict, header
 
 
-def _plot_jvall(graph: Graph, s: str, folder: str, fig_ax: list, pltclose: bool):
+def _plot_jvall(
+    graph: Graph,
+    s: str,
+    folder: str,
+    fig_ax: list,
+    pltclose: bool,
+    figure_factory: Optional[MplFigureFactory] = None,
+):
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     fsave = "export_{}_summary_allJV".format(s)
     for c in graph:
         c.update({"color": ""})
     graph.update({"xlabel": GraphJV.AXISLABELS[0], "ylabel": GraphJV.AXISLABELS[1]})
-    graph.plot(os.path.join(folder, fsave), fig_ax=fig_ax)
+    graph.plot(
+        os.path.join(folder, fsave), fig_ax=fig_ax, figure_factory=figure_factory
+    )
     if pltclose and fig_ax is None:
-        plt.close()
+        figure_factory.close()
 
 
-def _process_sample(s, celldict, areadict, header0, struct):
+def _process_sample(
+    s,
+    celldict,
+    areadict,
+    header0,
+    struct,
+    figure_factory: Optional[MplFigureFactory] = None,
+):
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     encoding = "utf-8"
     folder, fig_ax, pltClose, group_cell, fitDiodeWeight, ylim, newgraphkwargs = struct
-    kwargs_plot = {"fig_ax": fig_ax, "pltClose": pltClose}
+    kwargs_plot = {
+        "fig_ax": fig_ax,
+        "pltClose": pltClose,
+        "figure_factory": figure_factory,
+    }
     complement = {"ylim": ylim, "saveSilent": True, "_fitDiodeWeight": fitDiodeWeight}
 
     s_str = "Sample " + str(s) if is_number(s) else str(s)
@@ -388,7 +421,7 @@ def _process_sample(s, celldict, areadict, header0, struct):
                 outdark += graph.printShort(onlyDark=True)
 
     # graph with all JV curves area-corrected
-    _plot_jvall(graph_alljv, s, folder, fig_ax, pltClose)
+    _plot_jvall(graph_alljv, s, folder, fig_ax, pltClose, figure_factory=figure_factory)
 
     # print sample summary
     fsave = "export_{}_summary.txt".format(s)
@@ -402,13 +435,17 @@ def _process_sample(s, celldict, areadict, header0, struct):
         fsave = os.path.join(folder, fsave)
         with open(fsave, "w", encoding=encoding) as f:
             f.write(outdark)
-        processSampleCellsMap(fsave, figAx=fig_ax, pltClose=pltClose)
+        processSampleCellsMap(
+            fsave, figAx=fig_ax, pltClose=pltClose, figure_factory=figure_factory
+        )
 
         fsave = "export_{}_summary_illum.txt".format(s)
         fsave = os.path.join(folder, fsave)
         with open(fsave, "w", encoding=encoding) as f:
             f.write(outillum)
-        processSampleCellsMap(fsave, figAx=fig_ax, pltClose=pltClose)
+        processSampleCellsMap(
+            fsave, figAx=fig_ax, pltClose=pltClose, figure_factory=figure_factory
+        )
         writeFileAvgMax(fsave, filesave=True, ifPrint=True)
     return graph_alljv
 
@@ -421,11 +458,14 @@ def processJVfolder(
     groupCell: bool = True,
     figAx: list = None,
     pltClose: bool = True,
-    newGraphKwargs: dict = {},
+    newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """Process a folder containing JV files, identify pairs of dark-illum files,"""
     msg = "Script processJV folder initiated. Data processing can last a few seconds."
     print(msg)
+    if newGraphKwargs is None:
+        newGraphKwargs = {}
     newgraphkwargs = deepcopy(newGraphKwargs)
     newgraphkwargs.update({"silent": True})
     if figAx is not None:
@@ -444,7 +484,9 @@ def processJVfolder(
     # process each sample found
     struct = (folder, figAx, pltClose, groupCell, fitDiodeWeight, ylim, newgraphkwargs)
     for s, celldict in sampledict.items():
-        graph_alljv = _process_sample(s, celldict, areadict, header, struct)
+        graph_alljv = _process_sample(
+            s, celldict, areadict, header, struct, figure_factory=figure_factory
+        )
     print("Script processJV folder done.")
     return graph_alljv
 
@@ -557,10 +599,19 @@ def writeFileAvgMax(
 
 
 def processSampleCellsMap(
-    file, colorscale=None, figAx=None, pltClose=True, newGraphKwargs={}
+    file,
+    colorscale=None,
+    figAx=None,
+    pltClose=True,
+    newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """Process a file containing summary of solar cell parameters for different cells,
     and plot maps of the different parameters."""
+    if newGraphKwargs is None:
+        newGraphKwargs = {}
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     newGraphKwargs = deepcopy(newGraphKwargs)
     newGraphKwargs.update({"silent": True})
 
@@ -681,6 +732,7 @@ def processSampleCellsMap(
                 figAx=figAx,
                 inverseScale=inveScale[i],
                 pltClose=pltClose,
+                figure_factory=figure_factory,
             )
 
             if isinstance(res, Graph) and len(res) > 0:
@@ -724,9 +776,9 @@ def processSampleCellsMap(
         )
         filesave = ".".join(file.split(".")[:-1]) + "_" + ["basic", "diode"][0]
         graphs[0].filename = filesave
-        graphs[0].plot(filesave=filesave, fig_ax=figAx)
+        graphs[0].plot(filesave=filesave, fig_ax=figAx, figure_factory=figure_factory)
         if pltClose:
-            plt.close()
+            figure_factory.close()
         filesummary.append(filesave + ".txt")
 
     if len(graphs[1]) > 0:
@@ -739,9 +791,9 @@ def processSampleCellsMap(
         )
         filesave = ".".join(file.split(".")[:-1]) + "_" + ["basic", "diode"][1]
         graphs[1].filename = filesave
-        graphs[1].plot(filesave=filesave, fig_ax=figAx)
+        graphs[1].plot(filesave=filesave, fig_ax=figAx, figure_factory=figure_factory)
         if pltClose:
-            plt.close()
+            figure_factory.close()
         filesummary.append(filesave + ".txt")
 
     return filelist, filesummary
@@ -757,10 +809,15 @@ def plotSampleCellsMap(
     figAx=None,
     inverseScale=False,
     pltClose=True,
-    newGraphKwargs={},
+    newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """Plot a map of solar cell parameters for different cells."""
     # sizefactor: float, or np.array for each item in values. e.g. 0.25 to reduce markersize
+    if newGraphKwargs is None:
+        newGraphKwargs = {}
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     size_cell = np.array([0.6, 0.6])
     margin = np.array([0.4, 0.4])
 
@@ -879,7 +936,7 @@ def plotSampleCellsMap(
             "figsize": list(figsize),
             "text": texttxt,
             "textargs": textarg,
-            "title": graph.formatAxisLabel(title),
+            "title": graph.format_axis_label(title),
             "xlim": [min(xticks), max(xticks)],
             "ylim": [min(yticks), max(yticks)],
         }
@@ -912,18 +969,20 @@ def plotSampleCellsMap(
         # graph.plot(filesave, figAx=figAx)  # plot -> would need to plt.close() accordingly
         graph.export(filesave)  # export only txt file, and not the image
     else:
-        graph.plot(fig_ax=figAx, if_subplot=True)
+        graph.plot(fig_ax=figAx, if_subplot=True, figure_factory=figure_factory)
         if pltClose and figAx is None:
-            plt.close()
+            figure_factory.close()
     return graph
 
 
 def standalone():
     """Standalone function to test the script"""
+    import matplotlib.pyplot as plt
+
     # go through files, store files content in order to later select pairs
     folder = "./../examples/JV/SAMPLE_A/"
 
-    processJVfolder(folder, fitDiodeWeight=5, pltClose=True, groupCell=True)
+    processJVfolder(folder, fitDiodeWeight=5, pltClose=False, groupCell=True)
     # processJVfolder(folder, groupCell=True, fitDiodeWeight=5, pltClose=False)
 
     # file = r'./../examples/JV\SAMPLE_B_3layerMo\export_sample_b_3layermo_summary_illum.txt'

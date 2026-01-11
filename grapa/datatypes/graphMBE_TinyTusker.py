@@ -119,15 +119,15 @@ class GraphMBE_TinyTusker(Graph):
                 )
 
         # graph cosmetics
-        # self.update({'xlabel': self.formatAxisLabel(['Bias voltage', 'V', 'V']),
-        #             'ylabel': self.formatAxisLabel(['Current density', 'J', 'mA cm$^{-2}$'])})
+        # self.update({'xlabel': self.format_axis_label(['Bias voltage', 'V', 'V']),
+        #             'ylabel': self.format_axis_label(['Current density', 'J', 'mA cm$^{-2}$'])})
         # self.update({'axhline': [0, {'linewidth': 0.5}], 'axvline': [0, {'linewidth': 0.5}]})
 
         # self.append(Curve(np.transpose(data_2d[:,0:2]), attributes))
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphMBE_TinyTusker.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphMBE_TinyTusker.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphMBE_TinyTusker.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphMBE_TinyTusker.AXISLABELS[1]),
             }
         )
 
@@ -243,7 +243,7 @@ class GraphMBE_TinyTusker(Graph):
             # Adjust time 0 of graph to main shutter opening time
             index = 0
             while self[index] is not None:
-                self[index].setX(self[index].x() - main_shutter_opening_time)
+                self[index].set_x(self[index].x() - main_shutter_opening_time)
                 index += 1
 
             minus3_time_index = np.argmin(

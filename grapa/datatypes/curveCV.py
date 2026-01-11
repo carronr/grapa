@@ -10,9 +10,9 @@ import warnings
 import numpy as np
 
 from grapa.curve import Curve
-from grapa.mathModule import roundSignificant, derivative, is_number
-from grapa.constants import CST
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
+from grapa.shared.constants import CST
+from grapa.shared.maths import roundSignificant, derivative, is_number
+from grapa.shared.funcgui import FuncGUI, AlterListItem, funclistgui_graph_axislabels
 
 
 class CurveCV(Curve):
@@ -109,7 +109,7 @@ class CurveCV(Curve):
                 ]
             )
         # set epsilon
-        line = FuncGUI(self.setEpsR, "Set epsilon r \u03F5\u1D63")
+        line = FuncGUI(self.setEpsR, "Set epsilon r \u03f5\u1d63")
         line.append("default = 10", self.getEpsR())
         out.append(line)
         # help
@@ -119,7 +119,7 @@ class CurveCV(Curve):
             lookup_unity = self.UNIT_LOOKUP_Y[self.attr("_units")[1]]
         except (TypeError, KeyError, IndexError):
             lookup_unity = None
-        out += FuncListGUIHelper.graph_axislabels(self, lookup_y=lookup_unity, **kwargs)
+        out += funclistgui_graph_axislabels(self, lookup_y=lookup_unity, **kwargs)
         # finally memorize
         self._funclistgui_memorize(out)
         return out
@@ -192,7 +192,7 @@ class CurveCV(Curve):
         """
         oldArea = self.getArea()
         self.update({"cell area (cm2)": value})
-        self.setY(self.y() / value * oldArea)
+        self.set_y(self.y() / value * oldArea)
         return True
 
     def getArea(self):
@@ -257,7 +257,7 @@ class CurveCV(Curve):
         Fits the C-V data on Mott-Schottky plot, in ROI Vlim[0] to Vlim[0].
         Returns built-in voltage Vbi [V], apparent doping density N_CV [cm-3].
         """
-        datax, datay = self.selectData(xlim=Vlim)
+        datax, datay = self.select_data(xlim=Vlim)
         if len(datax) == 0:
             return np.nan, np.nan
         datay = 1 / (datay * 1e-5) ** 2  # calculation in SI units [F m-2]

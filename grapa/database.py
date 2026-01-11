@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """Database os not quite a Graph. Used to store data as table with labels.
-NB: not well leveraged within grapa
+NB: not nice implementation. Also, not well leveraged within grapa
 
 @author: Romain Carron
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import logging
+from typing import Optional
 
 import numpy as np
 
-
 from grapa.graph import Graph
-from grapa.mathModule import is_number
-from grapa.utils.error_management import issue_warning
+from grapa.shared.maths import is_number
+from grapa.shared.error_management import issue_warning
 
 
 logger = logging.getLogger(__name__)
@@ -29,41 +29,73 @@ class Database:
       respetively the rows, and rowLabelNums a numeric index corresponding the row label.
     """
 
-    def __init__(self, data, colLabels=[], rowLabels=[], rowLabelNums=[]):
-        self.rowLabel = "Growth TL nb"
+    def __init__(
+        self,
+        data,
+        colLabels: Optional[list] = None,
+        rowLabels: Optional[list] = None,
+        rowLabelNums: Optional[list] = None,
+    ):
+        if colLabels is None:
+            colLabels = []
+        if rowLabels is None:
+            rowLabels = []
+        if rowLabelNums is None:
+            rowLabelNums = []
+        self.rowLabel = ""
+        self.rowLabels = []
+        self.colLabels = []
+        self.rowLabelNums = []
         self.attr = {}
+        self.data = np.ndarray([])
         if isinstance(data, Graph):
-            self.colLabels = data.attr("collabels")
-            self.rowLabels = data.attr("rowlabels")
-            self.rowLabelNums = data.attr("rowlabelnums")
-            if data.attr("rowLabel") != "":
-                self.rowLabel = data.attr("rowLabel")
-            if data[0].shape(1) == 0:
-                self.data = np.ndarray([])
-            else:
-                # assumes all Curves have identical x data
-                self.data = np.ndarray((data[0].shape(1), len(data)))
-                for i, datai in enumerate(data):
-                    self.data[:, i] = datai.y()
-                    if not np.array_equiv(datai.x(), data[0].x()):
-                        msg = (
-                            "Database init: columns with different rows x "
-                            "values! (col %s)"
-                        )
-                        logger.error(msg, i)
+            self._init_from_graph(data)
         else:
-            self.data = np.array(data)
-            self.colLabels = colLabels
-            self.rowLabels = rowLabels
-            if rowLabelNums == []:
-                self.rowLabelNums = self.rowLabels[:]
-            else:
-                self.rowLabelNums = rowLabelNums
-            for i in range(len(self.rowLabelNums)):
-                try:
-                    self.rowLabelNums[i] = float(self.rowLabelNums[i])
-                except Exception:
-                    self.rowLabelNums[i] = np.nan
+            self._init_from_source(data, colLabels, rowLabels, rowLabelNums)
+
+    def _init_from_graph(self, graph: Graph):
+        self.colLabels = graph.attr("collabels")
+        self.rowLabelNums = graph.attr("rowlabelnums")
+        if graph.attr("rowLabel") != "":
+            self.rowLabels = graph.attr("rowLabel")
+
+        if len(self.rowLabels) == 0 and len(graph) == 1 and len(graph[0].x()) <= 1:
+            # 2-column file, data of interest stored in metadata
+            print("Database init from Graph metadata")
+            data = []
+            for key, value in graph[0].get_attributes().items():
+                if is_number(value):
+                    self.rowLabels.append(key)
+                    data.append(value)
+            self.data = np.array(data).reshape(-1, 1)
+            return
+
+        print("Database init from Graph rowLabels", self.rowLabels)
+        if len(graph[0].x()) == 0:
+            self.data = np.ndarray([])
+            return
+
+        # assumes all Curves have identical x data
+        self.data = np.ndarray((len(graph[0].x()), len(graph)))
+        for i, datai in enumerate(graph):
+            self.data[:, i] = datai.y()
+            if not np.array_equiv(datai.x(), graph[0].x()):
+                msg = "Database init: columns with different rows x values! (col %s)"
+                logger.error(msg, i)
+
+    def _init_from_source(self, data, colLabels, rowLabels, rowLabelNums):
+        self.data = np.array(data)
+        self.colLabels = colLabels
+        self.rowLabels = rowLabels
+        if rowLabelNums == []:
+            self.rowLabelNums = self.rowLabels[:]
+        else:
+            self.rowLabelNums = rowLabelNums
+        for i in range(len(self.rowLabelNums)):
+            try:
+                self.rowLabelNums[i] = float(self.rowLabelNums[i])
+            except Exception:
+                self.rowLabelNums[i] = np.nan
 
     def update(self, attr):
         for key in attr:
@@ -179,7 +211,7 @@ class Database:
 
     def value(self, col, row, silent=False):
         i = row if isinstance(row, int) else self.rowIdFromLabel(row)
-        [val, collabel] = self.colValuesFromId(col)
+        [val, _collabel] = self.colValuesFromId(col)
         try:
             return val[i]
         except Exception:
@@ -215,8 +247,8 @@ class Database:
                 x = self.data[:, self.colLabels.index(x)]
             else:
                 if not is_number(x):
-                    msg = "ERROR colValuesFromId x{}, colLabels {}."
-                    logger.error(msg.format(x, self.colLabels))
+                    msg = "ERROR colValuesFromId x %s, colLabels %s."
+                    logger.error(msg, x, self.colLabels)
                 xlabel = self.colLabels[x]
                 x = self.data[:, x]
         return [np.array(x), xlabel]
@@ -252,10 +284,10 @@ class Database:
         x,
         y,
         linespec="x",
-        xlim=[0, 0],
-        ylim=[0, 0],
-        complement={},
-        also=[],
+        xlim: Optional[list] = None,  # =[0, 0],
+        ylim: Optional[list] = None,  # =[0, 0],
+        complement: Optional[dict] = None,  # ={},
+        also: Optional[list] = None,  # =[],
         filesavesuffix="",
     ):
         """plot the data of the Database
@@ -277,6 +309,14 @@ class Database:
                            ylim=[15, 21],
                            also=alsoEff('row', 'Eff. [%]', 'k'))
         """
+        if xlim is None:
+            xlim = [0, 0]
+        if ylim is None:
+            ylim = [0, 0]
+        if also is None:
+            also = []
+        if complement is None:
+            complement = {}
 
         def cleanlabelfilename(label):
             return (
@@ -299,7 +339,7 @@ class Database:
         if xlim != [0, 0]:
             complement.update({"xlim": xlim})
         if ylim != [0, 0]:
-            complement.update({"xlim": ylim})
+            complement.update({"ylim": ylim})
 
         if filesavesuffix == "":
             filesavesuffix = "dbPlot_"
@@ -333,7 +373,15 @@ class Database:
             graph.update({"savesilent": True})
         graph.plot(filesave=filesave)
 
-    def plot(self, x, y, linespec="x", xlim=[0, 0], ylim=[0, 0], also=[]):
+    def plot(
+        self,
+        x,
+        y,
+        linespec="x",
+        xlim: Optional[list] = None,  # =[0, 0]
+        ylim: Optional[list] = None,  # =[0, 0]
+        also: Optional[list] = None,  # =[],
+    ):
         """deprecated plot function"""
         complement = {"linespec": linespec, "xlim": xlim, "ylim": ylim}
         self.plot2(x, y, complement=complement, also=also)

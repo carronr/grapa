@@ -9,7 +9,7 @@ import copy
 import fnmatch
 import itertools
 import logging
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Dict, Any
 
 import numpy as np
 from scipy.stats import pearsonr
@@ -25,7 +25,9 @@ from grapa.graph import Graph
 from grapa.curve import Curve
 from grapa.datatypes.graphScaps import GraphScaps
 from grapa.colorscale import Color
-from grapa.utils.error_management import issue_warning
+from grapa.shared.mpl_figure_factory import MplFigureFactory
+
+from grapa.shared.error_management import issue_warning
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +54,14 @@ def _writefile_datatable(filename, pkeys, pvals):
             file.write("\t".join([str(li) for li in line]) + "\n")
 
 
-def plot_parameters_1d(pkeys, pvals, new_graph_kwargs={}):
+def plot_parameters_1d(pkeys, pvals, new_graph_kwargs=None):
     """array of normal plots"""
+    if new_graph_kwargs is None:
+        new_graph_kwargs = {}
     xlim = values_to_lim(pvals[0])
     graphaux = Graph(**new_graph_kwargs)
     graphaux.append(Curve([[0], [0]], {}))
-    graphaux.castCurve("subplot", 0, silentSuccess=True)
+    graphaux.curve_cast("subplot", 0)
     graphaux[0].update({"subplotupdate": {"xlabel": pkeys[0], "xlim": xlim}})
     graphshow = Graph(**new_graph_kwargs)
     for i in range(1, pvals.shape[0]):
@@ -73,9 +77,11 @@ def plot_parameters_1d(pkeys, pvals, new_graph_kwargs={}):
 
 
 def plot_parameters_2d(
-    pkeys, pvals, idx_pattern=None, idx_labels=None, new_graph_kwargs={}
+    pkeys, pvals, idx_pattern=None, idx_labels=None, new_graph_kwargs=None
 ):
     """array of scatter plots"""
+    if new_graph_kwargs is None:
+        new_graph_kwargs = {}
     if idx_pattern is None:
         idx_pattern = [0, 1]
     if idx_labels is None:
@@ -103,7 +109,7 @@ def plot_parameters_2d(
     }
     x0, x1 = pvals[idx_pattern[0], :], pvals[idx_pattern[1], :]
     graphaux.append(Curve([x0, x1], attr0))
-    graphaux.castCurve("subplot", 0, silentSuccess=True)
+    graphaux.curve_cast("subplot", 0)
     xlim = values_to_lim(x0, islog[0])
     ylim = values_to_lim(x1, islog[1])
     su = {
@@ -161,12 +167,14 @@ def plot_correlations(
     idx_pattern=None,
     idx_labels=None,
     groupbyparam=True,
-    new_graph_kwargs={},
+    new_graph_kwargs=None,
 ):
     """
     seriesX, seriesy: tuple of column to consider
     groupbyparam: if True, organize data as series where possible
     """
+    if new_graph_kwargs is None:
+        new_graph_kwargs = {}
     if idx_pattern is None:
         idx_pattern = range(pvals.shape[0])
     if idx_labels is None:
@@ -218,7 +226,7 @@ def plot_correlations(
                 "labelhide": 1,
             }
             graph.append(Curve([[0], [0]], attri))
-            graph.castCurve("subplot", -1, silentSuccess=True)
+            graph.curve_cast("subplot", -1)
 
             # curve with data
             sbu = {"xlabel": pkeys[i], "ylabel": pkeys[j]}
@@ -310,7 +318,7 @@ def crosscorrelations_stats(pvals, pattern_idx, label_idx, also_transpose=True):
 
 
 def crosscorrelations_plot(
-    stats, pkeys, pvals, pattern_idx, label_idx, new_graph_kwargs={}
+    stats, pkeys, pvals, pattern_idx, label_idx, new_graph_kwargs=None
 ):
     """
     Plots cross-correlations between parameters.
@@ -323,6 +331,8 @@ def crosscorrelations_plot(
     :param new_graph_kwargs: Additional arguments for the Graph object.
     :return: Graph object with cross-correlation plots.
     """
+    if new_graph_kwargs is None:
+        new_graph_kwargs = {}
     # constants - maybe could be modified later on
     SUBPLOTDIM = [2.5, 2.5]
     MARGIN = [1, 1, 1, 1, 1.5, 1]
@@ -353,7 +363,7 @@ def crosscorrelations_plot(
         if pair not in stats:
             # along the diagonal
             graph.append(Curve([[0], [0]], {}))
-            graph.castCurve("subplot", -1, silentSuccess=True)
+            graph.curve_cast("subplot", -1)
             graph[-1].update({"subplotupdate": empty_spu, "label": str(pair)})
         else:
             data = stats[pair]
@@ -374,7 +384,7 @@ def crosscorrelations_plot(
                 "typeplot": typeplot,
             }
             graph.append(Curve([[0], [0]], {}))
-            graph.castCurve("subplot", -1, silentSuccess=True)
+            graph.curve_cast("subplot", -1)
             graph[-1].update({"subplotupdate": spu, "label": pair})
             # create scatter plot
             attrs = {
@@ -395,7 +405,7 @@ def crosscorrelations_plot(
     return graph
 
 
-def plot_pearson(pearson, keysx, keysy, new_graph_kwargs={}):
+def plot_pearson(pearson, keysx, keysy, new_graph_kwargs=None):
     """
     Plots a Pearson correlation heatmap.
 
@@ -410,12 +420,14 @@ def plot_pearson(pearson, keysx, keysy, new_graph_kwargs={}):
                              Graph object.
     :return: A Graph object representing the Pearson correlation heatmap.
     """
+    if new_graph_kwargs is None:
+        new_graph_kwargs = {}
     lenx, leny = pearson.shape[0], pearson.shape[1]
     # plot Pearson correlation coefficient
     graph = Graph(**new_graph_kwargs)
     for c in range(1, pearson.shape[1]):
         graph.append(Curve([pearson[:, 0, 0], pearson[:, c, 0]], {}))
-    graph.castCurve("image", 0, silentSuccess=True)
+    graph.curve_cast("image", 0)
     one = [0.5, 0.5]
     mrgn = [2, 2.5, 1.5, 0.5]
     plts = [one[0] * lenx, one[1] * leny]
@@ -752,7 +764,8 @@ def process_file(
     filters: Optional[list] = None,
     idx_pattern=None,
     idx_labels=None,
-    newGraphKwargs={},
+    newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ) -> Graph:
     """Process a file contaiing correleation data. e.g. a SCAPS output file of a
     2-parameter sweep. Creates different graph files and images in the same folder,
@@ -781,7 +794,12 @@ def process_file(
     :return: a Graph object
     """
     print("Processing file", filename)
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
+    if newGraphKwargs is None:
+        newGraphKwargs = {}
     ngkwargs = {"new_graph_kwargs": newGraphKwargs}
+    kwplot: Dict[str, Any] = {"figure_factory": figure_factory}
 
     # open input data
     graph = Graph(filename, **newGraphKwargs)
@@ -806,9 +824,10 @@ def process_file(
     # filter data
     pvals = filter_pvals(pkeys, pvals, filters=filters)
     if np.isnan(pvals).all():
-        graph.plot(fnamebase + "_parseddata" + dataext)  # before coloring
+        # before coloring
+        graph.plot(fnamebase + "_parseddata" + dataext, **kwplot)
         if CONF.pltclose:
-            plt.close()
+            figure_factory.close()
         msg = "Data table of parameters contains only NaN. Script end."
         msg += "\npkeys: {}\npvals.shape: {}"
         issue_warning(logger, msg.format(pkeys, pvals.shape))
@@ -828,9 +847,9 @@ def process_file(
 
     # if datakeys != CONF.AS_DATATABLE:
     colorize_graph(graph, idx_pattern, pvals)
-    graph.plot(fnamebase + "_parseddata" + dataext)
+    graph.plot(fnamebase + "_parseddata" + dataext, **kwplot)
     if CONF.pltclose:
-        plt.close()
+        figure_factory.close()
 
     # process datatable
     msg = "script correlation, reached datatable {}"
@@ -840,17 +859,17 @@ def process_file(
     )
     print("script correlation, reached datatable save graphs")
     if isinstance(graphshow, Graph):
-        graphshow.plot(fnamebase + "_summary")
+        graphshow.plot(fnamebase + "_summary", **kwplot)
         if CONF.pltclose:
-            plt.close()
+            figure_factory.close()
     if isinstance(graphtable, Graph):
-        graphtable.plot(fnamebase + "_correlation_data")
+        graphtable.plot(fnamebase + "_correlation_data", **kwplot)
         if CONF.pltclose:
-            plt.close()
+            figure_factory.close()
     if isinstance(graphpearson, Graph):
-        graphpearson.plot(fnamebase + "_correlation_pearson")
+        graphpearson.plot(fnamebase + "_correlation_pearson", **kwplot)
         if CONF.pltclose:
-            plt.close()
+            figure_factory.close()
 
     # cross-correlations
     msg = "script correlation, reached crosscorrelation len(idx_pattern) {}"
@@ -871,9 +890,9 @@ def process_file(
                 averages, pkeys, pvals, idx_pattern, idx_l, **ngkwargs
             )
             graphcc.update({"dpi": 100})
-            graphcc.plot(fnamebase + "_corrcross" + str(idx_l))
+            graphcc.plot(fnamebase + "_corrcross" + str(idx_l), **kwplot)
             if CONF.pltclose:
-                plt.close()
+                figure_factory.close()
 
     print("Script ended successfully")
     if graphtable is not None:

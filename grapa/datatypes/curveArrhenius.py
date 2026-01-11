@@ -9,9 +9,9 @@ import numpy as np
 import warnings
 
 from grapa.curve import Curve
-from grapa.mathModule import roundSignificant, roundSignificantRange
-from grapa.constants import CST
-from grapa.utils.funcgui import FuncListGUIHelper
+from grapa.shared.constants import CST
+from grapa.shared.maths import roundSignificant, roundSignificantRange
+from grapa.shared.funcgui import funclistgui_graph_axislabels
 
 
 class CurveArrhenius(Curve):
@@ -120,7 +120,7 @@ class CurveArrhenius(Curve):
                 if vals is not None:
                     out.append(
                         [
-                            kwargs["graph"].updateValuesDictkeys,
+                            kwargs["graph"].update_values_keys,
                             "Save",
                             ["xlabel", "ylabel"],
                             vals,
@@ -134,7 +134,7 @@ class CurveArrhenius(Curve):
                 if vals is not None:
                     out.append(
                         [
-                            kwargs["graph"].updateValuesDictkeys,
+                            kwargs["graph"].update_values_keys,
                             "Save",
                             ["xlabel", "ylabel"],
                             vals,
@@ -165,7 +165,7 @@ class CurveArrhenius(Curve):
                 ]
             )
         out.append([self.print_help, "Help!", [], []])
-        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
+        out += funclistgui_graph_axislabels(self, **kwargs)
         return out
 
     def alterListGUI(self):
@@ -191,7 +191,7 @@ class CurveArrhenius(Curve):
     def BUTTONFitROI(cls):
         return "ROI [1000/K]"
 
-    def x_1000overK(self, index=np.nan, **kwargs):
+    def x_1000overK(self, index=None, **kwargs):
         """x-axis transform function"""
         # syntax: not necessarily a CurveArrhenius
         variant = CurveArrhenius.getVariant(self)
@@ -200,7 +200,7 @@ class CurveArrhenius(Curve):
             return variant.x_1000overK(self, index=index, **kwargs)
         return 1000 / self.x(index, **kwargs)
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         """y-axis transform function, getting the Arrhenius straight line"""
         # syntax: not necessarily a CurveArrhenius
         variant = CurveArrhenius.getVariant(self)
@@ -415,7 +415,7 @@ class CurveArrheniusDefault(CurveArrhenius):
         # the help dedicated to the specific implementation
         return "Arrhenius plot is: value = offset - E /(kT)"
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         return self.y(index, **kwargs)
 
     def func_Arrhenius(self, T, E, prefactor):
@@ -442,7 +442,7 @@ class CurveArrheniusJscVocJ00(CurveArrhenius):
     def func_Arrhenius(self, T, E, prefactor):  # replace default fit function
         return np.exp(np.log(prefactor) - E / (CurveArrhenius.k_eVoverK * T))
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             out = np.log(self.y(index=index, **kwargs))
@@ -483,7 +483,7 @@ class CurveArrheniusCfDefects(CurveArrhenius):
     def func_Arrhenius(self, T, E, prefactor):
         return T**2 * np.exp(np.log(2 * prefactor) - E / (CurveArrhenius.k_eVoverK * T))
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         # must compute omega T**-2 and show log, corresponding fit expression
         # is 'log2ksi-omega/kT'
         with warnings.catch_warnings():
@@ -523,7 +523,7 @@ class CurveArrheniusCfdefault(CurveArrhenius):
     def func_Arrhenius(self, T, E, prefactor):
         return np.exp(np.log(2 * prefactor) - E / (CurveArrhenius.k_eVoverK * T))
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             out = np.log(self.y(index, **kwargs))
@@ -567,10 +567,10 @@ class CurveArrheniusExtrapolToZero(CurveArrhenius):
     def func_Arrhenius(self, T, E, prefactor):
         return prefactor + E * T
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         return self.y(index, **kwargs)
 
-    def x_1000overK(self, index=np.nan, **kwargs):  # NOT ARRHENIUS
+    def x_1000overK(self, index=None, **kwargs):  # NOT ARRHENIUS
         return self.x(index, **kwargs)
 
     @staticmethod
@@ -615,12 +615,12 @@ class CurveArrheniusExpDecay(CurveArrhenius):
     def func_Arrhenius(self, nm, U, E_at_1):
         return np.exp(((CST.nm_eV / nm) - (E_at_1)) / (U * 0.001))
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return np.log(self.y(index, **kwargs))
 
-    def x_1000overK(self, index=np.nan, **kwargs):  # NOT ARRHENIUS
+    def x_1000overK(self, index=None, **kwargs):  # NOT ARRHENIUS
         return self.x(index, alter="nmeV", **kwargs)
 
     @staticmethod
@@ -672,12 +672,12 @@ class CurveArrheniusPowerLaw(CurveArrhenius):
     def func_Arrhenius(self, x, A, k):
         return np.exp(np.log(A) + k * np.log(x))
 
-    def y_Arrhenius(self, index=np.nan, **kwargs):
+    def y_Arrhenius(self, index=None, **kwargs):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return np.log(self.y(index, **kwargs))
 
-    def x_1000overK(self, index=np.nan, **kwargs):  # NOT ARRHENIUS
+    def x_1000overK(self, index=None, **kwargs):  # NOT ARRHENIUS
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return np.log(self.x(index, **kwargs))

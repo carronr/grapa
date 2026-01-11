@@ -10,7 +10,7 @@ import os
 import numpy as np
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveJV import CurveJV
 
 
@@ -134,8 +134,8 @@ class GraphJV(Graph):
         self[-1].update({"_collabels": ["Voltage [V]", "Current density [mA cm-2]"]})
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphJV.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphJV.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphJV.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphJV.AXISLABELS[1]),
                 "axhline": [0, {"linewidth": 0.5}],
                 "axvline": [0, {"linewidth": 0.5}],
             }
@@ -152,8 +152,8 @@ class GraphJV(Graph):
         # back to TIV data reading
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphJV.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphJV.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphJV.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphJV.AXISLABELS[1]),
             }
         )
         # delete columns of temperature in newer versions
@@ -220,13 +220,13 @@ class GraphJV(Graph):
         FileParserDispatcher.readDataFromFileGeneric(self, attributes, delimiter=";")
         self[le].update({"area": 1.0})
         if max(abs(self[le].x())) > 10:  # want units in [V], not [mV]
-            self[le].setX(self[le].x() * 0.001)
+            self[le].set_x(self[le].x() * 0.001)
         self.update({"xlabel": self.attr("xlabel").replace("[mv]", "[mV]")})
         self.update(
             {
-                "xlabel": self.formatAxisLabel(self.attr("xlabel")),
-                "ylabel": self.formatAxisLabel(self.attr("ylabel")),
+                "xlabel": self.format_axis_label(self.attr("xlabel")),
+                "ylabel": self.format_axis_label(self.attr("ylabel")),
             }
         )
-        self.castCurve("Curve JV", le, silentSuccess=True)
+        self.curve_cast("Curve JV", le)
         self.update({"meastype": GraphJV.FILEIO_GRAPHTYPE_IV_HLS})

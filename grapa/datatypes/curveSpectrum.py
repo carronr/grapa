@@ -11,8 +11,8 @@ import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve, math_on_curves
-from grapa.mathModule import is_number, roundSignificantRange, MathOperator
-from grapa.constants import CST
+from grapa.shared.constants import CST
+from grapa.shared.maths import is_number, roundSignificantRange, MathOperator
 from grapa.datatypes.curveTRPL import integrate
 
 # TODO: better parse perkin elmer Reflectnce/transmittance
@@ -236,14 +236,14 @@ class CurveSpectrum(Curve):
         retrieves the original data (with some rounding errors)
         """
         if is_number(value):
-            self.setY(self.y() + value - self.getOffset())
+            self.set_y(self.y() + value - self.getOffset())
             self.update({"_spectrumOffset": value})
             return True
         return False
 
     # more "usual" methods
     def dataModifySwapNmEv(self):
-        self.setX(CST.nm_eV / self.x())
+        self.set_x(CST.nm_eV / self.x())
 
     def substractBG(self, id_dark, interpolate, if_new, offsets, graph=None, **kwargs):
         """Substract dark: substract a curve to the data.
@@ -445,12 +445,12 @@ class CurveSpectrum(Curve):
             out = T / multT / (1 - R / multR)
             if Rsub is not None and Tsub is not None:
                 out *= (1 - Rsub) / Tsub
-            out.setY(-1 / (1e-7 * thickness) * np.log(out.y()))
+            out.set_y(-1 / (1e-7 * thickness) * np.log(out.y()))
             out.update({"_spectrumSubclass": ""})
         else:  # absorptance
             out = 1 - R / multR - T / multT
             if multR == 100 and multT == 100:
-                out.setY(out.y() * 100)
+                out.set_y(out.y() * 100)
             out.update({"_spectrumSubclass": "CurveSpectrumAbsorptance"})
         lbl = self.attr("label").replace(" instr. resp. corr.", "")
         replacelist = [

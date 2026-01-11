@@ -12,9 +12,9 @@ import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveCV import CurveCV
-from grapa.utils.error_management import issue_warning
+from grapa.shared.error_management import issue_warning
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class GraphCV(Graph):
     def readDataFromFile(self, attributes, **_kwargs):
         len0 = len(self)
         FileParserDispatcher.readDataFromFileGeneric(self, attributes)
-        self.castCurve("Curve CV", len0, silentSuccess=True)
+        self.curve_cast("Curve CV", len0)
         # label based on file name, maybe want to base it on file content
         label = (
             self[len0]
@@ -62,7 +62,7 @@ class GraphCV(Graph):
             self[len0].update({"sample": samplename})
         # set [nF] units
         units = ["V", "nF"]
-        self[len0].setY(1e9 * self[len0].y())
+        self[len0].set_y(1e9 * self[len0].y())
         if np.max(self[len0].y()) > 1e5:
             msg = (
                 "WARNING: GraphCV, expected raw data in F, performing internal"
@@ -102,7 +102,7 @@ class GraphCV(Graph):
         if area is None:
             area = self[len0].attr("area", None)
         if area is not None:
-            self[len0].setY(self[len0].y() / area)
+            self[len0].set_y(self[len0].y() / area)
             self[len0].update({"cell area (cm2)": area})
             axislabels[1][2] = axislabels[1][2].replace("F", "F cm$^{-2}$")
             units[1] = "nF cm-2"
@@ -112,7 +112,7 @@ class GraphCV(Graph):
         # graph cosmetics
         self.update(
             {
-                "xlabel": self.formatAxisLabel(axislabels[0]),
-                "ylabel": self.formatAxisLabel(axislabels[1]),
+                "xlabel": self.format_axis_label(axislabels[0]),
+                "ylabel": self.format_axis_label(axislabels[1]),
             }
         )  # default

@@ -1,0 +1,114 @@
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>]
+  0  True True
+  1  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>]
+  0  True True
+  1  True True
+  2  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>]
+  0  True True
+  1  True True
+  2  True True
+  3  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+  2  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+  2  True True
+  3  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+  2  True True
+  3  True True
+  4  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+  2  True True
+  3  True True
+  4  True True
+  5  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+  2  True True
+  3  True True
+  4  True True
+  5  True True
+  6  True True
+NoneType: None
+01/08/2026 10:45:10 PM - grapa.shared.command_recorder - WARNING - CurveGraphsReferrer.register: graph already in _list. Proceed.[<grapa.graph.Graph object at 0x0000021844BE0AD0>, <grapa.graph.Graph object at 0x0000021844BE2750>]
+  0  True True
+  1  True True
+  2  True True
+  3  True True
+  4  True True
+  5  True True
+  6  True True
+  7  True True
+NoneType: None
+01/09/2026 04:20:13 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:21:14 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:22:48 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:23:17 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:24:17 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:25:20 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:26:14 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:29:04 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:29:19 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:31:58 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:33:20 PM - grapa.parse.parser_dispatcher - WARNING - File not found: 
+01/09/2026 04:57:15 PM - grapa.frontend.gui_main - ERROR - Exception during update of central section (plot and editor).
+Traceback (most recent call last):
+  File "C:\_python\_python_packages\grapa\grapa\frontend\gui_main.py", line 206, in update_ui
+    section[0].update_ui()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\_python\_python_packages\grapa\grapa\frontend\frames_main.py", line 882, in update_ui
+    self._widgets["frameDataPicker"].update_ui()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\_python\_python_packages\grapa\grapa\frontend\frames_main.py", line 661, in update_ui
+    self.update_crosshair(draw=False)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\frontend\frames_main.py", line 828, in update_crosshair
+    posx = graph[curve].x_offsets(index=idx, alter=alter[0])
+  File "C:\_python\_python_packages\grapa\grapa\curve.py", line 511, in x_offsets
+    return _xy_offsets(self, "x", **kwargs)
+  File "C:\_python\_python_packages\grapa\grapa\curve.py", line 1020, in _xy_offsets
+    series = curve.x(**kwargs) if x_or_y == "x" else curve.y(**kwargs)
+             ~~~~~~~^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\curve.py", line 405, in x
+    success, result = self._xy_alterspecial(alter, index, xyValue)
+                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\curve.py", line 494, in _xy_alterspecial
+    return (True, func(self, index=index, xyValue=xyvalue))
+                  ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveArrhenius.py", line 201, in x_1000overK
+    return 1000 / self.x(index, **kwargs)
+                  ~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\_python\_python_packages\grapa\grapa\curve.py", line 413, in x
+    return val[0, index]
+           ~~~^^^^^^^^^^
+IndexError: index 60 is out of bounds for axis 1 with size 11
+01/09/2026 10:57:45 PM - grapa.frontend.frame_curveactions - ERROR - While executing function <bound method CurveCV.setArea of <grapa.datatypes.curveCV.CurveCV object at 0x000001D31B466350>> with args ['abc'] kwargs {}. <class 'TypeError'>: ufunc 'divide' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''.
+Traceback (most recent call last):
+  File "C:\_python\_python_packages\grapa\grapa\frontend\frame_curveactions.py", line 244, in execute_func
+    res = func(*args, **kwargs)
+  File "C:\_python\_python_packages\grapa\grapa\datatypes\curveCV.py", line 195, in setArea
+    self.set_y(self.y() / value * oldArea)
+               ~~~~~~~~~^~~~~~~
+TypeError: ufunc 'divide' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''

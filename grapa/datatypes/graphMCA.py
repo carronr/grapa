@@ -8,10 +8,10 @@ Carron
 from re import findall as refindall
 import numpy as np
 
-from grapa.mathModule import is_number
-from grapa.utils.string_manipulations import strToVar
 from grapa.graph import Graph
 from grapa.datatypes.curveMCA import CurveMCA
+from grapa.shared.string_manipulations import strToVar
+from grapa.shared.maths import is_number
 
 
 class GraphMCA(Graph):
@@ -90,8 +90,8 @@ class GraphMCA(Graph):
             ylabel[2] = ylabel[2] + " s$^{-1}$"
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphMCA.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(ylabel),
+                "xlabel": self.format_axis_label(GraphMCA.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(ylabel),
             }
         )
         if y.size == 1024:

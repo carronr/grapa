@@ -7,12 +7,12 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain
 Carron
 """
 
-import numpy as np
 import os
+import numpy as np
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 
 
 class GraphPAIOS(Graph):
@@ -94,8 +94,8 @@ class GraphPAIOS(Graph):
         self.update(
             {
                 "legendtitle": legtitle,  # legendtitle from filename
-                "xlabel": self.formatAxisLabel(labels[0]),
-                "ylabel": self.formatAxisLabel(labels[1]),
+                "xlabel": self.format_axis_label(labels[0]),
+                "ylabel": self.format_axis_label(labels[1]),
             }
         )
         # cleaning: remove attributes 'column 01' etc. in curve 0
@@ -120,9 +120,9 @@ class GraphPAIOS(Graph):
         """
         jscvoc = []
         for c in range(len(self)):
-            self[c].setX(self[c].x()[::-1])  # data in ascending order
-            self[c].setY(self[c].y()[::-1])
-            self.castCurve("CurveJV", c, silentSuccess=True)
+            self[c].set_x(self[c].x()[::-1])  # data in ascending order
+            self[c].set_y(self[c].y()[::-1])
+            self.curve_cast("CurveJV", c)
             jsc = self[c].attr("jsc", np.nan)
             voc = self[c].attr("voc", np.nan)
             temp = self[c].attr("temperature")
@@ -144,4 +144,4 @@ class GraphPAIOS(Graph):
                     {"label": "Jsc-Voc - Temperature", "type": "scatter_c"},
                 )
             )
-            self.castCurve("CurveJscVoc", -2, silentSuccess=True)
+            self.curve_cast("CurveJscVoc", -2)

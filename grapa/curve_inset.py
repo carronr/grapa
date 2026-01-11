@@ -4,9 +4,13 @@
 @author: Romain Carron
 Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
+import os
+from typing import Optional
 
-# from grapa.graph import Graph
+from grapa.graph import Graph
 from grapa.curve import Curve
+from grapa.curve_subplot import folder_initialdir
+from grapa.shared.funcgui import FuncGUI, CurveActionRequestToGui
 
 
 class Curve_Inset(Curve):
@@ -36,18 +40,34 @@ class Curve_Inset(Curve):
     # GUI RELATED FUNCTIONS
     def funcListGUI(self, **kwargs):
         out = Curve.funcListGUI(self, **kwargs)
+
+        graph: Optional[Graph] = None
+        if "graph" in kwargs:
+            graph = kwargs["graph"]
+            del kwargs["graph"]
+
+        insetfile = self.attr("insetfile")
+        initialdir = folder_initialdir(insetfile, graph)
+        line = FuncGUI(self.update_values_keys, "Set")
+        line.set_hiddenvars({"keys": ["insetfile"]})
+        line.append_pickfile("file inset", insetfile, initialdir)
+        out.append(line)
+
+        # open subplot
+        if self.has_attr("insetfile"):
+            path = self.attr("insetfile")
+            if graph is not None:
+                path = graph.filenamewithpath(path)
+            path_escaped = (
+                os.path.normpath(path).encode("unicode_escape").decode("ascii")
+            )
+            line = FuncGUI(CurveActionRequestToGui.OPEN_FILE, "Open")
+            line.append("file", path_escaped, options={"state": "readonly"})
+            out.append(line)
+
         out.append(
             [
-                self.updateValuesDictkeys,
-                "Set",
-                ["file inset"],
-                [self.attr("insetfile")],
-                {"keys": ["insetfile"]},
-            ]
-        )
-        out.append(
-            [
-                self.updateValuesDictkeys,
+                self.update_values_keys,
                 "Set",
                 ["coords, in figure fraction [left, bottom, width, height]"],
                 [self.attr("insetcoords")],
@@ -56,7 +76,7 @@ class Curve_Inset(Curve):
         )
         out.append(
             [
-                self.updateValuesDictkeys,
+                self.update_values_keys,
                 "Set",
                 ["update inset"],
                 [self.attr("insetupdate")],

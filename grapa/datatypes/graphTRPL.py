@@ -9,7 +9,7 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 from os import path as ospath
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
+from grapa.parse.parser_dispatcher import FileParserDispatcher
 from grapa.datatypes.curveTRPL import CurveTRPL
 
 
@@ -50,7 +50,7 @@ class GraphTRPL(Graph):
         if "line1" in kwargs and kwargs["line1"] == "Parameters:":
             kw.update({"delimiterHeaders": " : "})
         FileParserDispatcher.readDataFromFileGeneric(self, attributes, **kw)
-        self.castCurve(CurveTRPL.CURVE, len0, silentSuccess=True)
+        self.curve_cast(CurveTRPL.CURVE, len0)
         # label management
         filenam_, _fileext = ospath.splitext(self.filename)  # , fileExt
         # self[len0].update({'label': filenam_.split('/')[-1].split('\\')[-1]})
@@ -82,8 +82,8 @@ class GraphTRPL(Graph):
             {
                 "typeplot": "semilogy",
                 "alter": ["", "idle"],
-                "xlabel": self.formatAxisLabel(xlabel),
-                "ylabel": self.formatAxisLabel(GraphTRPL.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(xlabel),
+                "ylabel": self.format_axis_label(GraphTRPL.AXISLABELS[1]),
             }
         )
         self.update({"subplots_adjust": [0.2, 0.15]})

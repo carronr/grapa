@@ -10,12 +10,12 @@ from copy import deepcopy
 
 import numpy as np
 
-from grapa.constants import CST
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.mathModule import is_number
-from grapa.utils.string_manipulations import strToVar
 from grapa.datatypes.curveCV import CurveCV
+from grapa.shared.constants import CST
+from grapa.shared.maths import is_number
+from grapa.shared.string_manipulations import strToVar
 
 
 # TODO: understand this factor 2 (maybe V_AC rms vs max value or similar, derivative numerically wrong??)

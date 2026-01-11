@@ -7,14 +7,15 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 import os
-
-import numpy as np
 import copy
 
-from grapa.mathModule import is_number, roundSignificant
+import numpy as np
+
 from grapa.curve import Curve
-from grapa.utils.curve_subclasses_utils import FileLoaderOnDemand, FitHandlerBasicFunc
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI
+from grapa.shared.funcgui import FuncGUI, funclistgui_graph_axislabels
+from grapa.shared.maths import is_number, roundSignificant
+from grapa.parse.curve_subclasses_utils import FileLoaderOnDemand, FitHandlerBasicFunc
+
 
 KEY_CTOKEV_OFFSET = "_MCA_CtokeV_offset"
 KEY_CTOKEV_MULT = "_MCA_CtokeV_mult"
@@ -95,6 +96,7 @@ class FitHandlerXRF(FitHandlerBasicFunc):
                 msg = "ERROR fit_amp calculation amp 0 {}, {}"
                 print(msg.format(sum_amp_gaussian, func.__name__))
                 raise NotImplementedError(msg.format(sum_amp_gaussian, func.__name__))
+
         if 1 in sum_amp_gaussian:
             if func == self.func_linbg_2gaussa:
                 amp += popt[6]
@@ -110,6 +112,7 @@ class FitHandlerXRF(FitHandlerBasicFunc):
                 msg = "ERROR fit_amp calculation amp 1 {}, {}"
                 print(msg.format(sum_amp_gaussian, func.__name__))
                 raise NotImplementedError(msg.format(sum_amp_gaussian, func.__name__))
+            
         if 2 in sum_amp_gaussian:
             msg = "ERROR fit_amp calculation amp 2 {}, {}"
             print(msg.format(sum_amp_gaussian, func.__name__))
@@ -350,7 +353,7 @@ class CurveMCA(Curve):
         out = Curve.funcListGUI(self, **kwargs)
         # energy calibration settings
         at = [KEY_CTOKEV_OFFSET, KEY_CTOKEV_MULT]
-        line = FuncGUI(self.updateValuesDictkeys, "Save", hiddenvars={"keys": at})
+        line = FuncGUI(self.update_values_keys, "Save", hiddenvars={"keys": at})
         line.append("keV = (channel +", self.attr(at[0]))
         line.append(") * ", self.attr(at[1]))
         out.append(line)
@@ -376,7 +379,7 @@ class CurveMCA(Curve):
         muloffsety = self.get_muloffset()[1]
         kw = dict(kwargs)
         kw.update({"lookup_y": {"": "counts s$^{-1}$"}} if muloffsety != 1 else {})
-        out += FuncListGUIHelper.graph_axislabels(self, **kw)
+        out += funclistgui_graph_axislabels(self, **kw)
         return out
 
     def alterListGUI(self):
@@ -389,11 +392,11 @@ class CurveMCA(Curve):
         # convert string reference to e.g. background into callable function
         param, revert, func = self.FITHANDLER.updateFitParam_before(self, *param)
         # call base function
-        out = super().updateFitParam(*param, func=func)
+        super().updateFitParam(*param, func=func)
         # revert callable parameter to its initial string value
         # also, compute and display amplitude - child class
         self.FITHANDLER.updateFitParam_after(self, revert)
-        return out
+        return True
 
     def x_kev(self, **kwargs):
         # do not call method channel_to_kev. Should be called on other Curve subclasses

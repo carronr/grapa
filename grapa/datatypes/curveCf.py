@@ -8,9 +8,10 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 import numpy as np
 
-from grapa.mathModule import is_number, derivative
 from grapa.curve import Curve
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI, AlterListItem
+from grapa.shared.funcgui import FuncGUI, AlterListItem, funclistgui_graph_axislabels
+from grapa.shared.maths import is_number, derivative
+
 
 STR_FURTHER_ANALYSIS = (
     "\nFurther analysis:\n"
@@ -71,7 +72,7 @@ class CurveCf(Curve):
         # help
         out.append([self.print_help, "Help!", [], []])
 
-        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
+        out += funclistgui_graph_axislabels(self, **kwargs)
 
         self._funclistgui_memorize(out)
         return out
@@ -91,16 +92,16 @@ class CurveCf(Curve):
         out.append(AlterListItem(lbl, ["CurveCV.x_CVdepth_nm", "x"], "semilogy", ""))
         return out
 
-    def y_mdCdlnf(self, index=np.nan, xyValue=None):
+    def y_mdCdlnf(self, index=None, xyValue=None, **_kwargs):
         # if ylim is set, keep the ylim restriction and not do not ignore ylim
         if xyValue is not None:
             return xyValue[1]
         # do not want to use self.x(index) syntax as we need more points to
-        # compute the local derivative. HEre we compute over all data, then
+        # compute the local derivative. Here we compute over all data, then
         # restrict to the desired datapoint
         val = -derivative(np.log(self.x(xyValue=xyValue)), self.y(xyValue=xyValue))
         if len(val) > 0:
-            if np.isnan(index).any():
+            if index is None or np.isnan(index).any():
                 return val[:]
             return val[index]
         return val
@@ -113,7 +114,7 @@ class CurveCf(Curve):
         :param value: the new device area value, presumably in cm2."""
         oldArea = self.getArea()
         self.update({"cell area (cm2)": value})
-        self.setY(self.y() / value * oldArea)
+        self.set_y(self.y() / value * oldArea)
         return True
 
     def getArea(self):

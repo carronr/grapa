@@ -47,7 +47,7 @@ class GraphMBElog(Graph):
         )
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphMBElog.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphMBElog.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphMBElog.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphMBElog.AXISLABELS[1]),
             }
         )

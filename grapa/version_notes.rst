@@ -11,6 +11,29 @@ Empa TFPV data reading and processing software
 
 
 
+TODO: REMOVE MANUAL; INCORPORATE INTO DOC
+TODO: howto examples, cleanup, use funcGUI
+TODO: geenrate tests for Color and colorscale
+
+
+
+
+** Version 0.8.0.0
+
+ONGOING
+Only few modifications of functionalities, but many changes in the package file organisation, hence major version number (breaking some backwards compatibility).
+The folder structure has been split as frontend, plot, parse, shared, internal, datatypes, scripts; many code units were moved from file to file.
+New
+- Curve subplot and inset: added Search button to select the file in a user-friendly manner.
+- Curve subplot and inset: added Open button, to open the file subplot/inset.
+- Colorscale: added support for CIE Lab and CIE LCh colorspaces
+Modifications
+- logging: Logging is enabled by default only when using the GUI, and the logfile is written to grapalog.log. If the app cannot write in the grapa folder, it automatically switches the log file to a writable location.
+- pyplot: now, grapa does not use pyplot in the GUI, but still does when not in the GUI (CLI)
+- Code cleaning
+
+
+
 ** Version 0.7.1.0
 
 Release 25.11.2025

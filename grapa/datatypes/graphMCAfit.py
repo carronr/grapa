@@ -118,8 +118,8 @@ class GraphMCAfit(Graph):
         # graph cosmetics
         self.update(
             {
-                "xlabel": self.formatAxisLabel(GraphMCAfit.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphMCAfit.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphMCAfit.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphMCAfit.AXISLABELS[1]),
                 "xtickslabels": [
                     [0, 1, 2, 3, 4, 5, 6, 7],
                     ["Cu", "In", "Ga", "Se", "Acq. time", "GGI", "CGI", "D"],

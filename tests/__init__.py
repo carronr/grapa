@@ -3,8 +3,8 @@ import sys
 import glob
 import pytest
 
-from grapa import Graph, logger, logger_handler
-from grapa.utils.error_management import GrapaWarning
+from grapa import Graph, logger
+from grapa.shared.error_management import GrapaWarning
 
 
 @pytest.fixture
@@ -18,12 +18,12 @@ class HiddenPrints:
     def __enter__(self):
         self._original_stdout = sys.stdout
         sys.stdout = open(os.devnull, "w", encoding="utf-8")
-        logger.removeHandler(logger_handler)  # to disable prints (so also logger)
+        # logger.removeHandler(logger_handler)  # to disable prints (so also logger)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout.close()
         sys.stdout = self._original_stdout
-        logger.addHandler(logger_handler)  # need to update the logger as well
+        # logger.addHandler(logger_handler)  # need to update the logger as well
 
 
 def open_files_in_subfolder(grapa_folder, subfolder, filenames, together=True):

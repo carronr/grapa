@@ -10,12 +10,12 @@ import warnings
 from typing import Optional
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.export import export_filesave_default
-from grapa.mathModule import is_number, roundgraphlim
+from grapa.shared.maths import is_number, roundgraphlim
+from grapa.shared.mpl_figure_factory import MplFigureFactory
+from grapa.plot.export import export_filesave_default
 
 from grapa.datatypes.curveJV import CurveJV
 
@@ -165,10 +165,13 @@ class GraphJVDarkIllum(Graph):
         if_export="auto",
         alter=None,
         pltClose=False,
+        figure_factory: Optional[MplFigureFactory] = None,
     ):
         """
         ifExport: Boolean. If 'auto': only exports the lin plot, not the log
         """
+        if figure_factory is None:
+            figure_factory = MplFigureFactory()
         if fig_ax is not None:
             pltClose = False
         # want to handle alter ourself. argument still placed to ensure call call be conducted
@@ -211,28 +214,39 @@ class GraphJVDarkIllum(Graph):
         # print ('    ylimlog', ylimLog,'(0',mM0,mM2,')')
         # ylimInit = self.attr('ylim')
         ex = True if if_export == "auto" else if_export
-        self.plot_std(filesave, ifSave=if_save, ifExport=ex, figAx=fig_ax, ylim=ylim)
+        kwplot = {
+            "if_save": if_save,
+            "fig_ax": fig_ax,
+            "figure_factory": figure_factory,
+        }
+        self.plot_std(filesave, if_export=ex, ylim=ylim, **kwplot)
         if pltClose:
-            plt.close()
+            figure_factory.close()
         ex = False if if_export == "auto" else if_export
         if len(self) > 2:
-            self.plot_diff(
-                filesave, ifSave=if_save, ifExport=ex, figAx=fig_ax, ylim=ylim
-            )
+            self.plot_diff(filesave, if_export=ex, ylim=ylim, **kwplot)
             if pltClose:
-                plt.close()
-        self.plot_logabs(
-            filesave, ifSave=if_save, ifExport=ex, figAx=fig_ax, ylim=ylimLog
-        )
+                figure_factory.close()
+        self.plot_logabs(filesave, if_export=ex, ylim=ylimLog, **kwplot)
         if pltClose:
-            plt.close()
+            figure_factory.close()
         # self.update({'ylim': ylimInit})
 
-    def plot_std(self, filesave="", ylim=None, figAx=None, ifSave=True, ifExport=True):
+    def plot_std(
+        self,
+        filesave="",
+        ylim=None,
+        fig_ax=None,
+        if_save=True,
+        if_export=True,
+        figure_factory: Optional[MplFigureFactory] = None,
+    ):
+        if figure_factory is None:
+            figure_factory = MplFigureFactory()
         # normal plot
         restore = {}
         if ylim is not None:
-            restore.update(self.attr_pop("ylim"))
+            restore.update({"ylim": self.attr_pop("ylim")})
             self.update({"ylim": ylim})
         self[1].update({"linestyle": "None"})
         if len(self) > 2:
@@ -240,9 +254,10 @@ class GraphJVDarkIllum(Graph):
         Graph.plot(
             self,
             filesave=export_filesave_default(self, filesave) + "lin",
-            fig_ax=figAx,
-            if_save=ifSave,
-            if_export=ifExport,
+            fig_ax=fig_ax,
+            if_save=if_save,
+            if_export=if_export,
+            figure_factory=figure_factory,
         )
         self[1].update({"linestyle": ""})
         if len(self) > 2:
@@ -251,31 +266,51 @@ class GraphJVDarkIllum(Graph):
         self.update(restore)
 
     def plot_logabs(
-        self, filesave="", ylim=None, figAx=None, ifSave=True, ifExport=True
+        self,
+        filesave="",
+        ylim=None,
+        fig_ax=None,
+        if_save=True,
+        if_export=True,
+        figure_factory: Optional[MplFigureFactory] = None,
     ):
+        if figure_factory is None:
+            figure_factory = MplFigureFactory()
         # unset xlim, ylim indications
         # change ylabel of the graph
         keys = ["ylim", "xlim", "ylabel", "axhline", "axvline", "alter"]
         restore = {}
         for key in keys:
-            restore.update(self.attr_pop(key))
+            restore.update({key: self.attr_pop(key)})
         self.update({"ylabel": "Log current density", "alter": "log10abs"})
         if ylim is not None:
             self.update({"ylim": ylim})
         Graph.plot(
             self,
             filesave=export_filesave_default(self, filesave) + "log",
-            fig_ax=figAx,
-            if_save=ifSave,
-            if_export=ifExport,
+            fig_ax=fig_ax,
+            if_save=if_save,
+            if_export=if_export,
+            figure_factory=figure_factory,
         )
         self.update(restore)
 
-    def plot_diff(self, filesave="", ylim=None, figAx=None, ifSave=True, ifExport=True):
+    def plot_diff(
+        self,
+        filesave="",
+        ylim=None,
+        fig_ax=None,
+        if_save=True,
+        if_export=True,
+        figure_factory: Optional[MplFigureFactory] = None,
+    ):
+        if figure_factory is None:
+            figure_factory = MplFigureFactory()
+
         keys = ["axhline", "alter"]
         restore = {}
         for key in keys:
-            restore.update(self.attr_pop(key))
+            restore.update({key: self.attr_pop(key)})
         if len(self) > 2:
             Jsc = self[self.idx_illum].attr("Jsc")
             if self.idx_dark >= 0 and self.idx_illum >= 0:
@@ -287,15 +322,16 @@ class GraphJVDarkIllum(Graph):
         if len(self) > 2:
             self[4].update({"linestyle": ""})
         if ylim is not None:
-            restore.update(self.attr_pop("ylim"))
+            restore.update({"ylim": self.attr_pop("ylim")})
             self.update({"ylim": ylim})
 
         Graph.plot(
             self,
             filesave=export_filesave_default(self, filesave) + "diff",
-            fig_ax=figAx,
-            if_save=ifSave,
-            if_export=ifExport,
+            fig_ax=fig_ax,
+            if_save=if_save,
+            if_export=if_export,
+            figure_factory=figure_factory,
         )
 
         # restore curve properties

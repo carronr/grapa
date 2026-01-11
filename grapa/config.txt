@@ -1,5 +1,5 @@
-# only keywords (first word) matters: comment line are read, maybe stored with corresponding keyword (e.g. '#'), but never refered to
-# repeating a keyword will overwrite the content of first instance
+# Comment line are read and stored including starting '#', but are not used.
+# Repeating a keyword will overwrite the content of first occurence
 
 # graph labels default unit presentation: [unit], (unit), / unit, or [], (), /
 graph_labels_units	[]
@@ -26,4 +26,5 @@ GUI_colorscale14	'afmhot'
 
 # default saving image format
 save_imgformat	.png
+save_image_dpi	300
 

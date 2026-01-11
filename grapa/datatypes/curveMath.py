@@ -13,17 +13,18 @@ import numpy as np
 
 from grapa.curve import Curve
 from grapa.graph import Graph
-from grapa.mathModule import is_number
-from grapa.utils.funcgui import FuncGUI
-from grapa.utils.error_management import issue_warning
+from grapa.shared.maths import is_number
+from grapa.shared.funcgui import FuncGUI
+from grapa.shared.error_management import issue_warning, GrapaError
 
 logger = logging.getLogger(__name__)
 
 
 class CurveMath(Curve):
     """
-    Class handling optical spectra, with notably nm to eV conversion and background
-    subtraction.
+    Class handling mathematical operations, to make them available to the GUI.
+    The operations are readily accessible from command line, for example
+    curve1 + curve2 - 20
     """
 
     CURVE = "Curve Math"
@@ -133,7 +134,7 @@ class CurveMath(Curve):
         math = curve.attr("math")
         curve.update({"math": math + "; " + txt if math != "" else txt})
 
-    def add(self, cst, curves, graph=None, operator="add"):
+    def add(self, cst, curves, graph: Graph = None, operator="add"):
         """Add a constant or a (list of) curves to this curve."""
 
         def op(x, y, operator):
@@ -209,15 +210,15 @@ class CurveMath(Curve):
     def swap_xy(self):
         """Return a copy of this curve with x and y data swapped."""
         out = 0 + self  # work on copy
-        out.setX(self.y())
-        out.setY(self.x())
+        out.set_x(self.y())
+        out.set_y(self.x())
         txt = "swap x<->y"
         self._append_to_math(out, txt)
         return out
 
     def assemble_curve_xy(
         self, idx_x: int, xory_x: str, idx_y: int, xory_y: str, graph: Graph
-    ) -> Curve:
+    ):
         """
         Assemble new Curve from data series of same length available in a Graph object.
 
@@ -233,12 +234,14 @@ class CurveMath(Curve):
         data_x = curve_x.x() if xory_x == "x" else curve_x.y()
         data_y = curve_y.x() if xory_y == "x" else curve_y.y()
         if len(data_x) != len(data_y):
-            print(
-                "ERROR CurveMath assembleCurveXY: selected data series do not have"
-                + "same length! Abort."
+            msg = (
+                "CurveMath assemble_curve_xy: selected Curves must have same"
+                "length. Lengths %s, %s. Input parameters: %s, %s, %s, %s. Abort."
             )
-            print("input parameters:", idx_x, xory_x, idx_y, xory_y)
-            return False
+            msa = (len(data_x), len(data_y), idx_x, xory_x, idx_y, xory_y)
+            logger.error(msg, *msa)
+            raise GrapaError(msg)
+
         attr = {}
         attr.update(curve_x.get_attributes())
         attr.update(curve_y.get_attributes())
@@ -258,7 +261,7 @@ class CurveMath(Curve):
         self._append_to_math(curve, txt)
         curve_type = curve.attr("curve", "")
         if curve_type != "":
-            curve = curve.castCurve(curve_type)
+            curve = curve.cast_as(curve_type)
         return curve
 
     def print_help(self):

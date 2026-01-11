@@ -10,11 +10,10 @@ import os
 import sys
 import copy
 import warnings
-from typing import Optional
+from typing import Optional, Dict, Any
 from enum import Enum
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -23,11 +22,12 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import file_read_first3lines
 from grapa.curve import Curve
 from grapa.colorscale import Colorscale
 from grapa.curve_image import Curve_Image
-from grapa.mathModule import roundSignificant
+from grapa.parse.parser_dispatcher import file_read_first3lines
+from grapa.shared.maths import roundSignificant
+from grapa.shared.mpl_figure_factory import MplFigureFactory
 
 from grapa.datatypes.graphCf import GraphCf
 from grapa.datatypes.graphCV import GraphCV
@@ -75,6 +75,7 @@ def script_processCV(
     ROIsmart=None,
     pltClose=True,
     newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """Script process CV files in folder
 
@@ -87,6 +88,8 @@ def script_processCV(
         ROIsmart = CurveCV.CST_MottSchottky_Vlim_adaptative
     if newGraphKwargs is None:
         newGraphKwargs = {}
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     ngkwargs = copy.deepcopy(newGraphKwargs)
     ngkwargs.update({"silent": True})
 
@@ -146,7 +149,7 @@ def script_processCV(
     graph_phase.update(
         {
             "xlabel": graph.attr("xlabel"),
-            "ylabel": graph.formatAxisLabel("Impedance phase [°]"),
+            "ylabel": graph.format_axis_label("Impedance phase [°]"),
         }
     )
     # mask undesired legends
@@ -162,7 +165,8 @@ def script_processCV(
     presets = UtilsCv.presets(graph, labels)
 
     # save
-    plotargs = {}  # {'ifExport': False, 'ifSave': False}
+    plotargs = {"figure_factory": figure_factory}
+    # {'ifExport': False, 'ifSave': False}
     filesave = os.path.join(folder, graph.attr("title").replace(" ", "_") + "_")
     # graphIO.filesave_default(self)
 
@@ -289,14 +293,14 @@ class UtilsCv:
             "ylim": "",
             "alter": ["", "CurveCV.y_ym2"],
             "typeplot": "",
-            "ylabel": graph.formatAxisLabel(["1 / C$^2$", "", "nF$^{-2}$ cm$^{4}$"]),
+            "ylabel": graph.format_axis_label(["1 / C$^2$", "", "nF$^{-2}$ cm$^{4}$"]),
             "xlabel": labels[0],
         }
         presets["NV"] = {
             "ylim": [0, np.nan],
             "typeplot": "",
             "alter": ["", "CurveCV.y_CV_Napparent"],
-            "ylabel": graph.formatAxisLabel(
+            "ylabel": graph.format_axis_label(
                 ["Apparent doping density", "N_{CV}", "cm$^{-3}$"]
             ),
             "xlabel": labels[0],
@@ -308,10 +312,10 @@ class UtilsCv:
             "xlim": "",
             "alter": ["CurveCV.x_CVdepth_nm", "CurveCV.y_CV_Napparent"],
             "typeplot": "",
-            "ylabel": graph.formatAxisLabel(
+            "ylabel": graph.format_axis_label(
                 ["Apparent doping density", "N_{CV}", "cm$^{-3}$"]
             ),
-            "xlabel": graph.formatAxisLabel(["Apparent depth", "d", "nm"]),
+            "xlabel": graph.format_axis_label(["Apparent depth", "d", "nm"]),
         }
         presets["Nxlog"] = copy.deepcopy(presets["Nx"])
         presets["Nxlog"].update({"ylim": "", "typeplot": "semilogy"})
@@ -344,7 +348,7 @@ class UtilsCv:
         graph_phase.append(curve)
         graph_phase.plot(filesave=filesave + "phase", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
     @staticmethod
     def plot_adaptative(
@@ -354,12 +358,12 @@ class UtilsCv:
         graph.update({"legendtitle": "Mott-Schottky fit (adaptative Vlim)"})
         graph.plot(filesave=filesave + "MottSchottkyAdaptative", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
         graph.update(presets["NVlog"])
         graph.update({"ylim": [0.75 * ncvminmax1[0], 2.2 * ncvminmax1[1]]})
         graph.plot(filesave=filesave + "NVlogAdaptative", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
     @staticmethod
     def plot_savevlim(
@@ -370,12 +374,12 @@ class UtilsCv:
         graph.update({"axvline": roifit})
         graph.plot(filesave=filesave + "MottSchottkySameVlim", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
         graph.update(presets["NVlog"])
         graph.update({"ylim": [0.75 * ncvminmax0[0], 2.2 * ncvminmax0[1]]})
         graph.plot(filesave=filesave + "NVlogSameVlim", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
         graph.update({"axvline": "", "legendtitle": ""})
 
     @staticmethod
@@ -409,63 +413,63 @@ class UtilsCv:
         )
         graph_vbi.update(
             {
-                "xlabel": graph_vbi.formatAxisLabel(["Temperature", "T", "K"]),
-                "ylabel": graph_vbi.formatAxisLabel(
+                "xlabel": graph_vbi.format_axis_label(["Temperature", "T", "K"]),
+                "ylabel": graph_vbi.format_axis_label(
                     ["Built-in voltage", "V_{bi}", "V"]
                 ),
             }
         )
         graph_vbi.plot(filesave=filesave + "VbiT", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
         for curve in graph_vbi:
             curve.visible(not curve.visible())
         graph_vbi.update(
             {
-                "xlabel": graph_vbi.formatAxisLabel(["Temperature", "T", "K"]),
+                "xlabel": graph_vbi.format_axis_label(["Temperature", "T", "K"]),
                 "ylabel": presets["NV"]["ylabel"],
                 "typeplot": "semilogy",
             }
         )
         graph_vbi.plot(filesave=filesave + "NcvT", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
     @staticmethod
     def plot_nx(graph: Graph, filesave, plotkwargs, pltclose, presets):
         graph.update(presets["Nx"])
         graph.plot(filesave=filesave + "Ndepth", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
         graph.update(presets["Nxlog"])
         graph.plot(filesave=filesave + "Ndepthlog", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
     @staticmethod
     def plot_nv(graph: Graph, filesave, plotkwargs, pltclose, presets):
         graph.update(presets["NV"])
         graph.plot(filesave=filesave + "NV", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
         graph.update(presets["NVlog"])
         graph.plot(filesave=filesave + "NVlog", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
     @staticmethod
     def plot_ms(graph: Graph, filesave, plotkwargs, pltclose, presets):
         graph.update(presets["MS"])
         graph.plot(filesave=filesave + "MottSchottky", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
     @staticmethod
     def plot_cv(graph: Graph, filesave, plotkwargs, pltclose, presets):
         graph.update(presets["default"])
         graph.plot(filesave=filesave + "CV", **plotkwargs)
         if pltclose:
-            plt.close()
+            plotkwargs["figure_factory"].close()
 
 
 def script_processCf(
@@ -473,6 +477,7 @@ def script_processCf(
     legend: LegendChoice = LegendChoice.MINMAX,
     pltClose=True,
     newGraphKwargs: Optional[dict] = None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """
     legend: possible values: 'none', 'minmax', 'all'
@@ -480,6 +485,8 @@ def script_processCf(
     print("Script process C-f")
     if newGraphKwargs is None:
         newGraphKwargs = {}
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
     newGraphKwargs = copy.deepcopy(newGraphKwargs)
     newGraphKwargs.update({"silent": True})
     graph = Graph("", **newGraphKwargs)
@@ -572,10 +579,10 @@ def script_processCf(
     _set_xlim(graph_bode, "tight")
 
     # save
-    filesave = os.path.join(
-        folder, graph.attr("title").replace(" ", "_") + "_"
-    )  # graphIO.filesave_default(self)
-    plotargs = {}  # {'ifExport': False, 'ifSave': False}
+    filesave = os.path.join(folder, graph.attr("title").replace(" ", "_") + "_")
+    # graphIO.filesave_default(self)
+    # {'ifExport': False, 'ifSave': False}
+    plotargs: Dict[str, Any] = {"figure_factory": figure_factory}
     graphattr = {}
     for attr in ["alter", "typeplot", "xlim", "ylim", "xlabel", "ylabel"]:
         graphattr.update({attr: graph.attr(attr)})
@@ -584,7 +591,7 @@ def script_processCf(
     graph.update({"ylim": [0, np.nan]})
     graph.plot(filesave=filesave + "Clogf", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # graph 2: derivative
     graph.update({"alter": ["", "CurveCf.y_mdCdlnf"], "typeplot": "semilogx"})
@@ -593,20 +600,20 @@ def script_processCf(
     )  # same math as d Capacitance / d ln(f)
     graph.plot(filesave=filesave + "deriv", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # graph 3: derivative, zoomed-in
     graph.update({"alter": ["", "CurveCf.y_mdCdlnf"], "typeplot": "semilogx"})
     graph.update({"ylim": [0, 1.5 * max(graph[0].y(alter="CurveCf.y_mdCdlnf"))]})
     graph.plot(filesave=filesave + "derivZoom", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # graph 4: phase
     graph_phase.update(
         {
             "xlabel": graph.attr("xlabel"),
-            "ylabel": graph_phase.formatAxisLabel("Impedance phase [°]"),
+            "ylabel": graph_phase.format_axis_label("Impedance phase [°]"),
             "alter": "",
             "typeplot": "semilogx",
             "ylim": [0, 90],
@@ -621,14 +628,14 @@ def script_processCf(
     )
     graph_phase.plot(filesave=filesave + "phase", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # graph 5: Nyquist
     graph_nyqui.update(
         {
             "alter": "",
-            "xlabel": graph_nyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[0]),
-            "ylabel": graph_nyqui.formatAxisLabel(GraphCf.AXISLABELSNYQUIST[1]),
+            "xlabel": graph_nyqui.format_axis_label(GraphCf.AXISLABELSNYQUIST[0]),
+            "ylabel": graph_nyqui.format_axis_label(GraphCf.AXISLABELSNYQUIST[1]),
         }
     )
     # Nyquist limits
@@ -654,7 +661,7 @@ def script_processCf(
     graph_nyqui.update(upd)
     graph_nyqui.plot(filesave=filesave + "Nyquist", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # graph 6: image derivative, omega (aka f) vs T (or rather arrhenius)
     graph_image = Graph()
@@ -731,12 +738,12 @@ def script_processCf(
             "alter": ["CurveArrhenius.x_1000overK", ""],
             "ylim": [omegamin, omegamax],
             "twinx_ylim": [omegamin / 2 / np.pi, omegamax / 2 / np.pi],
-            "ylabel": graph_image.formatAxisLabel(
+            "ylabel": graph_image.format_axis_label(
                 ["Angular frequency $\\omega$", "", "s$^{-1}$"]
             ),
             "twinx_ylabel": graph.attr("xlabel"),
-            "xlabel": graph_image.formatAxisLabel(["Temperature", "T", "K"]),
-            "twiny_xlabel": graph_image.formatAxisLabel(
+            "xlabel": graph_image.format_axis_label(["Temperature", "T", "K"]),
+            "twiny_xlabel": graph_image.format_axis_label(
                 ["1000/Temperature", "", "1000/K"]
             ),
             "xlim": [tempmax, tempmin],
@@ -787,15 +794,15 @@ def script_processCf(
         {
             "alter": ["CurveCV.x_CVdepth_nm", "x"],
             "typeplot": "semilogy",
-            "xlabel": graph.formatAxisLabel(["Apparent depth", "d", "nm"]),
-            "ylabel": graph.formatAxisLabel(["Frequency", "f", "Hz"]),
+            "xlabel": graph.format_axis_label(["Apparent depth", "d", "nm"]),
+            "ylabel": graph.format_axis_label(["Frequency", "f", "Hz"]),
             "xlim": "",
             "ylim": "",
         }
     )
     graph.plot(filesave=filesave + "apparentDepth", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # Bode plot
     graph_bode.update(
@@ -803,7 +810,7 @@ def script_processCf(
             "xlabel": graph.attr("ylabel"),
             "ylabel": "Modulus |Z| [Ohm]",
             "typeplot": "loglog",
-            "twinx_ylabel": graph_nyqui.formatAxisLabel("Impedance phase [°]"),
+            "twinx_ylabel": graph_nyqui.format_axis_label("Impedance phase [°]"),
             "twinx_ylim": [0, 90],
             "subplots_adjust": [0.15, 0.15],
         }
@@ -813,12 +820,12 @@ def script_processCf(
         graph_bode[1].update({"labelhide": ""})
     graph_bode.plot(filesave=filesave + "Bode", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     # restore initial graph
     graph.update(graphattr)
     if pltClose:
-        plt.close()
+        figure_factory.close()
     print(
         "Tip for next step: pick inflection points for different T, then the fit "
         "activation energy."
@@ -829,12 +836,13 @@ def script_processCf(
 
 def execute_standalone():
     """For test purposes"""
+    import matplotlib.pyplot as plt
+
     folder = "./../examples/Cf/"
-    # graph = script_processCf(folder, pltClose=False)
+    graph = script_processCf(folder, pltClose=False)
 
     folder = "./../examples/CV/"
-    folder = r"C:\Users\car\Desktop\CVtest"
-    graph = script_processCV(folder, ROIfit=[0.15, 0.3], pltClose=True)
+    # graph = script_processCV(folder, ROIfit=[0.15, 0.3], pltClose=True)
 
     plt.show()
 

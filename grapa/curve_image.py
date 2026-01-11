@@ -10,10 +10,10 @@ from copy import deepcopy
 import numpy as np
 import matplotlib
 
-from grapa import KEYWORDS_CURVE
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.utils.funcgui import FuncGUI
+from grapa.shared.funcgui import FuncGUI
+from grapa.shared.keywords_loader import keywords_curve
 
 
 class Curve_Image(Curve):
@@ -48,7 +48,7 @@ class Curve_Image(Curve):
         if default not in type_values:
             texttype = "issue: keyword 'type' should be:"
             default = "imshow"
-        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": ["type"]})
+        item = FuncGUI(self.update_values_keys, "Set", {"keys": ["type"]})
         item.appendcbb(texttype, default, type_values)
         doc = "Toggle matplotlib plot function: {}.".format(", ".join(type_values))
         item.set_funcdocstring_alt(doc)
@@ -78,14 +78,14 @@ class Curve_Image(Curve):
         datafile_xy1rowcol = bool(self.attr("datafile_XY1rowcol"))
         datafile_dataasxyz = bool(self.attr("datafile_dataasxyz"))
         # file
-        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": ["datafile"]})
+        item = FuncGUI(self.update_values_keys, "Set", {"keys": ["datafile"]})
         item.append("data file", self.attr("datafile"), options={"width": 40})
         item.set_funcdocstring_alt("Change filename of file containing data.")
         out.append(item)
 
         # X,Y 1st row column; data as XYZ
         opts_dfxy = {"options": {"field": "Checkbutton"}}
-        item = FuncGUI(self.updateValuesDictkeys, "Set")
+        item = FuncGUI(self.update_values_keys, "Set")
         item.set_hiddenvars({"keys": ["datafile_XY1rowcol", "datafile_dataasxyz"]})
         item.append("first row, column as coordinates", datafile_xy1rowcol, **opts_dfxy)
         item.append("data as 3-colum XYZ", datafile_dataasxyz, **opts_dfxy)
@@ -95,7 +95,7 @@ class Curve_Image(Curve):
 
         # transpose, rotate
         at = ["transpose", "rotate"]
-        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+        item = FuncGUI(self.update_values_keys, "Set", {"keys": at})
         item.appendcbb(at[0], self.attr(at[0]), ["", "True", "False"])
         item.append(at[1], self.attr(at[1]))
         item.set_funcdocstring_alt("Update attributes 'transpose' and 'rotate'.")
@@ -119,12 +119,13 @@ class Curve_Image(Curve):
             out.append([None, msg, [], []])
 
         # colorscale
+        KEYWORDS_CURVE = keywords_curve()
         key = "colorbar"
         valscb = [self.attr(key)]
         if "colorbar" in KEYWORDS_CURVE["keys"]:
             i = KEYWORDS_CURVE["keys"].index(key)
             valscb += [str(v) for v in KEYWORDS_CURVE["guiexamples"][i]]
-        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": [key]})
+        item = FuncGUI(self.update_values_keys, "Set", {"keys": [key]})
         item.appendcbb(key, self.attr(key), valscb, options={"width": 50})
         item.set_funcdocstring_alt("Modifies the attribute 'colorbar'.")
         out.append(item)
@@ -132,7 +133,7 @@ class Curve_Image(Curve):
         # colormap
         attxt = ["cmap (ignored if color image)", "vmin", "vmax"]
         at = [a.split(" ")[0] for a in attxt]
-        item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+        item = FuncGUI(self.update_values_keys, "Set", {"keys": at})
         for a in attxt:
             item.append(a, self.attr(a.split(" ")[0]))
         item.set_funcdocstring_alt("Update keywords 'cmap', 'vmin', 'vmax'")
@@ -141,7 +142,7 @@ class Curve_Image(Curve):
         # aspect ratio, interpolation, or levels
         if self.attr("type") == "imshow":
             at = ["aspect", "interpolation"]
-            item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+            item = FuncGUI(self.update_values_keys, "Set", {"keys": at})
             item.appendcbb("aspect ratio", self.attr(at[0]), aspect, bind="beforespace")
             item.appendcbb("interpolation", self.attr(at[1]), interpolation)
             doc = "Update attributes 'aspect' (ratio) and 'interpolation'"
@@ -154,7 +155,7 @@ class Curve_Image(Curve):
                 "field": "Combobox",
                 "values": list(matplotlib.scale.get_scale_names()),
             }
-            item = FuncGUI(self.updateValuesDictkeys, "Set", {"keys": at})
+            item = FuncGUI(self.update_values_keys, "Set", {"keys": at})
             item.append("levels (list of values)", self.attr(at[0]))
             item.append("extend", self.attr(at[1]), options=optse)
             item.append(", norm", self.attr(at[2]), options=optsn)
@@ -245,7 +246,7 @@ class Curve_Image(Curve):
         out.append(Curve([xyz[:, 0], xyz[:, 2]], {}))
         curvetype = out[0].attr("curve")
         if curvetype != "":
-            out.castCurve(curvetype, 0)
+            out.curve_cast(curvetype, 0)
         out[0].update({"datafile_dataasxyz": True})
         return out  # [c for c in out]
 
@@ -263,7 +264,7 @@ class Curve_Image(Curve):
         out[0].update(self.get_attributes())
         curvetype = out[0].attr("curve")
         if curvetype != "":
-            out.castCurve(curvetype, 0)
+            out.curve_cast(curvetype, 0)
         out[0].update({"datafile_dataasxyz": False})
         return out  # [c for c in out]
 
@@ -431,9 +432,10 @@ class Curve_Image(Curve):
                     data = data.transpose(PILimage.TRANSPOSE)
             except OSError:  # file is not an image -> assume is data
                 complement = {"readas": "generic", "_singlecurve": True}
-                graphtmp = Graph(datafile, complement)
+                graphkw = {} if graph is None else {"config": graph.config("filename")}
+                graphtmp = Graph(datafile, complement, **graphkw)
                 if len(graphtmp) > 0:
-                    data = graphtmp[0].getData()
+                    data = graphtmp[0].get_data()
                     if dataasxyz:
                         X, Y, data = self.xyz_to_x_y_z(data)
                     data, X, Y = self.process_matrix(

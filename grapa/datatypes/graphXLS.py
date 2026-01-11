@@ -8,8 +8,8 @@ Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 
 
 from grapa.graph import Graph
-from grapa.utils.parser_dispatcher import FileParserDispatcher
-from grapa.mathModule import is_number
+from grapa.parse.parser_dispatcher import FileParserDispatcher
+from grapa.shared.maths import is_number
 
 
 class GraphXLS(Graph):
@@ -68,5 +68,5 @@ class GraphXLS(Graph):
                     values.append(value)
             items.append(values)
         # identify correct way to process data - is it database, or file generic ?
-        func = FileParserDispatcher._funcReadDataFile(items, attributes)
+        func = FileParserDispatcher._which_default_parse_method(items, attributes)
         func(self, attributes, fileContent=items)

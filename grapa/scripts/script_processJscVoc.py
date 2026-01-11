@@ -8,10 +8,11 @@ Romain Carron
 """
 
 import os
-import numpy as np
-import copy
-import matplotlib.pyplot as plt
 import sys
+import copy
+from typing import Optional, Dict, Any
+
+import numpy as np
 
 path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
@@ -20,13 +21,19 @@ if path not in sys.path:
     sys.path.append(path)
 
 from grapa.graph import Graph
-from grapa.mathModule import roundSignificantRange, roundSignificant, is_number
-
+from grapa.shared.maths import roundSignificantRange, roundSignificant, is_number
+from grapa.shared.mpl_figure_factory import MplFigureFactory
 from grapa.datatypes.curveJscVoc import GraphJscVoc, CurveJscVoc
 
 
 def script_processJscVoc(
-    file, pltClose=True, newGraphKwargs={}, ROIJsclim=None, ROIVoclim=None, ROITlim=None
+    file,
+    pltClose=True,
+    newGraphKwargs={},
+    ROIJsclim=None,
+    ROIVoclim=None,
+    ROITlim=None,
+    figure_factory: Optional[MplFigureFactory] = None,
 ):
     """
     TO IMPLEMENT PARAMETERS:
@@ -35,6 +42,8 @@ def script_processJscVoc(
     """
     newGraphKwargs = copy.deepcopy(newGraphKwargs)
     newGraphKwargs.update({"silent": True})
+    if figure_factory is None:
+        figure_factory = MplFigureFactory()
 
     print("Script process Jsc-Voc")
 
@@ -46,11 +55,11 @@ def script_processJscVoc(
     if len(lbl) > 1:
         graph.update({"title": lbl})
 
-    labelT = graph.formatAxisLabel(["Temperature", "T", "K"])
-    labelA = graph.formatAxisLabel(["Diode ideality factor", "A", ""])
-    label1000AT = graph.formatAxisLabel(["1000 / (A*Temperature)", "", "K$^{-1}$"])
-    labellnJ0 = graph.formatAxisLabel(["ln(J$_0$)", "", "mAcm$^{-2}$"])
-    labelVoc = graph.formatAxisLabel(["Voc", "", "V"])
+    labelT = graph.format_axis_label(["Temperature", "T", "K"])
+    labelA = graph.format_axis_label(["Diode ideality factor", "A", ""])
+    label1000AT = graph.format_axis_label(["1000 / (A*Temperature)", "", "K$^{-1}$"])
+    labellnJ0 = graph.format_axis_label(["ln(J$_0$)", "", "mAcm$^{-2}$"])
+    labelVoc = graph.format_axis_label(["Voc", "", "V"])
 
     presets = {}
     presets.update(
@@ -107,7 +116,8 @@ def script_processJscVoc(
         folder, "JscVoc_" + graph.attr("title").replace(" ", "_") + "_"
     )  # graphIO.filesave_default(self)
     print("filesave", filesave)
-    plotargs = {}  # {'ifExport': False, 'ifSave': False}
+    plotargs: Dict[str, Any] = {"figure_factory": figure_factory}
+    # also possible e.g. {'if_export': False, 'if_save': False}
     grap2 = copy.deepcopy(graph)
     # default graph: with fits
     graph.update(presets["default"])
@@ -137,7 +147,7 @@ def script_processJscVoc(
         graph.append(curve)
     graph.plot(filesave=filesave + "fits", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
     # Graph ideality factor vs T
     grap2.update(presets["ideality"])
     grap2.append(graph[-3])
@@ -145,7 +155,7 @@ def script_processJscVoc(
         grap2[c].visible(not grap2[c].visible())
     grap2.plot(filesave=filesave + "IdealityvsT", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
     # Graph ideality factor vs T
     grap2.update(presets["J0vsAT"])
     grap2.curve_delete(-1)
@@ -162,7 +172,7 @@ def script_processJscVoc(
     grap2[-1].update({"label": "E$_a$ " + "{:1.3f}".format(Ea) + " eV"})
     grap2.plot(filesave=filesave + "J0vsAT", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
     # Voc vs T
     grap2.update(presets["VocvsT"])
     grap2.curve_delete(-1)  # previous fit
@@ -186,7 +196,7 @@ def script_processJscVoc(
     grap2.append(res, idx=2)
     grap2.plot(filesave=filesave + "VocvsT", **plotargs)
     if pltClose:
-        plt.close()
+        figure_factory.close()
 
     graph[-1].visible(False)
     graph[-3].visible(False)
@@ -200,6 +210,8 @@ def script_processJscVoc(
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    
     file_ = "./../examples/JscVoc/JscVoc_SAMPLE_c2_Values.txt"
     graph_ = script_processJscVoc(file_, pltClose=False)
 

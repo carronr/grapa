@@ -25,4 +25,5 @@ GUI_colorscale13	'YlGn'
 
 # default saving image format
 save_imgformat	.png
+save_image_dpi	300
 

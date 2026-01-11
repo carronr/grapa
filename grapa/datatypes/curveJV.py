@@ -18,9 +18,9 @@ import os
 
 from grapa.graph import Graph
 from grapa.curve import Curve
-from grapa.constants import CST
-from grapa.mathModule import xAtValue, is_number, roundSignificant, derivative, smooth
-from grapa.utils.funcgui import FuncListGUIHelper, FuncGUI
+from grapa.shared.constants import CST
+from grapa.shared.maths import xAtValue, is_number, roundSignificant, derivative, smooth
+from grapa.shared.funcgui import FuncGUI, funclistgui_graph_axislabels
 
 
 def ideality_differential(v, j_minus_jsc_ma, temperature):
@@ -124,10 +124,10 @@ class CurveJV(Curve):
 
         # internally all units are treated as V and mA/cm2
         if units[0] == "mV":
-            self.setX(self.x() / 1000)
+            self.set_x(self.x() / 1000)
             print("class CurveJV: V axis rescaling into V.")
         if units[1] == "Am-2":  # converts in mAcm-2
-            self.setY(self.y() * 1000 / (100 * 100))
+            self.set_y(self.y() * 1000 / (100 * 100))
             print("class CurveJV: J axis rescaling into mA/cm2.")
 
         # illumPower default 1000 W/m2
@@ -166,7 +166,7 @@ class CurveJV(Curve):
         # format: [func, 'func label', ['input 1', 'input 2', 'input 3', ...] (, [default1, default2, ...]) ]
         # sample, cell
         keys = ["Sample", "Cell"]
-        item = FuncGUI(self.updateValuesDictkeys, "Save", {"keys": keys})
+        item = FuncGUI(self.update_values_keys, "Save", {"keys": keys})
         item.append("Sample", self.attr("sample"), options={"width": 20})
         item.append("Cell", self.attr("cell"), options={"width": 10})
         out.append(item)
@@ -175,7 +175,7 @@ class CurveJV(Curve):
         opts_di = {"state": "readonly"}
         opts_fb = {"width": 5}
         keys = ["darkorillum", "illumspectrum", "fwd_bwd"]
-        item = FuncGUI(self.updateValuesDictkeys, "Save", {"keys": keys})
+        item = FuncGUI(self.update_values_keys, "Save", {"keys": keys})
         item.appendcbb(" ", darkillum, self.DARK_ILLUM_VALUESLIST, options=opts_di)
         item.append("spectrum", self.attr("illumspectrum"), options={"width": 10})
         item.appendcbb("sweep", self.attr("fwd_bwd"), ["fwd", "bwd"], options=opts_fb)
@@ -236,7 +236,7 @@ class CurveJV(Curve):
                 ]
             )
         out.append([self.print_help, "Help!", [], []])
-        out += FuncListGUIHelper.graph_axislabels(self, **kwargs)
+        out += funclistgui_graph_axislabels(self, **kwargs)
         self._funclistgui_memorize(out)
         return out
 
@@ -330,7 +330,7 @@ class CurveJV(Curve):
         if not self.silent:
             print("CurveJV setArea: new area (new", area, ", old", self.area(), ")")
         oldarea = self.area()
-        self.setY(self.y() * oldarea / area)
+        self.set_y(self.y() * oldarea / area)
         Curve.update(self, {"area": area})
         if not self.silent:
             print("Area set to", area, "(old value", oldarea, ")")
@@ -347,17 +347,17 @@ class CurveJV(Curve):
     def J(self, idx=np.nan):
         return self.y(idx)
 
-    def yDifferentialR(self, index=np.nan, xyValue=None):
+    def yDifferentialR(self, index=None, xyValue=None, **_kwargs):
         """Returns differential resistance of the J-V curve R = dV/dI"""
         if xyValue is not None:
             return np.array(xyValue)[1]
         V, J = self.x(), self.y() / 1000  # J in A/cm2
         val = derivative(J, V)  # R in Ohm cm2
-        if np.isnan(index).any():
+        if index is None or np.isnan(index).any():
             return val[:]
         return val[index]
 
-    def xinversejminusjsc(self, index=np.nan, xyValue=None):
+    def xinversejminusjsc(self, index=np.nan, xyValue=None, **_kwargs):
         """
         To be used for Sites method, dV/dJ vs 1/(J-Jsc)
         Returns value in [A-1 cm2]
@@ -372,12 +372,12 @@ class CurveJV(Curve):
         # return value in [A-1 cm2]
         return 1 / (j + jsc) * 1000
 
-    def y_idealitydifferential(self, index=np.nan, xyValue=None):
+    def y_idealitydifferential(self, index=None, xyValue=None, **_kwargs):
         if xyValue is not None:
             return np.array(xyValue)[1]
         jsc = self.attr("jsc", default=0)
         out = ideality_differential(self.x(), self.y() + jsc, self.T)
-        if np.isnan(index).any():
+        if index is None or np.isnan(index).any():
             return out
         return out[index]
 
@@ -1392,7 +1392,10 @@ class CurveJV(Curve):
                 ):
                     graph[c + 1].appendPoints([voc], [self.T])
                 else:
-                    msg = "WARNING: CurveJV extractJscVoc: could not identify curve to store temperature, or data length mismatch"
+                    msg = (
+                        "WARNING: CurveJV extractJscVoc: could not identify curve to"
+                        " store temperature, or data length mismatch"
+                    )
                     print(msg)
                 flag = True
                 break
@@ -1407,5 +1410,5 @@ class CurveJV(Curve):
             graph.append(curve0)
             curve1 = Curve([[voc], [self.T]], {identifierT: True, "type": "scatter_c"})
             graph.append(curve1)
-            graph.castCurve("CurveJscVoc", -2, silentSuccess=True)
+            graph.curve_cast("CurveJscVoc", -2)
         return True

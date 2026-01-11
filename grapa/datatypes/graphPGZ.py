@@ -74,7 +74,7 @@ class GraphPGZ(Graph):
             {
                 "figsize": [5, 5],
                 "subplots_adjust": [0.15, 0.15, 0.95, 0.95],
-                "xlabel": self.formatAxisLabel(GraphPGZ.AXISLABELS[0]),
-                "ylabel": self.formatAxisLabel(GraphPGZ.AXISLABELS[1]),
+                "xlabel": self.format_axis_label(GraphPGZ.AXISLABELS[0]),
+                "ylabel": self.format_axis_label(GraphPGZ.AXISLABELS[1]),
             }
         )
