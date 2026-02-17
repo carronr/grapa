@@ -175,7 +175,7 @@ def smooth(x, window_len=11, window="hanning"):
     if window_len < 3:
         return x
     if window not in SMOOTH_WINDOW:
-        raise ValueError("Window is not of {}".format(SMOOTH_WINDOW))
+        raise ValueError(f"Window is not of {SMOOTH_WINDOW}")
 
     s = np.r_[x[window_len - 1 : 0 : -1], x, x[-1:-window_len:-1]]
     # print(len(s))

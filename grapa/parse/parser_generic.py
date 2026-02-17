@@ -39,7 +39,7 @@ def _identify_delimiter(lines: list, print_if_issue=True) -> str:
         numbers.append(np.sum([line.count(delimiter) for line in lines]))
         if numbers[-1] > threshold:
             if delimiter != delimiters[0]:
-                print("Identified '{}' as delimiter.".format(delimiter))
+                print(f"Identified '{delimiter}' as delimiter.")
             return delimiter
 
     if print_if_issue:
@@ -273,9 +273,9 @@ class FileParserGeneric:
     def _update_graph_header_endloop(
         cls, attributes, last_line, last_keyword, delimiter
     ):
-        KEYWORDS_GRAPH = keywords_graph()
-        KEYWORDS_CURVE = keywords_curve()
-        KEYWORDS_HEADERS = keywords_headers()
+        kw_graph = keywords_graph()
+        kw_curve = keywords_curve()
+        kw_headers = keywords_headers()
         collabels = []
         is_label_default = False
         if "filename" in attributes:
@@ -295,9 +295,7 @@ class FileParserGeneric:
                 is_label_default
                 and len(last_line) > 1
                 and last_keyword
-                not in KEYWORDS_GRAPH["keys"]
-                + KEYWORDS_HEADERS["keys"]
-                + KEYWORDS_CURVE["keys"]
+                not in kw_graph["keys"] + kw_headers["keys"] + kw_curve["keys"]
             )
         ):
             collabels = cls._get_collabels(attributes, last_line)
@@ -364,14 +362,14 @@ class FileParserGeneric:
 
     @classmethod
     def _header_to_graph(cls, graph, linesplit: list, val_header) -> dict:
-        KEYWORDS_GRAPH = keywords_graph()
-        KEYWORDS_HEADERS = keywords_headers()
+        kw_graph = keywords_graph()
+        kw_headers = keywords_headers()
         keyword = linesplit[0]
         # identify headers, graphinfo values
-        if keyword in KEYWORDS_HEADERS["keys"]:
+        if keyword in kw_headers["keys"]:
             graph.update({keyword: strToVar(val_header)})
             return {}
-        if keyword in KEYWORDS_GRAPH["keys"] or keyword.startswith("subplots"):
+        if keyword in kw_graph["keys"] or keyword.startswith("subplots"):
             graph.update({keyword: strToVar(val_header)})
             return {}
 

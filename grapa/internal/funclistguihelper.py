@@ -272,16 +272,16 @@ class FuncListGUIHelper:
         if the curve has these attributes."""
         out = []
         if curve.has_attr("offset") or curve.has_attr("muloffset"):
-            KEYWORDS_CURVE = keywords_curve()
+            kw_curve = keywords_curve()
             at = ["offset", "muloffset"]
             line = FuncGUI(curve.update_values_keys, "Modify screen offsets")
             line.set_hiddenvars({"keys": at})
             line.set_funcdocstring_alt("Modify keywords {} and {}.".format(*at))
             for key in at:
                 vals = []
-                if key in KEYWORDS_CURVE["keys"]:
-                    i = KEYWORDS_CURVE["keys"].index(key)
-                    vals = [str(v) for v in KEYWORDS_CURVE["guiexamples"][i]]
+                if key in kw_curve["keys"]:
+                    i = kw_curve["keys"].index(key)
+                    vals = [str(v) for v in kw_curve["guiexamples"][i]]
                 line.appendcbb(key, curve.attr(key), vals)
             out.append(line)
         return out

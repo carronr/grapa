@@ -26,6 +26,7 @@ Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 """
 
 import warnings
+from logging import Logger
 
 
 # WARNINGS
@@ -58,7 +59,7 @@ class IncorrectInputError(GrapaError):
 # no raise_error, because want to keep pylance analysis 'code unreachable'
 # -> directly in relevant code
 def issue_warning(
-    logger,
+    logger: Logger,
     msg: str,
     *args,
     category: type[Warning] = GrapaWarning,

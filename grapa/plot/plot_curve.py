@@ -234,7 +234,7 @@ def _apply_attr_to_handle(handle, attr: dict, fmt: dict, attr_ignore: list) -> N
 
 def _build_fmt(attr: dict, ax: Axes, plot_method: str) -> dict:
     """internal details: construction of the fmt keyword used in ax.plot"""
-    KEYWORDS_CURVE = keywords_curve()
+    kw_curve = keywords_curve()
     fmt = {}
     for key in attr:
         if not isinstance(key, str):
@@ -244,7 +244,7 @@ def _build_fmt(attr: dict, ax: Axes, plot_method: str) -> dict:
         keys_not_fmt += ["offset", "muloffset", "labelhide", "xerr", "yerr"]
         if (
             (not isinstance(attr[key], str) or attr[key] != "")
-            and key in KEYWORDS_CURVE["keys"]
+            and key in kw_curve["keys"]
             and key not in keys_not_fmt
         ):
             fmt[key] = attr[key]

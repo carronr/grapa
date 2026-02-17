@@ -6,6 +6,10 @@ Includes reparametrized versions of CIE Lab and LCh, with values 0-1.
 @author: Romain Carron
 Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
+
+# pylint: disable=invalid-name  # math-heavy module, disable warnings capital letters
+
+
 import math
 
 

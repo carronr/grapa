@@ -39,7 +39,7 @@ class Action:
         return False
 
     def __str__(self):
-        return "{}(*{}, **{})".format(self.func, self.args, self.kwargs)
+        return f"{self.func}(*{self.args}, **{self.kwargs})"
 
     def execute(self, obj):
         """Exectue the Action on an object"""

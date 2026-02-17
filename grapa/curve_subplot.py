@@ -123,7 +123,7 @@ class Curve_Subplot(Curve):
             panelsize = [float(val) for val in panelsize]
             margin = [float(val) for val in margin]
         except (TypeError, ValueError) as e:
-            print("Exception {}: {}".format(type(e), e))
+            print(f"Exception {type(e)}: {e}")
             return False
         while len(margin) < 6:
             margin.append(1)

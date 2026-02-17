@@ -346,7 +346,7 @@ class ParserMisc:
             xyaxis.set_ticks(arr)
             return True
 
-        issue_warning(logger, "xticksstep or yticksstep invalid input {}.".format(val))
+        issue_warning(logger, f"xticksstep or yticksstep invalid input {val}.")
         return False
 
 

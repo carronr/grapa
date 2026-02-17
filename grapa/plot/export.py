@@ -109,7 +109,7 @@ class GraphExporter:
         except ImportError as e:
             msg = "export_xml ImportError lxml. try 'pip install lxml'. %s"
             logger.error(msg, e, exc_info=True)
-            raise FileNotCreatedError(msg % e)
+            raise FileNotCreatedError(msg % e) from e
 
         root = etree.Element("graph")
         # write headers
@@ -160,14 +160,14 @@ class GraphExporter:
                             msg = text[max(0, chari - 20) : min(len(text), chari + 15)]
                             msgfull += " --> surrounding characters: "
                             msgfull += msg.replace("\n", "\\n")
-                    msgfull += ". {}, {}.".format(type(e), e)
+                    msgfull += f". {type(e)}, {e}."
                     logger.error(msgfull, exc_info=True)
-                    raise FileNotCreatedError(msgfull)
+                    raise FileNotCreatedError(msgfull) from e
         except PermissionError as e:
             msg = "PermissionError in graphIO.export, filename %s. %s."
             msa = (filename, e)
             logger.error(msg, *msa)
-            raise FileNotCreatedError(msg % msa)
+            raise FileNotCreatedError(msg % msa) from e
 
     @staticmethod
     def _format_graph_attr(graph: "Graph", if_template):
@@ -239,11 +239,11 @@ class GraphExporter:
         # first establish list of attributes, then loop over curves to construct export
         keys_list = ["label"]
         if not if_only_labels:  # if ifOnlyLabels: only export 'label'
-            KEYWORDS_CURVE = keywords_curve()
+            kw_curve = keywords_curve()
             for curve in graph:
                 for attr in curve.get_attributes():
                     if attr not in keys_list:
-                        if attr in KEYWORDS_CURVE["keys"] or (not if_template):
+                        if attr in kw_curve["keys"] or (not if_template):
                             keys_list.append(attr)
         # if save altered Curve export curves modified for alterations and
         # offsets, and delete offset and muloffset key
