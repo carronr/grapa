@@ -3,7 +3,7 @@
 Defines Curves, a fondamental object to grapa. It stores both data and metadata.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import warnings
@@ -190,7 +190,7 @@ class Curve:
         """
         Update the curve label according to formatting using python string Template,
         with curve attributes as variables. Examples:
-        "${sample} ${_simselement}"¨, "${sample} ${cell}", "${temperature [k]:.0f} K"
+        "${sample} ${_simselement}", "${sample} ${cell}", "${temperature [k]:.0f} K"
         """
         # if modify implementation: beware GraphSIMS, label_auto(...)
         string = format_string_curveattr(self, formatter)
@@ -757,7 +757,7 @@ class Curve:
             for alter in alterlist:
                 if isinstance(alter, list):
                     alter = AlterListItem(*alter)
-                string = "- {}: {}".format(alter.label, alter.doc)
+                string = f"- {alter.label}: {alter.doc}"
                 print(string)
         # List of functions
         if len(self._funclistgui_last) == 0:

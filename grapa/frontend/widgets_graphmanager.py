@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Jan 24 13:30:42 2021
-
-@author: car
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 from enum import Enum
 import os

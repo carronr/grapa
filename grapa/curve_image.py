@@ -2,7 +2,7 @@
 """A subclass of Curve to deal with images, contour and contourf
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -385,7 +385,7 @@ class Curve_Image(Curve):
                 x = y
                 y = swap
         if rotate:
-            data = np.rot90(data, k=int(rotate))  # only by 90°
+            data = np.rot90(data, k=int(rotate))  # only by 90deg
             if x is not None and y is not None:
                 nrot = int(rotate) % 4
                 while nrot > 0:

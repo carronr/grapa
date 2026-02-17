@@ -3,8 +3,7 @@
 Created on Tue Feb 11 23:02:34 2020
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics,
-Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -211,7 +210,7 @@ def script_processJscVoc(
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    
+
     file_ = "./../examples/JscVoc/JscVoc_SAMPLE_c2_Values.txt"
     graph_ = script_processJscVoc(file_, pltClose=False)
 

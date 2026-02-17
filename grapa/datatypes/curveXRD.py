@@ -2,7 +2,7 @@
 """Fitting fuctions. For thorough data analyis please use a dedicated XRD software.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os

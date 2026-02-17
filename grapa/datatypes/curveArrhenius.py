@@ -2,7 +2,7 @@
 """Curve subclass hndling fits with mathematical expressions.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np

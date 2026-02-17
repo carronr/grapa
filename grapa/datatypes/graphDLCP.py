@@ -3,7 +3,7 @@
 To parse files containing Drive-Level Capacitance Profiling DLCP data,
 according to file format of Abt207 Empa
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from copy import deepcopy

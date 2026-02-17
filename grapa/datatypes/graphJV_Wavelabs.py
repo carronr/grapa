@@ -3,7 +3,7 @@
 Created on Tue May 23 12:53:00 2023
 
 @author: Matthias Diethelm
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os

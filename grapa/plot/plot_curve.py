@@ -1,4 +1,8 @@
-"""functions to plot a curve onto and ax"""
+"""functions to plot a curve onto and ax
+
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+"""
 
 import inspect
 import logging

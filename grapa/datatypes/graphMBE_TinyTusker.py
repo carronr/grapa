@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed  Jan 17 12:53:00 2024
-
 @author: Matthias Diethelm
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import numpy as np
@@ -19,7 +17,7 @@ class GraphMBE_TinyTusker(Graph):
 
     FILEIO_GRAPHTYPE = "Small MBE Tiny Tusker data"
 
-    AXISLABELS = [["Time", "t", "min"], ["Temperature", "T", "°C"]]
+    AXISLABELS = [["Time", "t", "min"], ["Temperature", "T", "\N{DEGREE SIGN}C"]]
 
     # second axis
 
@@ -114,7 +112,7 @@ class GraphMBE_TinyTusker(Graph):
                     {
                         "label": object_titles[i] + " " + property_names[i],
                         "sample": attributes["label"].replace(" TT export", ""),
-                        "_collabels": ["Time [min]", "Temperature [°C]"],
+                        "_collabels": ["Time [min]", "Temperature [\N{DEGREE SIGN}C]"],
                     }
                 )
 
@@ -281,18 +279,12 @@ class GraphMBE_TinyTusker(Graph):
 
             print(
                 "Temperatures at process start (-3min): Cu lip:",
-                "{:1.1f}".format(cu_lip_t),
-                "°C In lip:",
-                "{:1.1f}".format(in_lip_t),
-                "°C Ga lip:",
-                "{:1.1f}".format(ga_lip_t),
-                "°C Se:",
-                "{:1.1f}".format(se_t),
-                "°C LN2:",
-                "{:1.1f}".format(ln2_t),
-                "°C RbF:",
-                "{:1.1f}".format(rbf_t),
-                "°C",
+                f"{cu_lip_t:1.1f}\N{DEGREE SIGN}C In lip:",
+                f"{in_lip_t:1.1f}\N{DEGREE SIGN}C Ga lip:",
+                f"{ga_lip_t:1.1f}\N{DEGREE SIGN}C Se:",
+                f"{se_t:1.1f}\N{DEGREE SIGN}C LN2:",
+                f"{ln2_t:1.1f}\N{DEGREE SIGN}C RbF:",
+                f"{rbf_t:1.1f}\N{DEGREE SIGN}C",
             )
 
             # 2nd stage start time
@@ -371,9 +363,9 @@ class GraphMBE_TinyTusker(Graph):
             print(
                 "RbF opening and closing temperatures:",
                 "{:1.1f}".format(rbf_t_shutter_opening),
-                "°C and",
+                "\N{DEGREE SIGN}C and",
                 "{:1.1f}".format(rbf_t_shutter_closing),
-                "°C",
+                "\N{DEGREE SIGN}C",
             )
 
             # Ramp down start time

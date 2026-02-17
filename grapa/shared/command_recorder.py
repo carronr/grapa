@@ -1,3 +1,7 @@
+"""
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+"""
 import logging
 from typing import List, Optional, Tuple, TYPE_CHECKING
 from abc import abstractmethod, ABC

@@ -1,4 +1,12 @@
-"""Module storing the values of physical constants, expressed in SI units."""
+"""
+Module storing the values of physical constants, expressed in SI units.
+
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+"""
+
+# pylint: disable=C0103  # math-heavy, want to use variables with capital letters
+
 
 import numpy as np
 

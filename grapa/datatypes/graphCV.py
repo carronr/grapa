@@ -2,7 +2,7 @@
 """
 To parse files contaiing capacitance versus voltage C-V data.
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from copy import deepcopy

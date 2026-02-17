@@ -1,6 +1,9 @@
 """
 Provides a script that performs correlation analysis on a data input.
 possibly, SCAPS 2-D parameter sweeps
+
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os

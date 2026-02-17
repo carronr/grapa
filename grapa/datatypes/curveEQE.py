@@ -2,7 +2,7 @@
 """Curve type to handle External quantum efficiency EQE data of solar cells
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -532,8 +532,8 @@ class CurveEQE(Curve):
     # bandgap derivative max, PV ans best guess sigma
     def derivative_savgol(self, sgwidth=None, sgdegree=None, roi=None):
         """
-        Returns a reduced x,y range and the Savitzky–Golay derivative
-        sgwidth, sgdegree: width and degree of Savitzky–Golay
+        Returns a reduced x,y range and the Savitzky-Golay derivative
+        sgwidth, sgdegree: width and degree of Savitzky-Golay
         roi: range of interest [nmmin, nmmax]
         """
         if sgwidth is None:
@@ -544,13 +544,13 @@ class CurveEQE(Curve):
         sgwidth = int(sgwidth)
         if sgdegree >= sgwidth:
             msg = (
-                "Curve EQE bandgap derivative: Savitzky–Golay Degree must be lower "
+                "Curve EQE bandgap derivative: Savitzky-Golay Degree must be lower "
                 "than width"
             )
             print(msg)
             return None, None, None
         if sgwidth % 2 == 0:
-            msg = "Curve EQE bandgap derivative: Savitzky–Golay Width must be odd."
+            msg = "Curve EQE bandgap derivative: Savitzky-Golay Width must be odd."
             print(msg)
             return None, None, None
         # compute derivative
@@ -570,7 +570,7 @@ class CurveEQE(Curve):
         else:
             roi_ = (x >= min(roi)) * (x <= max(roi))
         x_, y_, eV = x[roi_], y[roi_], CST.nm_eV / x[roi_]
-        # locate peak using Savitzky–Golay filtering; then correct for possible
+        # locate peak using Savitzky-Golay filtering; then correct for possible
         # uneven data point spacing
         savgol = savgol_filter(y_, sgwidth, sgdegree, deriv=1)
         savgol /= np.append(
@@ -582,10 +582,10 @@ class CurveEQE(Curve):
         self, sgwidth=None, sgdegree=None, x_y_savgol=None, roi=None, silent=True
     ):
         """
-        Computes the bandgap based on the Savitzky–Golay derivative peak of derivative.
+        Computes the bandgap based on the Savitzky-Golay derivative peak of derivative.
         The peak is located based on a gaussian fit to few points near peak values.
 
-        :param sgwidth: 5. Parameters of Savitzky–Golay filtering
+        :param sgwidth: 5. Parameters of Savitzky-Golay filtering
         :param sgdegree: 3
         :param x_y_savgol: (optional) to avoid calculating twice if already computed
                somewhere else
@@ -705,7 +705,7 @@ class CurveEQE(Curve):
     ) -> list:
         """
         Bandgap derivative: Computes the bandgap and other derived data based on the
-        Savitzky–Golay derivative dEQE/dE. Are implemented:
+        Savitzky-Golay derivative dEQE/dE. Are implemented:
 
         - Peak of derivative, based on a gaussian fit to few points around the peak,
 
@@ -714,8 +714,8 @@ class CurveEQE(Curve):
 
         - Best guess for sigma value, based on gaussian fit with wider fit range
 
-        :param sgwidth: width of Savitzky–Golay filter. Default 5.
-        :param sgdegree: degree of Savitzky–Golay filter. Default 3.
+        :param sgwidth: width of Savitzky-Golay filter. Default 5.
+        :param sgdegree: degree of Savitzky-Golay filter. Default 3.
                Parameter values (w,d) = (3,1) fall back onto the symmetrical discrete
                difference.
         :param roi: range of interest. [nm_min, nm_max]
@@ -724,7 +724,7 @@ class CurveEQE(Curve):
                   the data on which the bandgap is computed. The computed bandgap values
                   can be retrieved in the last Curve attributes.
         """
-        # create Savitzky–Golay derivative
+        # create Savitzky-Golay derivative
         x_, y_, savgol = self.derivative_savgol(
             sgwidth=sgwidth, sgdegree=sgdegree, roi=roi
         )
@@ -937,7 +937,7 @@ class CurveEQE(Curve):
     ):
         """
         ERE: Computes the External Radiative Efficiency from the EQE curve and the
-        cell Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476
+        cell Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472-476
         The more complete calculation is also provided from Rau et al., Phys. Rev.
         Applied 7, 044016 (2017)
         https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016
@@ -1124,7 +1124,7 @@ class CurveEQE(Curve):
 
     def ERE_GUI(self, voc, T, Emin="auto", EminUnit="nm", fg=BB_FG, bandgap=None):
         """Computes the External Radiative Efficiency from the EQE curve and the cell
-        Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476
+        Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472-476
         The more complete calculation is also provided from Rau et al., Phys. Rev.
         Applied 7, 044016 (2017)
         https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016
@@ -1338,7 +1338,7 @@ def _funcListGUI_derivativeanalysis(curve):
         else:
             roi = [0, 0]
     line = FuncGUI(curve.CurveEQE_derivativeanalysis, "Bandgap derivative & PV")
-    line.append("Savitzky–Golay width", 5)
+    line.append("Savitzky-Golay width", 5)
     line.append("degree", 2)
     line.append("nm range", roundSignificantRange(roi, 3))
     line.set_hiddenvars({"silent": False})

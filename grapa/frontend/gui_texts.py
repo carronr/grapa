@@ -3,7 +3,7 @@
 A popup window ti edit graph text legends, titles and text annotations.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import tkinter as tk

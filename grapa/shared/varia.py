@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+"""
+
 import logging
 from typing import TYPE_CHECKING
 

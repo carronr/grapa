@@ -4,7 +4,7 @@ Meant as an extension to python colorsys
 Includes reparametrized versions of CIE Lab and LCh, with values 0-1.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 import math
 
@@ -17,7 +17,7 @@ def cielab_to_rgb(L: float, a: float, b: float):
     :param b: -127, 127
     :return: (R,G,B) in 0-1 (consistency with colorsys convention).
     """
-    # --- Lab → XYZ ---
+    # --- Lab -> XYZ ---
     # Reference white D65
     Xn, Yn, Zn = 95.047, 100.000, 108.883
 
@@ -34,16 +34,16 @@ def cielab_to_rgb(L: float, a: float, b: float):
     X = Xn * f_inv(fx)
     Y = Yn * f_inv(fy)
     Z = Zn * f_inv(fz)
-    # Normalize for sRGB matrix (XYZ scaled 0–1)
+    # Normalize for sRGB matrix (XYZ scaled 0-1)
     X /= 100
     Y /= 100
     Z /= 100
-    # --- XYZ → linear RGB ---
+    # --- XYZ -> linear RGB ---
     r_lin = 3.2406 * X - 1.5372 * Y - 0.4986 * Z
     g_lin = -0.9689 * X + 1.8758 * Y + 0.0415 * Z
     b_lin = 0.0557 * X - 0.2040 * Y + 1.0570 * Z
 
-    # --- linear RGB → sRGB ---
+    # --- linear RGB -> sRGB ---
     def compand(val):
         if val <= 0.0031308:
             return 12.92 * val
@@ -53,7 +53,7 @@ def cielab_to_rgb(L: float, a: float, b: float):
     r = compand(max(0, min(1, r_lin)))
     g = compand(max(0, min(1, g_lin)))
     b = compand(max(0, min(1, b_lin)))
-    # Scale to 0–1
+    # Scale to 0-1
     return (r, g, b)
 
 
@@ -73,11 +73,11 @@ def rgb_to_cielab(r: float, g: float, b: float):
     def pivot_xyz(t: float) -> float:
         return t ** (1 / 3) if t > 0.008856 else (7.787 * t) + (16 / 116)
 
-    # --- Convert RGB → linear RGB ---
+    # --- Convert RGB -> linear RGB ---
     r_lin = pivot_rgb(r)
     g_lin = pivot_rgb(g)
     b_lin = pivot_rgb(b)
-    # --- Linear RGB → XYZ (D65) ---
+    # --- Linear RGB -> XYZ (D65) ---
     # sRGB transform matrix
     X = r_lin * 0.4124564 + g_lin * 0.3575761 + b_lin * 0.1804375
     Y = r_lin * 0.2126729 + g_lin * 0.7151522 + b_lin * 0.0721750
@@ -86,7 +86,7 @@ def rgb_to_cielab(r: float, g: float, b: float):
     X /= 0.95047
     Y /= 1.00000
     Z /= 1.08883
-    # --- XYZ → Lab ---
+    # --- XYZ -> Lab ---
     fX = pivot_xyz(X)
     fY = pivot_xyz(Y)
     fZ = pivot_xyz(Z)
@@ -107,7 +107,7 @@ def cielab_to_cielch(L: float, a: float, b: float):
     C = math.sqrt(a * a + b * b)  # Chroma
     h = math.degrees(math.atan2(b, a))  # Hue angle in degrees
     if h < 0:
-        h += 360  # Wrap into 0–360
+        h += 360  # Wrap into 0-360
     return (L, C, h)
 
 

@@ -3,7 +3,7 @@
 Created on Fri Jul 15 15:46:13 2016
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import warnings
@@ -586,7 +586,7 @@ class CurveJV(Curve):
     # d1	0.66	18.6	72.3	8.9	0.57	0.53	16.8	8.9	9710	1.1	11.07.2016 16:02:23	25	1			...\I-V_Oct1048ref_d1_01.txt
     def printShort(self, header=False):
         if header:
-            out = "Cell\tVoc [V]\tJsc [mA/cm2]\tFF [%]\tEff. [%]\tArea [cm-2]\tVmpp [V]\tJmpp [mA/cm2]\tPmpp [mW/cm2]\tRp [Ohmcm2]\tRs [Ohmcm2]\tn\tJ0 [A/cm2]\tRsquare diode region\tTemperature [K]\tAcquis. T [°C]\tRp acquis. software [Ohmcm2]\tRs acquis. software [Ohmcm2]\tFilename\tRemarks\n"
+            out = "Cell\tVoc [V]\tJsc [mA/cm2]\tFF [%]\tEff. [%]\tArea [cm-2]\tVmpp [V]\tJmpp [mA/cm2]\tPmpp [mW/cm2]\tRp [Ohmcm2]\tRs [Ohmcm2]\tn\tJ0 [A/cm2]\tRsquare diode region\tTemperature [K]\tAcquis. T [\N{DEGREE SIGN}C]\tRp acquis. software [Ohmcm2]\tRs acquis. software [Ohmcm2]\tFilename\tRemarks\n"
             return out
 
         def st(st, precis):

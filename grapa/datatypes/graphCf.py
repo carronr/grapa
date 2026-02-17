@@ -3,7 +3,7 @@
 Created on Thu Feb 23 20:37:38 2017
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain
 Carron
 """
 

@@ -132,7 +132,7 @@ def plot_graph(
     # check
     if len(graph) == 0:
         if not if_subplot:
-            print("Warning plot {}: no data to plot!".format(graph.filename))
+            print(f"Warning plot {graph.filename}: no data to plot!")
             if fig_ax is not None:
                 fig, ax = fig_ax
                 if ax is not None:

@@ -1,7 +1,7 @@
 """This module defines class ContainerMetadata to store metadata in Curves and Graph.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from typing import Optional, Any, Union, TYPE_CHECKING

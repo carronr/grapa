@@ -4,7 +4,7 @@ Class handling optical spectra, with notably nm to eV conversion and background
 subtraction.
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import logging

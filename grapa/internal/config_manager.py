@@ -4,6 +4,9 @@ Config loading and caching for grapa.
 Provides a small config store with path resolution, cache, and type-aware value access.
 Each Graph object may specify its own configuration file.
 keys are lower-case.
+
+@author: Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 from dataclasses import dataclass

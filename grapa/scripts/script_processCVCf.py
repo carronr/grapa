@@ -3,7 +3,7 @@
 Created on Mon Mar  6 23:57:53 2017
 
 @author: Romain Carron
-Copyright (c) 2025, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
+Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
 import os
@@ -149,7 +149,7 @@ def script_processCV(
     graph_phase.update(
         {
             "xlabel": graph.attr("xlabel"),
-            "ylabel": graph.format_axis_label("Impedance phase [°]"),
+            "ylabel": graph.format_axis_label("Impedance phase [\N{DEGREE SIGN}]"),
         }
     )
     # mask undesired legends
@@ -613,7 +613,9 @@ def script_processCf(
     graph_phase.update(
         {
             "xlabel": graph.attr("xlabel"),
-            "ylabel": graph_phase.format_axis_label("Impedance phase [°]"),
+            "ylabel": graph_phase.format_axis_label(
+                "Impedance phase [\N{DEGREE SIGN}]"
+            ),
             "alter": "",
             "typeplot": "semilogx",
             "ylim": [0, 90],
@@ -810,7 +812,9 @@ def script_processCf(
             "xlabel": graph.attr("ylabel"),
             "ylabel": "Modulus |Z| [Ohm]",
             "typeplot": "loglog",
-            "twinx_ylabel": graph_nyqui.format_axis_label("Impedance phase [°]"),
+            "twinx_ylabel": graph_nyqui.format_axis_label(
+                "Impedance phase [\N{DEGREE SIGN}]"
+            ),
             "twinx_ylim": [0, 90],
             "subplots_adjust": [0.15, 0.15],
         }
