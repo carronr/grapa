@@ -1,24 +1,17 @@
 
-__pycache__
-*.pyc
+__pycache__/
+*.py[cod]
 
 /.vscode/
 /.idea/
 /grapa.egg-info/
 /dist/
 /.pytest_cache/
-/.idea/
-
-.idea/grapa.iml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/workspace.xml
-/_publication_howto/
-
 
 /docs/source/_autosummary/
 /docs/build/doctrees/
+
+/_publication_howto/
 
 /grapa/.hypothesis/
 
