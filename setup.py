@@ -1,4 +1,9 @@
-from setuptools import setup
+from pathlib import Path
+
+from setuptools import find_packages, setup
+
+
+README = Path(__file__).with_name("readme.rst").read_text(encoding="utf-8")
 
 setup(
     name="grapa",
@@ -12,23 +17,17 @@ setup(
         "scipy",
         "python-dateutil",
     ],
-    packages=[
-        "grapa",
-        "grapa.datatypes",
-        "grapa.gui",
-        "grapa.scripts",
-        "grapa.utils",
-        "grapa.shared",
-        # "tests",
-    ],
+    packages=find_packages(include=["grapa", "grapa.*"]),
     package_data={
         "grapa": [
             "*.txt",
             "*.rst",
             "*.log",
-            "manual/*.py",
-            "manual/*.txt",
-            "manual/*.pdf",
+            "howto/*.py",
+            "howto/*.txt",
+            "howto/*.pdf",
+            "howto/*.odt",
+            "howto/graphics/*.*",
             "datatypes/*.txt",
             "examples/*.*",
             "examples/_subplots_insets/*.*",
@@ -36,6 +35,8 @@ setup(
             "examples/Cf/*.*",
             "examples/CV/*.*",
             "examples/EQE/*.*",
+            "examples/HLsoaking/*.*",
+            "examples/HLsoaking/52_Oct1143/*.*",
             "examples/JscVoc/*.*",
             "examples/JV/mix/*.*",
             "examples/JV/SAMPLE_A/*.*",
@@ -54,9 +55,6 @@ setup(
     },
     license="MIT",
     url="https://github.com/carronr/grapa/",
-    long_description="Grapa is a python package providing a graphical interface and "
-                     "the underlying code dedicated to the visualization, analysis "
-                     "and presentation of scientific data, with a focus on "
-                     "photovoltaic research.",
-    long_description_content_type="text/plain",  # "text/markdown",  # ADD THIS LINE
+    long_description=README,
+    long_description_content_type="text/x-rst",
 )
