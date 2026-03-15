@@ -48,7 +48,8 @@ def _identify_delimiter(lines: list, print_if_issue=True) -> str:
     return delimiters[0]
 
 
-def file_lines(filename):
+def read_file_as_lines(filename):
+    """Reads a text file into a list of stripped lines, with encoding fallback."""
     encodings = ["utf-8", "cp1252", "latin-1"]
     for enc in encodings:
         try:
@@ -207,7 +208,7 @@ class FileParserGeneric:
             return file_content
 
         # parse content of file
-        lines, enc = file_lines(filename)
+        lines, enc = read_file_as_lines(filename)
 
         if replace_comma_dots:
             lines = [

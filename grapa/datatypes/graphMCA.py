@@ -13,11 +13,11 @@ from grapa.graph import Graph
 from grapa.datatypes.curveMCA import CurveMCA
 from grapa.shared.string_manipulations import strToVar
 from grapa.shared.maths import is_number
-from grapa.parse.parser_generic import file_lines
+from grapa.parse.parser_generic import read_file_as_lines
 
 
-def parse_from_list_of_lines(lines, attributes: Optional[dict] = None):
-    """Parses MCA lines of file into channel counts and metadata attributes."""
+def parse_file_mca(filename, attributes: Optional[dict] = None):
+    """Parses lines of a MCA file into [channels, values] and metadata attributes."""
     if attributes is None:
         attributes = {}
 
@@ -26,6 +26,7 @@ def parse_from_list_of_lines(lines, attributes: Optional[dict] = None):
             return line.replace("<", "").replace(">", "")
         return old
 
+    lines, _enc = read_file_as_lines(filename)
     y = []
     category = ""
     section = 0
@@ -77,8 +78,7 @@ class GraphMCA(Graph):
 
     def readDataFromFile(self, attributes, **_kwargs):
         # parse file
-        lines, _enc = file_lines(self.filename)
-        attributes, data = parse_from_list_of_lines(lines, attributes=attributes)
+        attributes, data = parse_file_mca(self.filename, attributes=attributes)
 
         # format data, create Curve
         at = "DPP CONFIGURATION.Preset"
