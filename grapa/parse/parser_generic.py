@@ -20,7 +20,7 @@ from grapa.shared.keywords_loader import (
 from grapa.curve import Curve
 from grapa.internal.container_metadata import MetadataContainer
 from grapa.shared.maths import is_number
-from grapa.shared.error_management import issue_warning, FileNotReadError
+from grapa.shared.error_management import FileNotReadError, issue_warning
 from grapa.shared.string_manipulations import strUnescapeIter, strToVar
 
 if TYPE_CHECKING:

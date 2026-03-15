@@ -33,10 +33,10 @@ def open_files_in_subfolder(grapa_folder, subfolder, filenames, together=True):
     for file in glob.glob(folder):
         assert not file.endswith(
             ".png"
-        ), "there should not be an image in folder {}".format(folder)
+        ), f"there should not be an image in folder {folder}"
         graph = Graph(file)
         assert len(graph) > 0, "expect file not empty"
         assert len(graph[0].x()) > 0, "expect data of first Curve not empty"
         out.append(graph)
-    assert len(out) > 0, "expect at least one file to open in folder {}".format(folder)
+    assert len(out) > 0, f"expect at least one file to open in folder {folder}"
     return out

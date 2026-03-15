@@ -370,7 +370,7 @@ class FileParserDispatcher:
             attributes,
             fileContent=fileContent,
             ifReplaceCommaByPoint=ifReplaceCommaByPoint,
-            **kwargs
+            **kwargs,
         )
 
     @classmethod
