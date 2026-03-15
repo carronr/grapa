@@ -1,2 +1,10 @@
+include readme.rst
+include LICENSE
+include pyproject.toml
+include setup.py
+include setup.cfg
+
+graft grapa
+
 exclude tests/*
 exclude docs/*

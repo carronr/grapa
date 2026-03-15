@@ -3,7 +3,13 @@ from pathlib import Path
 from setuptools import find_packages, setup
 
 
-README = Path(__file__).with_name("readme.rst").read_text(encoding="utf-8")
+ROOT = Path(__file__).parent
+README_PATH = ROOT / "readme.rst"
+README = (
+    README_PATH.read_text(encoding="utf-8")
+    if README_PATH.exists()
+    else "Grapa - graphing and photovoltaics analysis"
+)
 
 setup(
     name="grapa",
