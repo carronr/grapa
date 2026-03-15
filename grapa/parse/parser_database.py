@@ -34,7 +34,7 @@ class FileParserDatabase:
         graph: "Graph",
         attributes: dict,
         filecontent: Optional[List[List[str]]] = None,
-        **_kwargs
+        **_kwargs,
     ):
         """Read the file, populate Graph object"""
 
@@ -81,19 +81,17 @@ class FileParserDatabase:
         """read the file, returns content as list of lists"""
         content = None
         # this seems to parse the file satisfyingly
-        try:
-            with open(filename, "r") as file:
-                content = [line.strip(":\r\n").split("\t") for line in file]
-        except UnicodeError as e:
+
+        encodings = ["utf-8", "cp1252", "latin-1"]
+        for enc in encodings:
             try:
-                with open(filename, "r", encoding="ascii") as file:
+                with open(filename, "r", encoding=enc) as file:
                     content = [line.strip(":\r\n").split("\t") for line in file]
-                print("FileParserDatabase unicode error, opened as ascii")
-            except Exception:
-                msg = "Cannot open file %s: %s."
-                msa = (filename, e)
-                logger.error(msg, *msa, exc_info=True)
-                raise FileNotReadError(msg % msa)
+                break
+            except UnicodeDecodeError:
+                continue
+        else:  # only executes if not break
+            raise FileNotReadError(f"with file {filename}.")
         return content
 
     @staticmethod

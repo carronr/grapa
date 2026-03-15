@@ -1,4 +1,5 @@
 """Lazy loader for keyword metadata used by graph/curve parsing and GUI hints."""
+
 import os
 from typing import Dict
 import json

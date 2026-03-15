@@ -8,7 +8,7 @@ Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Ca
 import ast
 from re import sub as resub
 import logging
-from typing import List, TYPE_CHECKING
+from typing import List, Tuple, TYPE_CHECKING
 
 import numpy as np
 
@@ -20,7 +20,7 @@ from grapa.shared.keywords_loader import (
 from grapa.curve import Curve
 from grapa.internal.container_metadata import MetadataContainer
 from grapa.shared.maths import is_number
-from grapa.shared.error_management import issue_warning
+from grapa.shared.error_management import issue_warning, FileNotReadError
 from grapa.shared.string_manipulations import strUnescapeIter, strToVar
 
 if TYPE_CHECKING:
@@ -48,6 +48,20 @@ def _identify_delimiter(lines: list, print_if_issue=True) -> str:
     return delimiters[0]
 
 
+def file_lines(filename):
+    encodings = ["utf-8", "cp1252", "latin-1"]
+    for enc in encodings:
+        try:
+            with open(filename, "r", encoding=enc) as file:
+                lines = [line.rstrip(":\r\n\t") for line in file]
+            break
+        except UnicodeDecodeError:
+            continue
+    else:  # only executes if not break
+        raise FileNotReadError(f"with file {filename}.")
+    return lines, enc
+
+
 class FileParserGeneric:
     """Methods to parse a file, organized with header key-values,
     then multicolumn data"""
@@ -59,7 +73,7 @@ class FileParserGeneric:
         attributes: dict,
         fileContent=None,
         ifReplaceCommaByPoint=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Reads the file as a column-organized data file, with some headers lines at the
@@ -95,7 +109,9 @@ class FileParserGeneric:
         graph._curves.clear()
 
         # open file, start to process content
-        lines = cls.read_lines(filename, fileContent, ifReplaceCommaByPoint, lstriparg)
+        lines, encoding = cls.read_lines(
+            filename, fileContent, ifReplaceCommaByPoint, lstriparg
+        )
         delimiter, delimiter_headers = cls._get_delimiters(
             lines, kwargs, is_source_file
         )
@@ -128,6 +144,7 @@ class FileParserGeneric:
                 first_line_content,
                 delimiter,
                 ifReplaceCommaByPoint,
+                encoding=encoding,
             )
         else:
             data = cls._data_from_filecontent(fileContent, skip_header, skip_footer)
@@ -175,7 +192,7 @@ class FileParserGeneric:
         file_content,
         replace_comma_dots: bool,
         lstriparg,
-    ) -> List[str]:
+    ) -> Tuple[List[str], str]:
         """Read a file, returns the lines as a list of str
 
         :param filename: str of the filename to open
@@ -190,8 +207,8 @@ class FileParserGeneric:
             return file_content
 
         # parse content of file
-        with open(filename, "r") as file:
-            lines = [line.rstrip(":\r\n\t") for line in file]
+        lines, enc = file_lines(filename)
+
         if replace_comma_dots:
             lines = [
                 resub(
@@ -203,7 +220,7 @@ class FileParserGeneric:
             ]
         if lstriparg is not None:
             lines = [line.lstrip(*lstriparg) for line in lines]
-        return lines
+        return lines, enc
 
     @staticmethod
     def _get_delimiters(lines, kwargs, is_source_file):
@@ -241,7 +258,7 @@ class FileParserGeneric:
     @classmethod
     def _convert_keywords_legacy(cls, graph, linesplit: list, val):
         """conversion from legacy keywords and matlab terminology"""
-        strreplace = {"â²": "2"}
+        strreplace = {"â²": "2", "²": "2"}
         for old, new in strreplace.items():
             linesplit[0] = linesplit[0].replace(old, new)
         rename = {
@@ -461,6 +478,7 @@ class FileParserGeneric:
         first_line_content,
         delimiter,
         replace_commas_dots,
+        encoding,
     ):
         # default behavior
         usecols = range(0, len(first_line_content.split(delimiter)))
@@ -480,7 +498,9 @@ class FileParserGeneric:
         }
         if len(dict_converters) > 0:
             kwargs_genfromtxt.update({"converters": dict_converters})
-        data = np.transpose(np.genfromtxt(filename, **kwargs_genfromtxt))
+        data = np.transpose(
+            np.genfromtxt(filename, encoding=encoding, **kwargs_genfromtxt)
+        )
         return data
 
     @classmethod

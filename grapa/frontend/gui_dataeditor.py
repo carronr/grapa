@@ -14,6 +14,7 @@ from grapa.frontend.widgets_custom import EntryVar, LabelVar, ComboboxVar
 if TYPE_CHECKING:
     from grapa.graph import Graph
 
+
 class GuiDataEditor(tk.Frame):
     """
     This class creates a window to edit data of a Graph
@@ -331,4 +332,3 @@ def build_ui():
     app = GuiDataEditor(root, graph, None)
     app.master.title("Grapa software v" + grapa.__version__ + " Data editor")
     app.mainloop()
-

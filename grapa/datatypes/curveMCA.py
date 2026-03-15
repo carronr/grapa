@@ -112,7 +112,7 @@ class FitHandlerXRF(FitHandlerBasicFunc):
                 msg = "ERROR fit_amp calculation amp 1 {}, {}"
                 print(msg.format(sum_amp_gaussian, func.__name__))
                 raise NotImplementedError(msg.format(sum_amp_gaussian, func.__name__))
-            
+
         if 2 in sum_amp_gaussian:
             msg = "ERROR fit_amp calculation amp 2 {}, {}"
             print(msg.format(sum_amp_gaussian, func.__name__))

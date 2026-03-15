@@ -31,7 +31,7 @@ class MplFigureFactory:
         """Create a figure via pyplot (if enabled) or via Figure() otherwise."""
         if self.use_pyplot:
             plt = self._require_pyplot()
-            print("MplFigureFactory PYPLOT figure, figures", plt.get_fignums())
+            # print("MplFigureFactory PYPLOT figure, figures", plt.get_fignums())
             return plt.figure(*args, **kwargs)
 
         return Figure(*args, **kwargs)
@@ -40,7 +40,7 @@ class MplFigureFactory:
         """Close a pyplot-managed figure, or clear the figure if not pyplot"""
         if self.use_pyplot:
             plt = self._require_pyplot()
-            print("MplFigureFactory PYPLOT close, figures", plt.get_fignums())
+            # print("MplFigureFactory PYPLOT close, figures", plt.get_fignums())
             plt.close(fig)
             return
         if fig is not None and hasattr(fig, "clf"):

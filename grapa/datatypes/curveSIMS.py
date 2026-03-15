@@ -12,7 +12,6 @@ from grapa.shared.maths import roundSignificant
 from grapa.shared.funcgui import AlterListItem, funclistgui_graph_axislabels
 
 
-
 def findXAtValuePolynom(datax, datay, target, ifPlot=False):
     if len(datax) < 3 or len(datay) < 3:
         print(

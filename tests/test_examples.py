@@ -132,12 +132,16 @@ def test_open_files_boxplot(grapa_folder):
 def test_open_files_cf(grapa_folder):
     graphs = open_files_in_subfolder(grapa_folder, "examples/Cf", "*.*")
     assert len(graphs) == 19
+    for graph in graphs:
+        assert graph[0].attr("cell area (cm2)") == 0.57
     check_graphlist(graphs, CurveCf)
 
 
 def test_open_files_cv(grapa_folder):
     graphs = open_files_in_subfolder(grapa_folder, "examples/CV", "*.*")
     assert len(graphs) == 19
+    for graph in graphs:
+        assert graph[0].attr("cell area (cm2)") == 0.57
     check_graphlist(graphs, CurveCV)
 
 
@@ -242,6 +246,7 @@ def test_open_files_xrf(grapa_folder):
     assert len(graphs) == 2
     graphstest = [gr for gr in graphs if gr[0].attr("filename").endswith(".mca")]
     check_graphlist(graphstest, CurveMCA)
+    assert graphstest[0][0].y()[-1] == 917
     graphstest = [gr for gr in graphs if gr[0].attr("filename").endswith(".html")]
     check_graphlist(graphstest, Curve)
 

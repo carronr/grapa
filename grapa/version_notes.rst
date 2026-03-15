@@ -19,8 +19,8 @@ TODO: geenrate tests for Color and colorscale
 
 
 ** Version 0.8.0.0
+Release 15.03.2026
 
-ONGOING
 Only few modifications of functionalities, but many changes in the package file organisation, hence major version number (breaking some backwards compatibility).
 The folder structure has been split as frontend, plot, parse, shared, internal, datatypes, scripts; many code units were moved from file to file.
 New
@@ -30,6 +30,7 @@ New
 Modifications
 - logging: Logging is enabled by default only when using the GUI, and the logfile is written to grapalog.log. If the app cannot write in the grapa folder, it automatically switches the log file to a writable location.
 - pyplot: now, grapa does not use pyplot in the GUI, but still does when not in the GUI (CLI)
+- Partial hardening of non latin1 charsets
 - Code cleaning
 
 

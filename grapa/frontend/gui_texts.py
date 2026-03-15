@@ -6,6 +6,7 @@ A popup window ti edit graph text legends, titles and text annotations.
 Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
 
+from typing import Dict, List, Any
 import tkinter as tk
 from tkinter import ttk, font as tkfont
 from copy import deepcopy
@@ -61,8 +62,11 @@ class GuiManagerAnnotations(tk.Frame):
         self._config_leg_tit()
         self._config_legend()
         # fill GUI
+        self.button_go: tk.Button
+        self.button_quit: tk.Button
+        self.button_revert: tk.Button
         self.main = FrameScrollable(self.master)
-        self.fontBold = None
+        self.font_bold: tkfont.Font
         self._init_fonts(self.main)
         self.main.pack(side="top", fill="both", expand=True)
         self._fill_ui_main(self.main.child)
@@ -70,8 +74,8 @@ class GuiManagerAnnotations(tk.Frame):
 
     def _init_fonts(self, frame):
         a = tk.Label(frame, text="")
-        self.fontBold = tkfont.Font(font=a["font"])
-        self.fontBold.configure(weight="bold")
+        self.font_bold = tkfont.Font(font=a["font"])
+        self.font_bold.configure(weight="bold")
 
     def _config_text(self):
         self.text_fields = []
@@ -140,6 +144,7 @@ class GuiManagerAnnotations(tk.Frame):
                 "values": [
                     "{}",
                     "{'verticalalignment':'center'}",
+                    "{'horizontalalignment': 'right'}",
                     "{'xy':(0.5,0.5), 'xycoords': 'figure fraction', 'arrowprops':{'facecolor':'b', 'shrink':0.05}}",
                     "{'rotation': 90}",
                 ],
@@ -341,18 +346,18 @@ class GuiManagerAnnotations(tk.Frame):
         self._fill_ui_buttons(frm)
 
     def _fill_ui_buttons(self, frame):
-        self.ButtonRevert = tk.Button(
+        self.button_revert = tk.Button(
             frame, text="Revert to initial", fg="grey", command=self._revert
         )
-        self.ButtonRevert.pack(side="left")
-        self.ButtonQuit = tk.Button(
+        self.button_revert.pack(side="left")
+        self.button_quit = tk.Button(
             frame, text="Quit", fg="grey", command=self.close_windows
         )
-        self.ButtonQuit.pack(side="left", padx=10)
-        self.ButtonGo = tk.Button(
-            frame, text="Update graph", command=self.go, font=self.fontBold
+        self.button_quit.pack(side="left", padx=10)
+        self.button_go = tk.Button(
+            frame, text="Update graph", command=self.go, font=self.font_bold
         )
-        self.ButtonGo.pack(side="right", padx=30)
+        self.button_go.pack(side="right", padx=30)
 
     def _fill_ui_text_grid(self, frame):
         self._parse_graph()
@@ -371,8 +376,7 @@ class GuiManagerAnnotations(tk.Frame):
             args.append(deepcopy(self.attr["textargs"][j]))
         self.annotations.append([""] * len(self.text_fields))  # for new text
         args.append({})  # defautl new
-        for j in range(len(self.text_fields)):
-            field = self.text_fields[j]
+        for j, field in enumerate(self.text_fields):
             e = tk.Label(frame, text=field["label"])
             e.grid(row=0, column=(j + 1))
             if "tooltip" in field:
@@ -408,23 +412,22 @@ class GuiManagerAnnotations(tk.Frame):
                 if e is not None:
                     self.annotations[i][j] = e
                     e.grid(column=(j + 1), row=(i + 1), pady=0, ipady=0, padx=1)
-        tk.Label(frame, text="Text", font=self.fontBold).grid(row=0, column=0)
-        self.annotationsnew = tk.Label(frame, text="New", font=self.fontBold)
+        tk.Label(frame, text="Text", font=self.font_bold).grid(row=0, column=0)
+        self.annotationsnew = tk.Label(frame, text="New", font=self.font_bold)
         self.annotationsnew.grid(row=(len(self.attr["text"]) + 1), column=0)
-        for j in range(len(self.text_fields)):
-            if self.text_fields[j]["label"] == "xytext":
+        for j, text_field in enumerate(self.text_fields):
+            if text_field["label"] == "xytext":
                 self.annotations[-1][j].set("(0.05, 0.95)")
 
     def _fill_ui_legend_grid(self, frame):
-        Labels = []
-        for j in range(len(self.legend_fields)):
-            field = self.legend_fields[j]
-            Labels.append(tk.Label(frame, text=field["label"]))
+        labels = []
+        for j, field in enumerate(self.legend_fields):
+            labels.append(tk.Label(frame, text=field["label"]))
             if field["width"] == 0:
-                Labels[-1].configure(font=self.fontBold)
-            Labels[j].grid(row=(0 if field["width"] != 0 else 1), column=j)
+                labels[-1].configure(font=self.font_bold)
+            labels[j].grid(row=(0 if field["width"] != 0 else 1), column=j)
             if "tooltip" in field:
-                CreateToolTip(Labels[j], field["tooltip"])
+                CreateToolTip(labels[j], field["tooltip"])
             self.legend_vars[j].append(tk.StringVar())
             e = None
             if field["field"] == "OptionMenu":
@@ -447,15 +450,14 @@ class GuiManagerAnnotations(tk.Frame):
         )
 
     def _fill_ui_legend_title_grid(self, frame):
-        Labels = []
+        labels = []
         # legend title
-        for j in range(len(self.legtit_fields)):
-            field = self.legtit_fields[j]
+        for j, field in enumerate(self.legtit_fields):
             if field["width"] != 0:
-                Labels.append(tk.Label(frame, text=field["label"]))
-                Labels[-1].grid(row=0, column=j)
+                labels.append(tk.Label(frame, text=field["label"]))
+                labels[-1].grid(row=0, column=j)
             if "tooltip" in field:
-                CreateToolTip(Labels[-1], field["tooltip"])
+                CreateToolTip(labels[-1], field["tooltip"])
             self.legtit_vars[j].append(tk.StringVar())
             e = None
             if field["field"] == "OptionMenu":
@@ -473,10 +475,10 @@ class GuiManagerAnnotations(tk.Frame):
                 )
             if e is not None:
                 e.grid(column=j, row=len(self.legtit_vars[j]), ipady=0, pady=0, padx=1)
+
         # graph title
         self.legtit_fields[5].update({"values": ["(0,1)", "(0.5, 0.95)"]})
-        for j in range(len(self.legtit_fields)):
-            field = self.legtit_fields[j]
+        for j, field in enumerate(self.legtit_fields):
             # graph title
             self.legtit_vars[j].append(tk.StringVar())
             if "field" not in field:
@@ -497,8 +499,8 @@ class GuiManagerAnnotations(tk.Frame):
                 )
             if e is not None:
                 e.grid(column=j, row=len(self.legtit_vars[j]), ipady=0, pady=0, padx=1)
-        tk.Label(frame, text="Legend title", font=self.fontBold).grid(row=1, column=0)
-        tk.Label(frame, text="Graph title", font=self.fontBold).grid(
+        tk.Label(frame, text="Legend title", font=self.font_bold).grid(row=1, column=0)
+        tk.Label(frame, text="Graph title", font=self.font_bold).grid(
             row=2, column=0, sticky="W"
         )
         self._legend_title_fill_values(
@@ -510,7 +512,7 @@ class GuiManagerAnnotations(tk.Frame):
 
     def _legend_title_fill_values(self, attribute, fields, vars_, row=0):
         attr = deepcopy(self.graph.attr(attribute))
-        vals = [""] * len(fields)
+        vals: List[Any] = [""] * len(fields)
         vals[-1] = attr
         if attribute in ["title", "legendtitle"]:
             if not isinstance(attr, list):
@@ -520,23 +522,23 @@ class GuiManagerAnnotations(tk.Frame):
         elif attribute in ["legendproperties"]:
             if vals[-1] == "":
                 vals[-1] = {}
-        for i in range(len(fields)):
-            if "fromkwargs" in fields[i]:
-                key = fields[i]["fromkwargs"]
+        for i, field in enumerate(fields):
+            if "fromkwargs" in field:
+                key = field["fromkwargs"]
                 if attribute == "title" and key == "align":
                     key = "loc"  # different keyword for same stuff
                 if key in vals[-1]:
                     vals[i] = str(vals[-1][key])
                     del vals[-1][key]
-            if vals[i] == "" and "default" in fields[i]:
-                vals[i] = fields[i]["default"]
+            if vals[i] == "" and "default" in field:
+                vals[i] = field["default"]
         vals[1] = vals[1].replace("\n", "\\n")
         for j in range(0, len(vars_)):
             vars_[j][row].set(vals[j])
 
     def go(self):
         # text annotations
-        out = {"text": [], "textxy": [], "textargs": []}
+        out: Dict[str, Any] = {"text": [], "textxy": [], "textargs": []}
         i = 0
         for ann in self.annotations:
             if ann[1].get() != "":
@@ -564,9 +566,10 @@ class GuiManagerAnnotations(tk.Frame):
                 out["textxy"].append("")
                 out["textargs"].append(args)
             i += 1
+
         # legend title, graph title
         keywords = ["legendtitle", "title"]
-        for j in range(len(keywords)):
+        for j, keyword in enumerate(keywords):
             tit = strUnescapeIter(self.legtit_vars[1][j].get())  # as str
             kw = strToVar(self.legtit_vars[-1][j].get())
             if not isinstance(kw, dict):
@@ -576,31 +579,42 @@ class GuiManagerAnnotations(tk.Frame):
                 )
                 issue_warning(logger, msg.format(kw))
                 kw = {}
-            for i in range(len(self.legtit_fields)):
-                if "fromkwargs" in self.legtit_fields[i]:
-                    if self.legtit_vars[i][j].get() != "":
-                        val = strToVar(self.legtit_vars[i][j].get())
-                        if "casttype" in self.legtit_fields[i]:
-                            val = self.legtit_fields[i]["casttype"](val)
-                        kw.update({self.legtit_fields[i]["fromkwargs"]: val})
-            if keywords[j] == "title" and "align" in kw:
+
+            for legtit_field, legtit_var in zip(self.legtit_fields, self.legtit_vars):
+                if "fromkwargs" in legtit_field:
+                    if legtit_var[j].get() != "":
+                        val = strToVar(legtit_var[j].get())
+                        if "casttype" in legtit_field:
+                            val = legtit_field["casttype"](val)
+                        kw.update({legtit_field["fromkwargs"]: val})
+
+            if keyword == "title" and "align" in kw:
                 kw["loc"] = kw["align"]
                 del kw["align"]
             legtit = tit if kw in ["", {}] else [tit, kw]
             out.update({keywords[j]: legtit})
+
         # legend properties
         kw = strToVar(self.legend_vars[-1][0].get())
         if not isinstance(kw, dict):
             msg = "GuiManagerAnnotations invalid input: {} should be a dict (legend)."
             issue_warning(logger, msg.format(kw))
             kw = {}
-        for i in range(len(self.legend_fields)):
-            if "fromkwargs" in self.legend_fields[i]:
-                if self.legend_vars[i][0].get() != "":
-                    val = strToVar(self.legend_vars[i][0].get())
-                    if "casttype" in self.legend_fields[i]:
-                        val = self.legend_fields[i]["casttype"](val)
-                    kw.update({self.legend_fields[i]["fromkwargs"]: val})
+        for legend_field, legend_var in zip(self.legend_fields, self.legend_vars):
+            if "fromkwargs" not in legend_field:
+                continue
+            value = legend_var[0].get()
+            if value == "":
+                continue
+            val = strToVar(value)
+            if "casttype" in legend_field:
+                try:
+                    val = legend_field["casttype"](val)
+                except ValueError:
+                    msg = "Error with value {}, could not cast as {}, ignored."
+                    print(msg.format(val, legend_field["casttype"]))
+                    continue
+            kw.update({legend_field["fromkwargs"]: val})
         out.update({"legendproperties": kw})
         # graph title
         # perform update, finish

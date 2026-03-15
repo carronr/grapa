@@ -14,6 +14,7 @@ from grapa.shared.maths import is_number, roundSignificant, roundSignificantRang
 from grapa.shared.funcgui import funclistgui_graph_axislabels
 from grapa.parse.parser_dispatcher import FileParserDispatcher
 
+
 class GraphJscVoc(Graph):
     """Open files containing Jsc-Voc data"""
 
@@ -172,7 +173,7 @@ class GraphJscVoc(Graph):
         Jsclim=None,
         threshold=3,
         graphsnJ0=True,
-        curve: "CurveJscVoc"=None,
+        curve: "CurveJscVoc" = None,
         silent=False,
     ):
         """Fit the Jsc-Voc data, returns fitted Curves.
@@ -278,7 +279,7 @@ class GraphJscVoc(Graph):
         ifFit=False,
         fitTlim=None,
         extend0=False,
-        curve: Curve=None,
+        curve: Curve = None,
         silent=False,
     ):
         """

@@ -8,7 +8,7 @@ ylim	['', '']
 meastype	Graph
 [ev]	[nm]	[mA/cm2]	[mA/cm2]	[mA/cm2]	[V]	[V]	[%]	[%]
 authors	Sven Ruehle
-caption	Detailed balance limit for a single junction solar cell at a cell temperature Tc of 25 °C illuminated by the AM 1.5G spectral irradiance (ASTM G173-03) as a function of the energy band gap Eg and band gap wavelength lambda_g considering radiative emission from the front and rear side of the solar cell as shown in Fig. 2a.
+caption	Detailed balance limit for a single junction solar cell at a cell temperature Tc of 25 degrees C illuminated by the AM 1.5G spectral irradiance (ASTM G173-03) as a function of the energy band gap Eg and band gap wavelength lambda_g considering radiative emission from the front and rear side of the solar cell as shown in Fig. 2a.
 comment	SI, table S1 (no reflector: unfavorable case)
 doi	10.1016/j.solener.2016.02.015
 label	$\\lambda$g [nm]	Jmax [mA/cm2]	Jsc [mA/cm2]	Jmpp [mA/cm2]	Voc [V]	Vmpp [V]	FF [%]	$\\eta$ [%]

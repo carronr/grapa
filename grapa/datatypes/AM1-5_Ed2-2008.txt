@@ -1,5 +1,5 @@
 Wavelength	Spectral irradiance	Spectral photon irradiance	Cumulative integrated irradiance
-(nm)	(Wúm?2únm?1)	(m?2ús?1únm?1)	(Wúm?2)
+(nm)	(W?m?2?nm?1)	(m?2?s?1?nm?1)	(W?m?2)
 280	4.72E-23	6.65E-05	0.00E+00
 280.5	1.23E-21	1.73E-03	3.19E-22
 281	5.67E-21	8.03E-03	2.04E-21
@@ -2002,4 +2002,4 @@ Wavelength	Spectral irradiance	Spectral photon irradiance	Cumulative integrated 
 3990	0.0074	1.48E+17	997.4
 3995	0.0072	1.45E+17	997.43
 4000	0.0071	1.43E+17	997.47
-?			1000
+			1000

@@ -33,11 +33,11 @@ class GraphXPS(Graph):
     def readDataFromFile(self, attributes, **_kwargs):
         # parse headers
         attrs = {}
-        f = open(self.filename, "r")
-        attrs["acquisition location"] = f.readline().strip()
-        attrs["acquisition sample"] = f.readline().strip()
-        attrs["acquisition type"] = f.readline().strip()
-        f.close()
+        with open(self.filename, "r") as f:
+            attrs["acquisition location"] = f.readline().strip()
+            attrs["acquisition sample"] = f.readline().strip()
+            attrs["acquisition type"] = f.readline().strip()
+
         attrs["muloffset"] = 1
         # reads data
         data = np.array([np.nan, np.nan])

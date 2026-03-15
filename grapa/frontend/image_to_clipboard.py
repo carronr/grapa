@@ -12,7 +12,7 @@ from grapa.shared.error_management import issue_warning
 
 if TYPE_CHECKING:
     from grapa.graph import Graph
-    
+
 logger = logging.getLogger(__name__)
 
 

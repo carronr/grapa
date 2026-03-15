@@ -2,6 +2,7 @@
 @author: Romain Carron
 Copyright (c) 2026, Empa, Laboratory for Thin Films and Photovoltaics, Romain Carron
 """
+
 import os
 import sys
 import tkinter as tk

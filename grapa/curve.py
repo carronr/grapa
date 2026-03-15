@@ -266,7 +266,7 @@ class Curve:
         keys: Optional[list] = None,
         graph: "Graph" = None,
         also_attr: Optional[list] = None,
-        also_vals: Optional[list] = None
+        also_vals: Optional[list] = None,
     ):
         """Similar as update_values_keys, for all curves inside a provided graph.
         Implemented as curve method for easier integration into GUI.
@@ -883,7 +883,7 @@ class Curve:
         keys: Optional[list] = None,
         graph: "Graph" = None,
         also_attr: Optional[list] = None,
-        also_vals: Optional[list] = None
+        also_vals: Optional[list] = None,
     ):
         """Depreated, use update_values_keys_graph_conditional instead.
         :meta private:"""

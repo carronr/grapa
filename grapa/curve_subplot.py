@@ -103,7 +103,7 @@ class Curve_Subplot(Curve):
         ncols=2,
         nrows=2,
         graph: Optional[Graph] = None,  # actually not optional. Because of GUI.
-        **_kwargs
+        **_kwargs,
     ):
         """
         Updates the subplots_adjustupdate and figsize, based on margins and panelsize

@@ -112,7 +112,7 @@ class Graph:
             try:
                 load_graph(self, filename, complement=complement)
             except FileNotReadError as e:
-                raise FileNotReadError(e) from None  # from here
+                raise FileNotReadError(e) from e  # None  # from here
         # last: want to have abspath and not relative
         if isinstance(self.filename, str) and self.filename != "":
             self.filename = os.path.abspath(self.filename)
