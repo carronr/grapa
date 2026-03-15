@@ -1,0 +1,6 @@
+grapa.shared.maths.roundSignificantRange
+========================================
+
+.. currentmodule:: grapa.shared.maths
+
+.. autofunction:: roundSignificantRange

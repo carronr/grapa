@@ -1,0 +1,31 @@
+grapa.frontend.interface\_openbis
+=================================
+
+.. automodule:: grapa.frontend.interface_openbis
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GrapaOpenbis
+   
+   
+
+   
+   
+   
+
+
+

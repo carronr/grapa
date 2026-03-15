@@ -1,0 +1,27 @@
+grapa.frontend.widgets\_custom.EntryVar
+=======================================
+
+.. currentmodule:: grapa.frontend.widgets_custom
+
+.. autoclass:: EntryVar
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~EntryVar.__init__
+       ~EntryVar.get
+       ~EntryVar.set
+   
+   
+
+   
+   
+   

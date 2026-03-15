@@ -1,0 +1,27 @@
+grapa.shared.mpl\_figure\_factory.MplFigureFactory
+==================================================
+
+.. currentmodule:: grapa.shared.mpl_figure_factory
+
+.. autoclass:: MplFigureFactory
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~MplFigureFactory.__init__
+       ~MplFigureFactory.close
+       ~MplFigureFactory.figure
+   
+   
+
+   
+   
+   

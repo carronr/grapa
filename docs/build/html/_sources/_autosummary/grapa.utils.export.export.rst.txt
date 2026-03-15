@@ -1,6 +1,0 @@
-grapa.utils.export.export
-=========================
-
-.. currentmodule:: grapa.utils.export
-
-.. autofunction:: export

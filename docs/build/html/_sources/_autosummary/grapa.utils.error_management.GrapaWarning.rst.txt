@@ -1,6 +1,0 @@
-grapa.utils.error\_management.GrapaWarning
-==========================================
-
-.. currentmodule:: grapa.utils.error_management
-
-.. autoexception:: GrapaWarning

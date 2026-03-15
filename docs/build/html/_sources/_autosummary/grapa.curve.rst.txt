@@ -14,10 +14,7 @@ grapa.curve
    .. autosummary::
       :toctree:
    
-      get_point_closest_to_xy
       math_on_curves
-      update_curve_values_dictkeys
-      update_graph_values_dictkeys_conditional
    
    
 
@@ -29,9 +26,7 @@ grapa.curve
       :toctree:
       :template: custom-class-template.rst
    
-      CommandRecorderCurve
       Curve
-      CurveGraphsReferrer
    
    
 

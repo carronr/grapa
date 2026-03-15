@@ -1,0 +1,6 @@
+grapa.frontend.gui\_texts.build\_ui
+===================================
+
+.. currentmodule:: grapa.frontend.gui_texts
+
+.. autofunction:: build_ui

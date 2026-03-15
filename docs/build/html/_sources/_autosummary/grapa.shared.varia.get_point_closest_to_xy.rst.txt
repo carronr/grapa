@@ -1,0 +1,6 @@
+grapa.shared.varia.get\_point\_closest\_to\_xy
+==============================================
+
+.. currentmodule:: grapa.shared.varia
+
+.. autofunction:: get_point_closest_to_xy

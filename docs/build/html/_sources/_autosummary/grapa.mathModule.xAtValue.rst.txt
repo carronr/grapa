@@ -1,6 +1,0 @@
-grapa.mathModule.xAtValue
-=========================
-
-.. currentmodule:: grapa.mathModule
-
-.. autofunction:: xAtValue

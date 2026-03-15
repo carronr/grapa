@@ -1,0 +1,40 @@
+grapa.shared.funcgui
+====================
+
+.. automodule:: grapa.shared.funcgui
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      funclistgui_graph_axislabels
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      AlterListItem
+      CurveActionRequestToGui
+      FuncGUI
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+grapa.curve\_subplot.folder\_initialdir
+=======================================
+
+.. currentmodule:: grapa.curve_subplot
+
+.. autofunction:: folder_initialdir

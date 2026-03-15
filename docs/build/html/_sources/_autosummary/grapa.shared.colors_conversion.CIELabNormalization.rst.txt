@@ -1,0 +1,26 @@
+grapa.shared.colors\_conversion.CIELabNormalization
+===================================================
+
+.. currentmodule:: grapa.shared.colors_conversion
+
+.. autoclass:: CIELabNormalization
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CIELabNormalization.lab_to_labnorm
+       ~CIELabNormalization.labnorm_to_lab
+   
+   
+
+   
+   
+   

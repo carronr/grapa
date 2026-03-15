@@ -1,0 +1,40 @@
+grapa.frontend.frames\_main
+===========================
+
+.. automodule:: grapa.frontend.frames_main
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GUIFrameActionsGeneric
+      GUIFrameCanvasGraph
+      GUIFrameCentral
+      GUIFrameCentralOptions
+      GUIFrameConsole
+      GUIFrameDataPicker
+      GUIFrameMenuMain
+      GUIFramePropertyEditor
+      GUIFrameTemplateColorize
+      GUIFrameTree
+   
+   
+
+   
+   
+   
+
+
+

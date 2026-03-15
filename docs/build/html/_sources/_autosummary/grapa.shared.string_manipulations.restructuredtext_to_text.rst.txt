@@ -1,0 +1,6 @@
+grapa.shared.string\_manipulations.restructuredtext\_to\_text
+=============================================================
+
+.. currentmodule:: grapa.shared.string_manipulations
+
+.. autofunction:: restructuredtext_to_text

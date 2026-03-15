@@ -1,0 +1,25 @@
+grapa.frontend.widgets\_custom.ButtonSmall
+==========================================
+
+.. currentmodule:: grapa.frontend.widgets_custom
+
+.. autoclass:: ButtonSmall
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ButtonSmall.__init__
+   
+   
+
+   
+   
+   

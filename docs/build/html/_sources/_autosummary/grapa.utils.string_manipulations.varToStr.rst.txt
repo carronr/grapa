@@ -1,6 +1,0 @@
-grapa.utils.string\_manipulations.varToStr
-==========================================
-
-.. currentmodule:: grapa.utils.string_manipulations
-
-.. autofunction:: varToStr

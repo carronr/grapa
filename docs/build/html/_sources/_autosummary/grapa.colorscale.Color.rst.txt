@@ -23,4 +23,11 @@ grapa.colorscale.Color
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Color.SUPPORTED
+      ~Color.SUPPORTED_ALSOLOWER
+   
    

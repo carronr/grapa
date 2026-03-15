@@ -1,0 +1,53 @@
+grapa.frontend
+==============
+
+.. automodule:: grapa.frontend
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      frame_curveactions
+   
+      frames_main
+   
+      gui_dataeditor
+   
+      gui_main
+   
+      gui_texts
+   
+      image_to_clipboard
+   
+      interface_openbis
+   
+      observable
+   
+      widgets_custom
+   
+      widgets_graphmanager
+   
+      widgets_tooltip
+

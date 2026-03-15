@@ -1,6 +1,0 @@
-grapa.utils.error\_management.issue\_warning
-============================================
-
-.. currentmodule:: grapa.utils.error_management
-
-.. autofunction:: issue_warning

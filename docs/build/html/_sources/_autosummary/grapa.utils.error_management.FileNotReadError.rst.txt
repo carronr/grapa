@@ -1,6 +1,0 @@
-grapa.utils.error\_management.FileNotReadError
-==============================================
-
-.. currentmodule:: grapa.utils.error_management
-
-.. autoexception:: FileNotReadError

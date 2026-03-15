@@ -1,6 +1,0 @@
-grapa.mathModule.roundSignificant
-=================================
-
-.. currentmodule:: grapa.mathModule
-
-.. autofunction:: roundSignificant

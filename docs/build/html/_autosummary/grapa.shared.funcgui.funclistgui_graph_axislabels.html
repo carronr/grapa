@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.shared.funcgui.funclistgui_graph_axislabels &mdash; grapa 0.8.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=bcb8667a"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.shared.funcgui.AlterListItem" href="grapa.shared.funcgui.AlterListItem.html" />
+    <link rel="prev" title="grapa.shared.funcgui" href="grapa.shared.funcgui.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.frontend.html">grapa.frontend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.internal.html">grapa.internal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.plot.html">grapa.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.shared.html">grapa.shared</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.colors_conversion.html">grapa.shared.colors_conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.command_recorder.html">grapa.shared.command_recorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.conditional_property_applier.html">grapa.shared.conditional_property_applier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.constants.html">grapa.shared.constants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.constants_internals.html">grapa.shared.constants_internals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.error_management.html">grapa.shared.error_management</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.shared.funcgui.html">grapa.shared.funcgui</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.shared.funcgui.funclistgui_graph_axislabels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.shared.funcgui.AlterListItem.html">grapa.shared.funcgui.AlterListItem</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.shared.funcgui.CurveActionRequestToGui.html">grapa.shared.funcgui.CurveActionRequestToGui</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.shared.funcgui.FuncGUI.html">grapa.shared.funcgui.FuncGUI</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.keywords_loader.html">grapa.shared.keywords_loader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.logging_utils.html">grapa.shared.logging_utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.maths.html">grapa.shared.maths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.mpl_figure_factory.html">grapa.shared.mpl_figure_factory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.string_manipulations.html">grapa.shared.string_manipulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.shared.varia.html">grapa.shared.varia</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.shared.html">grapa.shared</a></li>
+          <li class="breadcrumb-item"><a href="grapa.shared.funcgui.html">grapa.shared.funcgui</a></li>
+      <li class="breadcrumb-item active">grapa.shared.funcgui.funclistgui_graph_axislabels</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.shared.funcgui.funclistgui_graph_axislabels.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-shared-funcgui-funclistgui-graph-axislabels">
+<h1>grapa.shared.funcgui.funclistgui_graph_axislabels<a class="headerlink" href="#grapa-shared-funcgui-funclistgui-graph-axislabels" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="grapa.shared.funcgui.funclistgui_graph_axislabels">
+<span class="sig-prename descclassname"><span class="pre">grapa.shared.funcgui.</span></span><span class="sig-name descname"><span class="pre">funclistgui_graph_axislabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.shared.funcgui.funclistgui_graph_axislabels" title="Link to this definition"></a></dt>
+<dd><p>To suggests the user appropriate graph axis xlabel and ylabel.
+Relies on CurveSubClass.AXISLABELS_X and CurveSubClass.AXISLABELS_Y, with form:
+{“”: [“Radius”, “r”, “m”]}. Key are the corresponding alter keywords.
+Superseded if the curve instance has attribute Curve.KEY_AXISLABEL_X and/or
+Curve.KEY_AXISLABEL_Y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curve</strong> – the Curve selected by the user</p></li>
+<li><p><strong>lookup_x</strong> – a dict to lookup new value for x unit, with key alter[0].
+Use-case: for example, if unit is “%” instead of “”, or “nF” vs “nF cm-2”</p></li>
+<li><p><strong>lookup_y</strong> – a dict to lookup new value for y unit, with key alter[1]</p></li>
+<li><p><strong>kwargs</strong> – must contain kwargs “graph”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list containing one FuncGUI element if appropriate, empty otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.shared.funcgui.html" class="btn btn-neutral float-left" title="grapa.shared.funcgui" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.shared.funcgui.AlterListItem.html" class="btn btn-neutral float-right" title="grapa.shared.funcgui.AlterListItem" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

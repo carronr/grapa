@@ -1,6 +1,0 @@
-grapa.gui.widgets\_graphmanager.userconfirm\_close\_notsaved
-============================================================
-
-.. currentmodule:: grapa.gui.widgets_graphmanager
-
-.. autofunction:: userconfirm_close_notsaved

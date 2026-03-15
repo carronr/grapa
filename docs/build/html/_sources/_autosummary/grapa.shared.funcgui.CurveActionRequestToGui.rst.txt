@@ -1,0 +1,25 @@
+grapa.shared.funcgui.CurveActionRequestToGui
+============================================
+
+.. currentmodule:: grapa.shared.funcgui
+
+.. autoclass:: CurveActionRequestToGui
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurveActionRequestToGui.OPEN_FILE
+   
+   

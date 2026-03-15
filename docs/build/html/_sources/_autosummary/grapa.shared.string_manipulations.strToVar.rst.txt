@@ -1,0 +1,6 @@
+grapa.shared.string\_manipulations.strToVar
+===========================================
+
+.. currentmodule:: grapa.shared.string_manipulations
+
+.. autofunction:: strToVar

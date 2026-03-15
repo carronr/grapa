@@ -19,7 +19,6 @@ grapa.graph
       :toctree:
       :template: custom-class-template.rst
    
-      ConditionalPropertyApplier
       Graph
    
    

@@ -1,6 +1,0 @@
-grapa.utils.string\_manipulations.listToString
-==============================================
-
-.. currentmodule:: grapa.utils.string_manipulations
-
-.. autofunction:: listToString

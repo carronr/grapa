@@ -29,7 +29,6 @@ grapa.colorscale
    
       Color
       Colorscale
-      PhotoImageColorscale
    
    
 

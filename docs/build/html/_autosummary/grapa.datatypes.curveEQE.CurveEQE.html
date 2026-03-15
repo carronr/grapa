@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.datatypes.curveEQE.CurveEQE &mdash; grapa 0.7.1.0 documentation</title>
+  <title>grapa.datatypes.curveEQE.CurveEQE &mdash; grapa 0.8.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
+      <script src="../_static/documentation_options.js?v=bcb8667a"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -52,7 +52,6 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
@@ -103,11 +102,12 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.frontend.html">grapa.frontend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.internal.html">grapa.internal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.plot.html">grapa.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.shared.html">grapa.shared</a></li>
 </ul>
 </li>
 </ul>
@@ -173,7 +173,7 @@ CurveSpectrum can convert [eV] in [nm].</p>
 <td><p>Performs fit of the low-energy side of EQE with Tauc formula (linear relation</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis" title="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveEQE_derivativeanalysis</span></code></a>([sgwidth, ...])</p></td>
-<td><p>Bandgap derivative: Computes the bandgap and other derived data based on the Savitzky–Golay derivative dEQE/dE.</p></td>
+<td><p>Bandgap derivative: Computes the bandgap and other derived data based on the Savitzky-Golay derivative dEQE/dE.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.CurveUrbachEnergy" title="grapa.datatypes.curveEQE.CurveEQE.CurveUrbachEnergy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurveUrbachEnergy</span></code></a>(roi_ev)</p></td>
 <td><p>Exponential decay: to obtain a measure of the sub-bandgap disorder tails.</p></td>
@@ -197,13 +197,13 @@ CurveSpectrum can convert [eV] in [nm].</p>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax" title="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_bandgapmax</span></code></a>([sgwidth, sgdegree, ...])</p></td>
-<td><p>Computes the bandgap based on the Savitzky–Golay derivative peak of derivative.</p></td>
+<td><p>Computes the bandgap based on the Savitzky-Golay derivative peak of derivative.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgappvrau" title="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgappvrau"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_bandgappvrau</span></code></a>([sgwidth, sgdegree, ...])</p></td>
 <td><p>PV bandgap based on Rau et al. PRA 2017 (weighted energy over peak FWHM) <a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a> Assumes input energy data actually given in nm Returns: bandgap value (float), x, y (base for calculation).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_savgol" title="grapa.datatypes.curveEQE.CurveEQE.derivative_savgol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_savgol</span></code></a>([sgwidth, sgdegree, roi])</p></td>
-<td><p>Returns a reduced x,y range and the Savitzky–Golay derivative sgwidth, sgdegree: width and degree of Savitzky–Golay roi: range of interest [nmmin, nmmax]</p></td>
+<td><p>Returns a reduced x,y range and the Savitzky-Golay derivative sgwidth, sgdegree: width and degree of Savitzky-Golay roi: range of interest [nmmin, nmmax]</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative_sigmabestguess</span></code>([sgwidth, ...])</p></td>
 <td><p></p></td>
@@ -367,7 +367,7 @@ By default, [0.25, 0.70].</p></li>
 <dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis">
 <span class="sig-name descname"><span class="pre">CurveEQE_derivativeanalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.CurveEQE_derivativeanalysis" title="Link to this definition"></a></dt>
 <dd><p>Bandgap derivative: Computes the bandgap and other derived data based on the
-Savitzky–Golay derivative dEQE/dE. Are implemented:</p>
+Savitzky-Golay derivative dEQE/dE. Are implemented:</p>
 <ul class="simple">
 <li><p>Peak of derivative, based on a gaussian fit to few points around the peak,</p></li>
 <li><p>PV bandgap based on Rau et al. PRA 2017 (weighted energy over peak FWHM)
@@ -377,8 +377,8 @@ Savitzky–Golay derivative dEQE/dE. Are implemented:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sgwidth</strong> – width of Savitzky–Golay filter. Default 5.</p></li>
-<li><p><strong>sgdegree</strong> – degree of Savitzky–Golay filter. Default 3.
+<li><p><strong>sgwidth</strong> – width of Savitzky-Golay filter. Default 5.</p></li>
+<li><p><strong>sgdegree</strong> – degree of Savitzky-Golay filter. Default 3.
 Parameter values (w,d) = (3,1) fall back onto the symmetrical discrete
 difference.</p></li>
 <li><p><strong>roi</strong> – range of interest. [nm_min, nm_max]</p></li>
@@ -414,7 +414,7 @@ slightly higher values, with a contribution from bandgap distributions.</p>
 <dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.ERE">
 <span class="sig-name descname"><span class="pre">ERE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Emin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EminUnit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.ERE" title="Link to this definition"></a></dt>
 <dd><p>ERE: Computes the External Radiative Efficiency from the EQE curve and the
-cell Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476
+cell Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472-476
 The more complete calculation is also provided from Rau et al., Phys. Rev.
 Applied 7, 044016 (2017)
 <a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a>
@@ -442,7 +442,7 @@ derivation, 1 for hemispherical emission (i.e. back reflector)</p></li>
 <dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.ERE_GUI">
 <span class="sig-name descname"><span class="pre">ERE_GUI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Emin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EminUnit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandgap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.ERE_GUI" title="Link to this definition"></a></dt>
 <dd><p>Computes the External Radiative Efficiency from the EQE curve and the cell
-Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472–476
+Voc. Ref: Green M. A., Prog. Photovolt: Res. Appl. 2012; 20:472-476
 The more complete calculation is also provided from Rau et al., Phys. Rev.
 Applied 7, 044016 (2017)
 <a class="reference external" href="https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016">https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.7.044016</a></p>
@@ -494,13 +494,13 @@ Assumes the EQE values are in range [0,1] and NOT [0,100].</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax">
 <span class="sig-name descname"><span class="pre">derivative_bandgapmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_y_savgol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_bandgapmax" title="Link to this definition"></a></dt>
-<dd><p>Computes the bandgap based on the Savitzky–Golay derivative peak of derivative.
+<dd><p>Computes the bandgap based on the Savitzky-Golay derivative peak of derivative.
 The peak is located based on a gaussian fit to few points near peak values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sgwidth</strong> – <ol class="arabic simple" start="5">
-<li><p>Parameters of Savitzky–Golay filtering</p></li>
+<li><p>Parameters of Savitzky-Golay filtering</p></li>
 </ol>
 </p></li>
 <li><p><strong>sgdegree</strong> – 3</p></li>
@@ -528,8 +528,8 @@ Returns: bandgap value (float), x, y (base for calculation)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveEQE.CurveEQE.derivative_savgol">
 <span class="sig-name descname"><span class="pre">derivative_savgol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sgwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgdegree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveEQE.CurveEQE.derivative_savgol" title="Link to this definition"></a></dt>
-<dd><p>Returns a reduced x,y range and the Savitzky–Golay derivative
-sgwidth, sgdegree: width and degree of Savitzky–Golay
+<dd><p>Returns a reduced x,y range and the Savitzky-Golay derivative
+sgwidth, sgdegree: width and degree of Savitzky-Golay
 roi: range of interest [nmmin, nmmax]</p>
 </dd></dl>
 

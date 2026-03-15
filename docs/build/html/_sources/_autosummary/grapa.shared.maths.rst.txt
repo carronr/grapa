@@ -1,0 +1,48 @@
+grapa.shared.maths
+==================
+
+.. automodule:: grapa.shared.maths
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      derivative
+      derivative2nd
+      find_nearest
+      fractionstr_to_float
+      is_number
+      roundSignificant
+      roundSignificantRange
+      roundgraphlim
+      smooth
+      trapz
+      xAtValue
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      MathOperator
+   
+   
+
+   
+   
+   
+
+
+

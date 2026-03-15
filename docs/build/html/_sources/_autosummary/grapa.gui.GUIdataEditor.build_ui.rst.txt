@@ -1,6 +1,0 @@
-grapa.gui.GUIdataEditor.build\_ui
-=================================
-
-.. currentmodule:: grapa.gui.GUIdataEditor
-
-.. autofunction:: build_ui

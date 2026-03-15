@@ -1,0 +1,6 @@
+grapa.internal.curve\_utils.update\_values\_keys
+================================================
+
+.. currentmodule:: grapa.internal.curve_utils
+
+.. autofunction:: update_values_keys

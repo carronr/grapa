@@ -1,0 +1,31 @@
+grapa.frontend.widgets\_graphmanager.RecorderSpecialKeys
+========================================================
+
+.. currentmodule:: grapa.frontend.widgets_graphmanager
+
+.. autoclass:: RecorderSpecialKeys
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RecorderSpecialKeys.SAVE
+      ~RecorderSpecialKeys.OPEN
+   
+   

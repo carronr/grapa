@@ -9,6 +9,13 @@ grapa.curve\_subplot
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      folder_initialdir
+   
    
 
    

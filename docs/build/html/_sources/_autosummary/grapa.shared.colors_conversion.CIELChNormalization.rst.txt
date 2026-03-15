@@ -1,0 +1,26 @@
+grapa.shared.colors\_conversion.CIELChNormalization
+===================================================
+
+.. currentmodule:: grapa.shared.colors_conversion
+
+.. autoclass:: CIELChNormalization
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CIELChNormalization.lch_to_lchnorm
+       ~CIELChNormalization.lchnorm_to_lch
+   
+   
+
+   
+   
+   

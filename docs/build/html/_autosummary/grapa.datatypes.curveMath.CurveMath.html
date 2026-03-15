@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.datatypes.curveMath.CurveMath &mdash; grapa 0.7.1.0 documentation</title>
+  <title>grapa.datatypes.curveMath.CurveMath &mdash; grapa 0.8.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
+      <script src="../_static/documentation_options.js?v=bcb8667a"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -52,7 +52,6 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
@@ -101,11 +100,12 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.frontend.html">grapa.frontend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.internal.html">grapa.internal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.plot.html">grapa.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.shared.html">grapa.shared</a></li>
 </ul>
 </li>
 </ul>
@@ -149,8 +149,9 @@
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.datatypes.curveMath.</span></span><span class="sig-name descname"><span class="pre">CurveMath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><code class="xref py py-class docutils literal notranslate"><span class="pre">Curve</span></code></a></p>
-<p>Class handling optical spectra, with notably nm to eV conversion and background
-subtraction.</p>
+<p>Class handling mathematical operations, to make them available to the GUI.
+The operations are readily accessible from command line, for example
+curve1 + curve2 - 20</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.__init__" title="Link to this definition"></a></dt>
@@ -168,8 +169,8 @@ subtraction.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="grapa.datatypes.curveMath.CurveMath.assemble_curve_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assemble_curve_xy</span></code></a>(idx_x, xory_x, idx_y, ...)</p></td>
 <td><p>Assemble new Curve from data series of same length available in a Graph object.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">classNameGUI</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.classNameGUI" title="grapa.datatypes.curveMath.CurveMath.classNameGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">classNameGUI</span></code></a>()</p></td>
+<td><p>Provide base data, for the GUI to show what subclass of curve this is.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.curveMath.CurveMath.funcListGUI" title="grapa.datatypes.curveMath.CurveMath.funcListGUI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">funcListGUI</span></code></a>(**kwargs)</p></td>
 <td><p>Fills in the Curve actions specific to the Curve type. Retuns a list, which elements are instances of <cite>FuncGUI</cite>, or (old style): ::.</p></td>
@@ -198,13 +199,13 @@ subtraction.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.add" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'add'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.add" title="Link to this definition"></a></dt>
 <dd><p>Add a constant or a (list of) curves to this curve.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.assemble_curve_xy">
-<span class="sig-name descname"><span class="pre">assemble_curve_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="grapa.curve.Curve.html#grapa.curve.Curve" title="grapa.curve.Curve"><span class="pre">Curve</span></a></span></span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">assemble_curve_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xory_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.graph.Graph.html#grapa.graph.Graph" title="grapa.graph.Graph"><span class="pre">Graph</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.assemble_curve_xy" title="Link to this definition"></a></dt>
 <dd><p>Assemble new Curve from data series of same length available in a Graph object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -220,6 +221,13 @@ subtraction.</p>
 <dd class="field-even"><p>a Curve with x and y data according to wishes</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.datatypes.curveMath.CurveMath.classNameGUI">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">classNameGUI</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.curveMath.CurveMath.classNameGUI" title="Link to this definition"></a></dt>
+<dd><p>Provide base data, for the GUI to show what subclass of curve this is.
+Can be overridden, see CurveArrhenius.</p>
 </dd></dl>
 
 <dl class="py method">

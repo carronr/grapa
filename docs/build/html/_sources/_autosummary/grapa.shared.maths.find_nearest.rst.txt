@@ -1,0 +1,6 @@
+grapa.shared.maths.find\_nearest
+================================
+
+.. currentmodule:: grapa.shared.maths
+
+.. autofunction:: find_nearest

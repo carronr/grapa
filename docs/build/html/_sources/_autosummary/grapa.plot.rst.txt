@@ -1,0 +1,39 @@
+grapa.plot
+==========
+
+.. automodule:: grapa.plot
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      export
+   
+      plot_curve
+   
+      plot_graph
+   
+      plot_graph_aux
+

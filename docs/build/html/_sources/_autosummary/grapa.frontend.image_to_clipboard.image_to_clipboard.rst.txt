@@ -1,0 +1,6 @@
+grapa.frontend.image\_to\_clipboard.image\_to\_clipboard
+========================================================
+
+.. currentmodule:: grapa.frontend.image_to_clipboard
+
+.. autofunction:: image_to_clipboard

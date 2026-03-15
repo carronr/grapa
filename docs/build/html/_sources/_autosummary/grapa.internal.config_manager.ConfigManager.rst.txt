@@ -1,0 +1,27 @@
+grapa.internal.config\_manager.ConfigManager
+============================================
+
+.. currentmodule:: grapa.internal.config_manager
+
+.. autoclass:: ConfigManager
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ConfigManager.__init__
+       ~ConfigManager.all
+       ~ConfigManager.get
+   
+   
+
+   
+   
+   

@@ -1,0 +1,6 @@
+grapa.datatypes.graphMCA.parse\_file\_mca
+=========================================
+
+.. currentmodule:: grapa.datatypes.graphMCA
+
+.. autofunction:: parse_file_mca

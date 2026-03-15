@@ -27,6 +27,7 @@ grapa.graph.Graph
        ~Graph.config
        ~Graph.config_all
        ~Graph.curve
+       ~Graph.curve_cast
        ~Graph.curve_delete
        ~Graph.curve_duplicate
        ~Graph.curve_move_to_index
@@ -39,6 +40,7 @@ grapa.graph.Graph
        ~Graph.export
        ~Graph.filenamewithpath
        ~Graph.formatAxisLabel
+       ~Graph.format_axis_label
        ~Graph.getAttribute
        ~Graph.getAttributes
        ~Graph.getCurveData
@@ -53,7 +55,6 @@ grapa.graph.Graph
        ~Graph.plot
        ~Graph.replaceCurve
        ~Graph.replace_labels
-       ~Graph.reset
        ~Graph.reverseCurves
        ~Graph.swapCurves
        ~Graph.text_add
@@ -61,6 +62,7 @@ grapa.graph.Graph
        ~Graph.text_remove
        ~Graph.update
        ~Graph.updateValuesDictkeys
+       ~Graph.update_values_keys
    
    
 
@@ -72,6 +74,7 @@ grapa.graph.Graph
    
       ~Graph.AXISLABELS
       ~Graph.CONFIG_FILENAME_DEFAULT
+      ~Graph.CONFIG_FILENAME_FALLBACK
       ~Graph.CONFIG_FILES
       ~Graph.DEFAULT
       ~Graph.FIGSIZE_DEFAULT

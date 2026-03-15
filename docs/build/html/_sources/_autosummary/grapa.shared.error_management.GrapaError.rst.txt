@@ -1,0 +1,6 @@
+grapa.shared.error\_management.GrapaError
+=========================================
+
+.. currentmodule:: grapa.shared.error_management
+
+.. autoexception:: GrapaError

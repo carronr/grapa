@@ -9,6 +9,13 @@ grapa.datatypes.graphMCA
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      parse_file_mca
+   
    
 
    

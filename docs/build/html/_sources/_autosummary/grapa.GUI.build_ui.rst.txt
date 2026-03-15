@@ -1,6 +1,0 @@
-grapa.GUI.build\_ui
-===================
-
-.. currentmodule:: grapa.GUI
-
-.. autofunction:: build_ui

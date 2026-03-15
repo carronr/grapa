@@ -1,0 +1,39 @@
+grapa.plot.plot\_graph
+======================
+
+.. automodule:: grapa.plot.plot_graph
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      convert_svg_to_emf
+      plot_graph
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Container
+   
+   
+
+   
+   
+   
+
+
+

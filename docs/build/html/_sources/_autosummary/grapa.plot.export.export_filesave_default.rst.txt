@@ -1,0 +1,6 @@
+grapa.plot.export.export\_filesave\_default
+===========================================
+
+.. currentmodule:: grapa.plot.export
+
+.. autofunction:: export_filesave_default

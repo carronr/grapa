@@ -1,0 +1,27 @@
+grapa.frontend.widgets\_custom.CheckbuttonVar
+=============================================
+
+.. currentmodule:: grapa.frontend.widgets_custom
+
+.. autoclass:: CheckbuttonVar
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~CheckbuttonVar.__init__
+       ~CheckbuttonVar.get
+       ~CheckbuttonVar.set
+   
+   
+
+   
+   
+   

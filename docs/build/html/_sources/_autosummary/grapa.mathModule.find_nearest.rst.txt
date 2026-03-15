@@ -1,6 +1,0 @@
-grapa.mathModule.find\_nearest
-==============================
-
-.. currentmodule:: grapa.mathModule
-
-.. autofunction:: find_nearest

@@ -1,6 +1,0 @@
-grapa.curve.get\_point\_closest\_to\_xy
-=======================================
-
-.. currentmodule:: grapa.curve
-
-.. autofunction:: get_point_closest_to_xy

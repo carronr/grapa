@@ -1,6 +1,0 @@
-grapa.mathModule.trapz
-======================
-
-.. currentmodule:: grapa.mathModule
-
-.. autofunction:: trapz

@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grapa.frontend.frames_main.GUIFrameActionsGeneric &mdash; grapa 0.8.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=bcb8667a"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="grapa.frontend.frames_main.GUIFrameCanvasGraph" href="grapa.frontend.frames_main.GUIFrameCanvasGraph.html" />
+    <link rel="prev" title="grapa.frontend.frames_main" href="grapa.frontend.frames_main.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            grapa
+              <img src="../_static/datareading.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+   <ul>
+        <li class="toctree-l1"><a href= "../index.html">Welcome</a></li>
+   </ul>
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="grapa.html">grapa</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.curve_subplot.html">grapa.curve_subplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.database.html">grapa.database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.datatypes.html">grapa.datatypes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="grapa.frontend.html">grapa.frontend</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.frame_curveactions.html">grapa.frontend.frame_curveactions</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="grapa.frontend.frames_main.html">grapa.frontend.frames_main</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">grapa.frontend.frames_main.GUIFrameActionsGeneric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameCanvasGraph.html">grapa.frontend.frames_main.GUIFrameCanvasGraph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameCentral.html">grapa.frontend.frames_main.GUIFrameCentral</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameCentralOptions.html">grapa.frontend.frames_main.GUIFrameCentralOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameConsole.html">grapa.frontend.frames_main.GUIFrameConsole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameDataPicker.html">grapa.frontend.frames_main.GUIFrameDataPicker</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameMenuMain.html">grapa.frontend.frames_main.GUIFrameMenuMain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFramePropertyEditor.html">grapa.frontend.frames_main.GUIFramePropertyEditor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameTemplateColorize.html">grapa.frontend.frames_main.GUIFrameTemplateColorize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="grapa.frontend.frames_main.GUIFrameTree.html">grapa.frontend.frames_main.GUIFrameTree</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.gui_dataeditor.html">grapa.frontend.gui_dataeditor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.gui_main.html">grapa.frontend.gui_main</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.gui_texts.html">grapa.frontend.gui_texts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.image_to_clipboard.html">grapa.frontend.image_to_clipboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.interface_openbis.html">grapa.frontend.interface_openbis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.observable.html">grapa.frontend.observable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.widgets_custom.html">grapa.frontend.widgets_custom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.widgets_graphmanager.html">grapa.frontend.widgets_graphmanager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grapa.frontend.widgets_tooltip.html">grapa.frontend.widgets_tooltip</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.internal.html">grapa.internal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.plot.html">grapa.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.shared.html">grapa.shared</a></li>
+</ul>
+</li>
+</ul>
+
+	<p> </p>
+	<ul>
+		<li class="toctree-l1"><a href= "../genindex.html">General Index</a></li>
+		<li class="toctree-l1"><a href= "../py-modindex.html">Module Index</a></li>
+   </ul>
+  
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">grapa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="grapa.html">grapa</a></li>
+          <li class="breadcrumb-item"><a href="grapa.frontend.html">grapa.frontend</a></li>
+          <li class="breadcrumb-item"><a href="grapa.frontend.frames_main.html">grapa.frontend.frames_main</a></li>
+      <li class="breadcrumb-item active">grapa.frontend.frames_main.GUIFrameActionsGeneric</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/grapa.frontend.frames_main.GUIFrameActionsGeneric.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="grapa-frontend-frames-main-guiframeactionsgeneric">
+<h1>grapa.frontend.frames_main.GUIFrameActionsGeneric<a class="headerlink" href="#grapa-frontend-frames-main-guiframeactionsgeneric" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">grapa.frontend.frames_main.</span></span><span class="sig-name descname"><span class="pre">GUIFrameActionsGeneric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">application</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.frontend.gui_main.Application.html#grapa.frontend.gui_main.Application" title="grapa.frontend.gui_main.Application"><span class="pre">Application</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Handles the panel Actions on Curves
+Contains a Frame, to be embedded in a wider application (.frame.pack())
+Some methods will call methods of application</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">application</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.frontend.gui_main.Application.html#grapa.frontend.gui_main.Application" title="grapa.frontend.gui_main.Application"><span class="pre">Application</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.__init__" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(master, application, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.cast_curve" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.cast_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cast_curve</span></code></a>()</p></td>
+<td><p>Cast (change the type of) a Curve</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.choose_color" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.choose_color"><code class="xref py py-obj docutils literal notranslate"><span class="pre">choose_color</span></code></a>()</p></td>
+<td><p>Prompts the user to choose a color</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_curve_to_clipboard" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_curve_to_clipboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_curve_to_clipboard</span></code></a>()</p></td>
+<td><p>Cpy the Curve into the clipboard</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_graph_to_clipboard" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_graph_to_clipboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_graph_to_clipboard</span></code></a>()</p></td>
+<td><p>Copy the content of a Graph into the clipboard</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curve" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_curve</span></code></a>()</p></td>
+<td><p>Delete the currently selected curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curves_hidden" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curves_hidden"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_curves_hidden</span></code></a>()</p></td>
+<td><p>Delete all the hidden curves.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.duplicate_curve" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.duplicate_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">duplicate_curve</span></code></a>()</p></td>
+<td><p>Duplicate the currently selected curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.replace_labels" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.replace_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace_labels</span></code></a>()</p></td>
+<td><p>Replace labels graph.replace_labels(old, new)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.set_quick_attr" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.set_quick_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_quick_attr</span></code></a>()</p></td>
+<td><p>Updates the values of the keywords label, and color</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_curve</span></code></a>(up_down[, relative])</p></td>
+<td><p>Chift a Curve within the Graph</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_bottom" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_bottom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_curve_bottom</span></code></a>()</p></td>
+<td><p>hift Curve at the end of a Graph</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_down" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_down"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_curve_down</span></code></a>()</p></td>
+<td><p>Shift Curve down in the Graph</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_reverse" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_reverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_curve_reverse</span></code></a>()</p></td>
+<td><p>Reverse the order of  the Curves within the Graph</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_top" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_top"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_curve_top</span></code></a>()</p></td>
+<td><p>Shift Curve in the position in the graph</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_up" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_up"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_curve_up</span></code></a>()</p></td>
+<td><p>Shift a Curve up in the Graph</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_all" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_hide_all</span></code></a>()</p></td>
+<td><p>Toggle if displayed or not, for all Curves with same value</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_curve" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_hide_curve</span></code></a>()</p></td>
+<td><p>Toggle if Curve is displayed or not</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_invert" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_invert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_hide_invert</span></code></a>()</p></td>
+<td><p>Toggle if displayed or not, for all Curves independently</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.update_ui" title="grapa.frontend.frames_main.GUIFrameActionsGeneric.update_ui"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ui</span></code></a>()</p></td>
+<td><p>Update widgets</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CASTCURVERENAMEGUI</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.cast_curve">
+<span class="sig-name descname"><span class="pre">cast_curve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.cast_curve" title="Link to this definition"></a></dt>
+<dd><p>Cast (change the type of) a Curve</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.choose_color">
+<span class="sig-name descname"><span class="pre">choose_color</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.choose_color" title="Link to this definition"></a></dt>
+<dd><p>Prompts the user to choose a color</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_curve_to_clipboard">
+<span class="sig-name descname"><span class="pre">copy_curve_to_clipboard</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_curve_to_clipboard" title="Link to this definition"></a></dt>
+<dd><p>Cpy the Curve into the clipboard</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_graph_to_clipboard">
+<span class="sig-name descname"><span class="pre">copy_graph_to_clipboard</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.copy_graph_to_clipboard" title="Link to this definition"></a></dt>
+<dd><p>Copy the content of a Graph into the clipboard</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curve">
+<span class="sig-name descname"><span class="pre">delete_curve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curve" title="Link to this definition"></a></dt>
+<dd><p>Delete the currently selected curve.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curves_hidden">
+<span class="sig-name descname"><span class="pre">delete_curves_hidden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.delete_curves_hidden" title="Link to this definition"></a></dt>
+<dd><p>Delete all the hidden curves.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.duplicate_curve">
+<span class="sig-name descname"><span class="pre">duplicate_curve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.duplicate_curve" title="Link to this definition"></a></dt>
+<dd><p>Duplicate the currently selected curve.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.replace_labels">
+<span class="sig-name descname"><span class="pre">replace_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.replace_labels" title="Link to this definition"></a></dt>
+<dd><p>Replace labels graph.replace_labels(old, new)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.set_quick_attr">
+<span class="sig-name descname"><span class="pre">set_quick_attr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.set_quick_attr" title="Link to this definition"></a></dt>
+<dd><p>Updates the values of the keywords label, and color</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve">
+<span class="sig-name descname"><span class="pre">shift_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">up_down</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve" title="Link to this definition"></a></dt>
+<dd><p>Chift a Curve within the Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_bottom">
+<span class="sig-name descname"><span class="pre">shift_curve_bottom</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_bottom" title="Link to this definition"></a></dt>
+<dd><p>hift Curve at the end of a Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_down">
+<span class="sig-name descname"><span class="pre">shift_curve_down</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_down" title="Link to this definition"></a></dt>
+<dd><p>Shift Curve down in the Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_reverse">
+<span class="sig-name descname"><span class="pre">shift_curve_reverse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_reverse" title="Link to this definition"></a></dt>
+<dd><p>Reverse the order of  the Curves within the Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_top">
+<span class="sig-name descname"><span class="pre">shift_curve_top</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_top" title="Link to this definition"></a></dt>
+<dd><p>Shift Curve in the position in the graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_up">
+<span class="sig-name descname"><span class="pre">shift_curve_up</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.shift_curve_up" title="Link to this definition"></a></dt>
+<dd><p>Shift a Curve up in the Graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_all">
+<span class="sig-name descname"><span class="pre">show_hide_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_all" title="Link to this definition"></a></dt>
+<dd><p>Toggle if displayed or not, for all Curves with same value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_curve">
+<span class="sig-name descname"><span class="pre">show_hide_curve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_curve" title="Link to this definition"></a></dt>
+<dd><p>Toggle if Curve is displayed or not</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_invert">
+<span class="sig-name descname"><span class="pre">show_hide_invert</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.show_hide_invert" title="Link to this definition"></a></dt>
+<dd><p>Toggle if displayed or not, for all Curves independently</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="grapa.frontend.frames_main.GUIFrameActionsGeneric.update_ui">
+<span class="sig-name descname"><span class="pre">update_ui</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.frontend.frames_main.GUIFrameActionsGeneric.update_ui" title="Link to this definition"></a></dt>
+<dd><p>Update widgets</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grapa.frontend.frames_main.html" class="btn btn-neutral float-left" title="grapa.frontend.frames_main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grapa.frontend.frames_main.GUIFrameCanvasGraph.html" class="btn btn-neutral float-right" title="grapa.frontend.frames_main.GUIFrameCanvasGraph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Romain Carron.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

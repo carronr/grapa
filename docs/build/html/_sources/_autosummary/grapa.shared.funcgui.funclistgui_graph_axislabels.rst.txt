@@ -1,0 +1,6 @@
+grapa.shared.funcgui.funclistgui\_graph\_axislabels
+===================================================
+
+.. currentmodule:: grapa.shared.funcgui
+
+.. autofunction:: funclistgui_graph_axislabels

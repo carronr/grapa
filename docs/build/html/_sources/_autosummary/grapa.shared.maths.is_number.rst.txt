@@ -1,0 +1,6 @@
+grapa.shared.maths.is\_number
+=============================
+
+.. currentmodule:: grapa.shared.maths
+
+.. autofunction:: is_number

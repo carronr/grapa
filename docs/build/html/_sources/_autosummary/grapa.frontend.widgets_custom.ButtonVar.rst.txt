@@ -1,0 +1,27 @@
+grapa.frontend.widgets\_custom.ButtonVar
+========================================
+
+.. currentmodule:: grapa.frontend.widgets_custom
+
+.. autoclass:: ButtonVar
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~ButtonVar.__init__
+       ~ButtonVar.get
+       ~ButtonVar.set
+   
+   
+
+   
+   
+   

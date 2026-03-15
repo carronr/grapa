@@ -1,0 +1,50 @@
+grapa.shared.colors\_conversion
+===============================
+
+.. automodule:: grapa.shared.colors_conversion
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      cielab_to_cielch
+      cielab_to_rgb
+      cielabnorm_to_cielchnorm
+      cielabnorm_to_rgb
+      cielch_to_cielab
+      cielch_to_rgb
+      cielchnorm_to_cielabnorm
+      cielchnorm_to_rgb
+      rgb_to_cielab
+      rgb_to_cielabnorm
+      rgb_to_cielch
+      rgb_to_cielchnorm
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CIELChNormalization
+      CIELabNormalization
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,32 @@
+grapa.frontend.widgets\_custom.FrameTitleContentHideHorizontal
+==============================================================
+
+.. currentmodule:: grapa.frontend.widgets_custom
+
+.. autoclass:: FrameTitleContentHideHorizontal
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FrameTitleContentHideHorizontal.create_widgets
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FrameTitleContentHideHorizontal.BUTTON_LABEL_IN
+      ~FrameTitleContentHideHorizontal.BUTTON_LABEL_OUT
+   
+   

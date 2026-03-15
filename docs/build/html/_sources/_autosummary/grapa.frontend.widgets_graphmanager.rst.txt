@@ -1,0 +1,42 @@
+grapa.frontend.widgets\_graphmanager
+====================================
+
+.. automodule:: grapa.frontend.widgets_graphmanager
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      test_all
+      userconfirm_close_notsaved
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CustomNotebook
+      GraphHandler
+      GraphsTabManager
+      RecorderSpecialKeys
+   
+   
+
+   
+   
+   
+
+
+

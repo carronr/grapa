@@ -1,0 +1,6 @@
+grapa.shared.colors\_conversion.rgb\_to\_cielch
+===============================================
+
+.. currentmodule:: grapa.shared.colors_conversion
+
+.. autofunction:: rgb_to_cielch

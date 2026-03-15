@@ -30,5 +30,6 @@ grapa.scripts.script\_JVSummaryToBoxPlots.ManyArgs
       ~ManyArgs.export_prefix
       ~ManyArgs.plotkwargs
       ~ManyArgs.pltclose
+      ~ManyArgs.figure_factory
    
    

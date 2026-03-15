@@ -1,0 +1,35 @@
+grapa.frontend.frames\_main.GUIFrameCanvasGraph
+===============================================
+
+.. currentmodule:: grapa.frontend.frames_main
+
+.. autoclass:: GUIFrameCanvasGraph
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~GUIFrameCanvasGraph.__init__
+       ~GUIFrameCanvasGraph.close_tab
+       ~GUIFrameCanvasGraph.disable_canvas_callbacks
+       ~GUIFrameCanvasGraph.enable_canvas_callbacks
+       ~GUIFrameCanvasGraph.get_canvas
+       ~GUIFrameCanvasGraph.get_tabs
+       ~GUIFrameCanvasGraph.on_mousewheel
+       ~GUIFrameCanvasGraph.registercallback_notifycanvas
+       ~GUIFrameCanvasGraph.set_canvas_background
+       ~GUIFrameCanvasGraph.update_ui
+       ~GUIFrameCanvasGraph.update_upon_resize_window
+   
+   
+
+   
+   
+   

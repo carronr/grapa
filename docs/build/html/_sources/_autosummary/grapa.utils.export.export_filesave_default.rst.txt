@@ -1,6 +1,0 @@
-grapa.utils.export.export\_filesave\_default
-============================================
-
-.. currentmodule:: grapa.utils.export
-
-.. autofunction:: export_filesave_default

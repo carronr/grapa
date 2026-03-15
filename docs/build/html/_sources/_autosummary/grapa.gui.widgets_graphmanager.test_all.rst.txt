@@ -1,6 +1,0 @@
-grapa.gui.widgets\_graphmanager.test\_all
-=========================================
-
-.. currentmodule:: grapa.gui.widgets_graphmanager
-
-.. autofunction:: test_all

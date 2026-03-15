@@ -1,0 +1,31 @@
+grapa.internal.container\_curves
+================================
+
+.. automodule:: grapa.internal.container_curves
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      CurveContainer
+   
+   
+
+   
+   
+   
+
+
+

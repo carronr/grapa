@@ -1,0 +1,31 @@
+grapa.shared.mpl\_figure\_factory
+=================================
+
+.. automodule:: grapa.shared.mpl_figure_factory
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      MplFigureFactory
+   
+   
+
+   
+   
+   
+
+
+

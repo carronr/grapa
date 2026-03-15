@@ -40,8 +40,6 @@
    
       colorscale
    
-      constants
-   
       curve
    
       curve_image
@@ -54,13 +52,15 @@
    
       datatypes
    
+      frontend
+   
       graph
    
-      gui
+      internal
    
-      mathModule
+      plot
    
       scripts
    
-      utils
+      shared
 

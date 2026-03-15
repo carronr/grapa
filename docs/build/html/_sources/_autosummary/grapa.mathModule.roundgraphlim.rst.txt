@@ -1,6 +1,0 @@
-grapa.mathModule.roundgraphlim
-==============================
-
-.. currentmodule:: grapa.mathModule
-
-.. autofunction:: roundgraphlim

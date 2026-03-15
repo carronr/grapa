@@ -22,7 +22,8 @@ grapa.curve.Curve
        ~Curve.attr
        ~Curve.attr_pop
        ~Curve.castCurve
-       ~Curve.castCurveListGUI
+       ~Curve.cast_as
+       ~Curve.cast_listpossibletypes
        ~Curve.classNameGUI
        ~Curve.data_units
        ~Curve.funcListGUI
@@ -31,6 +32,7 @@ grapa.curve.Curve
        ~Curve.getData
        ~Curve.getDataCustomPickerXY
        ~Curve.get_attributes
+       ~Curve.get_data
        ~Curve.get_muloffset
        ~Curve.has_attr
        ~Curve.isHidden
@@ -39,9 +41,12 @@ grapa.curve.Curve
        ~Curve.print_help
        ~Curve.print_help_func
        ~Curve.selectData
+       ~Curve.select_data
        ~Curve.setX
        ~Curve.setY
        ~Curve.set_data
+       ~Curve.set_x
+       ~Curve.set_y
        ~Curve.shape
        ~Curve.swapShowHide
        ~Curve.update
@@ -51,6 +56,8 @@ grapa.curve.Curve
        ~Curve.updateValuesDictkeysGraph
        ~Curve.update_plotter_boxplot_addon
        ~Curve.update_scatter_next_curves
+       ~Curve.update_values_keys
+       ~Curve.update_values_keys_graph_condition
        ~Curve.visible
        ~Curve.x
        ~Curve.x_offsets

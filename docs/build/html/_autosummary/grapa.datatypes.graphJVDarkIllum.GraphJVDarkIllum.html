@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum &mdash; grapa 0.7.1.0 documentation</title>
+  <title>grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum &mdash; grapa 0.8.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d4eb7906"></script>
+      <script src="../_static/documentation_options.js?v=bcb8667a"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -52,7 +52,6 @@
 <li class="toctree-l2"><a class="reference internal" href="grapa.grapa.html">grapa.grapa</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.guiapp.html">grapa.GUI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.colorscale.html">grapa.colorscale</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.constants.html">grapa.constants</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve.html">grapa.curve</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_image.html">grapa.curve_image</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.curve_inset.html">grapa.curve_inset</a></li>
@@ -101,11 +100,12 @@
 <li class="toctree-l3"><a class="reference internal" href="grapa.datatypes.graphXPS.html">grapa.datatypes.graphXPS</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.frontend.html">grapa.frontend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.graph.html">grapa.graph</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.gui.html">grapa.gui</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.mathModule.html">grapa.mathModule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.internal.html">grapa.internal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.plot.html">grapa.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grapa.utils.html">grapa.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.shared.html">grapa.shared</a></li>
 </ul>
 </li>
 </ul>
@@ -167,13 +167,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum.plot" title="grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([filesave, ylim, fig_ax, if_save, ...])</p></td>
 <td><p>ifExport: Boolean.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_diff</span></code>([filesave, ylim, figAx, ifSave, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_diff</span></code>([filesave, ylim, fig_ax, if_save, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_logabs</span></code>([filesave, ylim, figAx, ifSave, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_logabs</span></code>([filesave, ylim, fig_ax, ...])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_std</span></code>([filesave, ylim, figAx, ifSave, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_std</span></code>([filesave, ylim, fig_ax, if_save, ...])</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">printShort</span></code>([header, onlyIllum, onlyDark])</p></td>
@@ -188,7 +188,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pltClose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum.plot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filesave</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">if_export</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pltClose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_factory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="grapa.shared.mpl_figure_factory.MplFigureFactory.html#grapa.shared.mpl_figure_factory.MplFigureFactory" title="grapa.shared.mpl_figure_factory.MplFigureFactory"><span class="pre">MplFigureFactory</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#grapa.datatypes.graphJVDarkIllum.GraphJVDarkIllum.plot" title="Link to this definition"></a></dt>
 <dd><p>ifExport: Boolean. If ‘auto’: only exports the lin plot, not the log</p>
 </dd></dl>
 

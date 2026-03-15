@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa documentation &mdash; grapa 0.7.1.0 documentation</title>
+  <title>grapa documentation &mdash; grapa 0.8.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d4eb7906"></script>
+      <script src="_static/documentation_options.js?v=bcb8667a"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -112,8 +112,8 @@ analysis functions, with no modification of the existing code.</p>
 <section id="features-overview">
 <h2>Features overview<a class="headerlink" href="#features-overview" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Open and merge a wide range of experimental data. Data import
-possible from clipboard.</p></li>
+<li><p>Open and merge a wide range of experimental data.
+Data import possible from clipboard.</p></li>
 <li><p>Graphical data presentation and graph customisation.</p></li>
 <li><p>Graph export in various file formats with user-defined dpi.
 Additionally create a .txt file containing the raw data for later
@@ -150,18 +150,84 @@ the following lines:</p>
 <span class="n">grapa</span><span class="o">.</span><span class="n">grapa</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Grapa can also be used in scripts. Just above the console, a
-checkbox “Commands in console” should help you to get started.</p>
+<p>Grapa can also be used in scripts or own code. To help you to get
+started, the GUI offers a checkbox “Commands in console” right above
+the console. Use the GUI and learn from the printouts.</p>
 <p>Grapa is developed using python 3.13 and matplotlib 3.10, and should be
-backwards-compatible down to python 3.4 and matplotlib 1.5.</p>
+backwards-compatible down to python 3.7 and matplotlib 1.5.</p>
 </section>
 <section id="license">
 <h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
 <p>MIT License</p>
 </section>
+<section id="details-of-the-features">
+<h2>Details of the features<a class="headerlink" href="#details-of-the-features" title="Link to this heading"></a></h2>
+<p>The grapa packages comes with a graphical user interface (GUI), which allows
+handling most features of the package. Many matplotlib plotting methods are
+supported, as well as insets and subplots. Using grapa in python code allows
+further customization of the produced graphs.</p>
+<p>The central object of the package is the Graph object. A graph is stored in a
+Graph object. The Graph class can be thought as a combination of a dict
+storing plotting information (axes, text annotations, etc.) together with a
+list of Curves which stores the data and the corresponding plotting information
+(color, aspect, etc.).
+The Graph.plot() method returns the produced figure and axes for further
+modifications. Existing figures and axes can as well be provided.
+List of relevant keywords: see GUI, or file keywordsdata_graph.txt</p>
+<p>A Curve object contains the data usually accessed as a pair of vectors,
+as well as a dict-like metadata storage, including plotting information.
+Child classes of Curve can be implemented in order to provide dedicated
+data analysis tools.
+List of relevant keywords: see GUI, or file keywordsdata_curve.txt
+Every Curve type provides dedicated functions (e.g. for analysis or plotting)
+as well as specific data visualizations accessible from a GUI drop-down menu.
+Default Curve type for plotting purpose:
+Curve_Subplot, Curve_Inset, Curve_Image</p>
+<p>Other Curve types are provided for analysis of scientific data:
+EQE, J-V, Jsc-Voc pairs, Spectrum, SIMS, C-V, C-f, TRPL, XRF</p>
+<p>Scripts are provided:
+- Load all files from one folder
+- JV data fit, cell-by-cell, or cell separately
+- JV sample maps
+- Boxplots, both generic and specific behavior for JV data
+- Processing of C-V data temperature series
+- Processing of C-f data temperature series
+- Correlation</p>
+<p>Configuration file: a set of user preferences can be stored in a configuration
+file and indicated to the Graph object at creation. A personalized
+configuration file can also be provided to the GUI when using a application
+launcher as a second argument (it will be retrieved using sys.argv[1])
+Whenever needed the software will query for provided values, and use default
+settings if no suitable keyword is found.</p>
+</section>
+<section id="create-a-file-parser">
+<h2>Create a file parser<a class="headerlink" href="#create-a-file-parser" title="Link to this heading"></a></h2>
+<p>To create a file parser you will need to create inside folde “datatypes”
+a python file named for example graphMyfile.py (must start with “graph”,
+with a small g).
+This file must contains a class named “GraphMyfile” (capital G, same ending as
+file name) that inherits from class Graph.
+The class must contain at least 1 attribute and 2 methods:</p>
+<ul>
+<li><p>CURVE: a string identifier, for recognition within grapa.</p></li>
+<li><p>isFileReadable(cls, filename, fileext, line1=””, line2=””, line3=””, **kwargs)</p>
+<p>Must return True is the file can be opened using your class, otherwise False</p>
+</li>
+<li><p>readDataFromFile(self, attributes, **kwargs)</p></li>
+</ul>
+<p>Actually opens the file, which can be accessed from self.filename.
+attributes is a dict which can be given to the constructor of the Curves.
+Example: see files howto/example_sinx_x.txt, graphMydata.py</p>
+<p>You may also want to create your own Curve type, for example to provide
+customised analysis or visualisation functions inside the GUI. For this, you
+have to create in folder “datatypes” a file named for example
+“curveMycurve.py” (file name must start with “curve” with a small c).
+The file must contain a class named “CurveMycurve” (capital C, same ending as
+the file name) inheriting from class Curve.
+An example is provided in file howto/curveMycurve.py.</p>
+</section>
 <section id="questions">
 <h2>Questions?<a class="headerlink" href="#questions" title="Link to this heading"></a></h2>
-<p>See manual.pdf in folder /manual</p>
 <p>Author: Romain Carron (Empa, Laboratory for Thin Films and
 Photovoltaics)</p>
 <table class="autosummary longtable docutils align-default">

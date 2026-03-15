@@ -1,0 +1,57 @@
+grapa.shared
+============
+
+.. automodule:: grapa.shared
+  
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   
+      colors_conversion
+   
+      command_recorder
+   
+      conditional_property_applier
+   
+      constants
+   
+      constants_internals
+   
+      error_management
+   
+      funcgui
+   
+      keywords_loader
+   
+      logging_utils
+   
+      maths
+   
+      mpl_figure_factory
+   
+      string_manipulations
+   
+      varia
+

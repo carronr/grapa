@@ -1,6 +1,0 @@
-grapa.utils.error\_management.IncorrectInputError
-=================================================
-
-.. currentmodule:: grapa.utils.error_management
-
-.. autoexception:: IncorrectInputError

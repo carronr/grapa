@@ -1,6 +1,0 @@
-grapa.utils.string\_manipulations.format\_string\_curveattr
-===========================================================
-
-.. currentmodule:: grapa.utils.string_manipulations
-
-.. autofunction:: format_string_curveattr

@@ -1,0 +1,6 @@
+grapa.frontend.gui\_dataeditor.build\_ui
+========================================
+
+.. currentmodule:: grapa.frontend.gui_dataeditor
+
+.. autofunction:: build_ui

@@ -1,0 +1,38 @@
+grapa.frontend.gui\_dataeditor
+==============================
+
+.. automodule:: grapa.frontend.gui_dataeditor
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      build_ui
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      GuiDataEditor
+   
+   
+
+   
+   
+   
+
+
+

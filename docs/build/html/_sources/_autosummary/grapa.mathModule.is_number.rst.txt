@@ -1,6 +1,0 @@
-grapa.mathModule.is\_number
-===========================
-
-.. currentmodule:: grapa.mathModule
-
-.. autofunction:: is_number
