@@ -13,7 +13,7 @@ README = (
 
 setup(
     name="grapa",
-    version="0.8.0.2rc1",
+    version="0.8.0.2",
     description="Grapa - graphing and photovoltaics analysis",
     author="Romain Carron",
     author_email="carron.romain@gmail.com",

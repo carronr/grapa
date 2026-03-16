@@ -18,7 +18,7 @@ TODO: geenrate tests for Color and colorscale
 
 
 
-** Version 0.8.0.1
+** Version 0.8.0.2
 
 Release 16.03.2026
 
@@ -26,6 +26,20 @@ Bugs
 - Solved a bug that prevented in some circumstances cast of Curve types when grapa was imported in an external script.
 - Solved a bug that prevented the use of grapa.grapa()
 - Extended test coverage.
+
+Otherwise, building on 0.8.0.0:
+Only few modifications of functionalities, but many changes in the package file organisation, hence major version number (breaking some backwards compatibility).
+The folder structure has been split as frontend, plot, parse, shared, internal, datatypes, scripts; many code units were moved from file to file.
+New
+- Curve subplot and inset: added Search button to select the file in a user-friendly manner.
+- Curve subplot and inset: added Open button, to open the file subplot/inset.
+- Colorscale: added support for CIE Lab and CIE LCh colorspaces
+Modifications
+- logging: Logging is enabled by default only when using the GUI, and the logfile is written to grapalog.log. If the app cannot write in the grapa folder, it automatically switches the log file to a writable location.
+- pyplot: now, grapa does not use pyplot in the GUI, but still does when not in the GUI (CLI)
+- Partial hardening of non latin1 charsets
+- Code cleaning
+
 
 
 
