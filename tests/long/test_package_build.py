@@ -26,6 +26,15 @@ def _run_checked(cmd, cwd, env):
     )
 
 
+def _format_subprocess_error(exc: subprocess.CalledProcessError) -> str:
+    return (
+        f"Command: {exc.cmd}\n"
+        f"Return code: {exc.returncode}\n"
+        f"STDOUT:\n{exc.stdout}\n"
+        f"STDERR:\n{exc.stderr}"
+    )
+
+
 def _ignore_build_copy(_dir, names):
     ignored = {
         ".git",
@@ -40,7 +49,11 @@ def _ignore_build_copy(_dir, names):
         "dist",
         "grapa.egg-info",
     }
-    return [name for name in names if name in ignored]
+    return [
+        name
+        for name in names
+        if name in ignored or name.startswith(".tmp-")
+    ]
 
 
 def _copy_writable(src, dst):
@@ -96,12 +109,11 @@ def test_package_build_and_twine_check():
         str(dist_dir),
     ]
     try:
+        build_error = None
         try:
             _run_checked(build_cmd, cwd=source_dir, env=env)
         except subprocess.CalledProcessError as exc:
-            output = f"{exc.stdout}\n{exc.stderr}"
-            if "PermissionError" not in output and "Zugriff verweigert" not in output:
-                raise
+            build_error = exc
             fallback_sdist_cmd = [
                 sys.executable,
                 "setup.py",
@@ -116,8 +128,18 @@ def test_package_build_and_twine_check():
                 "--dist-dir",
                 str(dist_dir),
             ]
-            _run_checked(fallback_sdist_cmd, cwd=source_dir, env=env)
-            _run_checked(fallback_wheel_cmd, cwd=source_dir, env=env)
+            try:
+                _run_checked(fallback_sdist_cmd, cwd=source_dir, env=env)
+                _run_checked(fallback_wheel_cmd, cwd=source_dir, env=env)
+            except subprocess.CalledProcessError as fallback_exc:
+                pytest.fail(
+                    "Package build failed with both `python -m build` and "
+                    "`setup.py` fallback.\n\n"
+                    "Primary failure:\n"
+                    f"{_format_subprocess_error(build_error)}\n\n"
+                    "Fallback failure:\n"
+                    f"{_format_subprocess_error(fallback_exc)}"
+                )
         artifacts = sorted(dist_dir.iterdir())
         assert len(artifacts) >= 2
         wheel_path = next(path for path in artifacts if path.suffix == ".whl")
