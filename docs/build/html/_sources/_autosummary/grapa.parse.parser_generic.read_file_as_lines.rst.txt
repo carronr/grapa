@@ -1,0 +1,6 @@
+grapa.parse.parser\_generic.read\_file\_as\_lines
+=================================================
+
+.. currentmodule:: grapa.parse.parser_generic
+
+.. autofunction:: read_file_as_lines

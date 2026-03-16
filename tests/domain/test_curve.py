@@ -7,6 +7,7 @@ import pytest
 from . import grapa_folder, HiddenPrints
 from grapa.curve import Curve
 from grapa.graph import Graph
+from grapa.shared.error_management import GrapaWarning
 
 
 
@@ -103,8 +104,9 @@ def test_label_auto(grapa_folder):
 def test_label_auto_fail(grapa_folder):
     """Test function auto_label"""
     graph = Graph(os.path.join(grapa_folder, "examples", "EQE", "SAMPLE_A_d1_1.sr"))
-    with HiddenPrints():
-        graph[0].label_auto("ABC ${cell:.1f} ${sample}")  # fails to format, should print
+    with pytest.warns(GrapaWarning, match="format_string_curveattr"):
+        with HiddenPrints():
+            graph[0].label_auto("ABC ${cell:.1f} ${sample}")
     assert graph[0].attr("label") == "ABC d1 SAMPLE A"
 
 
@@ -117,12 +119,7 @@ def test_math_operation_interpolate_offsets():
     # interpolate 1, offset True
     # interpolate 2, offset False
     # interpolate 2, offset True
-
-
-@pytest.mark.skip("Not implemented math_operation_interpolate_offsets")
-def test_math_operation_interpolate_offsets():
-    raise NotImplementedError
-
+    
 
 @pytest.mark.skip("Not implemented update_curve_values_dictkeys")
 def test_update_curve_values_dictkeys():

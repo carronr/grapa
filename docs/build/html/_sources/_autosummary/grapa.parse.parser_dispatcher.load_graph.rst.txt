@@ -1,0 +1,6 @@
+grapa.parse.parser\_dispatcher.load\_graph
+==========================================
+
+.. currentmodule:: grapa.parse.parser_dispatcher
+
+.. autofunction:: load_graph

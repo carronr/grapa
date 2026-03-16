@@ -1,0 +1,38 @@
+grapa.parse.parser\_generic
+===========================
+
+.. automodule:: grapa.parse.parser_generic
+  
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      read_file_as_lines
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      FileParserGeneric
+   
+   
+
+   
+   
+   
+
+
+

@@ -205,7 +205,7 @@ class FileParserGeneric:
         """
         # if some content was provided
         if file_content is not None:
-            return file_content
+            return file_content, ""
 
         # parse content of file
         lines, enc = read_file_as_lines(filename)

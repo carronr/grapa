@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>grapa.graph.Graph &mdash; grapa 0.8.0.0 documentation</title>
+  <title>grapa.graph.Graph &mdash; grapa 0.8.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bcb8667a"></script>
+      <script src="../_static/documentation_options.js?v=18c0e263"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -67,6 +67,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.internal.html">grapa.internal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grapa.parse.html">grapa.parse</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.plot.html">grapa.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.scripts.html">grapa.scripts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grapa.shared.html">grapa.shared</a></li>
@@ -237,7 +238,7 @@ Purpose is to offer do/undo functionalities.</p></li>
 <td><p>Returns a dict containing the content of both headers and graphInfo</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#grapa.graph.Graph.get_list_subclasses_parse" title="grapa.graph.Graph.get_list_subclasses_parse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_list_subclasses_parse</span></code></a>()</p></td>
-<td><p>Returns the child classes of Graph which have implemented the methods required to parse files &quot;isFileReadable&quot;, &quot;readDataFromFile&quot;, and class attribute FILEIO_GRAPHTYPE.</p></td>
+<td><p>Sweeps through files in folder datatypes whose filename start with 'curve' or 'graph'.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#grapa.graph.Graph.has_attr" title="grapa.graph.Graph.has_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_attr</span></code></a>(key)</p></td>
 <td><p>Check if graph has attribute key</p></td>
@@ -500,12 +501,13 @@ Other possible input is [‘This is a Quantity’, ‘Q’, ‘unit’]</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="grapa.graph.Graph.get_list_subclasses_parse">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_list_subclasses_parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#grapa.graph.Graph.get_list_subclasses_parse" title="Link to this definition"></a></dt>
-<dd><p>Returns the child classes of Graph which have implemented the methods required
+<dd><p>Sweeps through files in folder datatypes whose filename start with ‘curve’ or
+‘graph’.
+Therefore compiles all possible user-created Curve and Graph subclasses for e.g.
+curve type cast.
+Returns the child classes of Graph which have implemented the methods required
 to parse files “isFileReadable”, “readDataFromFile”, and class attribute
-FILEIO_GRAPHTYPE.
-Seeps through files in folder datatypes whose filename start with ‘curve’ or
-‘graph’, check the presence of a class with appropriate name and required
-methods, and returns a list of Graph child class.</p>
+FILEIO_GRAPHTYPE.</p>
 </dd></dl>
 
 <dl class="py method">

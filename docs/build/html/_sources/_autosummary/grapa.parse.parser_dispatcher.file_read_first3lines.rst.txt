@@ -1,0 +1,6 @@
+grapa.parse.parser\_dispatcher.file\_read\_first3lines
+======================================================
+
+.. currentmodule:: grapa.parse.parser_dispatcher
+
+.. autofunction:: file_read_first3lines

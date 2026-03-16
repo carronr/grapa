@@ -1,7 +1,5 @@
 # import pytest
 
-from . import grapa_folder, HiddenPrints, open_files_in_subfolder
-
 from grapa.curve import Curve
 from grapa.graph import Graph
 from grapa.curve_image import Curve_Image
@@ -19,6 +17,8 @@ from grapa.datatypes.curveSpectrum import CurveSpectrum
 from grapa.datatypes.curveTRPL import CurveTRPL
 from grapa.datatypes.curveMCA import CurveMCA
 from grapa.datatypes.curveMath import CurveMath
+
+from . import grapa_folder, HiddenPrints, open_files_in_subfolder
 
 
 def check_graphlist(graphs, curvesubclass, lengraph=1, testtypeonlyfirst=False):
@@ -194,9 +194,7 @@ def test_open_files_jv(grapa_folder):
     assert len(graphs) == 19
     check_graphlist(graphs, CurveJV)
 
-    graphs = open_files_in_subfolder(
-        grapa_folder, "examples/JV/SAMPLE_C", "*.*"
-    )
+    graphs = open_files_in_subfolder(grapa_folder, "examples/JV/SAMPLE_C", "*.*")
     assert len(graphs) == 19
 
 

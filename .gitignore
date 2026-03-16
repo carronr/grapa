@@ -9,6 +9,8 @@ __pycache__/
 /grapa.egg-info/
 /dist/
 /.pytest_cache/
+/.pytest-build_sdist/
+
 
 /docs/source/_autosummary/
 /docs/build/doctrees/
@@ -18,4 +20,3 @@ __pycache__/
 /grapa/.hypothesis/
 
 /tests/.hypothesis/
-

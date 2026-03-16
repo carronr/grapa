@@ -58,6 +58,8 @@
    
       internal
    
+      parse
+   
       plot
    
       scripts

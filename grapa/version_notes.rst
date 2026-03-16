@@ -17,6 +17,15 @@ TODO: geenrate tests for Color and colorscale
 
 
 
+** Version 0.8.0.1
+work in progress
+
+Bugs
+- Solved a bug that prevented in some circumstances cast of Curve types when grapa was imported in an external script.
+- Solved a bug that prevented the use of grapa.grapa()
+- Extended test coverage.
+
+
 
 ** Version 0.8.0.0
 Release 15.03.2026

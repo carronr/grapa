@@ -613,12 +613,13 @@ class Graph:
     @classmethod
     def get_list_subclasses_parse(cls):
         """
+        Sweeps through files in folder datatypes whose filename start with 'curve' or
+        'graph'.
+        Therefore compiles all possible user-created Curve and Graph subclasses for e.g.
+        curve type cast.
         Returns the child classes of Graph which have implemented the methods required
         to parse files "isFileReadable", "readDataFromFile", and class attribute
         FILEIO_GRAPHTYPE.
-        Seeps through files in folder datatypes whose filename start with 'curve' or
-        'graph', check the presence of a class with appropriate name and required
-        methods, and returns a list of Graph child class.
         """
         # do not reimport everything each time, only first time
         if cls._list_subclasses_parse is not None:

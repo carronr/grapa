@@ -39,13 +39,17 @@ class CustomNotebook(ttk.Notebook):
     https://stackoverflow.com/questions/39458337/is-there-a-way-to-add-close-buttons-to-tabs-in-tkinter-ttk-notebook
     """
 
-    __initialized = False
+    __initialized_interpreters = set()
 
     def __init__(self, *args, graphstabmanager: "GraphsTabManager" = None, **kwargs):
         self.graphstabmanager = graphstabmanager
-        if not self.__initialized:
+        master = args[0] if len(args) > 0 else None
+        # __initialized_interpreters: reason is because of tests, need to link to
+        # specific tk interpreter that may not exist anymore
+        interpreter_id = str(master.tk) if master is not None else None
+        if interpreter_id not in self.__initialized_interpreters:
             self.__initialize_custom_style()
-            CustomNotebook.__initialized = True
+            CustomNotebook.__initialized_interpreters.add(interpreter_id)
         kwargs["style"] = "CustomNotebook"
         ttk.Notebook.__init__(self, *args, **kwargs)
         self._active = None

@@ -634,7 +634,10 @@ class Curve:
         """Returns a list of Curve subclasses into which a curve can be cast
 
         :param only_different: if false, also returns the object own subclass"""
+        from grapa.graph import Graph
+
         subclasses = [] if only_different else [Curve]
+        Graph.get_list_subclasses_parse()
         subclasses += Curve.__subclasses__()
         out = []
         for subclass in subclasses:

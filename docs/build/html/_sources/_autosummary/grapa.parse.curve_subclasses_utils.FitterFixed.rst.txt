@@ -1,0 +1,25 @@
+grapa.parse.curve\_subclasses\_utils.FitterFixed
+================================================
+
+.. currentmodule:: grapa.parse.curve_subclasses_utils
+
+.. autoclass:: FitterFixed
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FitterFixed.curve_fit_fixed
+   
+   
+
+   
+   
+   

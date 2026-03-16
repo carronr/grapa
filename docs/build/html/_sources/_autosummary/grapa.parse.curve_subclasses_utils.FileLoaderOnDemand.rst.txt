@@ -1,0 +1,27 @@
+grapa.parse.curve\_subclasses\_utils.FileLoaderOnDemand
+=======================================================
+
+.. currentmodule:: grapa.parse.curve_subclasses_utils
+
+.. autoclass:: FileLoaderOnDemand
+   :members:
+   :show-inheritance:
+   
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+       ~FileLoaderOnDemand.__init__
+       ~FileLoaderOnDemand.get
+       ~FileLoaderOnDemand.labels
+   
+   
+
+   
+   
+   
