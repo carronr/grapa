@@ -3,7 +3,9 @@ import shutil
 import stat
 import subprocess
 import sys
+import tarfile
 import uuid
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -45,6 +47,22 @@ def _copy_writable(src, dst):
     shutil.copyfile(src, dst)
     os.chmod(dst, stat.S_IWRITE | stat.S_IREAD)
     return dst
+
+
+def _assert_sdist_contains_package_files(sdist_path: Path):
+    with tarfile.open(sdist_path, "r:gz") as archive:
+        names = set(archive.getnames())
+    assert any(name.endswith("grapa/__init__.py") for name in names)
+    assert any(name.endswith("grapa/shared/keywordsdata_curve.txt") for name in names)
+    assert any(name.endswith("grapa/frontend/datareading.ico") for name in names)
+
+
+def _assert_wheel_contains_package_files(wheel_path: Path):
+    with zipfile.ZipFile(wheel_path) as archive:
+        names = set(archive.namelist())
+    assert "grapa/__init__.py" in names
+    assert "grapa/shared/keywordsdata_curve.txt" in names
+    assert "grapa/frontend/datareading.ico" in names
 
 
 @pytest.mark.long
@@ -102,8 +120,10 @@ def test_package_build_and_twine_check():
             _run_checked(fallback_wheel_cmd, cwd=source_dir, env=env)
         artifacts = sorted(dist_dir.iterdir())
         assert len(artifacts) >= 2
-        assert any(path.suffix == ".whl" for path in artifacts)
-        assert any(path.name.endswith(".tar.gz") for path in artifacts)
+        wheel_path = next(path for path in artifacts if path.suffix == ".whl")
+        sdist_path = next(path for path in artifacts if path.name.endswith(".tar.gz"))
+        _assert_wheel_contains_package_files(wheel_path)
+        _assert_sdist_contains_package_files(sdist_path)
         check_cmd = [sys.executable, "-m", "twine", "check", *map(str, artifacts)]
         _run_checked(check_cmd, cwd=source_dir, env=env)
     finally:
